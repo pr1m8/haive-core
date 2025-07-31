@@ -89,7 +89,9 @@ class FieldExtractor:
     """
 
     @staticmethod
-    def extract_from_model(model_cls: type[BaseModel]) -> tuple[
+    def extract_from_model(
+        model_cls: type[BaseModel],
+    ) -> tuple[
         dict[str, tuple[Any, Any]],  # fields
         dict[str, str],  # descriptions
         set[str],  # shared_fields
@@ -357,8 +359,9 @@ class FieldExtractor:
                 field_type = field_info_dict.get("field_type", Optional[model])
 
                 logger.info(
-                    f"Found structured_output_model in {engine_name}: {
-                        model.__name__} -> {model_name}"
+                    f"Found structured_output_model in {engine_name}: {model.__name__} -> {
+                        model_name
+                    }"
                 )
 
                 # Add a single field for the entire model
@@ -392,7 +395,9 @@ class FieldExtractor:
         return fields, descriptions, engine_io_mappings, input_fields, output_fields
 
     @staticmethod
-    def extract_from_dict(data: dict[str, Any]) -> tuple[
+    def extract_from_dict(
+        data: dict[str, Any],
+    ) -> tuple[
         dict[str, tuple[Any, Any]],  # fields
         dict[str, str],  # descriptions
         set[str],  # shared_fields
@@ -769,7 +774,6 @@ class FieldExtractor:
 
         # Ensure messages field exists if requested
         if include_messages_field and "messages" not in field_definitions:
-
             from langchain_core.messages import BaseMessage
 
             # Try to use add_messages reducer if available

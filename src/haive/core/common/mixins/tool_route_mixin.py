@@ -448,8 +448,7 @@ class ToolRouteMixin(BaseModel):
 
             self.set_tool_route(tool_name, new_route, metadata)
             logger.debug(
-                f"Updated route for '{tool_name}': {
-                    metadata['previous_route']} -> {new_route}"
+                f"Updated route for '{tool_name}': {metadata['previous_route']} -> {new_route}"
             )
 
         return self

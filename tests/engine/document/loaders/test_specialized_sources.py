@@ -415,9 +415,7 @@ def test_knowledge_sources():
             source = MockWikipediaSource(**config)
             loader_kwargs = source.get_loader_kwargs()
 
-            if config.get("query"):
-                pass
-            elif config.get("page_titles"):
+            if config.get("query") or config.get("page_titles"):
                 pass
 
             assert loader_kwargs["platform"] == source.platform.value
@@ -475,10 +473,9 @@ def main():
     if tests_passed >= 4:
         display_specialized_system_summary()
         return True
-    print("⚠️ SPECIALIZED SOURCES: NEEDS IMPROVEMENT")
     return False
 
 
 if __name__ == "__main__":
     success = main()
-    exit(0 if success else 1)
+    sys.exit(0 if success else 1)

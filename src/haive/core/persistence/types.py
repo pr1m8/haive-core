@@ -9,6 +9,7 @@ The module includes special handling for Python keyword conflicts (like 'async')
 and backward compatibility mappings for evolving terminology.
 """
 
+import urllib.parse
 from enum import Enum
 
 
@@ -204,7 +205,6 @@ class ConnectionOptions:
             # dsn = "postgresql://appuser:secret@db.example.com:5432/myapp?sslmode=require"
             ```
         """
-        import urllib.parse
 
         encoded_pass = urllib.parse.quote_plus(password)
         return f"postgresql://{user}:{encoded_pass}@{host}:{port}/{dbname}?sslmode={ssl_mode}"

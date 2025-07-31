@@ -152,9 +152,7 @@ class MessageConverter(TypeConverter):
     ) -> AIMessage:
         """Convert ToolMessage to AIMessage."""
         return AIMessage(
-            content=f"Tool Response [{
-                tool_msg.tool_call_id}]: {
-                tool_msg.content}",
+            content=f"Tool Response [{tool_msg.tool_call_id}]: {tool_msg.content}",
             additional_kwargs={
                 **tool_msg.additional_kwargs,
                 "was_tool_message": True,
@@ -262,9 +260,7 @@ class DocumentConverter(TypeConverter):
         # Include metadata in message
         metadata_str = ""
         if doc.metadata:
-            metadata_str = f"\n[Source: {
-                doc.metadata.get(
-                    'source', 'unknown')}]"
+            metadata_str = f"\n[Source: {doc.metadata.get('source', 'unknown')}]"
             context.track_lost_field("full_metadata", doc.metadata)
 
         return HumanMessage(

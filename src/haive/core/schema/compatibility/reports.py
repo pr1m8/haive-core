@@ -83,8 +83,7 @@ class CompatibilityReport:
             f"- **Target Schema**: `{self.target_schema.name}`",
             f"- **Compatible**: {'✅ Yes' if self.overall_compatible else '❌ No'}",
             f"- **Compatibility Score**: {self.compatibility_score:.1f}/100",
-            f"- **Compatibility Level**: {
-                self.compatibility_result.level.value}",
+            f"- **Compatibility Level**: {self.compatibility_result.level.value}",
             "",
         ]
 
@@ -98,9 +97,7 @@ class CompatibilityReport:
                 f"| Source Fields | {len(self.source_schema.fields)} |",
                 f"| Target Fields | {len(self.target_schema.fields)} |",
                 f"| Compatible Fields | {len([f for f in self.field_analyses.values() if f.is_compatible])} |",
-                f"| Missing Required | {
-                    len(
-                        self.compatibility_result.missing_required_fields)} |",
+                f"| Missing Required | {len(self.compatibility_result.missing_required_fields)} |",
                 f"| Extra Fields | {len(self.compatibility_result.extra_fields)} |",
                 "",
             ]
@@ -288,8 +285,7 @@ class ReportGenerator:
             elif field_result.level == CompatibilityLevel.SUBTYPE:
                 analysis.notes = "Subtype compatible"
             elif field_result.needs_conversion:
-                analysis.notes = f"Conversion available: {
-                    field_result.conversion_path}"
+                analysis.notes = f"Conversion available: {field_result.conversion_path}"
 
             report.field_analyses[field_name] = analysis
 
@@ -321,8 +317,7 @@ class ReportGenerator:
         incompatible = result.get_incompatible_fields()
         if incompatible:
             report.critical_issues.append(
-                f"{len(incompatible)} incompatible fields: "
-                f"{', '.join(sorted(incompatible))}"
+                f"{len(incompatible)} incompatible fields: {', '.join(sorted(incompatible))}"
             )
 
         # Warnings
@@ -416,14 +411,8 @@ class VisualDiffer:
                         lines.append(f"  {field_name}: ✓ compatible")
                     else:
                         lines.append(f"- {field_name}: ✗ incompatible")
-                        lines.append(
-                            f"    Source: {
-                                source_field.type_info.type_hint}"
-                        )
-                        lines.append(
-                            f"    Target: {
-                                target_field.type_info.type_hint}"
-                        )
+                        lines.append(f"    Source: {source_field.type_info.type_hint}")
+                        lines.append(f"    Target: {target_field.type_info.type_hint}")
             elif source_field:
                 # Only in source
                 lines.append(f"+ {field_name}: (only in source)")

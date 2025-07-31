@@ -39,7 +39,6 @@ try:
     with PostgresCheckpointerConfig.pool.connection() as conn, conn.cursor() as cursor:
         cursor.execute("SELECT 1 AS connection_test")
         result = cursor.fetchone()
-        print(f"Query result: {result}")
 
     # Test registering a thread
     thread_id = "test-thread-connection"

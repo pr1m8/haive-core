@@ -490,10 +490,7 @@ class ScrapingBeeLoader(BaseLoader):
 
                     documents.append(Document(page_content=content, metadata=metadata))
                 else:
-                    logger.error(
-                        f"Failed to scrape {url}: {
-                            response.status_code}"
-                    )
+                    logger.error(f"Failed to scrape {url}: {response.status_code}")
 
             return documents
 

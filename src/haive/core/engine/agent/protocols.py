@@ -36,7 +36,7 @@ class AgentProtocol(Protocol[TIn, TOut, TState]):
         thread_id: str | None = None,
         debug: bool = True,
         config: RunnableConfig | None = None,
-        **kwargs
+        **kwargs,
     ) -> TOut:
         """Synchronously run the agent with input data.
 
@@ -57,7 +57,7 @@ class AgentProtocol(Protocol[TIn, TOut, TState]):
         input_data: TIn,
         thread_id: str | None = None,
         config: RunnableConfig | None = None,
-        **kwargs
+        **kwargs,
     ) -> TOut:
         """Asynchronously run the agent with input data.
 
@@ -96,7 +96,7 @@ class StreamingAgentProtocol(Protocol[TIn, TOut]):
         stream_mode: str = "values",
         config: RunnableConfig | None = None,
         debug: bool = True,
-        **kwargs
+        **kwargs,
     ) -> Generator[dict[str, Any], None, None]:
         """Stream agent execution with input data.
 
@@ -119,7 +119,7 @@ class StreamingAgentProtocol(Protocol[TIn, TOut]):
         thread_id: str | None = None,
         stream_mode: str = "values",
         config: RunnableConfig | None = None,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[dict[str, Any], None]:
         """Asynchronously stream agent execution with input data.
 

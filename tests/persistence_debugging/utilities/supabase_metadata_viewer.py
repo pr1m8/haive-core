@@ -14,8 +14,7 @@ def get_database_connection():
     """Get database connection."""
     conn_str = os.getenv("POSTGRES_CONNECTION_STRING")
     if not conn_str:
-        raise ValueError(
-            "POSTGRES_CONNECTION_STRING environment variable not found")
+        raise ValueError("POSTGRES_CONNECTION_STRING environment variable not found")
     return psycopg2.connect(conn_str)
 
 
@@ -102,15 +101,13 @@ def view_recent_errors(limit: int = 10) -> list[dict[str, Any]]:
                         elif key == "contributions" and isinstance(value, list):
                             # Check contributions for errors
                             for i, contrib in enumerate(value):
-                                if isinstance(contrib, list) and len(
-                                    contrib) >= 3:
+                                if isinstance(contrib, list) and len(contrib) >= 3:
                                     agent_name, section, content = (
                                         contrib[0],
                                         contrib[1],
                                         contrib[2],
                                     )
-                                    if "prepared statement" in str(
-                                        content).lower():
+                                    if "prepared statement" in str(content).lower():
                                         error_info["errors_found"].append(
                                             {
                                                 "location": f"contributions[{i}]",
@@ -250,7 +247,6 @@ def test_conversation_agent_with_new_id():
         from haive.agents.conversation.collaberative.agent import (
             CollaborativeConversation,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
 
         # Create fresh participant agents with unique names
@@ -296,7 +292,6 @@ def test_conversation_agent_with_new_id():
             doc = result.shared_document
             if "prepared statement" in str(doc).lower():
                 return fresh_thread_id, False
-            print("✅ No prepared statement errors in result")
             return fresh_thread_id, True
 
         return fresh_thread_id, True
@@ -335,7 +330,6 @@ def main():
 
         if fresh_thread_id and success:
             details = get_thread_details(fresh_thread_id)
-
 
             if details["error_count"] == 0:
                 pass

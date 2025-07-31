@@ -81,8 +81,7 @@ class ValidationNodeConfigV2(BaseNodeConfig):
                 # the message
                 self.engine_name = engine_name_from_message
                 logger.debug(
-                    f"Updated validation node engine_name to: {
-                        self.engine_name}"
+                    f"Updated validation node engine_name to: {self.engine_name}"
                 )
             else:
                 logger.debug(
@@ -147,8 +146,7 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         goto = self._determine_destination(destinations)
 
         logger.info(
-            f"ValidationV2: Created {
-                len(new_messages)} ToolMessages, routing to {goto}"
+            f"ValidationV2: Created {len(new_messages)} ToolMessages, routing to {goto}"
         )
 
         return Command(update=update_dict, goto=goto)
@@ -176,8 +174,9 @@ class ValidationNodeConfigV2(BaseNodeConfig):
             model_instance = model_class(**args)
 
             # Create success message with model data
-            success_msg = f"Successfully validated {tool_name}: {
-                    model_instance.model_dump()}"
+            success_msg = (
+                f"Successfully validated {tool_name}: {model_instance.model_dump()}"
+            )
 
             return ToolMessage(
                 content=success_msg, tool_call_id=tool_id, name=tool_name
@@ -201,19 +200,13 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         if "engines" in state and isinstance(state["engines"], dict):
             engine = state["engines"].get(self.engine_name)
             if engine:
-                logger.info(
-                    f"Found engine in state.engines: {
-                        self.engine_name}"
-                )
+                logger.info(f"Found engine in state.engines: {self.engine_name}")
                 return engine
 
             # Try by engine.name attribute
             for _key, eng in state["engines"].items():
                 if hasattr(eng, "name") and eng.name == self.engine_name:
-                    logger.info(
-                        f"Found engine by name attribute: {
-                            self.engine_name}"
-                    )
+                    logger.info(f"Found engine by name attribute: {self.engine_name}")
                     return eng
 
         # Try registry

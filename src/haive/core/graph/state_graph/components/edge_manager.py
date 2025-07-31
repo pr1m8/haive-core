@@ -153,8 +153,7 @@ class EdgeManager(BaseGraphComponent):
                 raise ValueError(f"No edges found from node '{source}'")
 
             logger.debug(
-                f"Removed {removed_count} edges from '{source}' in graph '{
-                    self.graph.name}'"
+                f"Removed {removed_count} edges from '{source}' in graph '{self.graph.name}'"
             )
         else:
             # Remove specific edge

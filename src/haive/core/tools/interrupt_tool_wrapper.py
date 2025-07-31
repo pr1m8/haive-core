@@ -96,10 +96,7 @@ def add_human_in_the_loop(
             user_feedback = response["args"]
             tool_response = user_feedback
         else:
-            raise ValueError(
-                f"Unsupported interrupt response type: {
-                    response['type']}"
-            )
+            raise ValueError(f"Unsupported interrupt response type: {response['type']}")
 
         return tool_response
 

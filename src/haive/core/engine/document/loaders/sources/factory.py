@@ -42,7 +42,7 @@ def create_source_from_string(source_string: str) -> BaseSource:
             return FileSource(file_path=path)
 
     # If we get here, we couldn't determine the source type
-    raise ValueError(f"Could not determine source type for: {source_string}")
+    raise TypeError(f"Could not determine source type for: {source_string}")
 
 
 def create_source_from_path(path: Path) -> BaseSource:
@@ -108,7 +108,7 @@ def create_source_from_dict(source_dict: dict[str, Any]) -> BaseSource:
             return base_source
 
     # If we get here, we couldn't determine the source type
-    raise ValueError(f"Could not determine source type from dictionary: {source_dict}")
+    raise TypeError(f"Could not determine source type from dictionary: {source_dict}")
 
 
 def infer_source_type_from_url(url: str) -> SourceType:

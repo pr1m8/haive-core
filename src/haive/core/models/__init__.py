@@ -22,6 +22,11 @@ Typical usage example:
 """
 
 # Model metadata utilities
+
+import importlib
+
+import vectorstore
+
 from haive.core.models.metadata import ModelMetadata
 from haive.core.models.metadata_mixin import ModelMetadataMixin as MetadataMixin
 
@@ -38,8 +43,6 @@ def __getattr__(name):
     which load numpy/pandas, adding 17+ seconds to import time.
     """
     if name in _SUBMODULES:
-        import importlib
-
         return importlib.import_module(f"haive.core.models.{name}")
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 

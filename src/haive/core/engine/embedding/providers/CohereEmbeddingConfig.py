@@ -119,7 +119,7 @@ class CohereEmbeddingConfig(BaseEmbeddingConfig):
         }
 
         if v not in valid_types:
-            raise ValueError(f"Invalid input_type: {v}. Valid types: {valid_types}")
+            raise TypeError(f"Invalid input_type: {v}. Valid types: {valid_types}")
 
         return v
 

@@ -114,10 +114,8 @@ class EngineComposerMixin:
 
         logger.info(
             f"Updated {updated_count} fields across {
-                len(
-                    self.engines_by_type.get(
-                        engine_type,
-                        []))} {engine_type} engines"
+                len(self.engines_by_type.get(engine_type, []))
+            } {engine_type} engines"
         )
 
         # Add tracking entry
@@ -181,7 +179,6 @@ class EngineComposerMixin:
 
         # Add explicit engines dict if not present
         if "engines" not in self.fields and "engines" not in self.base_class_fields:
-
             self.add_field(
                 name="engines",
                 field_type=dict[str, Any],

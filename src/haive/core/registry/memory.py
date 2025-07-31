@@ -23,10 +23,7 @@ class MemoryRegistry(AbstractRegistry[E]):
         self.engines[engine.engine_type][engine.name] = engine
         self.engine_ids[engine.id] = engine
         logging.debug(
-            f"Registered engine {
-                engine.name} (id: {
-                engine.id}) of type {
-                engine.engine_type}"
+            f"Registered engine {engine.name} (id: {engine.id}) of type {engine.engine_type}"
         )
         return engine
 

@@ -24,7 +24,7 @@ def test_proper_conversation_flow():
     )
 
     # Calculate expected contributions
-    expected_contributions = (
+    (
         len(session.participant_agents)
         * len(session.sections)
         * session.min_contributions_per_section
@@ -40,8 +40,8 @@ def test_proper_conversation_flow():
         # Show conversation flow through messages
         if hasattr(result, "messages"):
 
-            for i, msg in enumerate(result.messages):
-                msg_type = type(msg).__name__
+            for _i, msg in enumerate(result.messages):
+                type(msg).__name__
                 speaker = getattr(msg, "name", "System")
 
                 # Truncate long content but show more for actual contributions
@@ -66,21 +66,20 @@ def test_proper_conversation_flow():
         ]
         for attr in metadata_attrs:
             if hasattr(result, attr):
-                value = getattr(result, attr)
+                getattr(result, attr)
 
         # Show contributions if available
         if hasattr(result, "contributions"):
-            for i, (contributor, section, content) in enumerate(
-                result.contributions):
-                content_preview = (
-                    content[:100] + "..." if len(content) > 100 else content
-                )
+            for _i, (_contributor, _section, content) in enumerate(
+                result.contributions
+            ):
+                (content[:100] + "..." if len(content) > 100 else content)
 
         # Show final document
         if hasattr(result, "shared_document") and result.shared_document:
             # Show the document with proper indentation
             doc_lines = result.shared_document.split("\n")
-            for line in doc_lines:
+            for _line in doc_lines:
                 pass
 
         # Check persistence
@@ -92,33 +91,29 @@ def test_proper_conversation_flow():
                             "SELECT COUNT(*) FROM checkpoints WHERE thread_id = %s",
                             (thread_id,),
                         )
-                        checkpoint_count = cursor.fetchone()[0]
+                        cursor.fetchone()[0]
 
                         # Try to retrieve the final state
-                        checkpoint_config = {
-                            "configurable": {"thread_id": thread_id}}
-                        final_checkpoint = session.checkpointer.get(
-                            checkpoint_config)
+                        checkpoint_config = {"configurable": {"thread_id": thread_id}}
+                        final_checkpoint = session.checkpointer.get(checkpoint_config)
                         if final_checkpoint and "channel_values" in final_checkpoint:
                             channel_values = final_checkpoint["channel_values"]
                             if (
                                 isinstance(channel_values, dict)
                                 and "messages" in channel_values
                             ):
-                                persisted_msg_count = len(
-                                    channel_values["messages"])
+                                len(channel_values["messages"])
                             else:
-                                passed")
+                                pass
                         else:
                             pass
-            except Exception as e:
+            except Exception:
                 pass
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()
-
 
 
 if __name__ == "__main__":

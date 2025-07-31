@@ -77,10 +77,7 @@ class TestAgentNodeIOPatterns:
 
         # Create agent node
         agent = CaptureAgent()
-        node = AgentNodeV3Config(
-            name="test_node",
-            agent_name="test_agent",
-            agent=agent)
+        node = AgentNodeV3Config(name="test_node", agent_name="test_agent", agent=agent)
 
         # Execute node
         node(state, {})
@@ -98,10 +95,7 @@ class TestAgentNodeIOPatterns:
 
         # Create simple agent node
         agent = MockSimpleAgent("chat_agent")
-        node = AgentNodeV3Config(
-            name="chat_node",
-            agent_name="chat_agent",
-            agent=agent)
+        node = AgentNodeV3Config(name="chat_node", agent_name="chat_agent", agent=agent)
 
         # Execute node
         result = node(state, {})
@@ -179,8 +173,7 @@ class TestAgentNodeIOPatterns:
         agent_output = result.update["agent_outputs"]["annotated_agent"]
         assert "messages" in agent_output
         assert len(agent_output["messages"]) == 2
-        assert all(isinstance(msg, BaseMessage)
-                   for msg in agent_output["messages"])
+        assert all(isinstance(msg, BaseMessage) for msg in agent_output["messages"])
 
     def test_command_update_patterns(self):
         """Test different Command update patterns for agents."""
@@ -219,12 +212,16 @@ class TestAgentNodeIOPatterns:
             # Check expected fields
             output = result.update["agent_outputs"][agent.name]
             for field in test_case["expected_fields"]:
-                assert field in output, f"Expected {field} in {
+                assert (
+                    field in output
+                ), f"Expected {field} in {
                     agent.name} output"
 
             # Check unexpected fields
             for field in test_case["unexpected_fields"]:
-                assert field not in output, f"Unexpected {field} in {
+                assert (
+                    field not in output
+                ), f"Unexpected {field} in {
                     agent.name} output"
 
     def test_agent_output_schema_field_mapping(self):
@@ -314,10 +311,7 @@ class TestAgentNodeIOPatterns:
                 return {"messages": [AIMessage(content="Default output")]}
 
         agent = MinimalAgent()
-        node = AgentNodeV3Config(
-            name="minimal_node",
-            agent_name="minimal",
-            agent=agent)
+        node = AgentNodeV3Config(name="minimal_node", agent_name="minimal", agent=agent)
 
         # Execute
         result = node(state, {})

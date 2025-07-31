@@ -31,8 +31,7 @@ def check_summarization_needed(
 ) -> bool:
     """Check if total message length exceeds threshold."""
     total_length = sum(len(msg.content) for msg in messages)
-    logger.info(
-        f"Total message length: {total_length}, threshold: {threshold}")
+    logger.info(f"Total message length: {total_length}, threshold: {threshold}")
     return total_length > threshold
 
 
@@ -42,7 +41,8 @@ def check_token_limit(token_count: int, max_tokens: int = 4000) -> bool:
     utilization = token_count / max_tokens
     logger.info(
         f"Token utilization: {
-            utilization:.1%} ({token_count}/{max_tokens})")
+            utilization:.1%} ({token_count}/{max_tokens})"
+    )
     return utilization > 0.8  # 80% threshold
 
 
@@ -82,8 +82,7 @@ def check_field_threshold(
 ) -> bool:
     """Generic threshold checker for any numeric field."""
     result = value > threshold
-    logger.info(
-        f"Field '{field_name}' check: {value} > {threshold} = {result}")
+    logger.info(f"Field '{field_name}' check: {value} > {threshold} = {result}")
     return result
 
 
@@ -255,9 +254,7 @@ def demonstrate_schema_composition():
             callable_func=check_field_threshold,
             goto_on_true="expensive",
             goto_on_false="continue",
-            parameter_mapping={
-                "value": "total_cost",
-                "threshold": "cost_limit"},
+            parameter_mapping={"value": "total_cost", "threshold": "cost_limit"},
         ),
     ]
 
@@ -331,9 +328,7 @@ def create_example_graph():
     )
 
     # Mock nodes for complete flow
-    graph.add_node(
-        "summarize", lambda s: {
-            "summary_count": s.summary_count + 1})
+    graph.add_node("summarize", lambda s: {"summary_count": s.summary_count + 1})
     graph.add_node("respond", lambda s: {"token_count": s.token_count + 100})
 
     # Define flow

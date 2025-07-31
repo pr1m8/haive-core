@@ -31,10 +31,7 @@ def display_model(model: type[BaseModel] | BaseModel, title: str | None = None) 
 
         # Create title
         display_title = (
-            title
-            or f"{
-                model_class.__name__} {
-                'Schema' if is_class else 'Instance'}"
+            title or f"{model_class.__name__} {'Schema' if is_class else 'Instance'}"
         )
 
         # Create main tree
@@ -64,8 +61,7 @@ def display_model(model: type[BaseModel] | BaseModel, title: str | None = None) 
                         f"{field_name}: {type_str} = {default_str} → {value_str}"
                     )
                 elif hasattr(field_info, "description") and field_info.description:
-                    field_str = f"{field_name}: {type_str} = {default_str} # {
-                        field_info.description}"
+                    field_str = f"{field_name}: {type_str} = {default_str} # {field_info.description}"
                 else:
                     field_str = f"{field_name}: {type_str} = {default_str}"
 
@@ -156,8 +152,7 @@ def model_to_code(model_class: type[BaseModel]) -> str:
                 if default is ...:
                     field_str = f"{field_name}: {type_str} = Field(...)"
                 else:
-                    field_str = f"{field_name}: {type_str} = Field(default={
-                        default!r}"
+                    field_str = f"{field_name}: {type_str} = Field(default={default!r}"
 
             # Add description if available
             if hasattr(field_info, "description") and field_info.description:
@@ -402,9 +397,11 @@ def format_value(value: Any) -> str:
             if len(value) > 3:
                 items = list(value.items())[:2]
                 return f"{{{', '.join(f'{k}: {format_value(v)}' for k, v in items)}, ... ({
-                    len(value)} items)}}"
-            return f"{{{', '.join(f'{k}: {format_value(v)}' for k,
-                                  v in value.items())}}}"
+                    len(value)
+                } items)}}"
+            return (
+                f"{{{', '.join(f'{k}: {format_value(v)}' for k, v in value.items())}}}"
+            )
         if hasattr(value, "model_dump"):  # Pydantic v2
             class_name = value.__class__.__name__
             return f"{class_name}(...)"

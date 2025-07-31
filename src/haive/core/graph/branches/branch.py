@@ -263,10 +263,7 @@ class Branch(BaseModel):
 
             # Handle None values
             if field_value is None and not self.allow_none:
-                logger.warning(
-                    f"Field '{
-                        self.key}' is None and allow_none is False"
-                )
+                logger.warning(f"Field '{self.key}' is None and allow_none is False")
                 return self.default
 
             # Perform comparison

@@ -67,29 +67,16 @@ class ToolNodeConfig(NodeConfig):
             logger.error(f"state.engines is not a dict: {type(engines_dict)}")
             return None
 
-        logger.debug(
-            f"Available engines in state: {
-                list(
-                    engines_dict.keys())}"
-        )
+        logger.debug(f"Available engines in state: {list(engines_dict.keys())}")
 
         if self.engine_name in engines_dict:
             engine = engines_dict[self.engine_name]
             if engine:
-                logger.info(
-                    f"✅ Found engine '{
-                        self.engine_name}' in state.engines"
-                )
+                logger.info(f"✅ Found engine '{self.engine_name}' in state.engines")
                 return engine
-            logger.error(
-                f"Engine '{
-                    self.engine_name}' exists in state but is None"
-            )
+            logger.error(f"Engine '{self.engine_name}' exists in state but is None")
         else:
-            logger.error(
-                f"Engine '{
-                    self.engine_name}' not found in state.engines"
-            )
+            logger.error(f"Engine '{self.engine_name}' not found in state.engines")
             logger.error(f"Available engines: {list(engines_dict.keys())}")
 
         return None
@@ -135,10 +122,7 @@ class ToolNodeConfig(NodeConfig):
         # Get engine from state
         engine = self._get_engine_from_state(state)
         if not engine:
-            logger.error(
-                f"Could not get engine '{
-                    self.engine_name}' from state"
-            )
+            logger.error(f"Could not get engine '{self.engine_name}' from state")
             return Command(update={}, goto=self.command_goto)
 
         # Get tools from engine
@@ -187,7 +171,8 @@ class ToolNodeConfig(NodeConfig):
             else:
                 logger.debug(
                     f"❌ Excluding tool '{tool_name}' (route: {route} not in allowed routes: {
-                        self.allowed_routes})"
+                        self.allowed_routes
+                    })"
                 )
 
         if not filtered_tools:
@@ -197,9 +182,7 @@ class ToolNodeConfig(NodeConfig):
             return Command(update={}, goto=self.command_goto)
 
         logger.info(
-            f"Tool node using {
-                len(filtered_tools)} tools from engine '{
-                self.engine_name}'"
+            f"Tool node using {len(filtered_tools)} tools from engine '{self.engine_name}'"
         )
 
         # Log tool names
@@ -229,9 +212,7 @@ class ToolNodeConfig(NodeConfig):
             if isinstance(result, dict) and self.messages_key in result:
                 updated_messages = result[self.messages_key]
                 logger.info(
-                    f"Tool node added {
-                        len(updated_messages) -
-                        len(messages)} ToolMessages"
+                    f"Tool node added {len(updated_messages) - len(messages)} ToolMessages"
                 )
 
                 # Count ToolMessages added
@@ -247,10 +228,7 @@ class ToolNodeConfig(NodeConfig):
 
                 # Return the full result which includes the updated messages
                 return Command(update=result, goto=self.command_goto)
-            logger.error(
-                f"Unexpected result format from ToolNode: {
-                    type(result)}"
-            )
+            logger.error(f"Unexpected result format from ToolNode: {type(result)}")
             logger.error(f"Result: {result}")
 
             # Manually create ToolMessages if needed

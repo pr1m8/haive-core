@@ -251,9 +251,7 @@ class ValidationAwareToolState(ToolState):
         self._update_validation_statistics()
 
         logger.debug(
-            f"Added validation result for {
-                result.tool_name}: {
-                result.is_valid}"
+            f"Added validation result for {result.tool_name}: {result.is_valid}"
         )
 
     def clear_current_validation_results(self) -> None:

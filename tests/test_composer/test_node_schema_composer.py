@@ -37,8 +37,7 @@ class TestNodeSchemaComposer:
     def mock_node(self):
         """Create a mock node for testing."""
 
-        def node_func(state: dict[str, Any],
-                      config: dict[str, Any]) -> dict[str, Any]:
+        def node_func(state: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
             return {"documents": ["doc1", "doc2"], "count": 2}
 
         return CallableNodeConfig(name="test_node", callable_func=node_func)
@@ -80,8 +79,7 @@ class TestNodeSchemaComposer:
 
         # Compose with input mapping
         composed = composer.compose_node(
-            base_node=node, input_mappings=[
-                FieldMapping("conversation", "messages")]
+            base_node=node, input_mappings=[FieldMapping("conversation", "messages")]
         )
 
         # Test with mapped input
@@ -97,8 +95,7 @@ class TestNodeSchemaComposer:
         composer.register_transform_function("double", lambda x: x * 2)
 
         # Create node
-        def calc_func(state: dict[str, Any],
-                      config: dict[str, Any]) -> dict[str, Any]:
+        def calc_func(state: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
             return {"value": 5}
 
         node = CallableNodeConfig(name="calc", callable_func=calc_func)
@@ -146,11 +143,7 @@ class TestNodeSchemaComposer:
 
         node = composer.from_callable(
             func=get_status,
-            output_mappings=[
-                FieldMapping(
-                    "result",
-                    "status",
-                    transform=["uppercase"])],
+            output_mappings=[FieldMapping("result", "status", transform=["uppercase"])],
         )
 
         result = node({}, {})
@@ -209,11 +202,9 @@ class TestNodeSchemaComposer:
     def test_change_input_key_factory(self, composer):
         """Test change_input_key factory function."""
 
-        def process(state: dict[str, Any],
-                    config: dict[str, Any]) -> dict[str, Any]:
+        def process(state: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
             # Expects 'query' but state has 'user_question'
-            return {
-                "response": f"Processing: {state.get('query', 'no query')}"}
+            return {"response": f"Processing: {state.get('query', 'no query')}"}
 
         node = CallableNodeConfig(name="processor", callable_func=process)
 
@@ -226,8 +217,7 @@ class TestNodeSchemaComposer:
     def test_remap_fields_factory(self, composer):
         """Test remap_fields for multiple mappings."""
 
-        def process(state: dict[str, Any],
-                    config: dict[str, Any]) -> dict[str, Any]:
+        def process(state: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
             query = state.get("query", "")
             context = state.get("context", "")
             return {
@@ -241,13 +231,10 @@ class TestNodeSchemaComposer:
         adapted = remap_fields(
             node=node,
             input_mapping={"user_question": "query", "background": "context"},
-            output_mapping={
-                "response": "ai_response",
-                "metadata": "processing_info"},
+            output_mapping={"response": "ai_response", "metadata": "processing_info"},
         )
 
-        result = adapted(
-            {"user_question": "Hello", "background": "Previous chat"}, {})
+        result = adapted({"user_question": "Hello", "background": "Previous chat"}, {})
 
         assert "ai_response" in result.update
         assert "processing_info" in result.update
@@ -256,8 +243,7 @@ class TestNodeSchemaComposer:
     def test_complex_path_mapping(self, composer):
         """Test mapping with complex paths."""
 
-        def process(state: dict[str, Any],
-                    config: dict[str, Any]) -> dict[str, Any]:
+        def process(state: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
             return {"result": {"data": {"value": 42}}}
 
         node = CallableNodeConfig(name="processor", callable_func=process)
@@ -276,10 +262,8 @@ class TestNodeSchemaComposer:
     def test_multiple_transforms(self, composer):
         """Test chaining multiple transforms."""
         # Register transforms
-        composer.register_transform_function(
-            "add_prefix", lambda x: f"PREFIX_{x}")
-        composer.register_transform_function(
-            "add_suffix", lambda x: f"{x}_SUFFIX")
+        composer.register_transform_function("add_prefix", lambda x: f"PREFIX_{x}")
+        composer.register_transform_function("add_suffix", lambda x: f"{x}_SUFFIX")
 
         def get_id() -> str:
             return "abc123"
@@ -301,8 +285,7 @@ class TestNodeSchemaComposer:
     def test_default_values_in_mapping(self, composer):
         """Test default values in field mappings."""
 
-        def process(state: dict[str, Any],
-                    config: dict[str, Any]) -> dict[str, Any]:
+        def process(state: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
             # Only return some fields
             return {"status": "complete"}
 
@@ -329,8 +312,7 @@ class TestNodeSchemaComposer:
             return "2024-01-01T00:00:00"
 
         node = composer.from_callable(
-            func=get_timestamp, output_mappings=[
-                FieldMapping("result", "timestamp")]
+            func=get_timestamp, output_mappings=[FieldMapping("result", "timestamp")]
         )
 
         result = node({}, {})
@@ -345,8 +327,7 @@ class TestNodeSchemaComposer:
         node = CallableNodeConfig(name="processor", callable_func=process)
 
         composed = composer.compose_node(
-            base_node=node, output_mappings=[
-                FieldMapping("original", "mapped_field")]
+            base_node=node, output_mappings=[FieldMapping("original", "mapped_field")]
         )
 
         result = composed({}, {})
@@ -404,13 +385,11 @@ class TestNodeSchemaComposerIntegration:
         )
 
         # Step 2: Mock retriever expecting different field
-        def retrieve(state: dict[str, Any],
-                     config: dict[str, Any]) -> dict[str, Any]:
+        def retrieve(state: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
             query = state.get("search_query", "")
             return {"docs": [f"Doc about {query}"]}
 
-        retriever = CallableNodeConfig(
-            name="retriever", callable_func=retrieve)
+        retriever = CallableNodeConfig(name="retriever", callable_func=retrieve)
 
         # Adapt retriever
         adapted_retriever = composer.compose_node(
@@ -442,8 +421,7 @@ class TestNodeSchemaComposerIntegration:
         def query_enhancer(q: str) -> dict[str, Any]:
             return {"enhanced": f"Find information about: {q}", "original": q}
 
-        def retriever(state: dict[str, Any],
-                      config: dict[str, Any]) -> dict[str, Any]:
+        def retriever(state: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
             search_term = state.get("search_term", "")
             return {
                 "results": [
@@ -452,8 +430,7 @@ class TestNodeSchemaComposerIntegration:
                 ]
             }
 
-        def generator(state: dict[str, Any],
-                      config: dict[str, Any]) -> dict[str, Any]:
+        def generator(state: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
             context = state.get("context", [])
             query = state.get("original_query", "")
 
@@ -481,8 +458,7 @@ class TestNodeSchemaComposerIntegration:
             "context",
         )
 
-        generator_node = CallableNodeConfig(
-            name="generator", callable_func=generator)
+        generator_node = CallableNodeConfig(name="generator", callable_func=generator)
         adapted_generator = change_output_key(
             generator_node, "answer", "final_response"
         )

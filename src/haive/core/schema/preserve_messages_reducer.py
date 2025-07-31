@@ -59,13 +59,7 @@ def preserve_messages_reducer(left: list, right: list) -> list:
             result.append(msg)
             logger.debug(f"Preserved BaseMessage: {type(msg).__name__}")
             if hasattr(msg, "tool_call_id"):
-                logger.debug(
-                    f"  tool_call_id: {
-                        getattr(
-                            msg,
-                            'tool_call_id',
-                            'None')}"
-                )
+                logger.debug(f"  tool_call_id: {getattr(msg, 'tool_call_id', 'None')}")
         else:
             # Need to convert from dict - use convert_to_messages
             # but only for this individual message

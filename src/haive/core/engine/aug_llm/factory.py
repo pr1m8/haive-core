@@ -93,26 +93,23 @@ class AugLLMFactory:
 
         # Log initialization state
         logger.debug(
-            f"AugLLMFactory Initialization - config_name: {
-                self.aug_config.name}, "
+            f"AugLLMFactory Initialization - config_name: {self.aug_config.name}, "
             f"runtime_overrides: {bool(config_params)}, "
-            f"has_prompt_template: {
-                self.aug_config.prompt_template is not None}, "
+            f"has_prompt_template: {self.aug_config.prompt_template is not None}, "
             f"has_tools: {len(self.aug_config.tools) > 0}, "
-            f"has_structured_output: {
-                self.aug_config.structured_output_model is not None}, "
-            f"force_messages_optional: {
-                self.aug_config.force_messages_optional}, "
+            f"has_structured_output: {self.aug_config.structured_output_model is not None}, "
+            f"force_messages_optional: {self.aug_config.force_messages_optional}, "
             f"messages_in_optional_vars: {
-                self.aug_config.messages_placeholder_name in self.aug_config.optional_variables}, "
+                self.aug_config.messages_placeholder_name in self.aug_config.optional_variables
+            }, "
             f"use_tool_for_format_instructions: {
-                self.aug_config.use_tool_for_format_instructions}, "
+                self.aug_config.use_tool_for_format_instructions
+            }, "
             f"tool_is_base_model: {self.aug_config.tool_is_base_model}, "
             f"force_tool_use: {self.aug_config.force_tool_use}, "
             f"force_tool_choice: {self.aug_config.force_tool_choice}, "
             f"tool_choice_mode: {self.aug_config.tool_choice_mode}, "
-            f"structured_output_version: {
-                self.aug_config.structured_output_version}"
+            f"structured_output_version: {self.aug_config.structured_output_version}"
         )
 
     def _apply_config_params(self):
@@ -150,10 +147,7 @@ class AugLLMFactory:
             if param in self.config_params:
                 setattr(self.aug_config, param, self.config_params[param])
                 override_summary[param] = self.config_params[param]
-                logger.debug(
-                    f"Overriding {param}: {
-                        self.config_params[param]}"
-                )
+                logger.debug(f"Overriding {param}: {self.config_params[param]}")
 
         # Handle partial variables separately (update, don't replace)
         if "partial_variables" in self.config_params:
@@ -174,7 +168,8 @@ class AugLLMFactory:
             )
             logger.warning(
                 f"Added {
-                    self.aug_config.messages_placeholder_name} to optional_variables during config param application"
+                    self.aug_config.messages_placeholder_name
+                } to optional_variables during config param application"
             )
 
         # Handle prompt modification if system_message was updated
@@ -299,7 +294,8 @@ class AugLLMFactory:
             )
             logger.warning(
                 f"Added {
-                    self.aug_config.messages_placeholder_name} to optional_variables during runnable creation"
+                    self.aug_config.messages_placeholder_name
+                } to optional_variables during runnable creation"
             )
 
         # Force chat templates to have optional messages placeholder if
@@ -328,9 +324,9 @@ class AugLLMFactory:
         # Debug LLM initialization
         logger.debug(
             f"LLM Initialization - model: {self.aug_config.llm_config.model}, "
-            f"temperature: {
-                self.aug_config.temperature}, max_tokens: {
-                self.aug_config.max_tokens}, "
+            f"temperature: {self.aug_config.temperature}, max_tokens: {
+                self.aug_config.max_tokens
+            }, "
             f"override_params: {llm_params}"
         )
 
@@ -428,8 +424,7 @@ class AugLLMFactory:
                         and hasattr(tool, "__name__")
                     ):
                         logger.info(
-                            f"Using custom output field: {
-                                self.aug_config.output_field_name}"
+                            f"Using custom output field: {self.aug_config.output_field_name}"
                         )
 
                 # Case 2: Tool is a BaseTool instance or needs instantiation
@@ -445,31 +440,20 @@ class AugLLMFactory:
                         try:
                             tool_instances.append(tool(**kwargs))
                             logger.info(
-                                f"Instantiated tool {
-                                    i +
-                                    1}: {
-                                    getattr(
-                                        tool,
-                                        '__name__',
-                                        'Unknown')}"
+                                f"Instantiated tool {i + 1}: {getattr(tool, '__name__', 'Unknown')}"
                             )
                         except Exception as e:
                             logger.exception(
                                 f"Failed to instantiate tool {
-                                    getattr(
-                                        tool,
-                                        '__name__',
-                                        'Unknown')}: {e}"
+                                    getattr(tool, '__name__', 'Unknown')
+                                }: {e}"
                             )
                             failed_tools.append((tool, str(e)))
                     else:
                         # Already an instance
                         tool_instances.append(tool)
                         tool_class_name = tool.__class__.__name__
-                        logger.info(
-                            f"Using tool instance {
-                                i + 1}: {tool_class_name}"
-                        )
+                        logger.info(f"Using tool instance {i + 1}: {tool_class_name}")
 
                 # Case 3: Tool is a string (reference to a tool)
                 elif isinstance(tool, str):
@@ -487,8 +471,7 @@ class AugLLMFactory:
                     except (ImportError, AttributeError) as e:
                         # Fallback - just skip this tool
                         logger.exception(
-                            f"Failed to resolve tool {
-                                i + 1}: {tool} - {e}"
+                            f"Failed to resolve tool {i + 1}: {tool} - {e}"
                         )
                         failed_tools.append((tool, f"Tool resolution failed: {e!s}"))
                         continue
@@ -506,10 +489,7 @@ class AugLLMFactory:
                     logger.warning(f"Unrecognized tool type: {tool_type}")
                     failed_tools.append((tool, f"Unrecognized tool type: {tool_type}"))
             except Exception as e:
-                logger.exception(
-                    f"Unexpected error processing tool {
-                        i + 1}: {e}"
-                )
+                logger.exception(f"Unexpected error processing tool {i + 1}: {e}")
                 failed_tools.append((tool, f"Unexpected error: {e!s}"))
 
         # Log any failed tools
@@ -536,10 +516,7 @@ class AugLLMFactory:
                 "type": "function",
                 "function": {"name": self.aug_config.force_tool_choice},
             }
-            logger.info(
-                f"Forcing specific tool: {
-                    self.aug_config.force_tool_choice}"
-            )
+            logger.info(f"Forcing specific tool: {self.aug_config.force_tool_choice}")
         elif self.aug_config.tool_choice_mode == "required":
             # Force using any tool
             bind_kwargs["tool_choice"] = "required"
@@ -555,10 +532,7 @@ class AugLLMFactory:
 
         # Use bind_tools method if available
         if hasattr(llm, "bind_tools"):
-            logger.info(
-                f"Using bind_tools method with {
-                    len(tool_instances)} tools"
-            )
+            logger.info(f"Using bind_tools method with {len(tool_instances)} tools")
             try:
                 return llm.bind_tools(tool_instances, **bind_kwargs)
             except Exception as e:
@@ -682,9 +656,7 @@ class AugLLMFactory:
         # ✅ Handle custom output parser
         if self.aug_config.output_parser:
             logger.info(
-                f"Using custom output parser: {
-                    type(
-                        self.aug_config.output_parser).__name__}"
+                f"Using custom output parser: {type(self.aug_config.output_parser).__name__}"
             )
             return llm | self.aug_config.output_parser
 
@@ -772,22 +744,20 @@ class AugLLMFactory:
         # Debug final chain composition
         logger.debug(
             f"Chain Composition - prompt_template_type: {
-                type(
-                    self.aug_config.prompt_template).__name__}, "
-            f"has_preprocess: {
-                bool(
-                    self.aug_config.preprocess)}, has_postprocess: {
-                bool(
-                    self.aug_config.postprocess)}, "
-            f"custom_runnables: {
-                len(
-                    self.aug_config.custom_runnables or [])}, messages_optional: {
-                self.aug_config.force_messages_optional}, "
+                type(self.aug_config.prompt_template).__name__
+            }, "
+            f"has_preprocess: {bool(self.aug_config.preprocess)}, has_postprocess: {
+                bool(self.aug_config.postprocess)
+            }, "
+            f"custom_runnables: {len(self.aug_config.custom_runnables or [])}, messages_optional: {
+                self.aug_config.force_messages_optional
+            }, "
             f"has_format_instructions: {
-                'format_instructions' in self.aug_config.partial_variables}, "
-            f"tool_is_base_model: {
-                self.aug_config.tool_is_base_model}, structured_output_version: {
-                self.aug_config.structured_output_version}"
+                'format_instructions' in self.aug_config.partial_variables
+            }, "
+            f"tool_is_base_model: {self.aug_config.tool_is_base_model}, structured_output_version: {
+                self.aug_config.structured_output_version
+            }"
         )
 
         return chain

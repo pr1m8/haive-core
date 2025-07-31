@@ -79,11 +79,7 @@ class RecompileMixin:
         if not self.needs_recompile:
             self.needs_recompile = True
             logger.info(
-                f"Component {
-                    getattr(
-                        self,
-                        'name',
-                        'unnamed')} marked for recompile: {reason}"
+                f"Component {getattr(self, 'name', 'unnamed')} marked for recompile: {reason}"
             )
 
         # Add reason if not already present
@@ -106,9 +102,7 @@ class RecompileMixin:
             or len(self.recompile_reasons) >= self.recompile_threshold
         ):
             logger.warning(
-                f"Component has {
-                    len(
-                        self.recompile_reasons)} pending reasons, forcing recompile"
+                f"Component has {len(self.recompile_reasons)} pending reasons, forcing recompile"
             )
             self._trigger_auto_recompile()
 
@@ -130,19 +124,11 @@ class RecompileMixin:
         if success:
             self.recompile_count += 1
             logger.info(
-                f"Component {
-                    getattr(
-                        self,
-                        'name',
-                        'unnamed')} recompilation resolved successfully"
+                f"Component {getattr(self, 'name', 'unnamed')} recompilation resolved successfully"
             )
         else:
             logger.error(
-                f"Component {
-                    getattr(
-                        self,
-                        'name',
-                        'unnamed')} recompilation failed"
+                f"Component {getattr(self, 'name', 'unnamed')} recompilation failed"
             )
 
         # Update history
@@ -191,9 +177,7 @@ class RecompileMixin:
             self.recompile_history.clear()
 
         logger.info(
-            f"Recompilation history cleared, kept {
-                len(
-                    self.recompile_history)} recent entries"
+            f"Recompilation history cleared, kept {len(self.recompile_history)} recent entries"
         )
 
     def force_recompile(self, reason: str = "Manual force recompile") -> None:

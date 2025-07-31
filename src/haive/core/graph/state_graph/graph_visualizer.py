@@ -221,11 +221,7 @@ class GraphVisualizer:
             Complete Mermaid diagram string
         """
         logger.info(
-            f"Generating Mermaid for graph: {
-                getattr(
-                    graph,
-                    'name',
-                    'Unnamed')}"
+            f"Generating Mermaid for graph: {getattr(graph, 'name', 'Unnamed')}"
         )
 
         # Initialize diagram
@@ -327,11 +323,7 @@ class GraphVisualizer:
             return agents
 
         logger.info(
-            f"Detecting agents at depth {current_depth} in {
-                getattr(
-                    graph,
-                    'name',
-                    'Unknown')}"
+            f"Detecting agents at depth {current_depth} in {getattr(graph, 'name', 'Unknown')}"
         )
 
         for node_name, node in (graph.nodes or {}).items():
@@ -419,7 +411,7 @@ class GraphVisualizer:
             if graph:
                 return {
                     "graph": graph,
-                    "reason": f'agent_attributes:{",".join(matching_attrs)}',
+                    "reason": f"agent_attributes:{','.join(matching_attrs)}",
                 }
 
         return None
@@ -465,8 +457,7 @@ class GraphVisualizer:
             try:
                 if debug:
                     logger.debug(
-                        f"Attempting to build graph from {
-                            type(obj).__name__}.build_graph()"
+                        f"Attempting to build graph from {type(obj).__name__}.build_graph()"
                     )
                 graph = obj.build_graph()
                 if graph:
@@ -479,8 +470,7 @@ class GraphVisualizer:
             try:
                 if debug:
                     logger.debug(
-                        f"Attempting to compile graph from {
-                            type(obj).__name__}.compile()"
+                        f"Attempting to compile graph from {type(obj).__name__}.compile()"
                     )
                 compiled = obj.compile()
                 if hasattr(compiled, "graph"):
@@ -553,17 +543,13 @@ class GraphVisualizer:
             if start_id not in context.processed_nodes:
                 # Use consistent shapes for START/END
                 lines.append(
-                    f'{indent}{start_id}(["▶ START"]):::{
-                        NodeStyle.START.value}'
+                    f'{indent}{start_id}(["▶ START"]):::{NodeStyle.START.value}'
                 )
                 context.processed_nodes.add(start_id)
                 context.node_mappings[f"{parent_prefix}START"] = start_id
 
             if end_id not in context.processed_nodes:
-                lines.append(
-                    f'{indent}{end_id}(["■ END"]):::{
-                        NodeStyle.END.value}'
-                )
+                lines.append(f'{indent}{end_id}(["■ END"]):::{NodeStyle.END.value}')
                 context.processed_nodes.add(end_id)
                 context.node_mappings[f"{parent_prefix}END"] = end_id
 
@@ -665,8 +651,7 @@ class GraphVisualizer:
         # Create subgraph
         lines.append("")
         lines.append(
-            f'{indent}subgraph {subgraph_id}["🤖 {
-                cls._sanitize_label(node_name)} Agent"]'
+            f'{indent}subgraph {subgraph_id}["🤖 {cls._sanitize_label(node_name)} Agent"]'
         )
         lines.append(f"{indent}    direction TB")
 
@@ -679,17 +664,13 @@ class GraphVisualizer:
         if start_id not in context.processed_nodes:
             # Add START at the top of the subgraph
             lines.append(
-                f'{indent}    {start_id}(["▶ START"]):::{
-                    NodeStyle.START.value}'
+                f'{indent}    {start_id}(["▶ START"]):::{NodeStyle.START.value}'
             )
             context.processed_nodes.add(start_id)
 
         if end_id not in context.processed_nodes:
             # Add END at the bottom (will be rendered later after other nodes)
-            lines.append(
-                f'{indent}    {end_id}(["■ END"]):::{
-                    NodeStyle.END.value}'
-            )
+            lines.append(f'{indent}    {end_id}(["■ END"]):::{NodeStyle.END.value}')
             context.processed_nodes.add(end_id)
 
         # Map START/END nodes for proper edge connections
@@ -720,10 +701,7 @@ class GraphVisualizer:
 
         # Style the subgraph
         style = cls.SUBGRAPH_STYLES["agent"]
-        style_str = f"fill:{
-            style['fill']},stroke:{
-            style['stroke']},stroke-width:{
-            style['strokeWidth']}"
+        style_str = f"fill:{style['fill']},stroke:{style['stroke']},stroke-width:{style['strokeWidth']}"
         lines.append(f"{indent}style {subgraph_id} {style_str}")
 
         # Mark the original node as processed
@@ -1060,9 +1038,7 @@ class GraphVisualizer:
 
         if highlight_ids:
             lines.append(
-                f"    class {
-                    ','.join(highlight_ids)} {
-                    NodeStyle.HIGHLIGHT.value}"
+                f"    class {','.join(highlight_ids)} {NodeStyle.HIGHLIGHT.value}"
             )
 
     @classmethod

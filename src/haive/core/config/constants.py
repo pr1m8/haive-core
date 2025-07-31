@@ -22,14 +22,10 @@ ROOT_DIR = PACKAGES_DIR.parent  # haive root (polyrepo root)
 
 # Check if paths look correct and log warnings if not
 if CORE_DIR.name != "core":
-    logger.warning(
-        f"Unexpected CORE_DIR name: {
-            CORE_DIR.name}, expected 'core'"
-    )
+    logger.warning(f"Unexpected CORE_DIR name: {CORE_DIR.name}, expected 'core'")
 if HAIVE_NAMESPACE_DIR.name != "haive":
     logger.warning(
-        f"Unexpected HAIVE_NAMESPACE_DIR name: {
-            HAIVE_NAMESPACE_DIR.name}, expected 'haive'"
+        f"Unexpected HAIVE_NAMESPACE_DIR name: {HAIVE_NAMESPACE_DIR.name}, expected 'haive'"
     )
 if SRC_DIR.name != "src":
     logger.warning(f"Unexpected SRC_DIR name: {SRC_DIR.name}, expected 'src'")
@@ -39,8 +35,7 @@ if "haive-core" not in str(HAIVE_CORE_PACKAGE_DIR):
     )
 if PACKAGES_DIR.name != "packages":
     logger.warning(
-        f"Unexpected PACKAGES_DIR name: {
-            PACKAGES_DIR.name}, expected 'packages'"
+        f"Unexpected PACKAGES_DIR name: {PACKAGES_DIR.name}, expected 'packages'"
     )
 
 # Get other package directories

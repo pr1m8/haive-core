@@ -165,7 +165,7 @@ class MessageList(RootModel[list[AnyMessage]]):
                     # It's already a Message object
                     converted.append(item)
                 else:
-                    raise ValueError(f"Unsupported message type: {type(item)}")
+                    raise TypeError(f"Unsupported message type: {type(item)}")
             return converted
         if isinstance(data, str):
             return [HumanMessage(content=data)]

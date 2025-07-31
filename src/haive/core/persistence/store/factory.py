@@ -74,7 +74,7 @@ class StoreFactory:
             # Connection testing will happen when store is first used
             return AsyncPostgresStoreWrapper(config=config)
 
-        raise ValueError(f"Unknown store type: {config.type}")
+        raise TypeError(f"Unknown store type: {config.type}")
 
     @staticmethod
     @contextmanager

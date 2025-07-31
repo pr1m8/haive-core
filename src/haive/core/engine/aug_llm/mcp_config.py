@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 def _get_mcp_mixin():
     """Lazy import MCPMixin to avoid circular dependency."""
     from haive.core.common.mixins import MCPMixin
+
     return MCPMixin
 
 
@@ -172,10 +173,7 @@ class MCPAugLLMConfig(_get_mcp_mixin(), AugLLMConfig):
             if name not in self.tools:
                 self.tools.append(name)
 
-        logger.debug(
-            f"Integrated {
-                len(mcp_tool_names)} MCP tools into configuration"
-        )
+        logger.debug(f"Integrated {len(mcp_tool_names)} MCP tools into configuration")
 
     def get_all_tools(self) -> list[str]:
         """Get all available tool names including MCP tools.

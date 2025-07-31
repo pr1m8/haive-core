@@ -118,7 +118,7 @@ class MultiVectorRetrieverConfig(BaseRetrieverConfig):
         """Validate document store type."""
         valid_types = ["in_memory", "file_system"]
         if v not in valid_types:
-            raise ValueError(f"docstore_type must be one of {valid_types}, got {v}")
+            raise TypeError(f"docstore_type must be one of {valid_types}, got {v}")
         return v
 
     @field_validator("indexing_strategy")
@@ -138,7 +138,7 @@ class MultiVectorRetrieverConfig(BaseRetrieverConfig):
         """Validate search type."""
         valid_types = ["similarity", "mmr"]
         if v not in valid_types:
-            raise ValueError(f"search_type must be one of {valid_types}, got {v}")
+            raise TypeError(f"search_type must be one of {valid_types}, got {v}")
         return v
 
     @field_validator("docstore_path")
@@ -209,7 +209,7 @@ class MultiVectorRetrieverConfig(BaseRetrieverConfig):
                     "Install with: pip install langchain[storage]"
                 )
         else:
-            raise ValueError(f"Unsupported docstore_type: {self.docstore_type}")
+            raise TypeError(f"Unsupported docstore_type: {self.docstore_type}")
 
         # Create search kwargs
         search_kwargs = dict(self.search_kwargs)

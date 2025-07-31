@@ -6,7 +6,7 @@ like debugging, auditing, and routing based on engine source.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from pydantic import Field
@@ -21,20 +21,17 @@ logger = logging.getLogger(__name__)
 class ConversationState(StateSchema):
     """State with conversation tracking."""
 
-    messages: List[BaseMessage] = Field(default_factory=list)
-    engine_usage: Dict[str, int] = Field(
+    messages: list[BaseMessage] = Field(default_factory=list)
+    engine_usage: dict[str, int] = Field(
         default_factory=dict, description="Track engine usage counts"
     )
-    last_engine: Optional[str] = Field(
+    last_engine: str | None = Field(
         default=None, description="Last engine that responded"
     )
 
 
-def track_engine_usage(state: ConversationState) -> Dict[str, Any]:
+def track_engine_usage(state: ConversationState) -> dict[str, Any]:
     """Analyze engine usage from message attribution."""
-    print("\n" + "=" * 80)
-    print("EXAMPLE: Tracking Engine Usage")
-    print("=" * 80)
 
     engine_stats = {
         "total_ai_messages": 0,
@@ -71,31 +68,22 @@ def track_engine_usage(state: ConversationState) -> Dict[str, Any]:
                     "token_count"
                 ]
 
-    print("\n📊 Engine Usage Statistics:")
-    print(f"Total AI messages: {engine_stats['total_ai_messages']}")
-    print("\nMessages by engine:")
-    for engine, count in engine_stats["messages_by_engine"].items():
-        print(f"  - {engine}: {count} messages")
+    for _engine, _count in engine_stats["messages_by_engine"].items():
+        pass
 
     if engine_stats["response_times"]:
-        print("\nAverage response times:")
-        for engine, times in engine_stats["response_times"].items():
-            avg_time = sum(times) / len(times)
-            print(f"  - {engine}: {avg_time:.2f}ms")
+        for _engine, times in engine_stats["response_times"].items():
+            sum(times) / len(times)
 
     if engine_stats["token_usage"]:
-        print("\nToken usage by engine:")
-        for engine, tokens in engine_stats["token_usage"].items():
-            print(f"  - {engine}: {tokens} tokens")
+        for _engine, _tokens in engine_stats["token_usage"].items():
+            pass
 
     return engine_stats
 
 
-def route_based_on_engine(messages: List[BaseMessage]) -> str:
+def route_based_on_engine(messages: list[BaseMessage]) -> str:
     """Route to different handlers based on source engine."""
-    print("\n" + "=" * 80)
-    print("EXAMPLE: Routing Based on Engine Attribution")
-    print("=" * 80)
 
     # Find the last AI message
     last_ai_msg = None
@@ -105,7 +93,6 @@ def route_based_on_engine(messages: List[BaseMessage]) -> str:
             break
 
     if not last_ai_msg:
-        print("No AI message found, using default route")
         return "default"
 
     engine_name = last_ai_msg.additional_kwargs.get("engine_name", "unknown")
@@ -121,18 +108,11 @@ def route_based_on_engine(messages: List[BaseMessage]) -> str:
 
     route = routing_rules.get(engine_name, "default")
 
-    print("\n🔀 Routing Decision:n: ")
-    print(f"Last message from: {engine_name}")
-    print(f"Routing to: {route}")
-
     return route
 
 
-def create_audit_log(state: ConversationState) -> List[Dict[str, Any]]:
+def create_audit_log(state: ConversationState) -> list[dict[str, Any]]:
     """Create an audit log with engine attribution."""
-    print("\n" + "=" * 80)
-    print("EXAMPLE: Creating Audit Log with Attribution")
-    print("=" * 80)
 
     audit_entries = []
 
@@ -160,52 +140,38 @@ def create_audit_log(state: ConversationState) -> List[Dict[str, Any]]:
 
         audit_entries.append(entry)
 
-    print("\n📋 Audit Log:")
     for entry in audit_entries:
         if entry["message_type"] == "AIMessage":
-            print(f"\n[{entry['index']}] AI Response from '{entry['engine_name']}'")
-            print(f"    Content: {entry['content_preview']}")
             if "response_time_ms" in entry:
-                print(f"    Response time: {entry['response_time_ms']}ms")
+                pass
             if "tokens_used" in entry:
-                print(f"    Tokens: {entry['tokens_used']}")
+                pass
         else:
-            print(f"\n[{entry['index']}] {entry['message_type']}")
-            print(f"    Content: {entry['content_preview']}")
+            pass
 
     return audit_entries
 
 
 def filter_messages_by_engine(
-    messages: List[BaseMessage], engine_name: str
-) -> List[BaseMessage]:
+    messages: list[BaseMessage], engine_name: str
+) -> list[BaseMessage]:
     """Filter messages to only show those from a specific engine."""
-    print("\n" + "=" * 80)
-    print(f"EXAMPLE: Filtering Messages from '{engine_name}'")
-    print("=" * 80)
 
     filtered = []
 
     for msg in messages:
         # Keep all non-AI messages
-        if not isinstance(msg, AIMessage):
+        if (
+            not isinstance(msg, AIMessage)
+            or msg.additional_kwargs.get("engine_name") == engine_name
+        ):
             filtered.append(msg)
-        # Keep AI messages from the specified engine
-        elif msg.additional_kwargs.get("engine_name") == engine_name:
-            filtered.append(msg)
-
-    print(f"\nOriginal conversation: {len(messages)} messages")
-    print(f"Filtered conversation: {len(filtered)} messages")
-    print(f"Removed {len(messages) - len(filtered)} messages from other engines")
 
     return filtered
 
 
 def debug_engine_behavior(state: ConversationState):
     """Debug helper to analyze engine behavior."""
-    print("\n" + "=" * 80)
-    print("EXAMPLE: Debugging Engine Behavior")
-    print("=" * 80)
 
     # Group messages by engine
     engines_data = {}
@@ -217,26 +183,16 @@ def debug_engine_behavior(state: ConversationState):
                 engines_data[engine] = []
             engines_data[engine].append(msg)
 
-    print("\n🔍 Engine Behavior Analysis:")
-
     for engine, messages in engines_data.items():
-        print(f"\n{engine}:")
-        print(f"  Total responses: {len(messages)}")
 
         # Analyze response patterns
         response_lengths = [len(msg.content) for msg in messages]
-        avg_length = (
-            sum(response_lengths) / len(response_lengths) if response_lengths else 0
-        )
-
-        print(f"  Average response length: {avg_length:.0f} characters")
-        print(f"  Shortest response: {min(response_lengths)} chars")
-        print(f"  Longest response: {max(response_lengths)} chars")
+        (sum(response_lengths) / len(response_lengths) if response_lengths else 0)
 
         # Check for any errors or special conditions
         errors = [msg for msg in messages if "error" in msg.additional_kwargs]
         if errors:
-            print(f"  ⚠️  Errors encountered: {len(errors)}")
+            pass
 
 
 def main():
@@ -298,19 +254,6 @@ def main():
     filter_messages_by_engine(state.messages, "gpt4_engine")
 
     debug_engine_behavior(state)
-
-    print("\n" + "=" * 80)
-    print("SUMMARY: Engine Attribution Use Cases")
-    print("=" * 80)
-    print("\n✅ Engine attribution enables:")
-    print("1. Usage tracking and analytics")
-    print("2. Dynamic routing based on engine source")
-    print("3. Comprehensive audit logging")
-    print("4. Message filtering by engine")
-    print("5. Engine behavior debugging")
-    print("\n💡 Key insight: Adding engine_name to AIMessage.additional_kwargs")
-    print("   provides a powerful mechanism for tracking, routing, and analyzing")
-    print("   multi-engine conversations!")
 
 
 if __name__ == "__main__":

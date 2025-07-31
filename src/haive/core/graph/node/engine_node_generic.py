@@ -114,9 +114,7 @@ class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
                 if hasattr(self.engine, "get_input_fields"):
                     engine_input_fields = self.engine.get_input_fields()
                     logger.debug(
-                        f"Engine derived input fields: {
-                            list(
-                                engine_input_fields.keys())}"
+                        f"Engine derived input fields: {list(engine_input_fields.keys())}"
                     )
 
                     # Convert engine fields to field definitions using
@@ -222,18 +220,18 @@ class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
             logger.debug(f"Node input_field_defs: {self.input_field_defs}")
             logger.debug(
                 f"State fields available: {
-                    [
-                        field for field in dir(state) if not field.startswith('_')]}"
+                    [field for field in dir(state) if not field.startswith('_')]
+                }"
             )
 
             if self.input_schema or self.input_field_defs:
                 input_data = self.extract_input_from_state(state)
                 logger.info(
                     f"Using schema-based input extraction: {
-                        list(
-                            input_data.keys()) if isinstance(
-                            input_data,
-                            dict) else type(input_data)}"
+                        list(input_data.keys())
+                        if isinstance(input_data, dict)
+                        else type(input_data)
+                    }"
                 )
                 logger.debug(f"Extracted input_data: {input_data}")
             else:
@@ -325,11 +323,10 @@ class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
             return self.engine
 
         # Priority 2: Get from state's engines dict using engine_name
-        if self.engine_name and state:
-            if hasattr(state, "engines"):
-                engines_dict = getattr(state, "engines", {})
-                if isinstance(engines_dict, dict) and self.engine_name in engines_dict:
-                    return engines_dict[self.engine_name]
+        if self.engine_name and state and hasattr(state, "engines"):
+            engines_dict = getattr(state, "engines", {})
+            if isinstance(engines_dict, dict) and self.engine_name in engines_dict:
+                return engines_dict[self.engine_name]
 
         return None
 
@@ -659,11 +656,7 @@ class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
                 value = self._get_state_value(state, field_def.name)
                 if value is not None:
                     input_dict[field_def.name] = value
-            logger.debug(
-                f"Field definition extraction: {
-                    list(
-                        input_dict.keys())}"
-            )
+            logger.debug(f"Field definition extraction: {list(input_dict.keys())}")
             return input_dict
 
         logger.debug("No input schema or field defs, returning empty dict")

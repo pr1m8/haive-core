@@ -252,7 +252,7 @@ class TestDebugUtilities:
 
         assert isinstance(result, dict)
         # Should not contain private variables or modules
-        for key in result.keys():
+        for key in result:
             assert not key.startswith("_")
 
         output = f.getvalue()

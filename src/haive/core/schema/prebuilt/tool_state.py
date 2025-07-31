@@ -117,8 +117,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         # Sync tools from class-level engines if they haven't been synced yet
         if hasattr(self.__class__, "engines") and not self.tools:
             logger.debug(
-                f"Initial tool sync from class engines for {
-                    self.__class__.__name__}"
+                f"Initial tool sync from class engines for {self.__class__.__name__}"
             )
             self._sync_tools_from_class_engines()
 
@@ -137,8 +136,8 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
             if hasattr(field_value, "tools") and hasattr(field_value, "engine_type"):
                 logger.debug(
                     f"Found instance engine field '{field_name}' with {
-                        len(
-                            field_value.tools)} tools"
+                        len(field_value.tools)
+                    } tools"
                 )
 
                 # Sync tools from this engine
@@ -154,7 +153,8 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
                 if hasattr(field_value, "tool_routes") and field_value.tool_routes:
                     logger.debug(
                         f"Syncing tool routes from instance engine '{field_name}': {
-                            field_value.tool_routes}"
+                            field_value.tool_routes
+                        }"
                     )
                     self.tool_routes.update(field_value.tool_routes)
 
@@ -162,7 +162,8 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
                 if hasattr(field_value, "tool_metadata") and field_value.tool_metadata:
                     logger.debug(
                         f"Syncing tool metadata from instance engine '{field_name}': {
-                            field_value.tool_metadata}"
+                            field_value.tool_metadata
+                        }"
                     )
                     self.tool_metadata.update(field_value.tool_metadata)
 
@@ -436,8 +437,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
                 self.tool_routes[tool_name] = self._get_tool_route(tool)
 
             logger.debug(
-                f"Added tool '{tool_name}' with route '{
-                    self.tool_routes[tool_name]}'"
+                f"Added tool '{tool_name}' with route '{self.tool_routes[tool_name]}'"
             )
 
             # Sync this new tool to engines

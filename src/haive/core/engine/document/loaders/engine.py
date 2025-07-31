@@ -180,7 +180,7 @@ class DocumentLoaderEngine(
                     raise ValueError("DocumentState must contain source")
                 loader_options = {}
             else:
-                raise ValueError(f"Invalid input type: {type(input_data)}")
+                raise TypeError(f"Invalid input type: {type(input_data)}")
 
             # Load documents using AutoLoader
             result = self.auto_loader.load(

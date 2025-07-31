@@ -98,8 +98,7 @@ class AutoLoaderFactory:
 
             if loader:
                 logger.info(
-                    f"Created loader for {path} using source {
-                        source.source_type}"
+                    f"Created loader for {path} using source {source.source_type}"
                 )
                 return loader
             logger.warning(f"Failed to create loader for {path}, trying fallback")

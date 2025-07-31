@@ -80,7 +80,7 @@ class BranchDefinition(BaseModel):
         """
         if self.condition_func is None:
             # Create a default condition function based on routes
-            def default_condition(state: dict[str, Any]):
+            def default_condition(____state: dict[str, Any]):
                 # Look for route matches in state
                 for route_key in self.routes:
                     if route_key in state:
@@ -335,7 +335,7 @@ def apply_persistence(graph, storage_type: str, auto_save: bool, **kwargs):
     default_route="fallback_node",
     description="Route based on detected intent",
 )
-def intent_router(state: dict[str, Any]):
+def intent_router(____state: dict[str, Any]):
     """Route based on intent in state.
 
     Args:

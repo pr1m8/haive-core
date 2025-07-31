@@ -171,10 +171,7 @@ class NodeFactory:
             return cls._ensure_config_aware(config, command_goto, runnable_config)
 
         # Unsupported config type
-        raise ValueError(
-            f"Unsupported node configuration type: {
-                type(config)}"
-        )
+        raise ValueError(f"Unsupported node configuration type: {type(config)}")
 
     @classmethod
     def create_node_function(
@@ -303,10 +300,7 @@ class NodeFactory:
             return cls._ensure_config_aware(config, command_goto, runnable_config)
 
         # Unsupported config type
-        raise ValueError(
-            f"Unsupported node configuration type: {
-                type(config)}"
-        )
+        raise ValueError(f"Unsupported node configuration type: {type(config)}")
 
     @classmethod
     def create_node_function(
@@ -429,10 +423,7 @@ class NodeFactory:
             return cls._ensure_config_aware(config, command_goto, runnable_config)
 
         # Unsupported config type
-        raise ValueError(
-            f"Unsupported node configuration type: {
-                type(config)}"
-        )
+        raise ValueError(f"Unsupported node configuration type: {type(config)}")
 
     @classmethod
     def create_tool_node(
@@ -571,10 +562,7 @@ class NodeFactory:
                     else:
                         # Try to find any JSON-like structure
                         json_match = re.search(r"({[\s\S]*?})", content)
-                        if json_match:
-                            json_str = json_match.group(1)
-                        else:
-                            json_str = content
+                        json_str = json_match.group(1) if json_match else content
 
                     # Parse the JSON
                     parsed_data = json.loads(json_str)
@@ -776,10 +764,7 @@ class NodeFactory:
             # Invoke the vector store
             try:
                 documents = engine.invoke(input_data, merged_config)
-                logger.debug(
-                    f"Vector store result: {
-                        len(documents)} documents"
-                )
+                logger.debug(f"Vector store result: {len(documents)} documents")
             except Exception as e:
                 logger.error(f"Error invoking vector store: {e}")
                 return cls._create_error_command(state, str(e), command_goto)
@@ -1027,19 +1012,17 @@ class NodeFactory:
                         )
                     else:
                         raise ValueError(
-                            f"Unsupported input format for embeddings: {
-                                input_data.keys()}"
+                            f"Unsupported input format for embeddings: {input_data.keys()}"
                         )
                 else:
                     raise ValueError(
-                        f"Unsupported input type for embeddings: {
-                            type(input_data)}"
+                        f"Unsupported input type for embeddings: {type(input_data)}"
                     )
 
                 logger.debug(
                     f"Embeddings generated with shape: {
-                        len(result) if isinstance(
-                            result, list) else 'unknown'}"
+                        len(result) if isinstance(result, list) else 'unknown'
+                    }"
                 )
             except Exception as e:
                 logger.error(f"Error generating embeddings: {e}")
@@ -1240,7 +1223,7 @@ class NodeFactory:
                 messages = (
                     state.messages if hasattr(state, "messages") else state["messages"]
                 )
-                state_update["messages"] = messages + [result]
+                state_update["messages"] = [*messages, result]
         elif isinstance(result, list) and all(
             hasattr(item, "content") for item in result
         ):
@@ -1269,7 +1252,7 @@ class NodeFactory:
                 messages = (
                     state.messages if hasattr(state, "messages") else state["messages"]
                 )
-                state_update["messages"] = messages + [AIMessage(content=result)]
+                state_update["messages"] = [*messages, AIMessage(content=result)]
         # Simple value
         elif output_mapping:
             # Use first mapping as default
@@ -1394,7 +1377,7 @@ class NodeFactory:
                 state.messages if hasattr(state, "messages") else state["messages"]
             )
             error_msg = AIMessage(content=f"Error: {error_message}")
-            state_update["messages"] = messages + [error_msg]
+            state_update["messages"] = [*messages, error_msg]
 
         return Command(update=state_update, goto=command_goto)
 
@@ -1550,7 +1533,7 @@ class NodeFactory:
         elif callable(component):
             sig = inspect.signature(component)
             for param_name in sig.parameters:
-                if param_name != "config" and param_name != "self":
+                if param_name not in {"config", "self"}:
                     mapping[param_name] = param_name
 
         # Common fallbacks

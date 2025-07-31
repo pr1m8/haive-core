@@ -6,11 +6,8 @@ making it easy to review the actual conversation results and state data.
 """
 
 import json
-import os
-import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
 
 
 def find_conversation_outputs(base_path: str) -> dict[str, list[str]]:
@@ -18,8 +15,7 @@ def find_conversation_outputs(base_path: str) -> dict[str, list[str]]:
     conversation_types = {}
 
     # Define conversation type directories
-    conv_base = Path(base_path) / \
-                     "packages/haive-agents/src/haive/agents/conversation"
+    conv_base = Path(base_path) / "packages/haive-agents/src/haive/agents/conversation"
 
     for conv_type_dir in conv_base.iterdir():
         if conv_type_dir.is_dir() and conv_type_dir.name != "base":
@@ -45,8 +41,7 @@ def find_conversation_outputs(base_path: str) -> dict[str, list[str]]:
 
 def find_global_state_history(base_path: str) -> list[str]:
     """Find conversation-related state history in global resources."""
-    global_resources = Path(base_path) / \
-                            "packages/haive-agents/resources/state_history"
+    global_resources = Path(base_path) / "packages/haive-agents/resources/state_history"
     conversation_files = []
 
     if global_resources.exists():
@@ -101,8 +96,7 @@ def extract_key_content(file_path: str) -> dict:
                 "type": "json_data",
                 "file": str(file_path),
                 "content_keys": (
-                    list(data.keys()) if isinstance(
-                        data, dict) else "list_format"
+                    list(data.keys()) if isinstance(data, dict) else "list_format"
                 ),
                 "last_modified": datetime.fromtimestamp(
                     file_path.stat().st_mtime
@@ -136,8 +130,7 @@ def extract_key_content(file_path: str) -> dict:
     return {"type": "unknown", "file": str(file_path)}
 
 
-def create_conversation_summary(
-    conv_type: str, files: list[str], base_path: str):
+def create_conversation_summary(conv_type: str, files: list[str], base_path: str):
     """Create a summary file for each conversation type."""
     conv_dir = (
         Path(base_path)
@@ -192,10 +185,8 @@ This file provides easy access to all outputs from {conv_type} conversation agen
                 summary += content["preview"][:200] + "...\n```\n"
 
         elif content["type"] == "json_data":
-            summary += (
-                f"**Content:** {content.get('content_keys',
+            summary += f"**Content:** {content.get('content_keys',
      'Unknown structure')}\n"
-            )
 
         elif content["type"] == "error":
             summary += f"**Error:** {content.get('error', 'Unknown error')}\n"
@@ -270,11 +261,10 @@ def main():
     summary_files = []
     for conv_type, files in conversation_outputs.items():
         if files:  # Only create summary if files exist
-            summary_file = create_conversation_summary(
-                conv_type, files, base_path)
+            summary_file = create_conversation_summary(conv_type, files, base_path)
             summary_files.append(summary_file)
         else:
-            passe}")
+            pass
 
     # Create master index
     master_index = (
@@ -317,7 +307,6 @@ find packages/haive-agents/src/haive/agents/conversation -name "*.json" -o -name
 
     with open(master_index, "w", encoding="utf-8") as f:
         f.write(index_content)
-
 
     # Show what was created
     for summary_file in summary_files:

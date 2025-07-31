@@ -15,6 +15,9 @@ import json
 import logging
 from typing import Any
 
+from psycopg_pool import ConnectionPool
+from psycopg_pool.base import AsyncPool
+
 logger = logging.getLogger(__name__)
 
 
@@ -72,8 +75,6 @@ def ensure_pool_open(checkpointer: Any) -> Any | None:
     conn = checkpointer.conn
 
     try:
-        from psycopg_pool import ConnectionPool
-
         if isinstance(conn, ConnectionPool):
             # Check if opened using the _opened attribute
             is_open = getattr(conn, "_opened", False)
@@ -138,8 +139,6 @@ async def ensure_async_pool_open(checkpointer: Any) -> Any | None:
 
             # Import here to avoid dependency issues
             try:
-                from psycopg_pool.base import AsyncPool
-
                 # Check if it's an async pool
                 if isinstance(conn, AsyncPool):
                     # Check if the pool is already open
@@ -220,7 +219,6 @@ def register_thread(
                         )
 
                     # Convert metadata to JSON string first
-                    import json
 
                     metadata_json = json.dumps(metadata) if metadata else "{}"
 
@@ -251,8 +249,6 @@ async def register_thread_async(
         return False
 
     try:
-        import json
-
         metadata_json = json.dumps(metadata) if metadata else "{}"
 
         async with checkpointer.conn.connection() as conn, conn.cursor() as cursor:

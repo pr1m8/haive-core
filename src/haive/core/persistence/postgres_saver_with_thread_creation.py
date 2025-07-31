@@ -10,6 +10,7 @@ from typing import Any
 
 from langgraph.checkpoint.base import Checkpoint, CheckpointMetadata
 from langgraph.checkpoint.postgres import PostgresSaver
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from psycopg import Connection
 from psycopg_pool import ConnectionPool
 
@@ -34,7 +35,7 @@ class PostgresSaverWithThreadCreation(PostgresSaver):
         super().__init__(conn, **kwargs)
         self._thread_creation_cache = set()  # Cache to avoid duplicate thread creation
 
-    def _ensure_thread_exists(self, thread_id: str, user_id: str = None) -> None:
+    def _ensure_thread_exists(self, thread_id: str, user_id: str | None = None) -> None:
         """Ensure a thread exists in the threads table.
 
         Args:
@@ -160,7 +161,6 @@ class AsyncPostgresSaverWithThreadCreation:
             **kwargs: Additional arguments passed to parent class
         """
         # Import async version
-        from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
         self._base_saver = AsyncPostgresSaver(conn, **kwargs)
         self._thread_creation_cache = set()  # Cache to avoid duplicate thread creation
@@ -170,7 +170,9 @@ class AsyncPostgresSaverWithThreadCreation:
         """Delegate attribute access to the base saver."""
         return getattr(self._base_saver, name)
 
-    async def _ensure_thread_exists(self, thread_id: str, user_id: str = None) -> None:
+    async def _ensure_thread_exists(
+        self, thread_id: str, user_id: str | None = None
+    ) -> None:
         """Ensure a thread exists in the threads table (async version).
 
         Args:

@@ -147,9 +147,7 @@ class SourceRegistry:
         self._update_indexes(name, registration)
 
         logger.info(
-            f"Registered source '{name}' with {
-                len(
-                    registration.loaders)} loaders, "
+            f"Registered source '{name}' with {len(registration.loaders)} loaders, "
             f"{len(registration.file_extensions)} extensions"
         )
 

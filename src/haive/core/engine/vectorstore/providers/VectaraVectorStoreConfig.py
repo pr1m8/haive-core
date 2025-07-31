@@ -148,13 +148,12 @@ class VectaraVectorStoreConfig(BaseVectorStoreConfig, SecureConfigMixin):
             v = os.getenv("VECTARA_API_KEY")
             if not v:
                 raise ValueError(
-                    "api_key must be provided or "
-                    "VECTARA_API_KEY environment variable must be set"
+                    "api_key must be provided or VECTARA_API_KEY environment variable must be set"
                 )
         return v
 
     @classmethod
-    def validate_embedding(self):
+    def validate_embedding(cls):
         """Override to make embedding optional for Vectara.
 
         Vectara manages its own embeddings internally, so we don't require

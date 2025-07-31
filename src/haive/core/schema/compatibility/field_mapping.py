@@ -88,10 +88,10 @@ class FieldMapping:
     def _extract_path_value(self, data: dict[str, Any], path: str) -> Any:
         """Extract value from nested path."""
         # Handle array notation: messages[0].content
-        array_pattern = re.compile(r"(\w+)\[(\d+)\]")
+        array_pattern = re.compile(r"()\[(\d+)\]")
 
         # Handle filter notation: messages[?type=="human"].content
-        filter_pattern = re.compile(r'(\w+)\[\?(\w+)==["\']([^"\']+)["\']\]')
+        filter_pattern = re.compile(r'()\[\?()==["\']([^"\']+)["\']\]')
 
         current = data
         parts = path.split(".")

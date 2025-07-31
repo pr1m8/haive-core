@@ -117,10 +117,9 @@ class TestDevLogger:
 
     def test_nested_context(self):
         """Test nested context managers."""
-        with redirect_stdout(io.StringIO()) as f:
-            with self.logger.context("outer_context"):
-                with self.logger.context("inner_context"):
-                    self.logger.info("Nested message")
+        with redirect_stdout(io.StringIO()) as f, self.logger.context("outer_context"):
+            with self.logger.context("inner_context"):
+                self.logger.info("Nested message")
 
         output = f.getvalue()
         assert "outer_context" in output
@@ -128,10 +127,9 @@ class TestDevLogger:
 
     def test_context_with_exception(self):
         """Test context manager behavior with exceptions."""
-        with pytest.raises(ValueError):
-            with redirect_stdout(io.StringIO()) as f:
-                with self.logger.context("error_context"):
-                    raise ValueError("Test error in context")
+        with pytest.raises(ValueError), redirect_stdout(io.StringIO()) as f:
+            with self.logger.context("error_context"):
+                raise ValueError("Test error in context")
 
         output = f.getvalue()
         assert "error_context" in output
@@ -246,9 +244,8 @@ class TestDevLogger:
 
     def test_timer_context_manager(self):
         """Test timer context manager."""
-        with redirect_stdout(io.StringIO()) as f:
-            with self.logger.timer("context_timer"):
-                time.sleep(0.01)  # Small delay
+        with redirect_stdout(io.StringIO()) as f, self.logger.timer("context_timer"):
+            time.sleep(0.01)  # Small delay
 
         output = f.getvalue()
         assert "context_timer" in output
@@ -281,9 +278,8 @@ class TestDevLogger:
 
     def test_message_formatting_with_context(self):
         """Test message formatting with context stack."""
-        with self.logger.context("operation1"):
-            with self.logger.context("operation2"):
-                formatted = self.logger._format_message("test message", key="value")
+        with self.logger.context("operation1"), self.logger.context("operation2"):
+            formatted = self.logger._format_message("test message", key="value")
 
         assert "test message" in formatted
         assert "operation1" in formatted
@@ -349,9 +345,8 @@ class TestGlobalLogInstance:
 
     def test_global_log_context(self):
         """Test global log context manager."""
-        with redirect_stdout(io.StringIO()) as f:
-            with log.context("global_context"):
-                log.info("Context test")
+        with redirect_stdout(io.StringIO()) as f, log.context("global_context"):
+            log.info("Context test")
 
         output = f.getvalue()
         assert "global_context" in output

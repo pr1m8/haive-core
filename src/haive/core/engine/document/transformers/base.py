@@ -213,7 +213,7 @@ class DocTransformerEngine(InvokableEngine[list[Document], list[Document]]):
             import logging
 
             logging.exception(f"Error importing document transformer: {e}")
-            raise ValueError(f"Required package not installed for {transformer_type}")
+            raise TypeError(f"Required package not installed for {transformer_type}")
 
         except Exception as e:
             import logging
@@ -248,7 +248,8 @@ class DocTransformerEngine(InvokableEngine[list[Document], list[Document]]):
         else:
             raise ValueError(
                 f"Invalid input type: {
-                    type(input_data)}. Expected list of documents or dict with 'documents' key."
+                    type(input_data)
+                }. Expected list of documents or dict with 'documents' key."
             )
 
         # Handle empty input

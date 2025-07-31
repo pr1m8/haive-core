@@ -244,7 +244,7 @@ class DocumentEngine(
                 return DocumentInput(**input_data)
             # Assume the dict itself is the source
             return DocumentInput(source=input_data)
-        raise ValueError(f"Invalid input type: {type(input_data)}")
+        raise TypeError(f"Invalid input type: {type(input_data)}")
 
     def _analyze_source(
         self, source: str | Path | dict[str, Any]
@@ -281,13 +281,9 @@ class DocumentEngine(
             elif hasattr(loader, "load_documents"):
                 documents = loader.load_documents()
             else:
-                raise ValueError(f"Loader {type(loader)} has no load method")
+                raise TypeError(f"Loader {type(loader)} has no load method")
 
-            logger.info(
-                f"Loaded {
-                    len(documents)} documents from {
-                    doc_input.source}"
-            )
+            logger.info(f"Loaded {len(documents)} documents from {doc_input.source}")
             return documents
 
         except Exception as e:
@@ -466,7 +462,7 @@ class DocumentEngine(
         # Normalize whitespace
         import re
 
-        content = re.sub(r"\s+", " ", content)
+        content = re.sub(r" ", " ", content)
         content = re.sub(r"\n\s*\n", "\n\n", content)
 
         return content

@@ -100,8 +100,7 @@ class FieldValidator(Validator):
                 if not validator(value):
                     error_msg = self.error_messages.get(
                         str(validator),
-                        f"Validation failed for {
-                            self.field_name}",
+                        f"Validation failed for {self.field_name}",
                     )
                     result.add_error(
                         ValidationError(

@@ -12,11 +12,11 @@ import asyncio
 from typing import Any
 
 import pytest
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.common.mixins.recompile_mixin import RecompileMixin
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.models.llm.base import AzureLLMConfig
@@ -60,8 +60,7 @@ class TestMetaAgentStateWithSimpleV2:
         agent = SimpleAgentV2(
             name="analyzer_v2",
             engine=AugLLMConfig(
-                llm_config=AzureLLMConfig(
-                    model="gpt-4o-mini", temperature=0.7),
+                llm_config=AzureLLMConfig(model="gpt-4o-mini", temperature=0.7),
                 system_message="You are a helpful analysis agent.",
             ),
             tools=[calculator],  # Start with one tool
@@ -78,8 +77,7 @@ class TestMetaAgentStateWithSimpleV2:
             # Mix in recompilation capability for testing
             class RecompilableSimpleAgentV2(SimpleAgentV2, RecompileMixin):
 
-                def add_tool_with_recompile(
-                        self, tool, route="langchain_tool"):
+                def add_tool_with_recompile(self, tool, route="langchain_tool"):
                     """Add tool and mark for recompilation."""
                     # Manually add tool - simplified approach without using
                     # _get_tool_name
@@ -115,8 +113,7 @@ class TestMetaAgentStateWithSimpleV2:
             agent=simple_agent_v2,
             agent_input={
                 "messages": [
-                    HumanMessage(
-                        content="Analyze the number 42 and its significance")
+                    HumanMessage(content="Analyze the number 42 and its significance")
                 ]
             },
             meta_context={
@@ -231,8 +228,7 @@ class TestMetaAgentStateWithSimpleV2:
 
         # Should be marked for recompilation
         assert agent.needs_recompile
-        assert any(
-            "Tool added:" in reason for reason in agent.recompile_reasons)
+        assert any("Tool added:" in reason for reason in agent.recompile_reasons)
 
         # Trigger recompilation
         if agent.auto_recompile:
@@ -248,8 +244,7 @@ class TestMetaAgentStateWithSimpleV2:
         # The tool should be added (allowing for flexibility in counting)
         assert len(final_tools) >= len(initial_tools)
 
-    def test_state_persistence_through_recompilation(
-            self, meta_state_with_agent):
+    def test_state_persistence_through_recompilation(self, meta_state_with_agent):
         """Test that state persists through agent recompilation."""
         # Execute once to establish state
         meta_state_with_agent.execute_agent()
@@ -274,8 +269,7 @@ class TestMetaAgentStateWithSimpleV2:
         meta_state_with_agent.execute_agent(input_data=new_input)
 
         # Verify state persistence
-        assert len(
-            meta_state_with_agent.execution_history) == initial_history_count + 1
+        assert len(meta_state_with_agent.execution_history) == initial_history_count + 1
         assert meta_state_with_agent.meta_context["execution_count"] == 2
 
         # Both executions should be successful
@@ -326,7 +320,10 @@ class TestMetaAgentStateWithSimpleV2:
                 "messages": [
                     HumanMessage(
                         content=f"Test execution {
-                            i + 1}")]}
+                            i + 1}"
+                    )
+                ]
+            }
             try:
                 meta_state_with_agent.execute_agent(input_data=input_data)
             except BaseException:

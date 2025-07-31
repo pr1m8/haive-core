@@ -519,10 +519,9 @@ def main():
     if tests_passed >= 5:
         display_business_system_summary()
         return True
-    print("⚠️ BUSINESS & CRM SOURCES: NEEDS IMPROVEMENT")
     return False
 
 
 if __name__ == "__main__":
     success = main()
-    exit(0 if success else 1)
+    sys.exit(0 if success else 1)

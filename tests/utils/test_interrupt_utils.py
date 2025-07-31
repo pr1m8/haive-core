@@ -14,11 +14,9 @@ import pytest
 
 from haive.core.utils.interrupt_utils import (
     is_interruptible,
-)
-from haive.core.utils.interrupt_utils import pause_for_human as real_pause_for_human
-from haive.core.utils.interrupt_utils import (
     uses_pause,
 )
+from haive.core.utils.interrupt_utils import pause_for_human as real_pause_for_human
 
 # === AST-compatible dummy function ===
 

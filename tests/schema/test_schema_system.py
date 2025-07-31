@@ -60,8 +60,7 @@ def display_schema(schema, title="Schema"):
 
         # Get shared field info if available
         shared_info = ""
-        if issubclass(schema, StateSchema) and hasattr(
-                schema, "__shared_fields__"):
+        if issubclass(schema, StateSchema) and hasattr(schema, "__shared_fields__"):
             shared_info = "\n\nShared Fields:\n"
             for field in schema.__shared_fields__:
                 shared_info += f"  - {field}\n"
@@ -405,10 +404,7 @@ def test_schema_composer_create_model():
 
     # Test with real messages
     logger.info("Testing with real messages")
-    test_messages = [
-        HumanMessage(
-            content="Hello"), AIMessage(
-            content="Hi there")]
+    test_messages = [HumanMessage(content="Hello"), AIMessage(content="Hi there")]
     instance1.messages = test_messages
 
     # Convert to dict and back
@@ -552,10 +548,7 @@ def test_combined_workflows():
 
     # Combine schemas
     logger.info("Combining schemas")
-    combined = StateSchema.combine(
-        InputSchema,
-        OutputSchema,
-        name="CombinedWorkflow")
+    combined = StateSchema.combine(InputSchema, OutputSchema, name="CombinedWorkflow")
 
     # Display combined schema
     display_schema(combined, "Combined Workflow Schema")
@@ -574,19 +567,15 @@ def test_combined_workflows():
 
     # Verify combined fields
     assert hasattr(state, "query"), "Query field missing from combined schema"
-    assert hasattr(
-        state, "filters"), "Filters field missing from combined schema"
-    assert hasattr(
-        state, "results"), "Results field missing from combined schema"
-    assert hasattr(
-        state, "metadata"), "Metadata field missing from combined schema"
+    assert hasattr(state, "filters"), "Filters field missing from combined schema"
+    assert hasattr(state, "results"), "Results field missing from combined schema"
+    assert hasattr(state, "metadata"), "Metadata field missing from combined schema"
 
     # Verify data
     assert (
         state.query == "test query"
     ), f"Expected query to be 'test query', got '{state.query}'"
-    assert len(
-        state.results) == 1, f"Expected 1 result, got {len(state.results)}"
+    assert len(state.results) == 1, f"Expected 1 result, got {len(state.results)}"
     assert (
         state.results[0]["id"] == 1
     ), f"Expected result ID to be 1, got {state.results[0]['id']}"
@@ -647,11 +636,7 @@ def test_complex_schema_with_multiple_reducers():
 
     # Create instances
     logger.info("Creating test instances")
-    state1 = complex_schema(
-        token_count=10,
-        trace_log=["start"],
-        stats={
-            "queries": 1})
+    state1 = complex_schema(token_count=10, trace_log=["start"], stats={"queries": 1})
 
     state2 = complex_schema(
         token_count=25, trace_log=["processing", "complete"], stats={"tokens": 100}
@@ -797,8 +782,7 @@ def test_schema_with_message_reducer():
     # Create message-focused schema
     logger.info("Creating message-focused schema")
     schema_cls = SchemaComposer.create_message_state(
-        additional_fields={"metadata": (
-            dict[str, Any], {}), "query": (str, "")},
+        additional_fields={"metadata": (dict[str, Any], {}), "query": (str, "")},
         name="MessageState",
     )
 
@@ -834,8 +818,7 @@ def test_schema_with_message_reducer():
     display_schema(state, "State 1 (After Reducer)")
 
     # Verify message combining
-    assert len(
-        state.messages) == 2, f"Expected 2 messages, got {len(state.messages)}"
+    assert len(state.messages) == 2, f"Expected 2 messages, got {len(state.messages)}"
     assert (
         state.messages[0].content == "What is AI?"
     ), f"Expected first message to be 'What is AI?', got '{state.messages[0].content}'"
@@ -908,8 +891,7 @@ def test_node_function_creation():
 
     # Create node function with validation
     logger.info("Creating node function with validation")
-    node_func = manager.create_node_function(
-        process_query, command_goto="next_node")
+    node_func = manager.create_node_function(process_query, command_goto="next_node")
 
     # Test the node function
     logger.info("Testing node function")
@@ -1015,14 +997,15 @@ def test_schema_manager_field_operations():
     instance = schema_cls(text="Hello")
 
     # Test computed property
-    assert hasattr(
-        instance, "text_length"), "Missing computed property 'text_length'"
+    assert hasattr(instance, "text_length"), "Missing computed property 'text_length'"
     assert (
         instance.text_length == 5
     ), f"Expected text_length to be 5, got {instance.text_length}"
 
     # Test default value modification
-    assert instance.count == 10, f"Expected count to be 10, got {
+    assert (
+        instance.count == 10
+    ), f"Expected count to be 10, got {
         instance.count}"
 
     logger.info("✅ Schema manager field operations test passed")
@@ -1125,7 +1108,8 @@ def test_command_and_send_helpers():
                 f"Command(update={
                     command.update}, goto={
                     command.goto})",
-                "python"),
+                "python",
+            ),
             title="[bold cyan]Created Command[/bold cyan]",
             border_style="cyan",
         )
@@ -1207,7 +1191,8 @@ def test_various_reducer_types():
     logger.info(f"Reducer functions: {schema_cls.__reducer_fields__}")
     logger.info(
         f"Serializable reducers: {
-            schema_cls.__serializable_reducers__}")
+            schema_cls.__serializable_reducers__}"
+    )
 
     # Test the reducers
     logger.info("Testing reducers")

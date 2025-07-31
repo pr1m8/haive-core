@@ -205,8 +205,7 @@ class EnhancedSourceRegistry:
             self._recursive_loaders.add(name)
 
         logger.info(
-            f"Registered source '{name}' with {
-                len(processed_loaders)} loaders, "
+            f"Registered source '{name}' with {len(processed_loaders)} loaders, "
             f"{len(file_extensions or [])} extensions"
         )
 
@@ -404,7 +403,6 @@ def register_source(
     """Enhanced decorator for registering source types."""
 
     def decorator(source_class: type[TSource]) -> type[TSource]:
-
         # Create capabilities
         source_capabilities = SourceCapabilities(
             is_bulk_loader=is_bulk_loader,

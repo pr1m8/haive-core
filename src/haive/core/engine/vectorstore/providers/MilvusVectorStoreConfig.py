@@ -202,8 +202,7 @@ class MilvusVectorStoreConfig(BaseVectorStoreConfig):
                 from langchain_community.vectorstores import Milvus
             except ImportError:
                 raise ImportError(
-                    "Milvus requires pymilvus package. "
-                    "Install with: pip install pymilvus"
+                    "Milvus requires pymilvus package. Install with: pip install pymilvus"
                 )
 
         # Validate embedding

@@ -218,10 +218,7 @@ def create_tool_from_component(
             component.tool_instance = tool
             return tool
         except Exception as e:
-            logger.exception(
-                f"Failed to create tool from {
-                    component.name}: {e}"
-            )
+            logger.exception(f"Failed to create tool from {component.name}: {e}")
 
     return None
 
@@ -321,8 +318,7 @@ def generate_markdown_report(
         f.write(f"- **Components with Tools**: {stats['with_tools']}\n")
         f.write(f"- **Components with Engine Configs**: {stats['with_engines']}\n")
         f.write(
-            f"- **Components with Environment Variables**: {
-                stats['with_env_vars']}\n\n"
+            f"- **Components with Environment Variables**: {stats['with_env_vars']}\n\n"
         )
 
         # By type

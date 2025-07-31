@@ -28,8 +28,7 @@ class SimpleState(StateSchema):
 
     query: str = Field(default="")
     response: str = Field(default="")
-    messages: Annotated[list[BaseMessage],
-                        add_messages] = Field(default_factory=list)
+    messages: Annotated[list[BaseMessage], add_messages] = Field(default_factory=list)
 
 
 class ToolsState(SimpleState):
@@ -45,8 +44,7 @@ class PlanState(StateSchema):
     task: str = Field(default="")
     plan: dict[str, Any] | None = Field(default=None)
     validated: bool = Field(default=False)
-    messages: Annotated[list[BaseMessage],
-                        add_messages] = Field(default_factory=list)
+    messages: Annotated[list[BaseMessage], add_messages] = Field(default_factory=list)
 
 
 # Define the Plan model for tools and validation
@@ -64,16 +62,20 @@ def test_basic_graph():
 
     # Add nodes
     graph.add_node(
-        "process", lambda state: {
+        "process",
+        lambda state: {
             "response": f"Processed: {
                 state.get(
-                    'query', '')}"}
+                    'query', '')}"
+        },
     )
     graph.add_node(
-        "format", lambda state: {
+        "format",
+        lambda state: {
             "response": f"Formatted: {
                 state.get(
-                    'response', '')}"}
+                    'response', '')}"
+        },
     )
 
     # Add edges
@@ -199,10 +201,7 @@ def test_subgraph():
     """Test integrating a subgraph into a larger graph."""
     # Create subgraph
     subgraph = BaseGraph(name="Processing Subgraph")
-    subgraph.add_node(
-        "extract", lambda state: {
-            "data": state.get(
-                "input", "")})
+    subgraph.add_node("extract", lambda state: {"data": state.get("input", "")})
     subgraph.add_node(
         "transform", lambda state: {"data": state.get("data", "").upper()}
     )
@@ -212,16 +211,15 @@ def test_subgraph():
 
     # Create main graph
     main_graph = BaseGraph(name="Main Graph")
-    main_graph.add_node(
-        "input", lambda state: {
-            "input": state.get(
-                "query", "")})
+    main_graph.add_node("input", lambda state: {"input": state.get("query", "")})
     main_graph.add_node("processing", subgraph)
     main_graph.add_node(
-        "output", lambda state: {
+        "output",
+        lambda state: {
             "response": f"Processed: {
                 state.get(
-                    'data', '')}"}
+                    'data', '')}"
+        },
     )
 
     # Connect nodes

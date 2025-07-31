@@ -366,8 +366,7 @@ class GitHubDiscussionsLoader(BaseLoader):
 
                     content = f"# {discussion['title']}\n\n"
                     content += f"**Author:** {discussion['author']['login']}\n"
-                    content += f"**Category:** {
-                        discussion['category']['name']}\n"
+                    content += f"**Category:** {discussion['category']['name']}\n"
                     content += f"**Created:** {discussion['createdAt']}\n"
                     content += f"**Answered:** {discussion['isAnswered']}\n\n"
                     content += discussion["body"]
@@ -377,9 +376,7 @@ class GitHubDiscussionsLoader(BaseLoader):
                     ):
                         content += "\n\n## Comments\n\n"
                         for comment in discussion["comments"]["nodes"]:
-                            content += f"**{
-                                comment['author']['login']}** ({
-                                comment['createdAt']}):\n"
+                            content += f"**{comment['author']['login']}** ({comment['createdAt']}):\n"
                             content += f"{comment['body']}\n\n"
 
                     metadata = {
@@ -464,9 +461,7 @@ class GitHubGistsLoader(BaseLoader):
         for filename, file_info in gist.get("files", {}).items():
             content = f"# Gist: {gist['description'] or 'Untitled'}\n"
             content += f"**File:** {filename}\n"
-            content += f"**Language:** {
-                file_info.get(
-                    'language', 'Unknown')}\n"
+            content += f"**Language:** {file_info.get('language', 'Unknown')}\n"
             content += f"**Size:** {file_info.get('size', 0)} bytes\n\n"
             content += "```" + (file_info.get("language", "").lower() or "") + "\n"
             content += file_info.get("content", "")
@@ -543,8 +538,7 @@ class GitHubReleasesLoader(BaseLoader):
                     if not self.include_prereleases and release.get("prerelease"):
                         continue
 
-                    content = f"# Release: {
-                        release['name'] or release['tag_name']}\n"
+                    content = f"# Release: {release['name'] or release['tag_name']}\n"
                     content += f"**Tag:** {release['tag_name']}\n"
                     content += f"**Published:** {release['published_at']}\n"
                     content += f"**Author:** {release['author']['login']}\n"
@@ -560,10 +554,8 @@ class GitHubReleasesLoader(BaseLoader):
                             content += (
                                 f"- **{asset['name']}** ({asset['size']} bytes)\n"
                             )
-                            content += f"  - Downloads: {
-                                asset['download_count']}\n"
-                            content += f"  - URL: {
-                                asset['browser_download_url']}\n\n"
+                            content += f"  - Downloads: {asset['download_count']}\n"
+                            content += f"  - URL: {asset['browser_download_url']}\n\n"
 
                     metadata = {
                         "source": release["html_url"],
@@ -635,10 +627,9 @@ class GitHubActionsLoader(BaseLoader):
                         continue
 
                     # Get runs for this workflow
-                    runs_url = f"https://api.github.com/repos/{
-                        self.owner}/{
-                        self.repo}/actions/workflows/{
-                        workflow['id']}/runs"
+                    runs_url = f"https://api.github.com/repos/{self.owner}/{
+                        self.repo
+                    }/actions/workflows/{workflow['id']}/runs"
                     params = {"per_page": min(self.max_runs, 100)}
                     if self.status:
                         params["status"] = self.status
@@ -657,8 +648,7 @@ class GitHubActionsLoader(BaseLoader):
                             content += f"**Conclusion:** {run['conclusion']}\n"
                             content += f"**Branch:** {run['head_branch']}\n"
                             content += f"**Commit:** {run['head_sha'][:8]}\n"
-                            content += f"**Started:** {
-                                run['run_started_at']}\n"
+                            content += f"**Started:** {run['run_started_at']}\n"
                             content += f"**Event:** {run['event']}\n\n"
 
                             metadata = {

@@ -40,11 +40,7 @@ class GraphPattern(BaseGraph, ABC):
         """
         # Use class name as default
         pattern_name = name or self.__class__.__name__.lower().replace("pattern", "")
-        pattern_desc = (
-            description
-            or f"{
-            self.__class__.__name__} graph pattern"
-        )
+        pattern_desc = description or f"{self.__class__.__name__} graph pattern"
 
         # Initialize the base graph
         super().__init__(name=pattern_name, description=pattern_desc, **kwargs)

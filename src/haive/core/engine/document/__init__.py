@@ -109,7 +109,7 @@ def load_documents(
     chunking_strategy: ChunkingStrategy = ChunkingStrategy.RECURSIVE,
     chunk_size: int = 1000,
     chunk_overlap: int = 200,
-    **kwargs
+    **kwargs,
 ) -> DocumentOutput:
     """Quick function to load and process documents.
 
@@ -127,7 +127,7 @@ def load_documents(
         chunking_strategy=chunking_strategy,
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
-        **kwargs
+        **kwargs,
     )
 
     return engine.invoke(source)
@@ -165,58 +165,34 @@ except ImportError:
 
 # Export all public components
 __all__ = [
-    # Core engine
-    "DocumentEngine",
-    "create_document_engine",
-    "load_documents",
-    # Factory functions
-    "create_file_document_engine",
-    "create_web_document_engine",
-    "create_directory_document_engine",
-    # Configuration
-    "DocumentEngineConfig",
-    "DocumentInput",
-    "DocumentOutput",
-    "ProcessedDocument",
-    "DocumentChunk",
-    # Enums
-    "DocumentFormat",
-    "DocumentSourceType",
-    "LoaderPreference",
-    "ProcessingStrategy",
-    "ChunkingStrategy",
-    # Path analysis
-    "analyze_path_comprehensive",
-    "PathAnalysisResult",
-    "PathType",
-    "FileCategory",
-    "DatabaseType",
-    "CloudProvider",
-    # Loaders
-    "BaseDocumentLoader",
-    "SimpleDocumentLoader",
-    "TextDocumentLoader",
-    # Registry
-    "DocumentLoaderRegistry",
-    "get_default_registry",
-    "register_loader",
-    "get_loader",
-    "create_loader",
-    # Agents
-    "DocumentAgent",
-    "FileDocumentAgent",
-    "WebDocumentAgent",
-    "DirectoryDocumentAgent",
-    # Processors
-    "DocumentProcessor",
-    "ChunkingProcessor",
-    "ContentNormalizer",
-    "FormatDetector",
-    "MetadataExtractor",
     # Factory and enhanced loaders
     "AutoLoaderFactory",
-    "create_document_loader",
-    "analyze_source",
+    # Loaders
+    "BaseDocumentLoader",
+    "ChunkingProcessor",
+    "ChunkingStrategy",
+    "CloudProvider",
+    "ContentNormalizer",
+    "CredentialManager",
+    "DatabaseType",
+    "DirectoryDocumentAgent",
+    # Agents
+    "DocumentAgent",
+    "DocumentChunk",
+    # Core engine
+    "DocumentEngine",
+    # Configuration
+    "DocumentEngineConfig",
+    # Enums
+    "DocumentFormat",
+    "DocumentInput",
+    # Registry
+    "DocumentLoaderRegistry",
+    "DocumentOutput",
+    # Processors
+    "DocumentProcessor",
+    "DocumentSourceType",
+    "EnhancedSource",
     # Universal loader system - commented out temporarily
     # "UniversalDocumentLoader",
     # "SmartSourceRegistry",
@@ -224,16 +200,40 @@ __all__ = [
     # "analyze_document_source",
     # Enhanced source system
     "EnhancedSourceType",
-    "CredentialManager",
-    "EnhancedSource",
-    "source_registry",
+    "FileCategory",
+    "FileDocumentAgent",
+    "FormatDetector",
+    "LoaderCapability",
+    "LoaderPreference",
+    "LoaderPriority",
     # Strategy system
     "LoaderStrategy",
-    "LoaderCapability",
-    "LoaderPriority",
-    "strategy_registry",
+    "MetadataExtractor",
     # Specific loader implementations - only what exists
     # Database sources
     "MongoDBSource",
+    "PathAnalysisResult",
+    "PathType",
     "PostgreSQLSource",
+    "ProcessedDocument",
+    "ProcessingStrategy",
+    "SimpleDocumentLoader",
+    "TextDocumentLoader",
+    "WebDocumentAgent",
+    # Path analysis
+    "analyze_path_comprehensive",
+    "analyze_source",
+    "create_directory_document_engine",
+    "create_document_engine",
+    "create_document_loader",
+    # Factory functions
+    "create_file_document_engine",
+    "create_loader",
+    "create_web_document_engine",
+    "get_default_registry",
+    "get_loader",
+    "load_documents",
+    "register_loader",
+    "source_registry",
+    "strategy_registry",
 ]

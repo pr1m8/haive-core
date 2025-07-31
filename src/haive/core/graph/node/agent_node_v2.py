@@ -179,10 +179,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
                 metadata = self._track_end(metadata, result)
                 state_update[self.metadata_field] = metadata
 
-            logger.info(
-                f"✅ Agent completed with {
-                    len(state_update)} field updates"
-            )
+            logger.info(f"✅ Agent completed with {len(state_update)} field updates")
 
             return Command(update=state_update, goto=self._get_goto_node())
 
@@ -205,8 +202,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
         # If agent has specific schema, extract those fields
         if self.agent_state_schema:
             logger.debug(
-                f"Using agent's state schema: {
-                    self.agent_state_schema.__name__}"
+                f"Using agent's state schema: {self.agent_state_schema.__name__}"
             )
 
             # Extract fields that exist in both state and agent schema

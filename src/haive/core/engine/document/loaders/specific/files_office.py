@@ -71,7 +71,8 @@ class ExcelSource(LocalFileSource):
             from langchain_community.document_loaders import UnstructuredExcelLoader
 
             return UnstructuredExcelLoader(
-                file_path=self.file_path, mode="elements"  # Extract structured elements
+                file_path=self.file_path,
+                mode="elements",  # Extract structured elements
             )
 
         except ImportError as e:

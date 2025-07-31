@@ -547,10 +547,7 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
         def encoder(obj) -> Any:
             if isinstance(obj, datetime):
                 return obj.isoformat()
-            raise TypeError(
-                f"Object of type {
-                    type(obj)} is not JSON serializable"
-            )
+            raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
         return json.dumps(config, default=encoder)
 

@@ -15,11 +15,20 @@ concurrent access capabilities.
 """
 
 import logging
+import urllib.parse
+from contextlib import asynccontextmanager
 from typing import Any
 
+from psycopg_pool import AsyncConnectionPool, ConnectionPool
 from pydantic import Field, SecretStr
 
 from haive.core.persistence.base import CheckpointerConfig
+from haive.core.persistence.postgres_saver_override import configure_postgres_json
+from haive.core.persistence.postgres_saver_with_thread_creation import (
+    create_async_postgres_saver_with_thread_creation,
+    create_postgres_saver_with_thread_creation,
+)
+from haive.core.persistence.serializers import create_encrypted_serializer_for_postgres
 from haive.core.persistence.types import CheckpointerMode, CheckpointerType
 
 logger = logging.getLogger(__name__)
@@ -172,7 +181,6 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
                 db_user="app_user",
                 db_pass="secret_password",
                 ssl_mode="require"
-            )
             uri = config.get_connection_uri()
             # uri = "postgresql://app_user:secret_password@db.example.com:5432/haive?sslmode=require"
             ```
@@ -182,7 +190,6 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
             return self.connection_string
 
         # Generate from individual parameters
-        import urllib.parse
 
         encoded_pass = urllib.parse.quote_plus(self.db_pass.get_secret_value())
         db_uri = f"postgresql://{self.db_user}:{encoded_pass}@{self.db_host}:{self.db_port}/{self.db_name}"
@@ -212,7 +219,6 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
                 auto_commit=True,
                 prepare_threshold=5,
                 connection_kwargs={"application_name": "haive_app"}
-            )
             kwargs = config.get_connection_kwargs()
             # kwargs = {
             #    "autocommit": True,
@@ -253,7 +259,6 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
                 db_host="localhost",
                 db_port=5432,
                 storage_mode=CheckpointStorageMode.SHALLOW
-            )
             try:
                 # Creates a ShallowPostgresSaver instance
                 checkpointer = config.create_checkpointer()
@@ -272,12 +277,7 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
                     "Cannot use create_checkpointer for async mode, use create_async_checkpointer instead"
                 )
 
-            from psycopg_pool import ConnectionPool
-
             # Import our enhanced PostgresSaver with thread creation
-            from haive.core.persistence.postgres_saver_with_thread_creation import (
-                create_postgres_saver_with_thread_creation,
-            )
 
             # Create connection pool with forced parameters to avoid SSL issues
             connection_kwargs = self.get_connection_kwargs()
@@ -291,9 +291,6 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
             )
 
             # Configure function for JSON handling
-            from haive.core.persistence.postgres_saver_override import (
-                configure_postgres_json,
-            )
 
             pool = ConnectionPool(
                 conninfo=self.get_connection_uri(),
@@ -315,9 +312,6 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
                 raise
 
             # Import our production serializer factory
-            from haive.core.persistence.serializers import (
-                create_encrypted_serializer_for_postgres,
-            )
 
             # Create production-grade encrypted serializer for PostgreSQL
             production_serializer = create_encrypted_serializer_for_postgres(
@@ -392,12 +386,7 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
             # Force async mode
             self.mode = CheckpointerMode.ASYNC
 
-            from psycopg_pool import AsyncConnectionPool
-
             # Import our enhanced AsyncPostgresSaver with thread creation
-            from haive.core.persistence.postgres_saver_with_thread_creation import (
-                create_async_postgres_saver_with_thread_creation,
-            )
 
             # Create connection pool with forced parameters to avoid SSL issues
             connection_kwargs = self.get_connection_kwargs()
@@ -411,9 +400,6 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
             )
 
             # Configure function for JSON handling
-            from haive.core.persistence.postgres_saver_override import (
-                configure_postgres_json,
-            )
 
             pool = AsyncConnectionPool(
                 conninfo=self.get_connection_uri(),
@@ -437,9 +423,6 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
                 raise
 
             # Import our production serializer factory
-            from haive.core.persistence.serializers import (
-                create_encrypted_serializer_for_postgres,
-            )
 
             # Create production-grade encrypted serializer for PostgreSQL
             production_serializer = create_encrypted_serializer_for_postgres(
@@ -519,7 +502,6 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
             This is the recommended method for asynchronous usage in production
             environments, as it ensures proper resource cleanup even if errors occur.
         """
-        from contextlib import asynccontextmanager
 
         @asynccontextmanager
         async def async_checkpointer_context():

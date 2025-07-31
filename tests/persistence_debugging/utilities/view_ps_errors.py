@@ -96,7 +96,7 @@ def view_ps_errors():
                             pass
 
                     except Exception as e:
-                        passe}")
+                        pass
 
 
                 # Get stats on which agents have errors

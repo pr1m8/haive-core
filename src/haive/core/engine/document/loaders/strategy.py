@@ -121,10 +121,7 @@ class LoaderStrategy(BaseModel):
             return loader_cls(**options)
 
         except Exception as e:
-            logger.exception(
-                f"Failed to create loader {
-                    self.loader_class}: {e}"
-            )
+            logger.exception(f"Failed to create loader {self.loader_class}: {e}")
             return None
 
     def check_availability(self) -> bool:
@@ -140,8 +137,7 @@ class LoaderStrategy(BaseModel):
                     importlib.import_module(dep)
                 except ImportError:
                     logger.warning(
-                        f"Dependency {dep} not available for {
-                            self.strategy_name}"
+                        f"Dependency {dep} not available for {self.strategy_name}"
                     )
                     return False
 
@@ -1966,8 +1962,7 @@ def create_loader(
         strategy = strategy_registry.select_best_strategy(source, preferences)
         if not strategy:
             logger.error(
-                f"No suitable strategy found for source type {
-                    source.source_type}"
+                f"No suitable strategy found for source type {source.source_type}"
             )
             return None
 

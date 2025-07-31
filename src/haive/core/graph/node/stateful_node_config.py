@@ -102,10 +102,7 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
         if self.engine_type:
             engine = self._discover_engine_by_type(state, self.engine_type)
             if engine:
-                logger.info(
-                    f"Discovered engine by type: {
-                        self.engine_type.__name__}"
-                )
+                logger.info(f"Discovered engine by type: {self.engine_type.__name__}")
                 return engine
 
         # Strategy 3: From last AI message attribution
@@ -424,11 +421,7 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
                 engine = self.discover_engine(state)
                 if engine:
                     logger.info(
-                        f"Discovered engine: {
-                            getattr(
-                                engine,
-                                'name',
-                                type(engine).__name__)}"
+                        f"Discovered engine: {getattr(engine, 'name', type(engine).__name__)}"
                     )
 
             # Execute the actual node logic
@@ -523,8 +516,7 @@ class StatefulValidationNodeConfig(StatefulNodeConfig):
             if model_class:
                 model_instance = model_class(**args)
                 return ToolMessage(
-                    content=f"Successfully validated {tool_name}: {
-                        model_instance.model_dump()}",
+                    content=f"Successfully validated {tool_name}: {model_instance.model_dump()}",
                     tool_call_id=tool_id,
                     name=tool_name,
                 )

@@ -84,15 +84,15 @@ from haive.core.types.serializable_callable import SerializableCallable
 # from haive.core.types.tree_leaf import TreeLeaf  # TODO: Fix MRO issue
 
 __all__ = [
+    # Advanced Structures
+    "AdvancedRegistry",
     # Dynamic Type System
     "DynamicEnum",
     "DynamicLiteral",
-    # Serializable Components
-    "SerializableCallable",
-    # Advanced Structures
-    "AdvancedRegistry",
     # "TreeLeaf",  # TODO: Fix MRO issue
     # General Domain Types
     "FileTypes",
     "ProgrammingLanguages",
+    # Serializable Components
+    "SerializableCallable",
 ]

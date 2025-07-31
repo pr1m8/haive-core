@@ -208,8 +208,7 @@ class DocArrayVectorStoreConfig(BaseVectorStoreConfig):
                 )
         except ImportError:
             raise ImportError(
-                "DocArray requires docarray package. "
-                "Install with: pip install docarray"
+                "DocArray requires docarray package. Install with: pip install docarray"
             )
 
         # Validate embedding

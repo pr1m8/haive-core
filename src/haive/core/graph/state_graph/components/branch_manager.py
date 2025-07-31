@@ -70,10 +70,7 @@ class BranchManager(BaseGraphComponent):
         """Initialize the branch manager."""
         super().initialize()
         self._branch_counter = 0
-        logger.debug(
-            f"BranchManager initialized for graph '{
-                self.graph.name}'"
-        )
+        logger.debug(f"BranchManager initialized for graph '{self.graph.name}'")
 
     def cleanup(self) -> None:
         """Clean up branch manager resources."""
@@ -160,7 +157,8 @@ class BranchManager(BaseGraphComponent):
 
         logger.debug(
             f"Added conditional edges from '{source_node}' with {
-                len(destinations) if destinations else 0} destinations"
+                len(destinations) if destinations else 0
+            } destinations"
         )
 
         return self.graph
@@ -307,10 +305,7 @@ class BranchManager(BaseGraphComponent):
         # Update graph metadata
         self.graph.updated_at = self._get_current_time()
 
-        logger.debug(
-            f"Removed branch '{branch_id}' from graph '{
-                self.graph.name}'"
-        )
+        logger.debug(f"Removed branch '{branch_id}' from graph '{self.graph.name}'")
 
         return self.graph
 
@@ -369,10 +364,7 @@ class BranchManager(BaseGraphComponent):
         # Update graph metadata
         self.graph.updated_at = self._get_current_time()
 
-        logger.debug(
-            f"Updated branch '{branch_id}' in graph '{
-                self.graph.name}'"
-        )
+        logger.debug(f"Updated branch '{branch_id}' in graph '{self.graph.name}'")
 
         return self.graph
 

@@ -7,23 +7,21 @@ This test demonstrates:
 4. The state isolation and sharing mechanisms
 """
 
-import asyncio
-from typing import List
+from langchain_core.messages import HumanMessage
+from pydantic import BaseModel, Field
 
 from haive.agents.simple.agent_v3 import SimpleAgentV3
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.graph.node.agent_node_v3 import create_agent_node_v3
 from haive.core.schema.prebuilt.multi_agent_state import MultiAgentState
-from langchain_core.messages import HumanMessage
-from pydantic import BaseModel, Field
 
 
 # Define structured output models
 class ResearchFindings(BaseModel):
     """Research agent output."""
 
-    findings: List[str] = Field(description="Key findings from research")
-    sources: List[str] = Field(description="Sources consulted")
+    findings: list[str] = Field(description="Key findings from research")
+    sources: list[str] = Field(description="Sources consulted")
     confidence: float = Field(ge=0.0, le=1.0, description="Confidence score")
 
 
@@ -31,16 +29,13 @@ class AnalysisResult(BaseModel):
     """Analysis agent output."""
 
     summary: str = Field(description="Summary of analysis")
-    insights: List[str] = Field(description="Key insights discovered")
-    recommendations: List[str] = Field(description="Action recommendations")
+    insights: list[str] = Field(description="Key insights discovered")
+    recommendations: list[str] = Field(description="Action recommendations")
     risk_level: str = Field(description="Risk assessment: low/medium/high")
 
 
 def test_agent_node_v3_isolated():
     """Test AgentNodeV3 behavior in isolation."""
-    print("\n" + "=" * 80)
-    print("Testing AgentNodeV3 in Isolation")
-    print("=" * 80)
 
     # Create agents with different output patterns
     research_agent = SimpleAgentV3(
@@ -72,32 +67,26 @@ def test_agent_node_v3_isolated():
 
     # Initialize MultiAgentState
     state = MultiAgentState(
-        agents={"researcher": research_agent, "analyzer": analysis_agent, "summarizer": summary_agent}
+        agents={
+            "researcher": research_agent,
+            "analyzer": analysis_agent,
+            "summarizer": summary_agent,
+        }
     )
-    state.messages = [HumanMessage(content="Research AI safety and provide an analysis")]
-
-    print("\nInitial State:")
-    print(f"- Agents: {list(state.agents.keys())}")
-    print(f"- Messages: {len(state.messages)}")
-    print(f"- Agent States: {state.agent_states}")
+    state.messages = [
+        HumanMessage(content="Research AI safety and provide an analysis")
+    ]
 
     # Test 1: Research Agent with Structured Output
-    print("\n" + "-" * 60)
-    print("Test 1: Research Agent (Structured Output)")
-    print("-" * 60)
 
     research_node = create_agent_node_v3("researcher")
     result1 = research_node(state, {"debug": True})
 
-    print("\nResearch Node Result:")
-    print(f"- Update Keys: {list(result1.update.keys())}")
     for key, value in result1.update.items():
-        if key == "agent_states":
-            print(f"- {key}: {value.get('researcher', {})}")
-        elif isinstance(value, list):
-            print(f"- {key}: {type(value).__name__} with {len(value)} items")
+        if key == "agent_states" or isinstance(value, list):
+            pass
         else:
-            print(f"- {key}: {value}")
+            pass
 
     # Apply updates to state
     for key, value in result1.update.items():
@@ -105,29 +94,20 @@ def test_agent_node_v3_isolated():
             setattr(state, key, value)
 
     # Test 2: Analysis Agent Reading Research Output
-    print("\n" + "-" * 60)
-    print("Test 2: Analysis Agent (Reads Research Findings)")
-    print("-" * 60)
 
     # Show what fields are available in state now
-    print("\nFields available in state after research:")
     for field in ["findings", "sources", "confidence"]:
         if hasattr(state, field):
             value = getattr(state, field)
-            print(f"- {field}: {value}")
 
     analysis_node = create_agent_node_v3("analyzer")
     result2 = analysis_node(state, {"debug": True})
 
-    print("\nAnalysis Node Result:")
-    print(f"- Update Keys: {list(result2.update.keys())}")
     for key, value in result2.update.items():
-        if key == "agent_states":
-            print(f"- {key}: {value.get('analyzer', {})}")
-        elif isinstance(value, list):
-            print(f"- {key}: {type(value).__name__} with {len(value)} items")
+        if key == "agent_states" or isinstance(value, list):
+            pass
         else:
-            print(f"- {key}: {value}")
+            pass
 
     # Apply updates
     for key, value in result2.update.items():
@@ -135,55 +115,44 @@ def test_agent_node_v3_isolated():
             setattr(state, key, value)
 
     # Test 3: Message-based Agent
-    print("\n" + "-" * 60)
-    print("Test 3: Summary Agent (Message-based)")
-    print("-" * 60)
 
     summary_node = create_agent_node_v3("summarizer")
     result3 = summary_node(state, {"debug": True})
 
-    print("\nSummary Node Result:")
-    print(f"- Update Keys: {list(result3.update.keys())}")
     for key, value in result3.update.items():
-        if key == "agent_outputs":
-            print(f"- {key}: {value}")
-        elif key == "agent_states":
-            print(f"- {key}: {value.get('summarizer', {})}")
-        elif key == "messages" and isinstance(value, list):
-            print(f"- {key}: {len(value)} messages")
+        if key in {"agent_outputs", "agent_states"} or (
+            key == "messages" and isinstance(value, list)
+        ):
+            pass
 
     # Final State Summary
-    print("\n" + "=" * 60)
-    print("Final State Summary")
-    print("=" * 60)
 
-    print("\nDirect Field Updates (from structured agents):")
-    for field in ["findings", "sources", "confidence", "summary", "insights", "recommendations", "risk_level"]:
+    for field in [
+        "findings",
+        "sources",
+        "confidence",
+        "summary",
+        "insights",
+        "recommendations",
+        "risk_level",
+    ]:
         if hasattr(state, field):
             value = getattr(state, field)
             if isinstance(value, list):
-                print(f"- {field}: {len(value)} items")
+                pass
             else:
-                print(f"- {field}: {value}")
+                pass
 
-    print("\nAgent States:")
-    for agent_name, agent_state in state.agent_states.items():
-        print(f"- {agent_name}: {agent_state}")
+    for _agent_name, _agent_state in state.agent_states.items():
+        pass
 
-    print("\nAgent Outputs (message-based agents):")
     if hasattr(state, "agent_outputs"):
-        for agent_name, output in state.agent_outputs.items():
-            print(f"- {agent_name}: {output}")
-
-    print("\nExecution Order:")
-    print(f"- {state.agent_execution_order}")
+        for _agent_name, _output in state.agent_outputs.items():
+            pass
 
 
 def test_state_projection_details():
     """Test the state projection mechanism in detail."""
-    print("\n" + "=" * 80)
-    print("Testing State Projection Details")
-    print("=" * 80)
 
     # Create agent with specific state requirements
     agent = SimpleAgentV3(
@@ -215,34 +184,20 @@ def test_state_projection_details():
         project_state=True,
     )
 
-    print("\nState Projection Test:")
-    print("- Container has:", list(vars(state).keys())[:10], "...")
-    print("- Agent state has:", state.agent_states["test_agent"])
-
     # Manually test projection
     projected = node._project_state_for_agent(state, agent)
 
-    print("\nProjected state for agent:")
-    for key, value in projected.items():
+    for _key, value in projected.items():
         if isinstance(value, list):
-            print(f"- {key}: {type(value).__name__} with {len(value)} items")
+            pass
         else:
-            print(f"- {key}: {value}")
-
-    print("\nProjection includes:")
-    print("- Private agent fields:", "private_field" in projected)
-    print("- Shared messages:", "messages" in projected)
-    print("- Shared context:", "shared_context" in projected)
-    print("- Container-only fields:", "agents" in projected)  # Should be False
+            pass
 
 
 if __name__ == "__main__":
-    print("Running AgentNodeV3 Isolation Tests\n")
 
     # Run synchronous test
     test_agent_node_v3_isolated()
 
     # Run projection test
     test_state_projection_details()
-
-    print("\n✅ All tests completed!")

@@ -173,8 +173,7 @@ class MongoDBAtlasVectorStoreConfig(BaseVectorStoreConfig):
                 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
             except ImportError:
                 raise ImportError(
-                    "MongoDB Atlas requires pymongo package. "
-                    "Install with: pip install pymongo"
+                    "MongoDB Atlas requires pymongo package. Install with: pip install pymongo"
                 )
 
         # Validate embedding

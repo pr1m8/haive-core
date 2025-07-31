@@ -82,10 +82,7 @@ class BigQuerySource(DatabaseSource):
             # Build query if not provided
             if not self.query:
                 if self.table_id and self.dataset_id:
-                    self.query = f"SELECT * FROM `{
-                        self.project_id}.{
-                        self.dataset_id}.{
-                        self.table_id}`"
+                    self.query = f"SELECT * FROM `{self.project_id}.{self.dataset_id}.{self.table_id}`"
                 else:
                     raise ValueError("Either query or table_id must be provided")
 
@@ -301,10 +298,7 @@ class MySQLSource(DatabaseSource):
 
             # Build connection URL
             if username and password:
-                connection_url = f"mysql+pymysql://{username}:{password}@{
-                    self.host}:{
-                    self.port}/{
-                    self.database}"
+                connection_url = f"mysql+pymysql://{username}:{password}@{self.host}:{self.port}/{self.database}"
             else:
                 connection_url = (
                     f"mysql+pymysql://{self.host}:{self.port}/{self.database}"

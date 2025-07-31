@@ -29,9 +29,7 @@ def register_agent(config_class: type):
     def decorator(agent_class: type):
         AGENT_REGISTRY[config_class] = agent_class
         logger.debug(
-            f"Registered agent {
-                agent_class.__name__} for config {
-                config_class.__name__}"
+            f"Registered agent {agent_class.__name__} for config {config_class.__name__}"
         )
         return agent_class
 
@@ -130,9 +128,7 @@ def register_agents_from_module(module_path: str) -> int:
                         AGENT_REGISTRY[config_class] = obj
                         count += 1
                         logger.debug(
-                            f"Registered agent {
-                                obj.__name__} for config {
-                                config_class.__name__}"
+                            f"Registered agent {obj.__name__} for config {config_class.__name__}"
                         )
 
         return count

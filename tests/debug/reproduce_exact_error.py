@@ -25,7 +25,6 @@ def test_exact_reproduction():
     try:
         console.print("[bold blue]Step 1: Import modules[/bold blue]")
         from haive.agents.simple.agent_v2 import SimpleAgentV2
-
         from haive.core.engine.aug_llm import AugLLMConfig
 
         console.print("✅ Imports successful")

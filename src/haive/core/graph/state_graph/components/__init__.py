@@ -60,14 +60,14 @@ except ImportError:
     from haive.core.graph.state_graph.base_graph2 import Node
 
 __all__ = [
-    # Legacy components
-    "Node",
-    "Branch",
     # New modular components
     "BaseGraphComponent",
-    "ComponentRegistry",
-    "NodeManager",
-    "EdgeManager",
+    "Branch",
     "BranchManager",
+    "ComponentRegistry",
+    "EdgeManager",
     "ModularBaseGraph",
+    # Legacy components
+    "Node",
+    "NodeManager",
 ]

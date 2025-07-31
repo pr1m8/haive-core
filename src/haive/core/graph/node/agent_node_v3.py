@@ -459,10 +459,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             if self.track_recompilation:
                 self._check_recompilation(state, agent)
 
-            logger.info(
-                f"✅ Agent completed with {
-                    len(state_update)} field updates"
-            )
+            logger.info(f"✅ Agent completed with {len(state_update)} field updates")
 
             if debug_mode:
                 self._display_debug_info(state, "AFTER_EXECUTION", state_update)
@@ -1056,9 +1053,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
                     value.get(self.agent_name, {}) if isinstance(value, dict) else {}
                 )
                 update_branch = branch.add(
-                    f"📊 {key}: Agent '{
-                        self.agent_name}' ({
-                        len(agent_updates)} fields)"
+                    f"📊 {key}: Agent '{self.agent_name}' ({len(agent_updates)} fields)"
                 )
                 for field, field_value in agent_updates.items():
                     if isinstance(field_value, list | tuple):
@@ -1075,9 +1070,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
                     value.get(self.agent_name, {}) if isinstance(value, dict) else {}
                 )
                 output_branch = branch.add(
-                    f"📤 {key}: Agent '{
-                        self.agent_name}' ({
-                        len(agent_output)} fields)"
+                    f"📤 {key}: Agent '{self.agent_name}' ({len(agent_output)} fields)"
                 )
                 for field, field_value in agent_output.items():
                     value_str = (
@@ -1132,8 +1125,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
     def _display_agent_output(self, result: Any, state_update: dict[str, Any]) -> None:
         """Display agent output and state updates with rich visualization."""
         output_tree = Tree(
-            f"📤 Agent '{
-                self.agent_name}' Output",
+            f"📤 Agent '{self.agent_name}' Output",
             style="bold green",
         )
 
@@ -1288,7 +1280,6 @@ def create_agent_node_v3(
     """
     # Ensure model is rebuilt if needed
     with contextlib.suppress(ImportError):
-
         AgentNodeV3Config.model_rebuild()
 
     if not name:

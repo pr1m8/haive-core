@@ -7,8 +7,7 @@ import sys
 from datetime import datetime
 
 # Disable heavy import logging to speed up tests
-logging.getLogger("haive.core.engine.document.loaders").setLevel(
-    logging.WARNING)
+logging.getLogger("haive.core.engine.document.loaders").setLevel(logging.WARNING)
 logging.getLogger("haive.core.engine.document.loaders.sources").setLevel(
     logging.WARNING
 )
@@ -72,7 +71,6 @@ async def test_async_memory_operations():
             MemoryStoreConfig,
             MemoryStoreManager,
         )
-
         from haive.core.persistence.store.types import StoreType
         from haive.core.tools.store_manager import StoreManager
 
@@ -81,9 +79,7 @@ async def test_async_memory_operations():
             store_config={"type": StoreType.MEMORY}, default_namespace=("test", "async")
         )
 
-        config = MemoryStoreConfig(
-            store_manager=store_manager,
-            auto_classify=False)
+        config = MemoryStoreConfig(store_manager=store_manager, auto_classify=False)
 
         memory_store = MemoryStoreManager(config)
 
@@ -189,7 +185,6 @@ def test_store_integration():
             MemoryStoreConfig,
             MemoryStoreManager,
         )
-
         from haive.core.persistence.store.types import StoreType
         from haive.core.tools.store_manager import StoreManager
 
@@ -230,9 +225,7 @@ def test_store_integration():
         print_status(f"Integration: Stored {len(stored_ids)} memories")
 
         # Test search integration
-        results = asyncio.run(
-            memory_store.retrieve_memories(
-                "password", limit=5))
+        results = asyncio.run(memory_store.retrieve_memories("password", limit=5))
         print_status(
             f"Integration: Search found {
                 len(results)} password-related memories"
@@ -253,9 +246,7 @@ def main():
     results = []
 
     try:
-        results.append(
-            ("Core Memory Components",
-             test_core_memory_components()))
+        results.append(("Core Memory Components", test_core_memory_components()))
         results.append(
             ("Async Memory Operations", asyncio.run(test_async_memory_operations()))
         )

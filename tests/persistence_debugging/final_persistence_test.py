@@ -39,8 +39,9 @@ def test_persistence_fixes():
 
     # Test 1: Simple agent
     try:
-        from haive.agents.simple.agent import SimpleAgent
         from langchain_core.messages import HumanMessage
+
+        from haive.agents.simple.agent import SimpleAgent
 
         agent = SimpleAgent(
             name="FinalTestSimple",
@@ -61,7 +62,6 @@ def test_persistence_fixes():
         from haive.agents.conversation.collaberative.agent import (
             CollaborativeConversation,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
 
         participants = {

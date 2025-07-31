@@ -190,8 +190,7 @@ class IntersectionMergeStrategy(MergeStrategy):
         for _schema_name, field_info in field_infos[1:]:
             if not analyzer.is_subtype(field_info.type_info.type_hint, base_type):
                 context.add_warning(
-                    f"Type incompatibility in intersection for '{
-                        field_info.name}'"
+                    f"Type incompatibility in intersection for '{field_info.name}'"
                 )
                 # Use most general type
                 base_type = Any

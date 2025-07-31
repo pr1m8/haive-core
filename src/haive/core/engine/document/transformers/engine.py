@@ -176,7 +176,7 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
                 document_state = DocumentState.model_validate(input_data)
                 documents_to_transform = document_state.raw_documents or []
             else:
-                raise ValueError(f"Invalid input type: {type(input_data)}")
+                raise TypeError(f"Invalid input type: {type(input_data)}")
 
             if not documents_to_transform:
                 # No documents to transform, return as-is
@@ -257,8 +257,7 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
                         content=transformed_doc.page_content,
                         metadata=enhanced_metadata,
                         source_type=document_state.source_type,
-                        loader_name=f"transformer_{
-                            self.config.transformer_type.value}",
+                        loader_name=f"transformer_{self.config.transformer_type.value}",
                         character_count=len(transformed_doc.page_content),
                         word_count=len(transformed_doc.page_content.split()),
                         chunk_count=1,

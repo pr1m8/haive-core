@@ -193,8 +193,7 @@ class QdrantVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
                 from langchain_community.vectorstores import Qdrant
             except ImportError:
                 raise ImportError(
-                    "Qdrant requires qdrant-client package. "
-                    "Install with: pip install qdrant-client"
+                    "Qdrant requires qdrant-client package. Install with: pip install qdrant-client"
                 )
 
         # Validate embedding

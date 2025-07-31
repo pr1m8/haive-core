@@ -149,8 +149,7 @@ class EnsembleRetrieverConfig(BaseRetrieverConfig):
             from langchain.retrievers import EnsembleRetriever
         except ImportError:
             raise ImportError(
-                "EnsembleRetriever requires langchain package. "
-                "Install with: pip install langchain"
+                "EnsembleRetriever requires langchain package. Install with: pip install langchain"
             )
 
         # Instantiate all component retrievers

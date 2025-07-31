@@ -67,8 +67,10 @@ else:
     # Import stub classes for runtime
     class StructuredOutputMixin:
         pass
+
     class ToolRouteMixin:
         pass
+
     # Import actual classes at runtime for use in default_factory
     try:
         from haive.core.models.llm.base import AzureLLMConfig, LLMConfig
@@ -112,7 +114,7 @@ def _get_augllm_base_classes():
     """Dynamically load base classes only when needed."""
     from haive.core.common.mixins.structured_output_mixin import StructuredOutputMixin
     from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
-    
+
     return (
         ToolRouteMixin,
         StructuredOutputMixin,
@@ -121,6 +123,7 @@ def _get_augllm_base_classes():
             Union[BaseMessage, dict[str, Any]],
         ],
     )
+
 
 class AugLLMConfig(*_get_augllm_base_classes()):
     """Configuration for creating enhanced LLM chains with flexible message handling.
@@ -189,7 +192,9 @@ class AugLLMConfig(*_get_augllm_base_classes()):
 
     # Core LLM configuration
     llm_config: LLMConfig = Field(
-        default_factory=lambda: AzureLLMConfig(model="gpt-4o") if AzureLLMConfig else None,
+        default_factory=lambda: (
+            AzureLLMConfig(model="gpt-4o") if AzureLLMConfig else None
+        ),
         description="LLM provider configuration",
     )
 
@@ -434,17 +439,9 @@ class AugLLMConfig(*_get_augllm_base_classes()):
 
         # LLM config
         llm_info = tree.add("🤖 [cyan]LLM Configuration[/cyan]")
+        llm_info.add(f"Provider: [yellow]{type(self.llm_config).__name__}[/yellow]")
         llm_info.add(
-            f"Provider: [yellow]{
-                type(
-                    self.llm_config).__name__}[/yellow]"
-        )
-        llm_info.add(
-            f"Model: [yellow]{
-                getattr(
-                    self.llm_config,
-                    'model',
-                    'Unknown')}[/yellow]"
+            f"Model: [yellow]{getattr(self.llm_config, 'model', 'Unknown')}[/yellow]"
         )
 
         # Tools info
@@ -457,16 +454,15 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         output_info = tree.add("📤 [cyan]Output Configuration[/cyan]")
         output_info.add(
             f"Structured Output Model: [yellow]{
-                self.structured_output_model.__name__ if self.structured_output_model else 'None'}[/yellow]"
+                self.structured_output_model.__name__ if self.structured_output_model else 'None'
+            }[/yellow]"
         )
         output_info.add(
             f"Structured Output Version: [yellow]{
-                self.structured_output_version or 'None'}[/yellow]"
+                self.structured_output_version or 'None'
+            }[/yellow]"
         )
-        output_info.add(
-            f"Parser Type: [yellow]{
-                self.parser_type or 'None'}[/yellow]"
-        )
+        output_info.add(f"Parser Type: [yellow]{self.parser_type or 'None'}[/yellow]")
 
         console.print(
             Panel(tree, title="Initialization Complete", border_style="green")
@@ -538,8 +534,7 @@ class AugLLMConfig(*_get_augllm_base_classes()):
                     reconstructed = load(v)
                     if isinstance(reconstructed, BasePromptTemplate):
                         logger.debug(
-                            f"Successfully reconstructed: {
-                                type(reconstructed)}"
+                            f"Successfully reconstructed: {type(reconstructed)}"
                         )
                         return reconstructed
 
@@ -597,10 +592,7 @@ class AugLLMConfig(*_get_augllm_base_classes()):
             )
 
         # For any other type, create a default
-        logger.debug(
-            f"Unexpected type {
-                type(v)}, creating default ChatPromptTemplate"
-        )
+        logger.debug(f"Unexpected type {type(v)}, creating default ChatPromptTemplate")
         return ChatPromptTemplate.from_messages(
             [("system", "You are a helpful assistant."), ("placeholder", "{messages}")]
         )
@@ -794,8 +786,7 @@ class AugLLMConfig(*_get_augllm_base_classes()):
                 if tool not in self.pydantic_tools:
                     self.pydantic_tools.append(tool)
                     debug_print(
-                        f"➕ [green]Added BaseModel {
-                            tool.__name__} to pydantic_tools[/green]"
+                        f"➕ [green]Added BaseModel {tool.__name__} to pydantic_tools[/green]"
                     )
 
             # Track tool names and mapping
@@ -825,9 +816,9 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         self.metadata["tool_name_mapping"] = tool_name_mapping
 
         debug_print(
-            f"📊 [cyan]Tool processing complete: {
-                len(tool_names)} tools, {
-                len(basemodel_tools)} BaseModel tools[/cyan]"
+            f"📊 [cyan]Tool processing complete: {len(tool_names)} tools, {
+                len(basemodel_tools)
+            } BaseModel tools[/cyan]"
         )
 
     def _setup_format_instructions(self):
@@ -851,7 +842,8 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         try:
             debug_print(
                 f"📋 [green]Setting up format instructions for: {
-                    self.structured_output_model.__name__}[/green]"
+                    self.structured_output_model.__name__
+                }[/green]"
             )
 
             # ✅ Use PydanticOutputParser ONLY for format instructions
@@ -966,7 +958,8 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         """Setup v2 (tool-based) approach - force tool usage with format instructions, NO parsing."""
         debug_print(
             f"🔧 [cyan]Setting up v2 approach (tool + format instructions, NO PARSER) with {
-                self.structured_output_model.__name__}[/cyan]"
+                self.structured_output_model.__name__
+            }[/cyan]"
         )
 
         # Ensure the model is in tools list
@@ -974,8 +967,7 @@ class AugLLMConfig(*_get_augllm_base_classes()):
             self.tools = list(self.tools) if self.tools else []
             self.tools.append(self.structured_output_model)
             debug_print(
-                f"➕ [green]Added {
-                    self.structured_output_model.__name__} to tools[/green]"
+                f"➕ [green]Added {self.structured_output_model.__name__} to tools[/green]"
             )
 
         # Add to pydantic_tools for tracking
@@ -1034,7 +1026,8 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         """Setup v1 (traditional) structured output."""
         debug_print(
             f"📋 [cyan]Setting up v1 structured output with {
-                self.structured_output_model.__name__}[/cyan]"
+                self.structured_output_model.__name__
+            }[/cyan]"
         )
 
         self.parser_type = "pydantic"
@@ -1068,7 +1061,8 @@ class AugLLMConfig(*_get_augllm_base_classes()):
                 self.force_tool_choice = None
             debug_print(
                 f"🔄 [yellow]Converted boolean force_tool_choice to mode: {
-                    self.tool_choice_mode}[/yellow]"
+                    self.tool_choice_mode
+                }[/yellow]"
             )
 
         elif isinstance(self.force_tool_choice, str):
@@ -1083,7 +1077,8 @@ class AugLLMConfig(*_get_augllm_base_classes()):
             ):
                 debug_print(
                     f"⚠️ [yellow]Warning: force_tool_choice '{
-                        self.force_tool_choice}' not in available tools: {actual_tool_names}[/yellow]"
+                        self.force_tool_choice
+                    }' not in available tools: {actual_tool_names}[/yellow]"
                 )
 
         elif (
@@ -1094,7 +1089,8 @@ class AugLLMConfig(*_get_augllm_base_classes()):
             self.force_tool_choice = self.force_tool_choice[0]
             debug_print(
                 f"📝 [yellow]Multiple forced tools not supported - using first: {
-                    self.force_tool_choice}[/yellow]"
+                    self.force_tool_choice
+                }[/yellow]"
             )
 
         elif self.force_tool_use and not self.force_tool_choice:
@@ -1104,8 +1100,7 @@ class AugLLMConfig(*_get_augllm_base_classes()):
                 actual_name = self._tool_name_mapping.get(display_name, display_name)
                 self.force_tool_choice = actual_name
                 debug_print(
-                    f"🎯 [green]Auto-selected single tool: {
-                        self.force_tool_choice}[/green]"
+                    f"🎯 [green]Auto-selected single tool: {self.force_tool_choice}[/green]"
                 )
 
         # Set bind_tools_kwargs based on configuration (only if not v2 which
@@ -1140,7 +1135,8 @@ class AugLLMConfig(*_get_augllm_base_classes()):
             }
             debug_print(
                 f"🔧 [green]Set bind_tools_kwargs for v2: forcing tool '{
-                    self.force_tool_choice}'[/green]"
+                    self.force_tool_choice
+                }'[/green]"
             )
         else:
             # Fallback to required if no specific tool
@@ -1366,9 +1362,7 @@ class AugLLMConfig(*_get_augllm_base_classes()):
                     **self.partial_variables
                 )
                 debug_print(
-                    f"✅ [green]Applied {
-                        len(
-                            self.partial_variables)} partial variables[/green]"
+                    f"✅ [green]Applied {len(self.partial_variables)} partial variables[/green]"
                 )
         except Exception as e:
             debug_print(f"❌ [red]Error applying partial variables: {e}[/red]")
@@ -1434,14 +1428,10 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         self._computed_output_fields = self._compute_output_fields()
 
         debug_print(
-            f"📥 [cyan]Input fields: {
-                list(
-                    self._computed_input_fields.keys())}[/cyan]"
+            f"📥 [cyan]Input fields: {list(self._computed_input_fields.keys())}[/cyan]"
         )
         debug_print(
-            f"📤 [cyan]Output fields: {
-                list(
-                    self._computed_output_fields.keys())}[/cyan]"
+            f"📤 [cyan]Output fields: {list(self._computed_output_fields.keys())}[/cyan]"
         )
 
     def _compute_input_fields(self) -> dict[str, tuple[type, Any]]:
@@ -1718,14 +1708,8 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         tools_section.add(
             f"Tool Is BaseModel: [yellow]{self.tool_is_base_model}[/yellow]"
         )
-        tools_section.add(
-            f"Force Tool Use: [yellow]{
-                self.force_tool_use}[/yellow]"
-        )
-        tools_section.add(
-            f"Tool Choice Mode: [yellow]{
-                self.tool_choice_mode}[/yellow]"
-        )
+        tools_section.add(f"Force Tool Use: [yellow]{self.force_tool_use}[/yellow]")
+        tools_section.add(f"Tool Choice Mode: [yellow]{self.tool_choice_mode}[/yellow]")
         tools_section.add(
             f"Force Tool Choice: [yellow]{self.force_tool_choice}[/yellow]"
         )
@@ -1734,18 +1718,21 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         output_section = tree.add("📤 [cyan]Output Configuration[/cyan]")
         output_section.add(
             f"Structured Output Model: [yellow]{
-                self.structured_output_model.__name__ if self.structured_output_model else 'None'}[/yellow]"
+                self.structured_output_model.__name__ if self.structured_output_model else 'None'
+            }[/yellow]"
         )
         output_section.add(
             f"Structured Output Version: [yellow]{
-                self.structured_output_version or 'None'}[/yellow]"
+                self.structured_output_version or 'None'
+            }[/yellow]"
         )
         output_section.add(
             f"Parser Type: [yellow]{self.parser_type or 'None'}[/yellow]"
         )
         output_section.add(
             f"Format Instructions: [yellow]{
-                'Set' if self._format_instructions_text else 'None'}[/yellow]"
+                'Set' if self._format_instructions_text else 'None'
+            }[/yellow]"
         )
 
         # Schema section
@@ -2259,8 +2246,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
     def add_prompt_template(self, prompt_template: BasePromptTemplate) -> AugLLMConfig:
         """Add a prompt template to the configuration."""
         debug_print(
-            f"[blue]Adding prompt template: {
-                type(prompt_template).__name__}[/blue]"
+            f"[blue]Adding prompt template: {type(prompt_template).__name__}[/blue]"
         )
 
         # Set prompt template
@@ -2271,8 +2257,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
             self.comprehensive_validation_and_setup()
 
         debug_print(
-            f"[green]Added prompt template: {
-                type(prompt_template).__name__}[/green]"
+            f"[green]Added prompt template: {type(prompt_template).__name__}[/green]"
         )
         return self
 
@@ -2293,10 +2278,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
                 auto_route = route or "manual"
                 self.tool_routes[auto_name] = auto_route
 
-            debug_print(
-                f"➕ [green]Added tool: {
-                    name or type(tool).__name__}[/green]"
-            )
+            debug_print(f"➕ [green]Added tool: {name or type(tool).__name__}[/green]")
 
             # Re-sync tool routes
             self._sync_tool_routes()
@@ -2318,8 +2300,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
                 del self.tool_routes[tool_name]
 
             debug_print(
-                f"➖ [yellow]Removed tool: {
-                    tool_name or type(tool).__name__}[/yellow]"
+                f"➖ [yellow]Removed tool: {tool_name or type(tool).__name__}[/yellow]"
             )
 
             # Re-sync and recompute fields
@@ -2474,8 +2455,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         """
         if not hasattr(config, "to_tool"):
             raise ValueError(
-                f"Config {
-                    type(config).__name__} does not support to_tool conversion"
+                f"Config {type(config).__name__} does not support to_tool conversion"
             )
 
         # Create the tool
@@ -2506,10 +2486,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         if llm_config is None:
             llm_config = AzureLLMConfig(model="gpt-4o")
 
-        debug_print(
-            f"[blue]Creating AugLLMConfig from {
-                type(prompt).__name__}[/blue]"
-        )
+        debug_print(f"[blue]Creating AugLLMConfig from {type(prompt).__name__}[/blue]")
 
         # Handle partial variables if provided in kwargs
         partial_variables = kwargs.pop("partial_variables", {})
@@ -2910,8 +2887,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
             llm_config = AzureLLMConfig(model="gpt-4o")
 
         debug_print(
-            f"[blue]Creating AugLLMConfig with format instructions from {
-                model.__name__}[/blue]"
+            f"[blue]Creating AugLLMConfig with format instructions from {model.__name__}[/blue]"
         )
 
         config = cls.from_system_prompt(
@@ -2935,8 +2911,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
             llm_config = AzureLLMConfig(model="gpt-4o")
 
         debug_print(
-            f"[blue]Creating AugLLMConfig with v1 structured output using {
-                model.__name__}[/blue]"
+            f"[blue]Creating AugLLMConfig with v1 structured output using {model.__name__}[/blue]"
         )
 
         # Set v1 specific parameters
@@ -3007,8 +2982,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
             llm_config = AzureLLMConfig(model="gpt-4o")
 
         debug_print(
-            f"[blue]Creating AugLLMConfig with v2 structured output using {
-                model.__name__}[/blue]"
+            f"[blue]Creating AugLLMConfig with v2 structured output using {model.__name__}[/blue]"
         )
 
         # Ensure proper settings for v2
@@ -3092,22 +3066,10 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         basic_tree = Tree("📋 [cyan]Basic Tool Information[/cyan]")
         basic_tree.add(f"Total Tools: [yellow]{len(self.tools)}[/yellow]")
         basic_tree.add(f"Pydantic Tools: [yellow]{len(self.pydantic_tools)}[/yellow]")
-        basic_tree.add(
-            f"Tool Is BaseModel: [yellow]{
-                self.tool_is_base_model}[/yellow]"
-        )
-        basic_tree.add(
-            f"Force Tool Use: [yellow]{
-                self.force_tool_use}[/yellow]"
-        )
-        basic_tree.add(
-            f"Tool Choice Mode: [yellow]{
-                self.tool_choice_mode}[/yellow]"
-        )
-        basic_tree.add(
-            f"Force Tool Choice: [yellow]{
-                self.force_tool_choice}[/yellow]"
-        )
+        basic_tree.add(f"Tool Is BaseModel: [yellow]{self.tool_is_base_model}[/yellow]")
+        basic_tree.add(f"Force Tool Use: [yellow]{self.force_tool_use}[/yellow]")
+        basic_tree.add(f"Tool Choice Mode: [yellow]{self.tool_choice_mode}[/yellow]")
+        basic_tree.add(f"Force Tool Choice: [yellow]{self.force_tool_choice}[/yellow]")
         console.print(basic_tree)
 
         # Tool details
@@ -3147,16 +3109,12 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         if self.structured_output_model:
             struct_tree = Tree("📤 [cyan]Structured Output[/cyan]")
             struct_tree.add(
-                f"Model: [yellow]{
-                    self.structured_output_model.__name__}[/yellow]"
+                f"Model: [yellow]{self.structured_output_model.__name__}[/yellow]"
             )
             struct_tree.add(
                 f"Version: [yellow]{self.structured_output_version}[/yellow]"
             )
-            struct_tree.add(
-                f"Parser Type: [yellow]{
-                    self.parser_type}[/yellow]"
-            )
+            struct_tree.add(f"Parser Type: [yellow]{self.parser_type}[/yellow]")
             console.print(struct_tree)
 
         console.print("=" * 80 + "\n")
@@ -3176,10 +3134,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         if not hasattr(self, "_prompt_templates"):
             self._prompt_templates = {}
         self._prompt_templates[name] = template
-        debug_print(
-            f"Added prompt template '{name}': {
-                type(template).__name__}"
-        )
+        debug_print(f"Added prompt template '{name}': {type(template).__name__}")
 
     def use_prompt_template(self, name: str) -> AugLLMConfig:
         """Switch to using a specific named template.
@@ -3267,13 +3222,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         current_tools = list(self.tools) if self.tools else []
         current_tools.append(tool)
         self.tools = current_tools
-        debug_print(
-            f"Added tool: {
-                getattr(
-                    tool,
-                    'name',
-                    type(tool).__name__)}"
-        )
+        debug_print(f"Added tool: {getattr(tool, 'name', type(tool).__name__)}")
         return self
 
     def remove_tool(self, tool: Any) -> AugLLMConfig:
@@ -3291,19 +3240,11 @@ The output should be valid JSON that conforms to the {model_name} schema."""
                 current_tools.remove(tool)
                 self.tools = current_tools
                 debug_print(
-                    f"Removed tool: {
-                        getattr(
-                            tool,
-                            'name',
-                            type(tool).__name__)}"
+                    f"Removed tool: {getattr(tool, 'name', type(tool).__name__)}"
                 )
             else:
                 debug_print(
-                    f"Tool {
-                        getattr(
-                            tool,
-                            'name',
-                            type(tool).__name__)} not found for removal"
+                    f"Tool {getattr(tool, 'name', type(tool).__name__)} not found for removal"
                 )
         return self
 

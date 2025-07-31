@@ -54,8 +54,7 @@ class _TestState(StateSchema):
 
         for message in self.messages:
             content = message.content.lower()
-            if any(word in content for word in [
-                   "hello", "hi", "hey", "greetings"]):
+            if any(word in content for word in ["hello", "hi", "hey", "greetings"]):
                 return True
 
         return False
@@ -136,13 +135,10 @@ def mapper_function():
 
     def map_contents(state: Any) -> list[Send]:
         contents = (
-            state.contents if hasattr(
-                state, "contents") else state.get(
-                "contents", [])
+            state.contents if hasattr(state, "contents") else state.get("contents", [])
         )
 
-        return [Send("process_content", {"content": content})
-                for content in contents]
+        return [Send("process_content", {"content": content}) for content in contents]
 
     return map_contents
 

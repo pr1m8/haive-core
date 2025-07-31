@@ -95,11 +95,7 @@ class StoreManager:
             self.store = create_store(store_type=StoreType.MEMORY)
 
         self.default_namespace = default_namespace or ("haive", "memories")
-        logger.info(
-            f"StoreManager initialized with store: {
-                type(
-                    self.store).__name__}"
-        )
+        logger.info(f"StoreManager initialized with store: {type(self.store).__name__}")
 
     def _get_namespace(
         self, namespace: tuple[str, ...] | None = None

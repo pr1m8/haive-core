@@ -32,7 +32,7 @@ class BranchModel(SerializableModel):
         """Validate branch type."""
         valid_types = ["conditional", "parallel", "switch"]
         if v not in valid_types:
-            raise ValueError(f"Invalid branch type: {v}. Must be one of {valid_types}")
+            raise TypeError(f"Invalid branch type: {v}. Must be one of {valid_types}")
         return v
 
     @model_validator(mode="after")

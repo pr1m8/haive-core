@@ -94,7 +94,7 @@ class ContextualCompressionRetrieverConfig(BaseRetrieverConfig):
         """Validate compressor type."""
         valid_types = ["llm_chain_extract", "llm_chain_filter"]
         if v not in valid_types:
-            raise ValueError(f"compressor_type must be one of {valid_types}, got {v}")
+            raise TypeError(f"compressor_type must be one of {valid_types}, got {v}")
         return v
 
     @field_validator("llm_config")
@@ -182,7 +182,7 @@ class ContextualCompressionRetrieverConfig(BaseRetrieverConfig):
             compressor = LLMChainFilter.from_llm(llm)
 
         else:
-            raise ValueError(f"Unsupported compressor_type: {self.compressor_type}")
+            raise TypeError(f"Unsupported compressor_type: {self.compressor_type}")
 
         return ContextualCompressionRetriever(
             base_compressor=compressor, base_retriever=base_retriever

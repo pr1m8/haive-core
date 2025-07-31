@@ -113,19 +113,13 @@ class ParserNodeConfigV2(NodeConfig):
         if hasattr(state, "engines") and isinstance(state.engines, dict):
             engine = state.engines.get(self.engine_name)
             if engine:
-                logger.info(
-                    f"Found engine in state.engines: {
-                        self.engine_name}"
-                )
+                logger.info(f"Found engine in state.engines: {self.engine_name}")
                 return engine
 
             # Try by engine.name attribute
             for _key, eng in state.engines.items():
                 if hasattr(eng, "name") and eng.name == self.engine_name:
-                    logger.info(
-                        f"Found engine by name attribute: {
-                            self.engine_name}"
-                    )
+                    logger.info(f"Found engine by name attribute: {self.engine_name}")
                     return eng
 
         # Try state attribute
@@ -228,10 +222,7 @@ class ParserNodeConfigV2(NodeConfig):
                 # Override the parser's engine_name with the one from the
                 # message
                 self.engine_name = engine_name_from_message
-                logger.debug(
-                    f"Updated parser engine_name to: {
-                        self.engine_name}"
-                )
+                logger.debug(f"Updated parser engine_name to: {self.engine_name}")
             else:
                 logger.debug(
                     "No engine attribution found in AI message additional_kwargs"
@@ -317,10 +308,7 @@ class ParserNodeConfigV2(NodeConfig):
                     json_data = json_data["data"]
 
                 model_instance = tool_class.model_validate(json_data)
-                logger.info(
-                    f"Successfully created {
-                        tool_class.__name__} from JSON"
-                )
+                logger.info(f"Successfully created {tool_class.__name__} from JSON")
                 return model_instance
             except (json.JSONDecodeError, Exception) as e:
                 logger.debug(f"JSON parsing failed: {e}")
@@ -337,10 +325,7 @@ class ParserNodeConfigV2(NodeConfig):
                     content = content["data"]
 
                 model_instance = tool_class.model_validate(content)
-                logger.info(
-                    f"Successfully created {
-                        tool_class.__name__} from dict"
-                )
+                logger.info(f"Successfully created {tool_class.__name__} from dict")
                 return model_instance
             except Exception as e:
                 logger.debug(f"Direct validation failed: {e}")
@@ -547,10 +532,7 @@ class ParserNodeConfigV2(NodeConfig):
             if isinstance(tool_class, type) and issubclass(tool_class, BaseModel):
                 parsed_result = self._parse_tool_content(content, tool_class)
             else:
-                logger.warning(
-                    f"Tool is not a Pydantic model: {
-                        type(tool_class)}"
-                )
+                logger.warning(f"Tool is not a Pydantic model: {type(tool_class)}")
                 parsed_result = content
 
             # Determine field name for the result using proper naming utilities

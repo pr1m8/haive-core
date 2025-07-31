@@ -127,8 +127,7 @@ class SecureConfigMixin:
             api_key = os.getenv(env_key)
             if api_key and api_key.strip():
                 logger.debug(
-                    f"Found API key for {provider_value} in {env_key} (length: {
-                        len(api_key)})"
+                    f"Found API key for {provider_value} in {env_key} (length: {len(api_key)})"
                 )
                 return SecretStr(api_key)
             logger.warning(f"Environment variable {env_key} not found or empty")
@@ -159,10 +158,8 @@ class SecureConfigMixin:
             if not hasattr(self, "api_key") or self.api_key is None:
                 logger.warning(
                     f"No API key attribute found for {
-                        getattr(
-                            self,
-                            'provider',
-                            'unknown provider')}"
+                        getattr(self, 'provider', 'unknown provider')
+                    }"
                 )
                 return None
 

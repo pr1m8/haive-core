@@ -5,7 +5,6 @@ This module defines the fundamental types, protocols, and enums used
 throughout the node system, providing type safety and standardization.
 """
 
-
 # src/haive/core/graph/node/types.py
 from enum import Enum
 from typing import Any, Literal, Protocol, TypeVar, Union, runtime_checkable

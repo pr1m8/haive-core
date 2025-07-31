@@ -35,7 +35,7 @@ class TypeAnalyzer:
     def analyze_schema(self, schema_type: type[BaseModel]) -> SchemaInfo:
         """Analyze a Pydantic BaseModel schema."""
         if not inspect.isclass(schema_type) or not issubclass(schema_type, BaseModel):
-            raise ValueError(f"{schema_type} is not a BaseModel subclass")
+            raise TypeError(f"{schema_type} is not a BaseModel subclass")
 
         # Get type info
         type_info = self.get_type_info(schema_type)

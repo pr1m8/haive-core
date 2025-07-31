@@ -179,13 +179,11 @@ def demo_filtering():
     external_logger.info("Message from external.library")
 
     # Filter mode (would filter non-haive loggers in real implementation)
-    print("\n--- Filtering mode (would hide external loggers) ---")
 
     haive_logger.info("Haive message - still visible")
     external_logger.info("External message - now hidden!")
 
     # Reset
-    print("\n--- Show all mode ---")
 
 
 def main():

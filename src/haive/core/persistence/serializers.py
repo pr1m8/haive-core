@@ -9,6 +9,7 @@ import logging
 import os
 from typing import Any
 
+from langgraph.checkpoint.serde.encrypted import EncryptedSerializer
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 from pydantic import SecretBytes, SecretStr
 from pydantic_core import PydanticUndefined
@@ -84,7 +85,8 @@ class SecureSecretStrSerializer(JsonPlusSerializer):
                 ):
                     logger.debug(
                         f"Allowing LangChain Serializable object to handle its own serialization: {
-                            type(value)}"
+                            type(value)
+                        }"
                     )
                     return value
 
@@ -97,8 +99,7 @@ class SecureSecretStrSerializer(JsonPlusSerializer):
                 for cls in value.__class__.__mro__
             ):
                 logger.debug(
-                    f"Preserving LangChain prompt template object: {
-                        type(value)}"
+                    f"Preserving LangChain prompt template object: {type(value)}"
                 )
                 return value
             return None
@@ -236,8 +237,6 @@ def create_production_serializer(
     # If we have an encryption key, use EncryptedSerializer
     if encryption_key:
         try:
-            from langgraph.checkpoint.serde.encrypted import EncryptedSerializer
-
             # Create encrypted serializer with our secure base
             base_serializer = SecureSecretStrSerializer()
             encrypted_serializer = EncryptedSerializer.from_pycryptodome_aes(
@@ -310,8 +309,6 @@ def create_encrypted_serializer_for_postgres(
 
     if encryption_key:
         try:
-            from langgraph.checkpoint.serde.encrypted import EncryptedSerializer
-
             # Create base serializer with SecretStr support
             base_serializer = SecureSecretStrSerializer()
 

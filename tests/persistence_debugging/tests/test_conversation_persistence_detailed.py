@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Detailed test to examine conversation agent inputs, outputs, and persistence behavior."""
 
+import contextlib
 import json
 import logging
 
@@ -64,10 +65,8 @@ def test_conversation_persistence_detailed():
                     if thread_info:
 
                         # Try to parse metadata if it exists
-                        try:
+                        with contextlib.suppress(Exception):
                             (json.loads(thread_info[3]) if thread_info[3] else {})
-                        except:
-                            pass
 
                     # Get checkpoint info
                     cursor.execute(

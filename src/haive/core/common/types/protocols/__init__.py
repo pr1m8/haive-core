@@ -14,21 +14,6 @@ from haive.core.common.types.protocols.general_protocols import (
     Nameable,
     StateSchemaAware,
 )
-from haive.core.common.types.protocols.schema_protocols import (
-    CompleteSchemaAware as _SchemaCompleteSchemaAware,
-)
-from haive.core.common.types.protocols.schema_protocols import (
-    FullSchemaAware as _SchemaFullSchemaAware,
-)
-from haive.core.common.types.protocols.schema_protocols import (
-    IOFieldAware as _SchemaIOFieldAware,
-)
-from haive.core.common.types.protocols.schema_protocols import (
-    IOSchemaAware as _SchemaIOSchemaAware,
-)
-from haive.core.common.types.protocols.schema_protocols import (
-    StateSchemaAware as _SchemaStateSchemaAware,
-)
 
 __all__ = [
     "AgentAware",

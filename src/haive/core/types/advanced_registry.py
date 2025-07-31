@@ -60,10 +60,7 @@ class Registered(BaseModel, Generic[BuildT], abc.ABC):
     @classmethod
     def _register_key(cls, key: str, impl: type[Registered]) -> None:
         if key in cls._registry and cls._registry[key] is not impl:
-            raise ValueError(
-                f"Duplicate registry key '{key}' for {
-                    impl.__name__}"
-            )
+            raise ValueError(f"Duplicate registry key '{key}' for {impl.__name__}")
         cls._registry[key] = impl
 
     @classmethod
@@ -133,7 +130,7 @@ class ComponentSpec(BaseModel, Generic[C]):
     @model_validator(mode="after")
     def _exclusive(self) -> Self:
         if bool(self.type) == bool(self.inline):
-            raise ValueError("Must provide exactly one of 'type' or 'inline'")
+            raise TypeError("Must provide exactly one of 'type' or 'inline'")
         return self
 
     def build(self) -> C:
@@ -192,7 +189,6 @@ __all__ = [
 
 # ───────────────────────────── Smoke Test Runner ─────────────────────────── #
 if __name__ == "__main__":
-
     cfg = {
         "tokenizer": {
             "type": "whitespace-tokenizer",

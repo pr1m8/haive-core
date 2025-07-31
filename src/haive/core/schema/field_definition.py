@@ -257,27 +257,25 @@ class FieldDefinition:
             ```
         """
         logger.debug(
-            f"🔍 TO_FIELD_INFO DEBUG {
-                self.name}: default={
-                self.default}, factory={
-                self.default_factory}"
+            f"🔍 TO_FIELD_INFO DEBUG {self.name}: default={self.default}, factory={
+                self.default_factory
+            }"
         )
 
         if self.field_info:
             # Use existing field info if available
             logger.debug(
-                f"🔍 TO_FIELD_INFO {
-                    self.name}: Using existing field_info, default={
-                    self.field_info.default}"
+                f"🔍 TO_FIELD_INFO {self.name}: Using existing field_info, default={
+                    self.field_info.default
+                }"
             )
             return self.field_type, self.field_info
 
         # Create field using utility function
         logger.debug(
-            f"🔍 TO_FIELD_INFO {
-                self.name}: Creating new field with default={
-                self.default}, factory={
-                self.default_factory}"
+            f"🔍 TO_FIELD_INFO {self.name}: Creating new field with default={
+                self.default
+            }, factory={self.default_factory}"
         )
         field_type, field_info = create_field(
             field_type=self.field_type,
@@ -289,10 +287,9 @@ class FieldDefinition:
             **self.metadata,
         )
         logger.debug(
-            f"🔍 TO_FIELD_INFO {
-                self.name}: Created field_info with default={
-                field_info.default}, required={
-                field_info.default is ...}"
+            f"🔍 TO_FIELD_INFO {self.name}: Created field_info with default={
+                field_info.default
+            }, required={field_info.default is ...}"
         )
 
         return field_type, field_info

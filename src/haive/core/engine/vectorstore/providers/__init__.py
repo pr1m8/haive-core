@@ -67,45 +67,45 @@ from .WeaviateVectorStoreConfig import WeaviateVectorStoreConfig
 from .ZillizVectorStoreConfig import ZillizVectorStoreConfig
 
 __all__ = [
-    # Core open source
-    "ChromaVectorStoreConfig",
-    "FAISSVectorStoreConfig",
-    "QdrantVectorStoreConfig",
-    "WeaviateVectorStoreConfig",
-    "MilvusVectorStoreConfig",
-    # Cloud/managed
-    "PineconeVectorStoreConfig",
-    "ZillizVectorStoreConfig",
-    "MongoDBAtlasVectorStoreConfig",
-    "AzureSearchVectorStoreConfig",
-    # Database extensions
-    "PGVectorStoreConfig",
-    "SupabaseVectorStoreConfig",
-    "ClickHouseVectorStoreConfig",
-    # Search engines
-    "ElasticsearchVectorStoreConfig",
-    # In-memory databases
-    "RedisVectorStoreConfig",
-    # Columnar vector databases
-    "LanceDBVectorStoreConfig",
-    # Document-oriented vector stores
-    "DocArrayVectorStoreConfig",
+    "AmazonOpenSearchVectorStoreConfig",
     # Approximate nearest neighbor stores
     "AnnoyVectorStoreConfig",
-    "USearchVectorStoreConfig",
-    # ML integration stores
-    "SKLearnVectorStoreConfig",
+    "AzureSearchVectorStoreConfig",
+    "CassandraVectorStoreConfig",
+    # Core open source
+    "ChromaVectorStoreConfig",
+    "ClickHouseVectorStoreConfig",
+    # Document-oriented vector stores
+    "DocArrayVectorStoreConfig",
+    # Search engines
+    "ElasticsearchVectorStoreConfig",
+    "FAISSVectorStoreConfig",
     # Development and testing stores
     "InMemoryVectorStoreConfig",
-    # Search engines with vector capabilities
-    "TypesenseVectorStoreConfig",
+    # Columnar vector databases
+    "LanceDBVectorStoreConfig",
+    "MarqoVectorStoreConfig",
+    "MilvusVectorStoreConfig",
+    "MongoDBAtlasVectorStoreConfig",
     # Graph databases with vector support
     "Neo4jVectorStoreConfig",
-    "CassandraVectorStoreConfig",
     # Additional search engines with vector capabilities
     "OpenSearchVectorStoreConfig",
-    "AmazonOpenSearchVectorStoreConfig",
+    # Database extensions
+    "PGVectorStoreConfig",
+    # Cloud/managed
+    "PineconeVectorStoreConfig",
+    "QdrantVectorStoreConfig",
+    # In-memory databases
+    "RedisVectorStoreConfig",
+    # ML integration stores
+    "SKLearnVectorStoreConfig",
+    "SupabaseVectorStoreConfig",
+    # Search engines with vector capabilities
+    "TypesenseVectorStoreConfig",
+    "USearchVectorStoreConfig",
     # Managed vector search platforms
     "VectaraVectorStoreConfig",
-    "MarqoVectorStoreConfig",
+    "WeaviateVectorStoreConfig",
+    "ZillizVectorStoreConfig",
 ]

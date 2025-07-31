@@ -161,8 +161,7 @@ class SupabaseVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             from langchain_community.vectorstores import SupabaseVectorStore
         except ImportError:
             raise ImportError(
-                "Supabase requires supabase package. "
-                "Install with: pip install supabase"
+                "Supabase requires supabase package. Install with: pip install supabase"
             )
 
         # Validate embedding

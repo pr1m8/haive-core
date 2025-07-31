@@ -29,6 +29,7 @@ Typical usage example:
 """
 
 # Import common mixins
+
 from haive.core.common.mixins import (
     IdentifierMixin as IDMixin,  # Alias for backward compatibility
 )
@@ -39,12 +40,12 @@ from haive.core.common.mixins import (
     TimestampMixin,
     VersionMixin,
 )
+from haive.core.common.models import DynamicChoiceModel, NamedList
+from haive.core.common.types import DictStrAny, JsonType, StrOrPath
 
 # Import common models
-from haive.core.common.models import DynamicChoiceModel, NamedList
 
 # Import common types
-from haive.core.common.types import DictStrAny, JsonType, StrOrPath
 
 # Export all these symbols when using star imports
 __all__ = [

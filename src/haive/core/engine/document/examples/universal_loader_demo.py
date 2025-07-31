@@ -60,7 +60,6 @@ def demo_universal_loader() -> None:
     ]
 
     for path in test_paths:
-
         # Analyze the source
         analysis = loader.analyze_source(path)
 

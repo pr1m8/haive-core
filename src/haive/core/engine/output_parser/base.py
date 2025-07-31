@@ -304,7 +304,7 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
 
             # Check if we have a configuration for this parser type
             if self.parser_type not in PARSER_MAP:
-                raise ValueError(f"Unknown parser type: {self.parser_type}")
+                raise TypeError(f"Unknown parser type: {self.parser_type}")
 
             module_key, class_override, config_handler = PARSER_MAP[self.parser_type]
 
@@ -350,15 +350,9 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
             return parser_class(**params)
 
         except ImportError as e:
-            logger.exception(
-                f"Failed to import parser for {
-                    self.parser_type}: {
-                    e!s}"
-            )
+            logger.exception(f"Failed to import parser for {self.parser_type}: {e!s}")
             raise ImportError(
-                f"Required package for {
-                    self.parser_type} parser not installed: {
-                    e!s}"
+                f"Required package for {self.parser_type} parser not installed: {e!s}"
             )
 
     def invoke(
@@ -537,7 +531,7 @@ def create_output_parser_engine(
         try:
             parser_type = OutputParserType(parser_type)
         except ValueError:
-            raise ValueError(f"Unknown parser type: {parser_type}")
+            raise TypeError(f"Unknown parser type: {parser_type}")
 
     if name is None:
         name = f"{parser_type.value}_parser_{uuid.uuid4().hex[:6]}"
@@ -589,9 +583,7 @@ def create_list_parser(
 
     if list_type not in type_map:
         raise ValueError(
-            f"Unknown list type: {list_type}. Must be one of {
-                list(
-                    type_map.keys())}"
+            f"Unknown list type: {list_type}. Must be one of {list(type_map.keys())}"
         )
 
     return create_output_parser_engine(type_map[list_type], name, **kwargs)

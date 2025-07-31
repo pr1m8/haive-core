@@ -439,33 +439,21 @@ class EngineStateMixin(BaseModel):
 
                 if show_metadata and llm.name in self.engine_metadata:
                     meta = self.engine_metadata[llm.name]
+                    node.add(f"[dim]Access count: {meta.get('access_count', 0)}[/dim]")
                     node.add(
-                        f"[dim]Access count: {
-                            meta.get(
-                                'access_count',
-                                0)}[/dim]"
-                    )
-                    node.add(
-                        f"[dim]Last accessed: {
-                            meta.get(
-                                'last_accessed',
-                                'Never')}[/dim]"
+                        f"[dim]Last accessed: {meta.get('last_accessed', 'Never')}[/dim]"
                     )
 
                 if show_performance and llm.name in self.engine_metadata:
                     perf = self.engine_metadata[llm.name].get("performance", {})
                     node.add(
-                        f"[dim]Avg response time: {
-                            perf.get(
-                                'avg_time',
-                                0):.3f}s[/dim]"
+                        f"[dim]Avg response time: {perf.get('avg_time', 0):.3f}s[/dim]"
                     )
 
         # Retrievers
         if retrievers := self.get_retrievers():
             ret_branch = tree.add(
-                f"🔍 [bold magenta]Retrievers[/bold magenta] ({
-                    len(retrievers)})"
+                f"🔍 [bold magenta]Retrievers[/bold magenta] ({len(retrievers)})"
             )
             for ret in retrievers:
                 ret_info = f"[green]{ret.name}[/green]"
@@ -487,8 +475,7 @@ class EngineStateMixin(BaseModel):
         # Vector Stores
         if vector_stores := self.get_vector_stores():
             vs_branch = tree.add(
-                f"💾 [bold blue]Vector Stores[/bold blue] ({
-                    len(vector_stores)})"
+                f"💾 [bold blue]Vector Stores[/bold blue] ({len(vector_stores)})"
             )
             for vs in vector_stores:
                 vs_info = f"[green]{vs.name}[/green]"
@@ -534,10 +521,7 @@ class EngineStateMixin(BaseModel):
                 console.print("\n[bold]Top Accessed Engines:[/bold]")
                 for name, meta in sorted_by_access:
                     if meta.get("access_count", 0) > 0:
-                        console.print(
-                            f"  {name}: {
-                                meta['access_count']} accesses"
-                        )
+                        console.print(f"  {name}: {meta['access_count']} accesses")
 
     def display_engine_details(self, name: str) -> None:
         """Display detailed information about a specific engine.

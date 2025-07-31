@@ -2,9 +2,9 @@
 
 import logging
 
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from pydantic import BaseModel, Field
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.engine.aug_llm import AugLLMConfig
 
 # Set up logging to see debug output

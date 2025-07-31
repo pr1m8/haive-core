@@ -51,6 +51,8 @@ See Also:
 # ============================================================================
 # PERFORMANCE OPTIMIZATIONS - Applied automatically on import
 # ============================================================================
+
+import importlib
 import logging
 import os
 
@@ -80,7 +82,6 @@ def __getattr__(name: str):
         module_path, class_name = _CORE_IMPORTS[name]
 
         # Import module and get class only when accessed
-        import importlib
 
         module = importlib.import_module(module_path)
         component = getattr(module, class_name)

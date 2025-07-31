@@ -142,7 +142,7 @@ async def test_async_persistence():
             else:
                 pass
         else:
-            passds")
+            pass
 
     except Exception as e:
         import traceback

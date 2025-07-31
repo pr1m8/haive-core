@@ -16,6 +16,8 @@ from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, Field
 
+from haive.core.persistence.memory import MemoryCheckpointerConfig
+from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
 from haive.core.persistence.types import (
     CheckpointerMode,
     CheckpointerType,
@@ -232,18 +234,12 @@ class CheckpointerConfig(BaseModel, ABC, Generic[T]):
         """
         # Ensure type is specified
         if "type" not in data:
-            raise ValueError("Checkpointer type must be specified")
+            raise TypeError("Checkpointer type must be specified")
 
         # Get appropriate subclass based on type
         checkpointer_type = data["type"]
         if checkpointer_type == CheckpointerType.MEMORY:
-            from haive.core.persistence.memory import MemoryCheckpointerConfig
-
             return MemoryCheckpointerConfig(**data)
         if checkpointer_type == CheckpointerType.POSTGRES:
-            from haive.core.persistence.postgres_config import (
-                PostgresCheckpointerConfig,
-            )
-
             return PostgresCheckpointerConfig(**data)
-        raise ValueError(f"Unsupported checkpointer type: {checkpointer_type}")
+        raise TypeError(f"Unsupported checkpointer type: {checkpointer_type}")

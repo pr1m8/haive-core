@@ -85,10 +85,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
             # Get agent from state
             agent = self._get_agent(state)
             if not agent:
-                raise ValueError(
-                    f"Agent '{
-                        self.agent_name}' not found in state"
-                )
+                raise ValueError(f"Agent '{self.agent_name}' not found in state")
 
             # Set as active agent
             state.set_active_agent(self.agent_name)
@@ -277,9 +274,7 @@ class StateProjectionNode(BaseNodeConfig[TInput, TOutput]):
     def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
         """Project state from input to output schema."""
         logger.info(
-            f"Projecting state: {
-                self.input_schema.__name__} → {
-                self.output_schema.__name__}"
+            f"Projecting state: {self.input_schema.__name__} → {self.output_schema.__name__}"
         )
 
         # Extract input data

@@ -99,8 +99,7 @@ def create_test_components():
         embedding_model=state.embedding_model,
         k=2,
     )
-    console.print(
-        "[green]✓[/green] Created vector store with sample documents")
+    console.print("[green]✓[/green] Created vector store with sample documents")
 
     # Create retriever
     state.retriever = VectorStoreRetrieverConfig(
@@ -140,8 +139,7 @@ def create_test_components():
             description="Key points extracted from the documents"
         )
         sentiment: str = Field(description="Overall sentiment analysis")
-        questions: list[str] = Field(
-            description="Questions for further research")
+        questions: list[str] = Field(description="Questions for further research")
 
     state.analysis_llm = AugLLMConfig(
         name="document_analyzer",
@@ -150,8 +148,7 @@ def create_test_components():
         structured_output_model=AnalysisOutput,
         llm_config=AzureLLMConfig(model="gpt-4o"),
     )
-    console.print(
-        "[green]✓[/green] Created analysis LLM with structured output model")
+    console.print("[green]✓[/green] Created analysis LLM with structured output model")
 
     # Create summary LLM
     summary_prompt = ChatPromptTemplate.from_messages(
@@ -229,18 +226,15 @@ def create_node_functions(registry):
     NodeFactory.set_registry(registry)
 
     # Debug each node creation separately
-    state.retrieval_node = create_node_function_safe(
-        "retrieve", state.retrieval_config)
+    state.retrieval_node = create_node_function_safe("retrieve", state.retrieval_config)
     if state.retrieval_node:
         console.print("[green]✓[/green] Created retrieval node function")
 
-    state.analysis_node = create_node_function_safe(
-        "analyze", state.analysis_config)
+    state.analysis_node = create_node_function_safe("analyze", state.analysis_config)
     if state.analysis_node:
         console.print("[green]✓[/green] Created analysis node function")
 
-    state.summary_node = create_node_function_safe(
-        "summarize", state.summary_config)
+    state.summary_node = create_node_function_safe("summarize", state.summary_config)
     if state.summary_node:
         console.print("[green]✓[/green] Created summary node function")
 
@@ -469,8 +463,7 @@ def examine_retrieval_result(retrieval_result):
                         if len(doc.page_content) > 50
                         else doc.page_content
                     )
-                    console.print(
-                        f"  {i}. [italic]{source}[/italic]: {content}")
+                    console.print(f"  {i}. [italic]{source}[/italic]: {content}")
     else:
         # Not a Command object
         console.print("[dim]Result is not a Command object[/dim]")
@@ -523,8 +516,7 @@ def examine_analysis_result(analysis_result):
                         display_value = (
                             value[:100] + "..." if len(value) > 100 else value
                         )
-                        console.print(
-                            f"  [italic]{key}[/italic]: {display_value}")
+                        console.print(f"  [italic]{key}[/italic]: {display_value}")
                     elif isinstance(value, list):
                         console.print(f"  [italic]{key}[/italic]:")
                         for item in value[:3]:  # Show first 3 items
@@ -592,8 +584,7 @@ def examine_summary_result(summary_result):
                         display_value = (
                             value[:150] + "..." if len(value) > 150 else value
                         )
-                        console.print(
-                            f"  [italic]{key}[/italic]: {display_value}")
+                        console.print(f"  [italic]{key}[/italic]: {display_value}")
                     else:
                         console.print(
                             f"  [italic]{key}[/italic]: {str(value)[:100]}..."

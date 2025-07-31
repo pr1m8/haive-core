@@ -139,7 +139,7 @@ class AzureSearchVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         """Validate search type is supported."""
         valid_types = ["similarity", "hybrid", "semantic_hybrid"]
         if v not in valid_types:
-            raise ValueError(f"search_type must be one of {valid_types}, got {v}")
+            raise TypeError(f"search_type must be one of {valid_types}, got {v}")
         return v
 
     def get_input_fields(self) -> dict[str, tuple[type, Any]]:

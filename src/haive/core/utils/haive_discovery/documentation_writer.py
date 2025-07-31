@@ -86,10 +86,7 @@ class DocumentationWriter:
                     comp_dict = comp.to_dict()
                     component_dicts.append(comp_dict)
                 except Exception as e:
-                    logger.warning(
-                        f"Could not serialize {comp_type} {
-                            comp.name}: {e}"
-                    )
+                    logger.warning(f"Could not serialize {comp_type} {comp.name}: {e}")
                     component_dicts.append(
                         {
                             "name": comp.name,
@@ -210,8 +207,7 @@ class DocumentationWriter:
                             tool_data.append(tool_dict)
                         except Exception as e:
                             logger.warning(
-                                f"Could not serialize tool from {
-                                    comp.name}: {e}"
+                                f"Could not serialize tool from {comp.name}: {e}"
                             )
 
                 with open(tools_file, "w") as f:

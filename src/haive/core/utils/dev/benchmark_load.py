@@ -36,8 +36,7 @@ class LoadTester:
         """Perform load testing with concurrent users."""
         if HAS_RICH and self.console:
             self.console.print(
-                f"🔥 Load Testing {func.__name__} "
-                f"({concurrent_users} users, {duration_seconds}s)",
+                f"🔥 Load Testing {func.__name__} ({concurrent_users} users, {duration_seconds}s)",
                 style="bold red",
             )
 

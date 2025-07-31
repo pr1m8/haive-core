@@ -135,10 +135,7 @@ class OutputParserNodeConfig(BaseNodeConfig[TInput, TOutput]):
         messages = self._get_messages_from_state(state)
 
         if not messages:
-            logger.warning(
-                f"No messages found in field '{
-                    self.messages_field}'"
-            )
+            logger.warning(f"No messages found in field '{self.messages_field}'")
             return self._create_error_response(
                 "No messages found", goto_node=self._get_goto_node()
             )
@@ -251,8 +248,7 @@ class OutputParserNodeConfig(BaseNodeConfig[TInput, TOutput]):
         }
 
         logger.info(
-            f"Successfully parsed output using {
-                self.output_parser.__class__.__name__}"
+            f"Successfully parsed output using {self.output_parser.__class__.__name__}"
         )
 
         return Command(update=update_dict, goto=self._get_goto_node())
@@ -389,7 +385,7 @@ class ListParserNodeConfig(OutputParserNodeConfig):
 
                 kwargs["output_parser"] = MarkdownListOutputParser()
             else:
-                raise ValueError(f"Unknown list_type: {list_type}")
+                raise TypeError(f"Unknown list_type: {list_type}")
 
         if "output_field" not in kwargs:
             kwargs["output_field"] = "parsed_list"

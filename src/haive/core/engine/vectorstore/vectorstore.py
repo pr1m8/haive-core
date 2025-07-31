@@ -263,7 +263,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
     @classmethod
     def validate_engine_type(cls, v) -> Any:
         if v != EngineType.VECTOR_STORE:
-            raise ValueError("engine_type must be VECTOR_STORE")
+            raise TypeError("engine_type must be VECTOR_STORE")
         return v
 
     def get_input_fields(self) -> dict[str, tuple[type, Any]]:
@@ -385,7 +385,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
             return vectorstore.similarity_search(query, **search_params)
         if search_type == "mmr":
             return vectorstore.max_marginal_relevance_search(query, **search_params)
-        raise ValueError(f"Unsupported search type: {search_type}")
+        raise TypeError(f"Unsupported search type: {search_type}")
 
     def invoke(
         self,
@@ -415,7 +415,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
             score_threshold = input_data.get("score_threshold")
             search_type = input_data.get("search_type")
         else:
-            raise ValueError(f"Unsupported input type: {type(input_data)}")
+            raise TypeError(f"Unsupported input type: {type(input_data)}")
 
         # Perform search
         return self.similarity_search(

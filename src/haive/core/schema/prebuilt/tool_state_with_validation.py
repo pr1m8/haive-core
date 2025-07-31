@@ -226,8 +226,7 @@ class EnhancedToolState(ToolState):
         self.branch_conditions.update(validation_state.get_routing_decision())
 
         logger.info(
-            f"Applied validation results: {
-                validation_state.get_routing_summary()}"
+            f"Applied validation results: {validation_state.get_routing_summary()}"
         )
 
     def get_validation_routing_data(self) -> dict[str, Any]:

@@ -196,7 +196,7 @@ class DocumentLoaderEngine(
         # Auto-detect from string or Path
         source = SourceFactory.create_source(input_data)
         if not source:
-            raise ValueError(f"Could not detect source type for: {input_data}")
+            raise TypeError(f"Could not detect source type for: {input_data}")
 
         return source
 
@@ -215,12 +215,8 @@ class DocumentLoaderEngine(
             and source.source_type not in self.supported_source_types
         ):
             raise ValueError(
-                f"Source type {
-                    source.source_type} not supported by {
-                    self.loader_name}. "
-                f"Supported types: {
-                    ', '.join(
-                        self.supported_source_types_names)}"
+                f"Source type {source.source_type} not supported by {self.loader_name}. "
+                f"Supported types: {', '.join(self.supported_source_types_names)}"
             )
 
     def invoke(

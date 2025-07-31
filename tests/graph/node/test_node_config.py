@@ -48,7 +48,8 @@ def test_node_config_with_end():
     assert node_config_str.command_goto is END
     logger.debug(
         f"Asserted command_goto (str): {
-            node_config_str.command_goto}")
+            node_config_str.command_goto}"
+    )
 
     # Test with END constant
     logger.debug("Testing with command_goto=END")
@@ -59,7 +60,8 @@ def test_node_config_with_end():
     assert node_config_const.command_goto is END
     logger.debug(
         f"Asserted command_goto (const): {
-            node_config_const.command_goto}")
+            node_config_const.command_goto}"
+    )
     logger.debug("--- Finished test_node_config_with_end ---")
 
 
@@ -67,9 +69,7 @@ def test_node_config_with_engine_object(real_llm_engine):
     """Test NodeConfig with an Engine object."""
     logger.debug("--- Starting test_node_config_with_engine_object ---")
     logger.debug(f"Using real_llm_engine: {real_llm_engine}")
-    node_config = NodeConfig(
-        name="test_node_engine_obj",
-        engine=real_llm_engine)
+    node_config = NodeConfig(name="test_node_engine_obj", engine=real_llm_engine)
     logger.debug(f"Created NodeConfig: {node_config}")
 
     assert node_config.engine is real_llm_engine
@@ -108,20 +108,16 @@ def test_node_config_resolve_engine(real_llm_engine, monkeypatch):
 
     # Test with engine object
     logger.debug("Testing resolve_engine with direct engine object")
-    node_config_obj = NodeConfig(
-        name="test_node_resolve_obj",
-        engine=real_llm_engine)
+    node_config_obj = NodeConfig(name="test_node_resolve_obj", engine=real_llm_engine)
     logger.debug(f"Created NodeConfig: {node_config_obj}")
     resolved_engine_obj, engine_id_obj = node_config_obj.resolve_engine()
-    logger.debug(
-        f"Resolved engine: {resolved_engine_obj}, engine_id: {engine_id_obj}")
+    logger.debug(f"Resolved engine: {resolved_engine_obj}, engine_id: {engine_id_obj}")
     assert resolved_engine_obj is real_llm_engine
     assert engine_id_obj == real_llm_engine.id
     logger.debug("Assertions passed for engine object case.")
 
     # Test with string (mock the registry lookup)
-    logger.debug(
-        "Testing resolve_engine with string reference (mocking registry)")
+    logger.debug("Testing resolve_engine with string reference (mocking registry)")
     from haive.core.engine.base import EngineRegistry
 
     # Create a mock registry class for testing
@@ -165,16 +161,12 @@ def test_node_config_resolve_engine(real_llm_engine, monkeypatch):
     monkeypatch.setattr(EngineRegistry, "get_instance", lambda: mock_registry)
 
     # Create config with string reference
-    node_config_str = NodeConfig(
-        name="test_node_resolve_str",
-        engine="test_engine")
-    logger.debug(
-        f"Created NodeConfig with string engine ref: {node_config_str}")
+    node_config_str = NodeConfig(name="test_node_resolve_str", engine="test_engine")
+    logger.debug(f"Created NodeConfig with string engine ref: {node_config_str}")
 
     # Resolve engine
     resolved_engine_str, engine_id_str = node_config_str.resolve_engine()
-    logger.debug(
-        f"Resolved engine: {resolved_engine_str}, engine_id: {engine_id_str}")
+    logger.debug(f"Resolved engine: {resolved_engine_str}, engine_id: {engine_id_str}")
     assert resolved_engine_str is real_llm_engine
     assert engine_id_str == real_llm_engine.id
     logger.debug("Assertions passed for string reference case.")
@@ -224,8 +216,7 @@ def test_node_config_serialization(real_llm_engine, monkeypatch):
                 f"MockRegistry.find called with: {name_or_id} during deserialization"
             )
             if name_or_id in (real_llm_engine.id, real_llm_engine.name):
-                logger.debug(
-                    f"MockRegistry returning engine: {real_llm_engine}")
+                logger.debug(f"MockRegistry returning engine: {real_llm_engine}")
                 return real_llm_engine
             logger.debug("MockRegistry returning None")
             return None

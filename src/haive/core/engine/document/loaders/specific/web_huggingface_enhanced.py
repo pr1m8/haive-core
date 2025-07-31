@@ -311,8 +311,7 @@ class HuggingFacePapersLoader(BaseLoader):
                 try:
                     dataset_info = api.dataset_info(self.dataset_id)
                     if hasattr(dataset_info, "citation") and dataset_info.citation:
-                        content = f"# Citation for Dataset: {
-                            self.dataset_id}\n\n"
+                        content = f"# Citation for Dataset: {self.dataset_id}\n\n"
                         content += f"```bibtex\n{dataset_info.citation}\n```\n"
 
                         metadata = {
@@ -527,8 +526,7 @@ class ExtendedHuggingFaceDatasetLoader(BaseLoader):
 
                 builder = load_dataset_builder(self.dataset_name, self.config_name)
                 info_content = f"# Dataset Info: {self.dataset_name}\n\n"
-                info_content += f"**Description:** {
-                    builder.info.description}\n"
+                info_content += f"**Description:** {builder.info.description}\n"
                 info_content += f"**Version:** {builder.info.version}\n"
                 info_content += f"**License:** {builder.info.license}\n"
 

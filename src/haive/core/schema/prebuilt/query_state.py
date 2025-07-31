@@ -67,8 +67,10 @@ try:
     # Try to import without triggering the full document system
     # This is a stub to check if DocumentState is available
     import sys
-    if 'haive.core.engine.document' in sys.modules:
+
+    if "haive.core.engine.document" in sys.modules:
         from haive.core.schema.prebuilt.document_state import DocumentState
+
         _HAS_DOCUMENT_STATE = True
     else:
         DocumentState = None
@@ -186,11 +188,15 @@ class QueryResult(BaseModel):
 
 # Define QueryState with conditional inheritance based on DocumentState availability
 if _HAS_DOCUMENT_STATE and DocumentState is not None:
+
     class QueryState(MessagesState, DocumentState):
         pass
+
 else:
+
     class QueryState(MessagesState):
         pass
+
 
 # Now redefine the actual QueryState class with its full implementation
 class QueryState(QueryState):
@@ -247,10 +253,7 @@ class QueryState(QueryState):
 
     # Core Query Information
     original_query: str = Field(description="The original user query")
-    query_id: str = Field(
-        default_factory=lambda: f"query_{
-            datetime.now().timestamp()}"
-    )
+    query_id: str = Field(default_factory=lambda: f"query_{datetime.now().timestamp()}")
     query_type: QueryType = Field(default=QueryType.SIMPLE)
     query_intent: QueryIntent = Field(default=QueryIntent.INFORMATION_SEEKING)
     query_complexity: QueryComplexity = Field(default=QueryComplexity.MEDIUM)

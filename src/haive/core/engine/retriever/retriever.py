@@ -39,6 +39,7 @@ Example:
     docs = retriever.get_relevant_documents("query")
     ```
 """
+
 import importlib
 import logging
 import pkgutil
@@ -174,7 +175,7 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
     def validate_engine_type(cls, v) -> Any:
         """Validate that the engine type is RETRIEVER."""
         if v != EngineType.RETRIEVER:
-            raise ValueError("engine_type must be RETRIEVER")
+            raise TypeError("engine_type must be RETRIEVER")
         return v
 
     def get_input_fields(self) -> dict[str, tuple[type, Any]]:
@@ -319,8 +320,7 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
 
         def decorator(subclass) -> Any:
             logger.debug(
-                f"Registering retriever type {retriever_type} with class {
-                    subclass.__name__}"
+                f"Registering retriever type {retriever_type} with class {subclass.__name__}"
             )
             cls._registry[retriever_type] = subclass
             return subclass
@@ -475,10 +475,7 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
                         if metadata_items:
                             metadata_str = f" ({', '.join(metadata_items)})"
 
-                    results.append(
-                        f"Result {
-                            i + 1}{metadata_str}:\n{content_preview}"
-                    )
+                    results.append(f"Result {i + 1}{metadata_str}:\n{content_preview}")
 
                 return "\n\n".join(results)
 
@@ -565,7 +562,7 @@ class VectorStoreRetrieverConfig(BaseRetrieverConfig):
     def validate_retriever_type(cls, v) -> Any:
         """Validate that the retriever type is VECTOR_STORE."""
         if v != RetrieverType.VECTOR_STORE:
-            raise ValueError("retriever_type must be VECTOR_STORE")
+            raise TypeError("retriever_type must be VECTOR_STORE")
         return v
 
     def instantiate(self) -> BaseRetriever:

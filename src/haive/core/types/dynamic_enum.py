@@ -69,11 +69,7 @@ class DynamicEnum(str, metaclass=_DynEnumMeta):
             if not isinstance(v, str):
                 raise TypeError("string required")
             if v not in cls._values:
-                raise ValueError(
-                    f"invalid enum value; allowed = {
-                        sorted(
-                            cls._values)}"
-                )
+                raise ValueError(f"invalid enum value; allowed = {sorted(cls._values)}")
             return v
 
         return core_schema.no_info_plain_validator_function(validate)

@@ -100,8 +100,7 @@ class TypedStateSchema(StateSchema, Generic[TEngine]):
 
                 logger = logging.getLogger(__name__)
                 logger.warning(
-                    f"Engine type mismatch: expected {
-                        cls._engine_type.__name__}, "
+                    f"Engine type mismatch: expected {cls._engine_type.__name__}, "
                     f"got {type(v).__name__}"
                 )
 
@@ -181,8 +180,7 @@ class MultiEngineStateSchema(StateSchema):
         # Check type
         if not isinstance(engine, engine_type):
             raise TypeError(
-                f"Engine '{name}' is {type(engine).__name__}, "
-                f"expected {engine_type.__name__}"
+                f"Engine '{name}' is {type(engine).__name__}, expected {engine_type.__name__}"
             )
 
         return engine

@@ -166,7 +166,7 @@ class ClickHouseVectorStoreConfig(BaseVectorStoreConfig):
         # Currently, ClickHouse primarily supports Annoy for vector indexing
         valid_types = ["annoy"]
         if v.lower() not in valid_types:
-            raise ValueError(f"index_type must be one of {valid_types}, got {v}")
+            raise TypeError(f"index_type must be one of {valid_types}, got {v}")
         return v.lower()
 
     @field_validator("table")

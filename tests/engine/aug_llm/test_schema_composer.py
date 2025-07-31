@@ -36,9 +36,7 @@ class SearchResult(BaseModel):
     """Search result model for testing."""
 
     answer: str = Field(description="Answer to the query")
-    sources: list[str] = Field(
-        default_factory=list,
-        description="Source documents")
+    sources: list[str] = Field(default_factory=list, description="Source documents")
     confidence: float = Field(default=0.0, description="Confidence score")
 
 
@@ -48,9 +46,7 @@ class ChatState(StateSchema):
     messages: Annotated[list[BaseMessage], operator.add] = Field(
         default_factory=list, description="Conversation messages"
     )
-    context: list[str] = Field(
-        default_factory=list,
-        description="Context documents")
+    context: list[str] = Field(default_factory=list, description="Context documents")
     query: str = Field(default="", description="User query")
 
 
@@ -136,8 +132,7 @@ def log_schema_debug_info(schema, title: str = "Schema Debug Info"):
 
 def test_schema_composer_basics():
     """Test basic SchemaComposer functionality with extensive logging."""
-    console.print(
-        "\n[bold cyan]Testing Basic SchemaComposer Functionality[/bold cyan]")
+    console.print("\n[bold cyan]Testing Basic SchemaComposer Functionality[/bold cyan]")
 
     # Create a composer
     composer = SchemaComposer(name="TestSchema")
@@ -165,8 +160,7 @@ def test_schema_composer_basics():
     log_schema_debug_info(schema, "Built Schema")
 
     # Verify fields
-    assert hasattr(
-        schema, "model_fields"), "Schema missing model_fields attribute"
+    assert hasattr(schema, "model_fields"), "Schema missing model_fields attribute"
     assert (
         "name" in schema.model_fields
     ), f"Field 'name' missing. Available: {list(schema.model_fields.keys())}"
@@ -209,8 +203,7 @@ def test_schema_composer_from_model():
     log_schema_debug_info(schema, "Built Schema from Model")
 
     # Verify fields were correctly extracted
-    assert hasattr(
-        schema, "model_fields"), "Schema missing model_fields attribute"
+    assert hasattr(schema, "model_fields"), "Schema missing model_fields attribute"
 
     for field_name in SimpleModel.model_fields:
         assert (
@@ -264,12 +257,14 @@ def test_schema_composer_with_engine():
         f"  Has get_input_fields: {
             hasattr(
                 aug_llm,
-                'get_input_fields')}")
+                'get_input_fields')}"
+    )
     console.print(
         f"  Has get_output_fields: {
             hasattr(
                 aug_llm,
-                'get_output_fields')}")
+                'get_output_fields')}"
+    )
 
     # Test field extraction methods
     if hasattr(aug_llm, "get_input_fields"):
@@ -301,12 +296,12 @@ def test_schema_composer_with_engine():
     log_schema_debug_info(schema, "Built Schema from Engine")
 
     # Verify schema has fields
-    assert hasattr(
-        schema, "model_fields"), "Schema missing model_fields attribute"
+    assert hasattr(schema, "model_fields"), "Schema missing model_fields attribute"
     console.print(
         f"\n[green]Schema fields: {
             list(
-                schema.model_fields.keys())}[/green]")
+                schema.model_fields.keys())}[/green]"
+    )
 
     # Check for expected fields
     expected_fields = ["messages", "content"]
@@ -321,8 +316,7 @@ def test_schema_composer_with_engine():
 
 def test_schema_composer_input_output_schema():
     """Test input/output schema composition with comprehensive debugging."""
-    console.print(
-        "\n[bold cyan]Testing Input/Output Schema Composition[/bold cyan]")
+    console.print("\n[bold cyan]Testing Input/Output Schema Composition[/bold cyan]")
 
     # Create AugLLMConfig
     aug_llm = AugLLMConfig(
@@ -349,8 +343,7 @@ def test_schema_composer_input_output_schema():
     SchemaComposer(name="DebugOutputSchema")
 
     # Manually add fields to see what should be there
-    console.print(
-        "\n[bold]Manual Output Field Addition (for debugging):[/bold]")
+    console.print("\n[bold]Manual Output Field Addition (for debugging):[/bold]")
 
     # Check what fields get extracted
     if hasattr(aug_llm, "get_output_fields"):
@@ -363,8 +356,7 @@ def test_schema_composer_input_output_schema():
             console.print(f"Error getting output fields: {e}")
 
     # Check for structured output
-    if hasattr(
-            aug_llm, "structured_output_model") and aug_llm.structured_output_model:
+    if hasattr(aug_llm, "structured_output_model") and aug_llm.structured_output_model:
         console.print("\nStructured output model fields:")
         for (
             field_name,
@@ -382,10 +374,8 @@ def test_schema_composer_input_output_schema():
         console.print(f"  {field_name}: {field_info.annotation}")
 
     # Assertions with better error messages
-    assert hasattr(
-        input_schema, "model_fields"), "Input schema missing model_fields"
-    assert hasattr(
-        output_schema, "model_fields"), "Output schema missing model_fields"
+    assert hasattr(input_schema, "model_fields"), "Input schema missing model_fields"
+    assert hasattr(output_schema, "model_fields"), "Output schema missing model_fields"
 
     # Check for specific fields
     for field in ["messages"]:
@@ -400,8 +390,7 @@ def test_schema_composer_input_output_schema():
 
     # Check what's in output schema
     has_content = "content" in output_schema.model_fields
-    has_searchresult = any(
-        "searchresult" in k for k in output_schema.model_fields)
+    has_searchresult = any("searchresult" in k for k in output_schema.model_fields)
 
     console.print("\nOutput schema contains:")
     console.print(f"  - 'content' field: {has_content}")
@@ -445,8 +434,7 @@ def test_schema_composer_merge():
     log_composer_debug_info(composer2, "Second Composer")
 
     # Test merge method
-    console.print(
-        "\n[yellow]Merging composers using the merge method...[/yellow]")
+    console.print("\n[yellow]Merging composers using the merge method...[/yellow]")
     merged = SchemaComposer.merge(composer1, composer2)
     log_composer_debug_info(merged, "Merged Composer")
 
@@ -477,8 +465,7 @@ def test_schema_composer_merge():
 
 def test_schema_composer_state_from_io():
     """Test creating state from I/O schemas with detailed debugging."""
-    console.print(
-        "\n[bold cyan]Testing State Creation from I/O Schemas[/bold cyan]")
+    console.print("\n[bold cyan]Testing State Creation from I/O Schemas[/bold cyan]")
 
     # Define input schema
     class QueryInputSchema(BaseModel):
@@ -511,8 +498,7 @@ def test_schema_composer_state_from_io():
         console.print(f"  {field_name}: {field_info.annotation}")
 
     # Test create_state_from_io_schemas method
-    console.print(
-        "\n[yellow]Creating state schema from I/O schemas...[/yellow]")
+    console.print("\n[yellow]Creating state schema from I/O schemas...[/yellow]")
     try:
         state_schema = SchemaComposer.create_state_from_io_schemas(
             QueryInputSchema, ResponseOutputSchema, name="ComposedStateSchema"
@@ -526,7 +512,8 @@ def test_schema_composer_state_from_io():
             f"  Is StateSchema: {
                 issubclass(
                     state_schema,
-                    StateSchema)}")
+                    StateSchema)}"
+        )
         console.print(
             f"  Is QueryInputSchema: {
                 issubclass(
@@ -559,8 +546,7 @@ def test_schema_composer_state_from_io():
         state = state_schema(
             query="What is AI?", context=["AI is artificial intelligence."]
         )
-        console.print(
-            f"\n[green]Successfully created state instance: {state}[/green]")
+        console.print(f"\n[green]Successfully created state instance: {state}[/green]")
 
         SchemaUI.display_schema(state_schema, "Composed State Schema")
 
@@ -573,8 +559,7 @@ def test_schema_composer_state_from_io():
 
 def test_schema_composer_complete_workflow():
     """Complete workflow test with visualization of every step."""
-    console.print(
-        "\n[bold cyan]Complete Workflow Test with Visualization[/bold cyan]")
+    console.print("\n[bold cyan]Complete Workflow Test with Visualization[/bold cyan]")
 
     # Step 1: Create initial composer
     composer = SchemaComposer(name="CompleteWorkflow")

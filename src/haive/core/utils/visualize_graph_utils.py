@@ -1,8 +1,9 @@
 import os
 
+from haive.core.config.constants import GRAPH_IMAGES_DIR
+
 # Optionally display the image (for local viewing, using PIL)
 # Function to render and display the graph
-from haive.core.config.constants import GRAPH_IMAGES_DIR
 
 
 def render_and_display_graph(

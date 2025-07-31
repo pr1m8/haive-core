@@ -172,8 +172,7 @@ class SelfQueryRetrieverConfig(BaseRetrieverConfig):
             from langchain.retrievers import SelfQueryRetriever
         except ImportError:
             raise ImportError(
-                "SelfQueryRetriever requires langchain package. "
-                "Install with: pip install langchain"
+                "SelfQueryRetriever requires langchain package. Install with: pip install langchain"
             )
 
         # Instantiate the vector store

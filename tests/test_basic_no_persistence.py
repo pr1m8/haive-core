@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Test the actual test_basic.py scenario with persistence disabled."""
 
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.engine.aug_llm import AugLLMConfig
 
 RAG_QUERY_REFINEMENT = ChatPromptTemplate.from_messages(

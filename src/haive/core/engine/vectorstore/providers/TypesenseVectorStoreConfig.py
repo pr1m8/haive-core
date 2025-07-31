@@ -188,8 +188,7 @@ class TypesenseVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             from langchain_community.vectorstores import Typesense
         except ImportError:
             raise ImportError(
-                "Typesense requires typesense package. "
-                "Install with: pip install typesense"
+                "Typesense requires typesense package. Install with: pip install typesense"
             )
 
         # Validate embedding

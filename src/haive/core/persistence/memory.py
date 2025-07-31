@@ -14,9 +14,11 @@ temporary state management is sufficient.
 import logging
 from typing import Any
 
+from langgraph.checkpoint.memory import MemorySaver
 from pydantic import Field
 
 from haive.core.persistence.base import CheckpointerConfig
+from haive.core.persistence.serializers import SecureSecretStrSerializer
 from haive.core.persistence.types import (
     CheckpointerMode,
     CheckpointerType,
@@ -114,10 +116,7 @@ class MemoryCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
             ```
         """
         try:
-            from langgraph.checkpoint.memory import MemorySaver
-
             # Import our secure serializer
-            from haive.core.persistence.serializers import SecureSecretStrSerializer
 
             # Create checkpointer with secure serializer
             secure_serializer = SecureSecretStrSerializer()

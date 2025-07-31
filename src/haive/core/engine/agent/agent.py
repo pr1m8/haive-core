@@ -80,9 +80,7 @@ def register_agent(config_class: type[AgentConfig]):
         # Set reference to config class on agent class
         agent_class.config_class = config_class
         logger.info(
-            f"Registered agent class {
-                agent_class.__name__} for config {
-                config_class.__name__}"
+            f"Registered agent class {agent_class.__name__} for config {config_class.__name__}"
         )
         return agent_class
 
@@ -257,10 +255,8 @@ class Agent(Generic[TConfig], ABC):
         self.console.print(
             Panel.fit(
                 f"[bold blue]Haive Agent: [green]{
-                    getattr(
-                        self.config,
-                        'name',
-                        'Unnamed')}[/green][/bold blue]",
+                    getattr(self.config, 'name', 'Unnamed')
+                }[/green][/bold blue]",
                 border_style="blue",
                 title="Initializing",
                 subtitle=f"v{getattr(self.config, 'version', '1.0.0')}",
@@ -336,8 +332,7 @@ class Agent(Generic[TConfig], ABC):
 
         # Create a table for agent configuration
         table = Table(
-            title=f"[bold]Agent Configuration: [green]{
-                self.config.name}[/green][/bold]"
+            title=f"[bold]Agent Configuration: [green]{self.config.name}[/green][/bold]"
         )
         table.add_column("Property", style="cyan")
         table.add_column("Value", style="green")
@@ -376,18 +371,14 @@ class Agent(Generic[TConfig], ABC):
             Panel.fit(
                 f"[bold green]Agent {self.config.name} Ready[/bold green]\n"
                 f"[cyan]Workflow nodes:[/cyan] {
-                    len(
-                        self.graph.nodes) if hasattr(
-                        self.graph,
-                        'nodes') else 0}\n"
+                    len(self.graph.nodes) if hasattr(self.graph, 'nodes') else 0
+                }\n"
                 f"[cyan]Schema fields:[/cyan] {
-                    len(
-                        self.state_schema.model_fields) if hasattr(
-                        self.state_schema,
-                        'model_fields') else 0}\n"
-                f"[cyan]Persistence:[/cyan] {
-                    type(
-                        self.checkpointer).__name__}\n"
+                    len(self.state_schema.model_fields)
+                    if hasattr(self.state_schema, 'model_fields')
+                    else 0
+                }\n"
+                f"[cyan]Persistence:[/cyan] {type(self.checkpointer).__name__}\n"
                 f"[cyan]Checkpoint mode:[/cyan] {self._checkpoint_mode}\n"
                 f"[cyan]Runnable config:[/cyan] {self.config.runnable_config}",
                 border_style="green",
@@ -421,8 +412,7 @@ class Agent(Generic[TConfig], ABC):
 
         if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
             self.console.print(
-                f"[blue]Created output directories in:[/blue] {
-                    self.config.output_dir}"
+                f"[blue]Created output directories in:[/blue] {self.config.output_dir}"
             )
 
         logger.debug(f"Output directories set up for {self.config.name}")
@@ -460,8 +450,7 @@ class Agent(Generic[TConfig], ABC):
                     if isinstance(self.config.state_schema, dict):
                         # Build from dictionary definition
                         logger.debug(
-                            f"Building state schema from dictionary for {
-                                self.config.name}"
+                            f"Building state schema from dictionary for {self.config.name}"
                         )
                         schema_composer = SchemaComposer(
                             name=f"{self.config.name}State"
@@ -504,8 +493,7 @@ class Agent(Generic[TConfig], ABC):
                             description="[bold blue]Using provided state schema...[/bold blue]",
                         )
                         logger.debug(
-                            f"Using provided state schema for {
-                                self.config.name}"
+                            f"Using provided state schema for {self.config.name}"
                         )
                         self.state_schema = self.config.state_schema
                 else:
@@ -515,10 +503,7 @@ class Agent(Generic[TConfig], ABC):
                         advance=50,
                         description="[bold blue]Deriving state schema from components...[/bold blue]",
                     )
-                    logger.debug(
-                        f"Deriving state schema for {
-                            self.config.name}"
-                    )
+                    logger.debug(f"Deriving state schema for {self.config.name}")
                     self.state_schema = self.config.derive_schema()
                     progress.update(state_task, advance=30)
 
@@ -542,10 +527,7 @@ class Agent(Generic[TConfig], ABC):
 
                     if isinstance(self.config.input_schema, dict):
                         # Build from dictionary
-                        logger.debug(
-                            f"Building input schema for {
-                                self.config.name}"
-                        )
+                        logger.debug(f"Building input schema for {self.config.name}")
                         schema_composer = SchemaComposer(
                             name=f"{self.config.name}Input"
                         )
@@ -584,8 +566,7 @@ class Agent(Generic[TConfig], ABC):
                             description="[bold blue]Using provided input schema...[/bold blue]",
                         )
                         logger.debug(
-                            f"Using provided input schema for {
-                                self.config.name}"
+                            f"Using provided input schema for {self.config.name}"
                         )
                         self.input_schema = self.config.input_schema
                 else:
@@ -595,10 +576,7 @@ class Agent(Generic[TConfig], ABC):
                         advance=80,
                         description="[bold blue]Deriving input schema...[/bold blue]",
                     )
-                    logger.debug(
-                        f"Deriving input schema for {
-                            self.config.name}"
-                    )
+                    logger.debug(f"Deriving input schema for {self.config.name}")
                     self.input_schema = self.config.derive_input_schema()
 
                 progress.update(
@@ -621,10 +599,7 @@ class Agent(Generic[TConfig], ABC):
 
                     if isinstance(self.config.output_schema, dict):
                         # Build from dictionary
-                        logger.debug(
-                            f"Building output schema for {
-                                self.config.name}"
-                        )
+                        logger.debug(f"Building output schema for {self.config.name}")
                         schema_composer = SchemaComposer(
                             name=f"{self.config.name}Output"
                         )
@@ -663,8 +638,7 @@ class Agent(Generic[TConfig], ABC):
                             description="[bold blue]Using provided output schema...[/bold blue]",
                         )
                         logger.debug(
-                            f"Using provided output schema for {
-                                self.config.name}"
+                            f"Using provided output schema for {self.config.name}"
                         )
                         self.output_schema = self.config.output_schema
                 else:
@@ -674,10 +648,7 @@ class Agent(Generic[TConfig], ABC):
                         advance=80,
                         description="[bold blue]Deriving output schema...[/bold blue]",
                     )
-                    logger.debug(
-                        f"Deriving output schema for {
-                            self.config.name}"
-                    )
+                    logger.debug(f"Deriving output schema for {self.config.name}")
                     self.output_schema = self.config.derive_output_schema()
 
                 progress.update(
@@ -698,8 +669,7 @@ class Agent(Generic[TConfig], ABC):
                 if isinstance(self.config.state_schema, dict):
                     # Build from dictionary definition
                     logger.debug(
-                        f"Building state schema from dictionary for {
-                            self.config.name}"
+                        f"Building state schema from dictionary for {self.config.name}"
                     )
                     schema_composer = SchemaComposer(name=f"{self.config.name}State")
                     for field_name, field_info in self.config.state_schema.items():
@@ -718,10 +688,7 @@ class Agent(Generic[TConfig], ABC):
                     self.state_schema = schema_composer.build()
                 else:
                     # Use provided class
-                    logger.debug(
-                        f"Using provided state schema for {
-                            self.config.name}"
-                    )
+                    logger.debug(f"Using provided state schema for {self.config.name}")
                     self.state_schema = self.config.state_schema
             else:
                 # Derive from components
@@ -735,10 +702,7 @@ class Agent(Generic[TConfig], ABC):
             ):
                 if isinstance(self.config.input_schema, dict):
                     # Build from dictionary
-                    logger.debug(
-                        f"Building input schema for {
-                            self.config.name}"
-                    )
+                    logger.debug(f"Building input schema for {self.config.name}")
                     schema_composer = SchemaComposer(name=f"{self.config.name}Input")
                     for field_name, field_info in self.config.input_schema.items():
                         if isinstance(field_info, tuple):
@@ -756,10 +720,7 @@ class Agent(Generic[TConfig], ABC):
                     self.input_schema = schema_composer.build()
                 else:
                     # Use provided class
-                    logger.debug(
-                        f"Using provided input schema for {
-                            self.config.name}"
-                    )
+                    logger.debug(f"Using provided input schema for {self.config.name}")
                     self.input_schema = self.config.input_schema
             else:
                 # Derive using config's derivation method
@@ -773,10 +734,7 @@ class Agent(Generic[TConfig], ABC):
             ):
                 if isinstance(self.config.output_schema, dict):
                     # Build from dictionary
-                    logger.debug(
-                        f"Building output schema for {
-                            self.config.name}"
-                    )
+                    logger.debug(f"Building output schema for {self.config.name}")
                     schema_composer = SchemaComposer(name=f"{self.config.name}Output")
                     for field_name, field_info in self.config.output_schema.items():
                         if isinstance(field_info, tuple):
@@ -794,10 +752,7 @@ class Agent(Generic[TConfig], ABC):
                     self.output_schema = schema_composer.build()
                 else:
                     # Use provided class
-                    logger.debug(
-                        f"Using provided output schema for {
-                            self.config.name}"
-                    )
+                    logger.debug(f"Using provided output schema for {self.config.name}")
                     self.output_schema = self.config.output_schema
             else:
                 # Derive using config's derivation method
@@ -953,50 +908,31 @@ class Agent(Generic[TConfig], ABC):
 
             self.console.print(engine_table)
             self.console.print(
-                f"[green]Successfully initialized {
-                    len(
-                        self.engines)} engines[/green]"
+                f"[green]Successfully initialized {len(self.engines)} engines[/green]"
             )
         else:
             # Initialize main engine if present
             if hasattr(self.config, "engine") and self.config.engine is not None:
                 engine_name = "main"
-                logger.debug(
-                    f"Initializing main engine for {
-                        self.config.name}"
-                )
+                logger.debug(f"Initializing main engine for {self.config.name}")
                 self.engine = self.config.engine
                 self.engines[engine_name] = self.engine
                 logger.debug(
-                    f"Main engine initialized: {
-                        getattr(
-                            self.engine,
-                            'name',
-                            'unknown')}"
+                    f"Main engine initialized: {getattr(self.engine, 'name', 'unknown')}"
                 )
 
             # Initialize additional engines
             for name, engine_config in getattr(self.config, "engines", {}).items():
-                logger.debug(
-                    f"Initializing engine '{name}' for {
-                        self.config.name}"
-                )
+                logger.debug(f"Initializing engine '{name}' for {self.config.name}")
                 self.engines[name] = engine_config
                 logger.debug(
-                    f"Engine '{name}' initialized: {
-                        getattr(
-                            self.engines[name],
-                            'name',
-                            'unknown')}"
+                    f"Engine '{name}' initialized: {getattr(self.engines[name], 'name', 'unknown')}"
                 )
 
             # Process any subagent engines
             if hasattr(self.config, "subagents") and self.config.subagents:
                 for name, subagent_config in self.config.subagents.items():
-                    logger.debug(
-                        f"Processing subagent '{name}' for {
-                            self.config.name}"
-                    )
+                    logger.debug(f"Processing subagent '{name}' for {self.config.name}")
                     self.engines[f"subagent:{name}"] = subagent_config
 
         logger.debug(f"Initialized {len(self.engines)} engines for {self.config.name}")
@@ -1053,10 +989,9 @@ class Agent(Generic[TConfig], ABC):
             # Standard synchronous checkpointer setup
             self.checkpointer = setup_checkpointer(self.config)
             logger.debug(
-                f"Synchronous checkpointer set up for {
-                    self.config.name}: {
-                    type(
-                        self.checkpointer).__name__}"
+                f"Synchronous checkpointer set up for {self.config.name}: {
+                    type(self.checkpointer).__name__
+                }"
             )
 
             # Add store if configured
@@ -1196,8 +1131,7 @@ class Agent(Generic[TConfig], ABC):
                         )
 
                 logger.info(
-                    f"Async checkpointer created successfully for {
-                        self.config.name}"
+                    f"Async checkpointer created successfully for {self.config.name}"
                 )
             except Exception as e:
                 logger.exception(f"Failed to create async checkpointer: {e}")
@@ -1417,8 +1351,7 @@ class Agent(Generic[TConfig], ABC):
 
         if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
             with self.console.status(
-                f"[bold blue]Processing {
-                    len(node_configs)} node configurations...[/bold blue]"
+                f"[bold blue]Processing {len(node_configs)} node configurations...[/bold blue]"
             ) as status:
                 for node_name, node_config in node_configs.items():
                     status.update(
@@ -1440,8 +1373,7 @@ class Agent(Generic[TConfig], ABC):
                     )
 
             self.console.print(
-                f"[green]Added {
-                    len(node_configs)} nodes from configuration[/green]"
+                f"[green]Added {len(node_configs)} nodes from configuration[/green]"
             )
         else:
             for node_name, node_config in node_configs.items():
@@ -1478,15 +1410,11 @@ class Agent(Generic[TConfig], ABC):
         if not ordered_patterns:
             return
 
-        logger.debug(
-            f"Applying {
-                len(ordered_patterns)} patterns from configuration"
-        )
+        logger.debug(f"Applying {len(ordered_patterns)} patterns from configuration")
 
         if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
             with self.console.status(
-                f"[bold blue]Applying {
-                    len(ordered_patterns)} patterns...[/bold blue]"
+                f"[bold blue]Applying {len(ordered_patterns)} patterns...[/bold blue]"
             ) as status:
                 for pattern_config in ordered_patterns:
                     pattern_name = pattern_config.name
@@ -1516,8 +1444,7 @@ class Agent(Generic[TConfig], ABC):
                         )
 
             self.console.print(
-                f"[green]Applied {
-                    len(ordered_patterns)} patterns from configuration[/green]"
+                f"[green]Applied {len(ordered_patterns)} patterns from configuration[/green]"
             )
         else:
             for pattern_config in ordered_patterns:
@@ -1602,7 +1529,8 @@ class Agent(Generic[TConfig], ABC):
             # Show compilation result
             self.console.print(
                 f"[bold green]Graph compiled successfully[/bold green] in {
-                    compile_time:.2f} seconds"
+                    compile_time:.2f
+                } seconds"
             )
 
             # Get node count
@@ -1698,10 +1626,7 @@ class Agent(Generic[TConfig], ABC):
             raise RuntimeError("Graph builder is not set up.")
 
         try:
-            logger.info(
-                f"Applying pattern '{pattern_name}' to {
-                    self.config.name}"
-            )
+            logger.info(f"Applying pattern '{pattern_name}' to {self.config.name}")
 
             if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
                 with self.console.status(
@@ -1784,8 +1709,7 @@ class Agent(Generic[TConfig], ABC):
                 try:
                     result = input_schema(**prepared_input)
                     logger.debug(
-                        f"Created input schema instance with {
-                            len(prepared_input)} fields"
+                        f"Created input schema instance with {len(prepared_input)} fields"
                     )
                     return result
                 except Exception as e:
@@ -1852,8 +1776,7 @@ class Agent(Generic[TConfig], ABC):
                 try:
                     result = input_schema(**prepared_input)
                     logger.debug(
-                        f"Created input schema instance with {
-                            len(prepared_input)} fields"
+                        f"Created input schema instance with {len(prepared_input)} fields"
                     )
                     return result
                 except Exception as e:
@@ -1881,8 +1804,7 @@ class Agent(Generic[TConfig], ABC):
                 try:
                     result = input_schema(**input_data)
                     logger.debug(
-                        f"Created input schema instance from dict with {
-                            len(input_data)} fields"
+                        f"Created input schema instance from dict with {len(input_data)} fields"
                     )
                     return result
                 except Exception as e:
@@ -1922,8 +1844,7 @@ class Agent(Generic[TConfig], ABC):
         else:
             # Convert to string and handle recursively
             logger.warning(
-                f"Unsupported input type {
-                    type(input_data).__name__}, converting to string"
+                f"Unsupported input type {type(input_data).__name__}, converting to string"
             )
             return self._prepare_input(str(input_data))
 
@@ -2122,8 +2043,7 @@ class Agent(Generic[TConfig], ABC):
         if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
             self.console.print(
                 Panel.fit(
-                    f"[bold blue]Running Agent: [green]{
-                        self.config.name}[/green][/bold blue]\n"
+                    f"[bold blue]Running Agent: [green]{self.config.name}[/green][/bold blue]\n"
                     f"[cyan]Thread ID:[/cyan] {thread_id}",
                     border_style="blue",
                     title="Execution Started",
@@ -2244,8 +2164,7 @@ class Agent(Generic[TConfig], ABC):
                 self.console.print(
                     Panel.fit(
                         f"[bold green]Execution Completed[/bold green]\n"
-                        f"[cyan]Execution Time:[/cyan] {
-                            execution_time:.2f} seconds",
+                        f"[cyan]Execution Time:[/cyan] {execution_time:.2f} seconds",
                         border_style="green",
                         title="Agent Execution",
                         subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -2320,7 +2239,8 @@ class Agent(Generic[TConfig], ABC):
             self.console.print(
                 Panel.fit(
                     f"[bold blue]Running Agent Async: [green]{
-                        self.config.name}[/green][/bold blue]\n"
+                        self.config.name
+                    }[/green][/bold blue]\n"
                     f"[cyan]Thread ID:[/cyan] {thread_id}\n"
                     f"[cyan]Checkpoint Mode:[/cyan] {checkpoint_mode}",
                     border_style="blue",
@@ -2411,8 +2331,10 @@ class Agent(Generic[TConfig], ABC):
                     # Log execution details
                     logger.info(
                         f"Executing async app with checkpointer: {
-                            async_app.checkpointer.__class__.__name__ if hasattr(
-                                async_app, 'checkpointer') and async_app.checkpointer else 'None'}"
+                            async_app.checkpointer.__class__.__name__
+                            if hasattr(async_app, 'checkpointer') and async_app.checkpointer
+                            else 'None'
+                        }"
                     )
 
                     # Run with async app and async checkpointer
@@ -2529,8 +2451,7 @@ class Agent(Generic[TConfig], ABC):
                 self.console.print(
                     Panel.fit(
                         f"[bold green]Async Execution Completed[/bold green]\n"
-                        f"[cyan]Execution Time:[/cyan] {
-                            execution_time:.2f} seconds\n"
+                        f"[cyan]Execution Time:[/cyan] {execution_time:.2f} seconds\n"
                         f"[cyan]Checkpoint Mode:[/cyan] {checkpoint_mode}",
                         border_style="green",
                         title="Agent Async Execution",
@@ -2557,7 +2478,7 @@ class Agent(Generic[TConfig], ABC):
         config: RunnableConfig | None = None,
         debug: bool | None = None,
         **kwargs,
-    ) -> Generator[dict[str, Any], None, None]:
+    ) -> Generator[dict[str, Any]]:
         """Stream agent execution with input data.
 
         Args:
@@ -2598,8 +2519,7 @@ class Agent(Generic[TConfig], ABC):
         if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
             self.console.print(
                 Panel.fit(
-                    f"[bold blue]Streaming Agent: [green]{
-                        self.config.name}[/green][/bold blue]\n"
+                    f"[bold blue]Streaming Agent: [green]{self.config.name}[/green][/bold blue]\n"
                     f"[cyan]Thread ID:[/cyan] {thread_id}\n"
                     f"[cyan]Stream Mode:[/cyan] {stream_mode}",
                     border_style="blue",
@@ -2702,8 +2622,7 @@ class Agent(Generic[TConfig], ABC):
                 self.console.print(
                     Panel.fit(
                         f"[bold green]Streaming Completed[/bold green]\n"
-                        f"[cyan]Execution Time:[/cyan] {
-                            execution_time:.2f} seconds\n"
+                        f"[cyan]Execution Time:[/cyan] {execution_time:.2f} seconds\n"
                         f"[cyan]Total Chunks:[/cyan] {chunk_count}",
                         border_style="green",
                         title="Agent Streaming",
@@ -2774,7 +2693,7 @@ class Agent(Generic[TConfig], ABC):
         config: RunnableConfig | None = None,
         debug: bool | None = None,
         **kwargs,
-    ) -> AsyncGenerator[dict[str, Any], None]:
+    ) -> AsyncGenerator[dict[str, Any]]:
         """Asynchronously stream agent execution with input data.
 
         Args:
@@ -2823,7 +2742,8 @@ class Agent(Generic[TConfig], ABC):
             self.console.print(
                 Panel.fit(
                     f"[bold blue]Async Streaming Agent: [green]{
-                        self.config.name}[/green][/bold blue]\n"
+                        self.config.name
+                    }[/green][/bold blue]\n"
                     f"[cyan]Thread ID:[/cyan] {thread_id}\n"
                     f"[cyan]Stream Mode:[/cyan] {stream_mode}\n"
                     f"[cyan]Checkpoint Mode:[/cyan] {checkpoint_mode}",
@@ -3060,8 +2980,7 @@ class Agent(Generic[TConfig], ABC):
                 self.console.print(
                     Panel.fit(
                         f"[bold green]Async Streaming Completed[/bold green]\n"
-                        f"[cyan]Execution Time:[/cyan] {
-                            execution_time:.2f} seconds\n"
+                        f"[cyan]Execution Time:[/cyan] {execution_time:.2f} seconds\n"
                         f"[cyan]Checkpoint Mode:[/cyan] {checkpoint_mode}",
                         border_style="green",
                         title="Agent Async Streaming",
@@ -3107,18 +3026,14 @@ class Agent(Generic[TConfig], ABC):
                         json.dump(state_json, f, indent=4)
 
                 self.console.print(
-                    f"[bold green]State history saved to:[/bold green] {
-                        self.state_filename}"
+                    f"[bold green]State history saved to:[/bold green] {self.state_filename}"
                 )
             else:
                 # Get state from app
                 state_json = self.app.get_state(runnable_config)
 
                 if not state_json:
-                    logger.warning(
-                        f"No state history available for {
-                            self.config.name}"
-                    )
+                    logger.warning(f"No state history available for {self.config.name}")
                     return False
 
                 # Ensure state is JSON serializable
@@ -3269,10 +3184,7 @@ class Agent(Generic[TConfig], ABC):
 
                 else:
                     # Unknown format
-                    logger.info(
-                        f"State (Type: {
-                            type(state).__name__}): {state}"
-                    )
+                    logger.info(f"State (Type: {type(state).__name__}): {state}")
 
         except Exception as e:
             logger.exception(f"Error inspecting state: {e}")
@@ -3632,10 +3544,7 @@ class Agent(Generic[TConfig], ABC):
 
                 # Ensure state is a dictionary
                 if not isinstance(state_data, dict):
-                    logger.error(
-                        f"Invalid state data type: {
-                            type(state_data)}"
-                    )
+                    logger.error(f"Invalid state data type: {type(state_data)}")
                     return False
 
                 # Create runtime config with thread ID

@@ -134,7 +134,7 @@ class TimeWeightedVectorStoreRetrieverConfig(BaseRetrieverConfig):
         """Validate search type."""
         valid_types = ["similarity", "mmr"]
         if v not in valid_types:
-            raise ValueError(f"search_type must be one of {valid_types}, got {v}")
+            raise TypeError(f"search_type must be one of {valid_types}, got {v}")
         return v
 
     def get_input_fields(self) -> dict[str, tuple[type, Any]]:

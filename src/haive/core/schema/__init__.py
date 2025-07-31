@@ -99,12 +99,11 @@ __license__ = "MIT"
 
 # Type imports for better IDE support
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from typing import TypeAlias
 
-    from pydantic import BaseModel
 
 # Core schema imports
 # Schema composition imports
@@ -156,8 +155,8 @@ try:
     from haive.core.schema.composer.schema_composer import SchemaComposer
 except ImportError:
     # Fallback to original location for backward compatibility
-    from haive.core.schema.schema_composer import (  # type: ignore[attr-defined]
-        SchemaComposer,
+    from haive.core.schema.schema_composer import (
+        SchemaComposer,  # type: ignore[attr-defined]
     )
 
 # Type aliases for better API clarity
@@ -168,53 +167,53 @@ ValidatorType: "TypeAlias" = Callable[[Any], Any]
 
 # Define public API
 __all__ = [
-    # Version information
-    "__version__",
-    "__author__",
-    "__license__",
-    # Core classes
-    "StateSchema",
-    "StateSchemaManager",
-    "SchemaUI",
-    # Schema composition
-    "SchemaComposer",
     "AgentSchemaComposer",
     "BuildMode",
-    "MultiAgentStateSchema",
-    "MultiAgentSchemaComposer",
-    "PrebuiltMultiAgentStateSchema",
     # Field management
     "FieldDefinition",
     "FieldExtractor",
-    "create_field",
-    "create_annotated_field",
-    "extract_type_metadata",
-    "infer_field_type",
-    "get_common_reducers",
-    "resolve_reducer",
+    "FieldType",
     # Prebuilt schemas
     # "BasicAgentState",  # Module doesn't exist
     "MessagesState",
-    "ToolState",
+    "MessagesStateWithTokenUsage",
+    "MultiAgentSchemaComposer",
+    "MultiAgentStateSchema",
+    "PrebuiltMultiAgentStateSchema",
+    "ReducerType",
+    # Schema composition
+    "SchemaComposer",
+    # Type aliases
+    "SchemaType",
+    "SchemaUI",
+    # Core classes
+    "StateSchema",
+    "StateSchemaManager",
     # Token usage utilities
     "TokenUsage",
     "TokenUsageMixin",
-    "MessagesStateWithTokenUsage",
-    "extract_token_usage_from_message",
+    "ToolState",
+    "ValidatorType",
+    "__author__",
+    "__license__",
+    # Version information
+    "__version__",
     "aggregate_token_usage",
     "calculate_token_cost",
-    # Reducer utilities
-    "preserve_messages_reducer",
-    # Type aliases
-    "SchemaType",
-    "FieldType",
-    "ReducerType",
-    "ValidatorType",
+    "create_agent_state",
+    "create_annotated_field",
+    "create_field",
     # Convenience functions
     "create_simple_state",
-    "create_agent_state",
-    "validate_schema",
+    "extract_token_usage_from_message",
+    "extract_type_metadata",
+    "get_common_reducers",
     "get_schema_info",
+    "infer_field_type",
+    # Reducer utilities
+    "preserve_messages_reducer",
+    "resolve_reducer",
+    "validate_schema",
 ]
 
 
@@ -229,9 +228,8 @@ def _initialize_schema_module() -> None:
 
     # Validate critical imports
     try:
-        from typing import get_type_hints
+        pass
 
-        from pydantic import BaseModel, Field
     except ImportError as e:
         raise ImportError(
             f"Critical schema dependencies missing: {e.name}. "

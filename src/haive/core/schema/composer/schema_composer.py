@@ -107,11 +107,7 @@ class SchemaComposer(EngineComposerMixin, EngineDetectorMixin, FieldManagerMixin
         # This will be implemented by extracting from the original SchemaComposer
         # For now, just track that we processed it
         logger.debug(
-            f"Would extract fields from engine: {
-                getattr(
-                    engine,
-                    'name',
-                    'unnamed')}"
+            f"Would extract fields from engine: {getattr(engine, 'name', 'unnamed')}"
         )
         return self
 
@@ -126,10 +122,7 @@ class SchemaComposer(EngineComposerMixin, EngineDetectorMixin, FieldManagerMixin
         """Add fields from a dictionary definition."""
         # This will be implemented by extracting from the original
         # SchemaComposer
-        logger.debug(
-            f"Would add fields from dict with {
-                len(fields_dict)} entries"
-        )
+        logger.debug(f"Would add fields from dict with {len(fields_dict)} entries")
         return self
 
     def _ensure_standard_fields(self) -> None:
@@ -173,11 +166,9 @@ class SchemaComposer(EngineComposerMixin, EngineDetectorMixin, FieldManagerMixin
 
         # Show what we're building
         logger.debug(
-            f"Building {
-                self.name} with {
-                len(
-                    self.fields)} fields using base class {
-                base_class.__name__}"
+            f"Building {self.name} with {len(self.fields)} fields using base class {
+                base_class.__name__
+            }"
         )
 
         # Create field definitions for the model

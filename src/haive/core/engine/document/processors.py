@@ -295,7 +295,7 @@ class ContentNormalizer(DocumentProcessor):
         if self.normalize_whitespace:
             import re
 
-            normalized = re.sub(r"\s+", " ", normalized)
+            normalized = re.sub(r" ", " ", normalized)
 
         # Remove extra newlines
         if self.remove_extra_newlines:

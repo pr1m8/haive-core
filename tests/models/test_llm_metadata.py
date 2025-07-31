@@ -180,11 +180,7 @@ def display_model_capabilities(models_data: list[dict[str, Any]]) -> None:
     # Add columns
     table.add_column("Model", style="cyan")
     for capability in capabilities:
-        table.add_column(
-            capability.replace(
-                "_",
-                " ").title(),
-            justify="center")
+        table.add_column(capability.replace("_", " ").title(), justify="center")
 
     # Add rows
     for data in models_data:
@@ -234,8 +230,7 @@ def available_models():
         if check_env_var(config["env_var"]):
             available.append(config)
         else:
-            logger.warning(
-                f"Skipping {config['name']} - {config['env_var']} not set")
+            logger.warning(f"Skipping {config['name']} - {config['env_var']} not set")
 
     return available
 
@@ -284,7 +279,9 @@ def test_model_metadata_access(model_config):
     console.print(
         Panel(
             f"[bold]Basic Metadata for {
-                model_config['name']}[/bold]"))
+                model_config['name']}[/bold]"
+        )
+    )
 
     context_window = config.get_context_window()
     console.print(f"Context Window: [cyan]{context_window}[/cyan] tokens")
@@ -302,7 +299,8 @@ def test_model_metadata_access(model_config):
     input_cost, output_cost = config.get_token_pricing()
     console.print(
         f"Input cost per token: [green]{
-            format_pricing(input_cost)}[/green]")
+            format_pricing(input_cost)}[/green]"
+    )
     console.print(
         f"Output cost per token: [green]{format_pricing(output_cost)}[/green]"
     )
@@ -349,7 +347,8 @@ def test_model_metadata_access(model_config):
             for size, cost in search_costs.items():
                 console.print(
                     f"  {size}: [yellow]{
-                        format_pricing(cost)}[/yellow]")
+                        format_pricing(cost)}[/yellow]"
+                )
 
     # Instead of returning, collect data for the comparison and assert it's
     # valid
@@ -401,21 +400,14 @@ def test_compare_models(available_models):
 
     # Display comparison tables
     console.print(
-        Panel(
-            Text(
-                "Model Metadata Comparison",
-                style="bold cyan",
-                justify="center"))
+        Panel(Text("Model Metadata Comparison", style="bold cyan", justify="center"))
     )
     display_model_metadata_table(models_data)
 
     console.print("\n")
     console.print(
         Panel(
-            Text(
-                "Model Capabilities Comparison",
-                style="bold cyan",
-                justify="center")
+            Text("Model Capabilities Comparison", style="bold cyan", justify="center")
         )
     )
     display_model_capabilities(models_data)
@@ -439,11 +431,7 @@ def test_compare_models(available_models):
 if __name__ == "__main__":
     # When run directly, execute specific tests
     console.print(
-        Panel(
-            Text(
-                "LLM Metadata Test Suite",
-                style="bold cyan",
-                justify="center"))
+        Panel(Text("LLM Metadata Test Suite", style="bold cyan", justify="center"))
     )
 
     # Get available models
@@ -473,7 +461,8 @@ if __name__ == "__main__":
         except Exception as e:
             console.print(
                 f"[bold red]Error testing {
-                    model['name']}: {e}[/bold red]")
+                    model['name']}: {e}[/bold red]"
+            )
 
     # Run comparison if we have multiple models
     if len(available) >= 2:

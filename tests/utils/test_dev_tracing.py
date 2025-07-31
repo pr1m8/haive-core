@@ -569,9 +569,10 @@ class TestTracingUtilities:
 
     def test_trace_context_manager(self):
         """Test trace context manager."""
-        with redirect_stdout(io.StringIO()) as f:
-            with self.tracer.trace_context("test_trace"):
-                time.sleep(0.001)
+        with redirect_stdout(io.StringIO()) as f, self.tracer.trace_context(
+            "test_trace"
+        ):
+            time.sleep(0.001)
 
         output = f.getvalue()
         assert "Starting trace: test_trace" in output
@@ -733,9 +734,8 @@ class TestGlobalTraceInstance:
 
     def test_global_trace_context(self):
         """Test global trace context manager."""
-        with redirect_stdout(io.StringIO()) as f:
-            with trace.trace_context("global_context"):
-                time.sleep(0.001)
+        with redirect_stdout(io.StringIO()) as f, trace.trace_context("global_context"):
+            time.sleep(0.001)
 
         output = f.getvalue()
         assert "global_context" in output

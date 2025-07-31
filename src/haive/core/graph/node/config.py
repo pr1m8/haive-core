@@ -301,8 +301,7 @@ class NodeConfig(BaseModel):
                 return engine, engine_id
         except ImportError:
             logger.warning(
-                f"Could not import EngineRegistry to resolve engine: {
-                    self.engine_name}"
+                f"Could not import EngineRegistry to resolve engine: {self.engine_name}"
             )
 
         # Not found - return None

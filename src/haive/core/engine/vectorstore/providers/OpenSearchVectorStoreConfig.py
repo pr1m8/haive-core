@@ -196,7 +196,7 @@ class OpenSearchVectorStoreConfig(BaseVectorStoreConfig):
             "cosinesimil",
         ]
         if v not in valid_space_types:
-            raise ValueError(f"space_type must be one of {valid_space_types}, got {v}")
+            raise TypeError(f"space_type must be one of {valid_space_types}, got {v}")
         return v
 
     @field_validator("index_name")
@@ -246,8 +246,7 @@ class OpenSearchVectorStoreConfig(BaseVectorStoreConfig):
             from langchain_community.vectorstores import OpenSearchVectorSearch
         except ImportError as e:
             raise ImportError(
-                "OpenSearch requires opensearch-py package. "
-                "Install with: pip install opensearch-py"
+                "OpenSearch requires opensearch-py package. Install with: pip install opensearch-py"
             ) from e
 
         # Validate embedding

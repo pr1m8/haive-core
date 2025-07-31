@@ -249,9 +249,7 @@ class Router:
             name=name,
             condition=condition,
             destination=destination,
-            description=description
-            or f"Route based on function: {
-                function.__name__}",
+            description=description or f"Route based on function: {function.__name__}",
         )
 
         return self.add_route(route)
@@ -342,8 +340,7 @@ class Router:
             if isinstance(schema, BaseTool):
                 if schema.args_schema is None:
                     logger.warning(
-                        f"Tool {
-                            schema.name} does not have an args_schema defined"
+                        f"Tool {schema.name} does not have an args_schema defined"
                     )
                     continue
                 if not isinstance(
@@ -393,7 +390,8 @@ class Router:
                             ):
                                 logger.info(
                                     f"Validation error detected, routing to {
-                                        self.validation_config.retry_destination}"
+                                        self.validation_config.retry_destination
+                                    }"
                                 )
                                 return Command(
                                     update=validated_state,
@@ -412,16 +410,10 @@ class Router:
                         )
                         return route.destination
                 except Exception as e:
-                    logger.exception(
-                        f"Error evaluating route {
-                            route.name}: {e}"
-                    )
+                    logger.exception(f"Error evaluating route {route.name}: {e}")
 
             # No routes matched, use default destination
-            logger.info(
-                f"No routes matched, using default: {
-                    self.default_destination}"
-            )
+            logger.info(f"No routes matched, using default: {self.default_destination}")
             return self.default_destination
 
         return router_function

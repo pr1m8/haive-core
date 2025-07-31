@@ -52,7 +52,8 @@ class ToolInjector:
         if state_param is None:
             raise ValueError(
                 f"Function {
-                    func.__name__} must have a parameter named 'state' or ending with '_state'"
+                    func.__name__
+                } must have a parameter named 'state' or ending with '_state'"
             )
 
         # Create a new function with the state parameter annotated for
@@ -125,7 +126,8 @@ class ToolInjector:
         if store_param is None:
             raise ValueError(
                 f"Function {
-                    func.__name__} must have a parameter named 'store' or ending with '_store'"
+                    func.__name__
+                } must have a parameter named 'store' or ending with '_store'"
             )
 
         # Create a new function with the store parameter annotated for
@@ -203,13 +205,15 @@ class ToolInjector:
         if state_param is None:
             raise ValueError(
                 f"Function {
-                    func.__name__} must have a parameter named 'state' or ending with '_state'"
+                    func.__name__
+                } must have a parameter named 'state' or ending with '_state'"
             )
 
         if store_param is None:
             raise ValueError(
                 f"Function {
-                    func.__name__} must have a parameter named 'store' or ending with '_store'"
+                    func.__name__
+                } must have a parameter named 'store' or ending with '_store'"
             )
 
         # Create a new function with both parameters annotated for injection

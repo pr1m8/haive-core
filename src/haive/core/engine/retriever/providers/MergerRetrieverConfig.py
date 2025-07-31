@@ -116,8 +116,7 @@ class MergerRetrieverConfig(BaseRetrieverConfig):
             from langchain.retrievers import MergerRetriever
         except ImportError:
             raise ImportError(
-                "MergerRetriever requires langchain package. "
-                "Install with: pip install langchain"
+                "MergerRetriever requires langchain package. Install with: pip install langchain"
             )
 
         # Instantiate all component retrievers
@@ -128,15 +127,15 @@ class MergerRetrieverConfig(BaseRetrieverConfig):
                 instantiated_retrievers.append(retriever)
             except Exception as e:
                 raise ValueError(
-                    f"Failed to instantiate retriever {
-                        retriever_config.name}: {e}"
+                    f"Failed to instantiate retriever {retriever_config.name}: {e}"
                 )
 
         # Validate we have the right number of retrievers
         if len(instantiated_retrievers) < 2:
             raise ValueError(
                 f"MergerRetriever requires at least 2 retrievers, got {
-                    len(instantiated_retrievers)}"
+                    len(instantiated_retrievers)
+                }"
             )
 
         return MergerRetriever(

@@ -413,8 +413,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 if hasattr(field_value, "tools") and hasattr(self, "tools"):
                     engine_tools = getattr(field_value, "tools", [])
                     logger.debug(
-                        f"Found engine '{engine_name}' with {
-                            len(engine_tools)} tools"
+                        f"Found engine '{engine_name}' with {len(engine_tools)} tools"
                     )
 
                     # Initialize tools list if None
@@ -455,9 +454,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         if found_engines:
             logger.debug(
-                f"Found engines in {
-                    self.__class__.__name__}: {
-                    ', '.join(found_engines)}"
+                f"Found engines in {self.__class__.__name__}: {', '.join(found_engines)}"
             )
 
         return self
@@ -590,10 +587,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     self.engine = first_engine
                     logger.debug(
                         f"Set first available engine as main: {
-                            getattr(
-                                first_engine,
-                                'name',
-                                'unnamed')}"
+                            getattr(first_engine, 'name', 'unnamed')
+                        }"
                     )
 
     def dict(self, **kwargs) -> builtins.dict[str, Any]:
@@ -910,10 +905,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         """
         # Log extraction request
         key_str = str(keys) if keys else "all fields"
-        logger.debug(
-            f"Extracting values ({key_str}) from {
-                type(state).__name__}"
-        )
+        logger.debug(f"Extracting values ({key_str}) from {type(state).__name__}")
 
         # If state is already a StateSchema instance, use its get_state_values
         # method
@@ -1357,8 +1349,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     and field_name in base_class.model_fields
                 ):
                     logger.debug(
-                        f"Skipping field '{field_name}' - already defined in {
-                            base_class.__name__}"
+                        f"Skipping field '{field_name}' - already defined in {base_class.__name__}"
                     )
                     continue
 
@@ -1469,8 +1460,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     and field_name in base_class.model_fields
                 ):
                     logger.debug(
-                        f"Skipping field '{field_name}' - already defined in {
-                            base_class.__name__}"
+                        f"Skipping field '{field_name}' - already defined in {base_class.__name__}"
                     )
                     continue
 
@@ -1653,10 +1643,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             return cls.from_dict(snapshot)
 
         # Last resort - empty state
-        logger.warning(
-            f"Couldn't extract state from snapshot of type {
-                type(snapshot)}"
-        )
+        logger.warning(f"Couldn't extract state from snapshot of type {type(snapshot)}")
         return cls()
 
     # Engine integration methods
@@ -1773,15 +1760,11 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         # Apply update with or without reducers
         if apply_reducers:
             logger.debug(
-                f"Applying reducers to engine output (fields: {
-                    list(
-                        filtered_output.keys())})"
+                f"Applying reducers to engine output (fields: {list(filtered_output.keys())})"
             )
             return self.apply_reducers(filtered_output)
         logger.debug(
-            f"Updating with engine output without reducers (fields: {
-                list(
-                    filtered_output.keys())})"
+            f"Updating with engine output without reducers (fields: {list(filtered_output.keys())})"
         )
         return self.update(filtered_output)
 
@@ -1902,8 +1885,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 items = list(value.items())[:3]
                 items_str = ", ".join(f"{k}: {str(v)[:20]}" for k, v in items)
                 return f"[cyan]{{{items_str}, ... ({len(value)} items)}}[/cyan]"
-            return f"[cyan]{{{', '.join(f'{k}: {str(v)[:50]}' for k,
-                                        v in value.items())}}}[/cyan]"
+            return f"[cyan]{{{', '.join(f'{k}: {str(v)[:50]}' for k, v in value.items())}}}[/cyan]"
         if hasattr(value, "__class__"):
             class_name = value.__class__.__name__
             if hasattr(value, "model_dump"):
@@ -1958,7 +1940,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         # Create main tree
         tree = Tree(
             f"[bold blue]class {schema_name}([/bold blue][italic]{
-                cls.__base__.__name__}[/italic][bold blue])[/bold blue]:"
+                cls.__base__.__name__
+            }[/italic][bold blue])[/bold blue]:"
         )
 
         # Add fields
@@ -1981,10 +1964,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             else:
                 default = field_info.default
                 default_str = (
-                    "[red]required[/red]"
-                    if default is ...
-                    else f"default={
-                        default!r}"
+                    "[red]required[/red]" if default is ... else f"default={default!r}"
                 )
 
             # Add description if available
@@ -2073,10 +2053,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             else:
                 default = field_info.default
                 default_str = (
-                    "Field(..."
-                    if default is ...
-                    else f"Field(default={
-                        default!r}"
+                    "Field(..." if default is ... else f"Field(default={default!r}"
                 )
 
             # Add description if available
@@ -2097,30 +2074,22 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         if cls.__serializable_reducers__:
             lines.append(
-                f"    __serializable_reducers__ = {
-                    cls.__serializable_reducers__}"
+                f"    __serializable_reducers__ = {cls.__serializable_reducers__}"
             )
 
         if cls.__engine_io_mappings__:
-            lines.append(
-                f"    __engine_io_mappings__ = {
-                    cls.__engine_io_mappings__}"
-            )
+            lines.append(f"    __engine_io_mappings__ = {cls.__engine_io_mappings__}")
 
         # Add structured models if available
         if hasattr(cls, "__structured_models__") and cls.__structured_models__:
-            lines.append(
-                f"    __structured_models__ = {
-                    cls.__structured_models__}"
-            )
+            lines.append(f"    __structured_models__ = {cls.__structured_models__}")
 
         if (
             hasattr(cls, "__structured_model_fields__")
             and cls.__structured_model_fields__
         ):
             lines.append(
-                f"    __structured_model_fields__ = {
-                    cls.__structured_model_fields__}"
+                f"    __structured_model_fields__ = {cls.__structured_model_fields__}"
             )
 
         return "\n".join(lines)
@@ -2179,9 +2148,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         # Use logger to display
         logger.info(
             str(syntax),
-            title=title
-            or f"{
-                cls.__name__} Code",
+            title=title or f"{cls.__name__} Code",
             style="yellow",
         )
 
@@ -2285,10 +2252,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         else:
             default = field_info.default
             default_str = (
-                "[red]required[/red]"
-                if default is ...
-                else f"default={
-                    default!r}"
+                "[red]required[/red]" if default is ... else f"default={default!r}"
             )
 
         return f"[yellow]{type_str}[/yellow] ({default_str})"

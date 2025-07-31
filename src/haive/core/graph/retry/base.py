@@ -63,7 +63,7 @@ def execute_with_retry(
     *args,
     retry_policy: RetryPolicy | None = None,
     fallback_result: Any | None = None,
-    **kwargs
+    **kwargs,
 ) -> Any:
     """Execute a function with retry logic.
 
@@ -112,7 +112,7 @@ async def execute_with_retry_async(
     *args,
     retry_policy: RetryPolicy | None = None,
     fallback_result: Any | None = None,
-    **kwargs
+    **kwargs,
 ) -> Any:
     """Execute an async function with retry logic.
 

@@ -212,10 +212,7 @@ def create_search_memory_tool(
                 "message": f"Found {len(results)} relevant memories",
             }
 
-            logger.debug(
-                f"Search returned {
-                    len(results)} memories for query: {query}"
-            )
+            logger.debug(f"Search returned {len(results)} memories for query: {query}")
             return json.dumps(result, indent=2)
 
         except Exception as e:

@@ -163,26 +163,19 @@ class MetaAgentNodeConfig(NodeConfig):
             # Validate state is meta state
             if not self._is_meta_state(state):
                 raise ValueError(
-                    f"State must be a MetaStateSchema instance, got {
-                        type(state)}"
+                    f"State must be a MetaStateSchema instance, got {type(state)}"
                 )
 
             # Extract the embedded agent
             agent = self._extract_agent(state)
             if agent is None:
-                raise ValueError(
-                    f"No agent found in state field '{
-                        self.agent_field}'"
-                )
+                raise ValueError(f"No agent found in state field '{self.agent_field}'")
 
             logger.info(f"✅ Found embedded agent: {type(agent).__name__}")
 
             # Prepare input for the embedded agent
             agent_input = self._prepare_agent_input(state, config)
-            logger.debug(
-                f"Prepared agent input with {
-                    len(agent_input)} fields"
-            )
+            logger.debug(f"Prepared agent input with {len(agent_input)} fields")
 
             # Prepare execution configuration
             execution_config = self._prepare_execution_config(state, config)
@@ -223,10 +216,7 @@ class MetaAgentNodeConfig(NodeConfig):
         self, state: StateLike, config: ConfigLike | None = None
     ) -> dict[str, Any]:
         """Prepare input data for the embedded agent based on configuration."""
-        logger.debug(
-            f"Preparing agent input using strategy: {
-                self.input_preparation}"
-        )
+        logger.debug(f"Preparing agent input using strategy: {self.input_preparation}")
 
         if self.input_preparation == "auto":
             return self._prepare_auto_input(state)
@@ -306,11 +296,7 @@ class MetaAgentNodeConfig(NodeConfig):
         execution_config: dict[str, Any],
     ) -> dict[str, Any]:
         """Execute the embedded agent and return execution result."""
-        logger.info(
-            f"Executing embedded agent with input: {
-                list(
-                    agent_input.keys())}"
-        )
+        logger.info(f"Executing embedded agent with input: {list(agent_input.keys())}")
 
         start_time = datetime.now()
 
@@ -326,10 +312,7 @@ class MetaAgentNodeConfig(NodeConfig):
                 logger.debug("Using agent as callable")
                 result = agent(agent_input)
             else:
-                raise RuntimeError(
-                    f"Agent {
-                        type(agent).__name__} is not executable"
-                )
+                raise RuntimeError(f"Agent {type(agent).__name__} is not executable")
 
             end_time = datetime.now()
             execution_time = (end_time - start_time).total_seconds()
@@ -345,10 +328,7 @@ class MetaAgentNodeConfig(NodeConfig):
                 "config": execution_config,
             }
 
-            logger.info(
-                f"✅ Agent execution completed in {
-                    execution_time:.2f}s"
-            )
+            logger.info(f"✅ Agent execution completed in {execution_time:.2f}s")
             return execution_result
 
         except Exception as e:
@@ -398,10 +378,7 @@ class MetaAgentNodeConfig(NodeConfig):
         self, state: StateLike, execution_result: dict[str, Any]
     ) -> StateLike:
         """Handle agent execution output and update meta state."""
-        logger.debug(
-            f"Handling agent output using strategy: {
-                self.output_handling}"
-        )
+        logger.debug(f"Handling agent output using strategy: {self.output_handling}")
 
         # Create a copy of the state to avoid modifying the original
         if hasattr(state, "model_copy"):
@@ -418,10 +395,7 @@ class MetaAgentNodeConfig(NodeConfig):
             return self._append_output(updated_state, execution_result)
         if self.output_handling == "custom":
             return self._handle_custom_output(updated_state, execution_result)
-        raise ValueError(
-            f"Unknown output handling strategy: {
-                self.output_handling}"
-        )
+        raise ValueError(f"Unknown output handling strategy: {self.output_handling}")
 
     def _merge_output(
         self, state: StateLike, execution_result: dict[str, Any]

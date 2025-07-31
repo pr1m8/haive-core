@@ -2,6 +2,7 @@
 """Debug script to test prompt template variable handling."""
 
 import asyncio
+import contextlib
 
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
@@ -36,10 +37,8 @@ def test_prompt_template_directly():
     # Check template properties
 
     # Test with proper variables
-    try:
+    with contextlib.suppress(Exception):
         RAG_QUERY_REFINEMENT.format(query="what is the tallest building in france")
-    except Exception:
-        pass
 
 
 def test_augllm_config():
@@ -60,7 +59,6 @@ def test_augllm_config():
 async def test_simple_agent():
     """Test SimpleAgent with debug output."""
     from haive.agents.simple.agent_v2 import SimpleAgentV2
-
     from haive.core.engine.aug_llm import AugLLMConfig
 
     try:

@@ -5,11 +5,14 @@ from collections.abc import Callable
 from functools import wraps
 from typing import TYPE_CHECKING, Any, TypeVar
 
+from haive.core.registry.base import AbstractRegistry
+from haive.core.registry.manager import RegistryManager
+
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 if TYPE_CHECKING:
-    from haive.core.registry.base import AbstractRegistry
+    pass
 
 
 def register_component(
@@ -103,7 +106,6 @@ def register_component(
 
     def _get_registry(registry_ref):
         """Helper function to get the registry instance."""
-        from haive.core.registry.manager import RegistryManager
 
         # Default to RegistryManager instance
         if registry_ref is None:

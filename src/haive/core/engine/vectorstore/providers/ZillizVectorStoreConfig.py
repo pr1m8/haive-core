@@ -182,8 +182,7 @@ class ZillizVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             from langchain_community.vectorstores import Zilliz
         except ImportError:
             raise ImportError(
-                "Zilliz requires pymilvus package. "
-                "Install with: pip install pymilvus"
+                "Zilliz requires pymilvus package. Install with: pip install pymilvus"
             )
 
         # Validate embedding

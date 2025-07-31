@@ -162,10 +162,7 @@ class ComponentAnalyzer(ABC):
                 **fields,
             )
         except Exception as e:
-            logger.warning(
-                f"Error creating Pydantic model for {
-                    cls.__name__}: {e}"
-            )
+            logger.warning(f"Error creating Pydantic model for {cls.__name__}: {e}")
             # Return a minimal model with just basic fields as fallback
             try:
                 return create_model(

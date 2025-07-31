@@ -26,9 +26,7 @@ class CustomInputSchema(BaseModel):
 
     messages: list[BaseMessage] = Field(default_factory=list)
     query: str = Field(default="", description="User query")
-    context: list[str] = Field(
-        default_factory=list,
-        description="Context documents")
+    context: list[str] = Field(default_factory=list, description="Context documents")
 
 
 class CustomOutputSchema(BaseModel):
@@ -65,22 +63,24 @@ def test_agent_io_to_state_composition():
     logger.info(
         f"Input schema fields: {
             list(
-                input_schema.model_fields.keys())}")
+                input_schema.model_fields.keys())}"
+    )
     logger.info(f"Output schema: {output_schema.__name__}")
     logger.info(
         f"Output schema fields: {
             list(
-                output_schema.model_fields.keys())}")
+                output_schema.model_fields.keys())}"
+    )
     logger.info(f"State schema: {state_schema.__name__}")
     logger.info(
         f"State schema fields: {
             list(
-                state_schema.model_fields.keys())}")
+                state_schema.model_fields.keys())}"
+    )
 
     # Check engine_io_mappings in state schema
     if hasattr(state_schema, "__engine_io_mappings__"):
-        logger.info(
-            f"Engine I/O mappings: {state_schema.__engine_io_mappings__}")
+        logger.info(f"Engine I/O mappings: {state_schema.__engine_io_mappings__}")
 
     # Verify that the schemas are correctly related
     assert issubclass(state_schema, StateSchema)
@@ -108,9 +108,7 @@ def test_agent_io_to_state_composition():
     # Create a state instance to test functionality
     state = state_schema(
         query="What is the capital of France?",
-        context=[
-            "France is a country in Europe.",
-            "Paris is a city in France."],
+        context=["France is a country in Europe.", "Paris is a city in France."],
     )
 
     # Test updating the state
@@ -153,17 +151,20 @@ def test_agent_with_component_derived_schemas():
     logger.info(
         f"Input schema fields: {
             list(
-                input_schema.model_fields.keys())}")
+                input_schema.model_fields.keys())}"
+    )
     logger.info(f"Output schema: {output_schema.__name__}")
     logger.info(
         f"Output schema fields: {
             list(
-                output_schema.model_fields.keys())}")
+                output_schema.model_fields.keys())}"
+    )
     logger.info(f"State schema: {state_schema.__name__}")
     logger.info(
         f"State schema fields: {
             list(
-                state_schema.model_fields.keys())}")
+                state_schema.model_fields.keys())}"
+    )
 
     # Verify that the schemas are correctly related
     assert issubclass(state_schema, StateSchema)

@@ -129,8 +129,7 @@ class MessageTransformationNodeConfig(NodeConfig):
         """Execute the message transformation."""
         if self.debug:
             console.print(
-                f"[cyan]MessageTransformation[/] Starting {
-                    self.transformation_type} transformation"
+                f"[cyan]MessageTransformation[/] Starting {self.transformation_type} transformation"
             )
 
         try:
@@ -138,10 +137,7 @@ class MessageTransformationNodeConfig(NodeConfig):
             messages = self._get_messages_from_state(state)
 
             if not messages:
-                logger.warning(
-                    f"No messages found in state key '{
-                        self.messages_key}'"
-                )
+                logger.warning(f"No messages found in state key '{self.messages_key}'")
                 return Command(update={}, goto=self.command_goto)
 
             if self.debug:
@@ -152,8 +148,7 @@ class MessageTransformationNodeConfig(NodeConfig):
 
             if self.debug:
                 console.print(
-                    f"[green]Transformed to {
-                        len(transformed_messages)} messages[/]"
+                    f"[green]Transformed to {len(transformed_messages)} messages[/]"
                 )
 
             # Create update dictionary
@@ -423,8 +418,7 @@ class MessageTransformationNodeConfig(NodeConfig):
 
                 if self.debug:
                     console.print(
-                        f"[green]Added engine_id to AI message:[/] {
-                            self.engine_id}"
+                        f"[green]Added engine_id to AI message:[/] {self.engine_id}"
                     )
             else:
                 # Keep other messages unchanged
@@ -474,9 +468,9 @@ class MessageTransformationNodeConfig(NodeConfig):
 
             if self.debug:
                 console.print(
-                    f"[green]Applied custom transformation:[/] {
-                        len(messages)} → {
-                        len(result)} messages"
+                    f"[green]Applied custom transformation:[/] {len(messages)} → {
+                        len(result)
+                    } messages"
                 )
 
             return result

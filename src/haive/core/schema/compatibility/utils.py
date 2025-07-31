@@ -169,7 +169,7 @@ def extract_path_value(
     # Handle array notation
     import re
 
-    array_pattern = re.compile(r"(\w+)\[(\d+|\*)\]")
+    array_pattern = re.compile(r"()\[(\d+|\*)\]")
 
     parts = path.split(separator)
     current = data

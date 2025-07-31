@@ -67,7 +67,7 @@ def test_postgres_connection_settings():
         except Exception as e:
             if "prepared statement" in str(e).lower():
                 return False
-            print(f"⚠️  Other error (might be normal): {e}")e}")
+            print(f"⚠️  Other error (might be normal): {e}")
 
         return True
 

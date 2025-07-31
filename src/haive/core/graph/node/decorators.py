@@ -217,8 +217,7 @@ def debug_node(name: str | None = None):
             # Log input
             console.print(
                 Panel.fit(
-                    f"[bold cyan]Node {func_name} Input:[/bold cyan]\n{
-                        Pretty(state)}",
+                    f"[bold cyan]Node {func_name} Input:[/bold cyan]\n{Pretty(state)}",
                     border_style="cyan",
                 )
             )

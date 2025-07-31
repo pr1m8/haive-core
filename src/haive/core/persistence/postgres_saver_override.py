@@ -18,6 +18,7 @@ from langgraph.checkpoint.postgres.aio import (
     AsyncPostgresSaver as BaseAsyncPostgresSaver,
 )
 from psycopg.rows import dict_row
+from psycopg.types.json import set_json_dumps
 from pydantic import BaseModel
 
 
@@ -45,7 +46,6 @@ def configure_postgres_json(connection):
     Args:
         connection: A psycopg connection object
     """
-    from psycopg.types.json import set_json_dumps
 
     set_json_dumps(pydantic_aware_json_dumps, context=connection)
 

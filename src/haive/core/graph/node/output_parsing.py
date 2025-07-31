@@ -59,10 +59,7 @@ class OutputParserNodeConfig(ParserNodeConfig):
         logger.debug(f"OutputParserNode processing {len(messages)} messages")
 
         if not messages:
-            logger.warning(
-                f"No messages found in state key '{
-                    self.messages_key}'"
-            )
+            logger.warning(f"No messages found in state key '{self.messages_key}'")
             return Command(
                 update={self.output_key: None, "parse_error": "No messages found"},
                 goto=goto_node,
@@ -77,8 +74,7 @@ class OutputParserNodeConfig(ParserNodeConfig):
 
             if content is None:
                 logger.warning(
-                    f"Unable to extract content from message: {
-                        type(last_message)}"
+                    f"Unable to extract content from message: {type(last_message)}"
                 )
                 return Command(
                     update={
@@ -95,8 +91,7 @@ class OutputParserNodeConfig(ParserNodeConfig):
                 update_dict = {self.output_key: parsed_result}
 
                 logger.info(
-                    f"Successfully parsed output using {
-                        self.output_parser.__class__.__name__}"
+                    f"Successfully parsed output using {self.output_parser.__class__.__name__}"
                 )
                 return Command(update=update_dict, goto=goto_node)
 
@@ -116,8 +111,7 @@ class OutputParserNodeConfig(ParserNodeConfig):
             return Command(
                 update={
                     self.output_key: None,
-                    "parse_error": f"Node error: {
-                        e!s}",
+                    "parse_error": f"Node error: {e!s}",
                 },
                 goto=goto_node,
             )

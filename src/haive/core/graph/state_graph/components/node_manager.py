@@ -136,8 +136,7 @@ class NodeManager(BaseGraphComponent):
         self.graph.updated_at = self._get_current_time()
 
         logger.debug(
-            f"Added node '{node_name}' of type {node_type} to graph '{
-                self.graph.name}'"
+            f"Added node '{node_name}' of type {node_type} to graph '{self.graph.name}'"
         )
 
         return self.graph
@@ -199,10 +198,7 @@ class NodeManager(BaseGraphComponent):
         # Update graph metadata
         self.graph.updated_at = self._get_current_time()
 
-        logger.debug(
-            f"Added configured node '{name}' to graph '{
-                self.graph.name}'"
-        )
+        logger.debug(f"Added configured node '{name}' to graph '{self.graph.name}'")
 
         return self.graph
 
@@ -248,10 +244,7 @@ class NodeManager(BaseGraphComponent):
         # Update graph metadata
         self.graph.updated_at = self._get_current_time()
 
-        logger.debug(
-            f"Removed node '{node_name}' from graph '{
-                self.graph.name}'"
-        )
+        logger.debug(f"Removed node '{node_name}' from graph '{self.graph.name}'")
 
         return self.graph
 
@@ -300,10 +293,7 @@ class NodeManager(BaseGraphComponent):
         # Update graph metadata
         self.graph.updated_at = self._get_current_time()
 
-        logger.debug(
-            f"Updated node '{node_name}' in graph '{
-                self.graph.name}'"
-        )
+        logger.debug(f"Updated node '{node_name}' in graph '{self.graph.name}'")
 
         return self.graph
 
@@ -372,10 +362,7 @@ class NodeManager(BaseGraphComponent):
             return node_or_name.name, node_or_name
         if isinstance(node_or_name, dict) and "name" in node_or_name:
             return node_or_name["name"], node_or_name
-        raise ValueError(
-            f"Cannot determine node name from {
-                type(node_or_name)}"
-        )
+        raise ValueError(f"Cannot determine node name from {type(node_or_name)}")
 
     def _infer_node_type(self, node_obj: Any) -> NodeType:
         """Infer node type from node object."""

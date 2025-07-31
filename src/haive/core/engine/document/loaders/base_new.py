@@ -165,9 +165,7 @@ class BaseSource(BaseModel, ABC):
             return getattr(module, strategy.loader_class)
         except (ImportError, AttributeError) as e:
             raise ImportError(
-                f"Failed to import {
-                    strategy.loader_class} from {
-                    strategy.module}: {e}"
+                f"Failed to import {strategy.loader_class} from {strategy.module}: {e}"
             )
 
 

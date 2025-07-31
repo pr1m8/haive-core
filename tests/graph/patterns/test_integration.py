@@ -65,7 +65,9 @@ class TestAgentPatternIntegration:
             Panel.fit(
                 f"Running test with ID: {
                     self.test_id}",
-                style="green"))
+                style="green",
+            )
+        )
 
     def create_test_llm_engine(self):
         """Create a test LLM engine for pattern testing."""
@@ -175,9 +177,7 @@ class TestAgentPatternIntegration:
         pattern = TestIntegrationPattern()
 
         # Create test graph
-        graph = DynamicGraph(
-            name="enhanced_workflow_test",
-            state_schema=_TestState)
+        graph = DynamicGraph(name="enhanced_workflow_test", state_schema=_TestState)
 
         # Apply the pattern
         with console.status("[bold green]Applying pattern to graph..."):
@@ -247,7 +247,8 @@ class TestAgentPatternIntegration:
                 """Apply the test pattern to an agent config."""
                 logger.info(
                     f"Applying pattern to agent config: {
-                        agent_config.name}")
+                        agent_config.name}"
+                )
 
                 # Modify the agent config
                 if agent_config.node_configs is None:
@@ -294,9 +295,7 @@ class TestAgentPatternIntegration:
         logger.info("Testing dynamic graph integration with agent")
 
         # Create graph
-        graph = DynamicGraph(
-            name="dynamic_graph_test",
-            state_schema=_TestState)
+        graph = DynamicGraph(name="dynamic_graph_test", state_schema=_TestState)
         logger.info(f"Created graph: {graph}")
 
         # Create test LLM engine
@@ -386,7 +385,8 @@ class TestAgentPatternIntegration:
                 f"Updated graph nodes: {
                     list(
                         graph.nodes.keys())}",
-                style="blue")
+                style="blue",
+            )
         )
         rprint(
             Panel.fit(
@@ -401,9 +401,7 @@ class TestAgentPatternIntegration:
         logger.info("Testing pattern schema integration")
 
         # Create graph with state schema
-        graph = DynamicGraph(
-            name="schema_pattern_test",
-            state_schema=_TestState)
+        graph = DynamicGraph(name="schema_pattern_test", state_schema=_TestState)
         logger.info(f"Created graph: {graph}")
 
         # Create test LLM engine
@@ -449,7 +447,8 @@ class TestAgentPatternIntegration:
                     existing_schema = graph.state_schema
                     logger.info(
                         f"Found existing schema: {
-                            existing_schema.__name__}")
+                            existing_schema.__name__}"
+                    )
 
                     # Create composer with existing schema
                     composer = SchemaComposer(
@@ -479,7 +478,8 @@ class TestAgentPatternIntegration:
                     enhanced_schema = composer.build()
                     logger.info(
                         f"Built enhanced schema: {
-                            enhanced_schema.__name__}")
+                            enhanced_schema.__name__}"
+                    )
 
                     # Add a node that uses the enhanced schema
                     def schema_node(state):
@@ -502,13 +502,12 @@ class TestAgentPatternIntegration:
                     graph.state_schema = enhanced_schema
                     logger.info(
                         f"Updated graph schema to {
-                            enhanced_schema.__name__}")
+                            enhanced_schema.__name__}"
+                    )
 
                     return True
                 except Exception as e:
-                    logger.error(
-                        f"Error in schema pattern: {e}",
-                        exc_info=True)
+                    logger.error(f"Error in schema pattern: {e}", exc_info=True)
                     return False
 
         # Create pattern instance
@@ -565,8 +564,7 @@ class TestAgentPatternIntegration:
                 # Simple identity function
                 def identity_function(state):
                     """Return state unchanged."""
-                    logger.info(
-                        f"Identity function called with state: {state}")
+                    logger.info(f"Identity function called with state: {state}")
                     return {"processed": True}
 
                 # Add node to graph
@@ -581,9 +579,7 @@ class TestAgentPatternIntegration:
 
                     return True
                 except Exception as e:
-                    logger.error(
-                        f"Error applying simple pattern: {e}",
-                        exc_info=True)
+                    logger.error(f"Error applying simple pattern: {e}", exc_info=True)
                     return False
 
         # Create pattern instance

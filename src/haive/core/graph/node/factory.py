@@ -108,10 +108,7 @@ class NodeFactory:
                 # Return with Command for routing
                 return Command(update=processed_output, goto=command_goto)
             except Exception as e:
-                logger.exception(
-                    f"Error in node {
-                        engine_id or 'unknown'}: {e}"
-                )
+                logger.exception(f"Error in node {engine_id or 'unknown'}: {e}")
                 return Command(update={"error": str(e)}, goto=command_goto)
 
         # Add metadata
@@ -170,8 +167,7 @@ class NodeFactory:
                 return Command(update=processed_output, goto=command_goto)
             except Exception as e:
                 logger.exception(
-                    f"Error in non-invokable node {
-                        engine_id or 'unknown'}: {e}"
+                    f"Error in non-invokable node {engine_id or 'unknown'}: {e}"
                 )
                 return Command(update={"error": str(e)}, goto=command_goto)
 

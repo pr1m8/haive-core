@@ -114,9 +114,7 @@ class CallableReference(BaseModel):
                 return func
             except Exception as e:
                 logger.exception(
-                    f"Failed to resolve function {
-                        self.module_path}.{
-                        self.name}: {e}"
+                    f"Failed to resolve function {self.module_path}.{self.name}: {e}"
                 )
 
         # Third priority: evaluate lambda source code
@@ -147,16 +145,12 @@ class CallableReference(BaseModel):
                         return getattr(module, self.name)
             except Exception as e:
                 logger.debug(
-                    f"Failed dynamic import for {
-                        self.module_path}.{
-                        self.name}: {e}"
+                    f"Failed dynamic import for {self.module_path}.{self.name}: {e}"
                 )
 
         # Could not resolve
         logger.warning(
-            f"Could not resolve callable reference: {
-                self.module_path}.{
-                self.name}"
+            f"Could not resolve callable reference: {self.module_path}.{self.name}"
         )
         return None
 

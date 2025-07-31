@@ -374,7 +374,6 @@ KEY INSIGHTS:
 """
 
 if __name__ == "__main__":
-
     # Run examples
     agent = create_simple_agent_with_stateful_nodes()
 

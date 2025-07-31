@@ -1,5 +1,5 @@
 from collections.abc import Callable, Sequence
-from typing import Any, Dict
+from typing import Any
 from uuid import uuid4
 
 from langchain_core.messages import (
@@ -11,9 +11,10 @@ from langchain_core.messages import (
     ToolMessage,
 )
 from langchain_core.tools import BaseTool, StructuredTool, Tool
+from langgraph.prebuilt import ToolNode as LangGraphToolNode
 
 
-def has_tool_calls(state: Dict[str, Any]) -> bool:
+def has_tool_calls(state: dict[str, Any]) -> bool:
     """Check if the last AI message has tool calls."""
     # Get last AI message, return False if none exists
 
@@ -310,7 +311,6 @@ class MessageNormalizingToolNode:
             tools: List of tools to use
         """
         # Create the underlying ToolNode
-        from langgraph.prebuilt import ToolNode as LangGraphToolNode
 
         self.tool_node = LangGraphToolNode(tools)
         self.tools = tools

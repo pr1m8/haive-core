@@ -32,8 +32,7 @@ def apply_pattern_to_graph(
         components = getattr(graph, "components", [])
         missing = pattern.metadata.check_required_components(components)
         if missing:
-            error_msg = f"Missing required components for pattern: {
-                ', '.join(missing)}"
+            error_msg = f"Missing required components for pattern: {', '.join(missing)}"
             logger.error(error_msg)
             raise ValueError(error_msg)
 
@@ -114,8 +113,9 @@ def create_pattern_node_config(
     # Validate pattern parameters
     is_valid, errors = pattern.metadata.validate_parameters(pattern_params)
     if not is_valid:
-        error_msg = f"Invalid parameters for pattern {pattern_name}: {
-                ', '.join(errors)}"
+        error_msg = (
+            f"Invalid parameters for pattern {pattern_name}: {', '.join(errors)}"
+        )
         logger.error(error_msg)
         raise ValueError(error_msg)
 

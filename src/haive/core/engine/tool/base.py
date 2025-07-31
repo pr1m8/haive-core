@@ -124,8 +124,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
                             all_tools.append(structured_tool)
                         else:
                             logger.warning(
-                                f"Could not convert model to tool: {
-                                    type(tool).__name__}"
+                                f"Could not convert model to tool: {type(tool).__name__}"
                             )
                     except Exception as e:
                         logger.warning(f"Error converting model to tool: {e}")
@@ -256,7 +255,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
     def validate_engine_type(cls, v) -> Any:
         """Validate engine type is TOOL."""
         if v != EngineType.TOOL:
-            raise ValueError("engine_type must be TOOL")
+            raise TypeError("engine_type must be TOOL")
         return v
 
     @field_validator("tools")
@@ -271,10 +270,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
             if isinstance(tool, BaseTool | Tool | StructuredTool | BaseModel):
                 valid_tools.append(tool)
             else:
-                logger.warning(
-                    f"Ignoring invalid tool type: {
-                        type(tool).__name__}"
-                )
+                logger.warning(f"Ignoring invalid tool type: {type(tool).__name__}")
 
         return valid_tools
 

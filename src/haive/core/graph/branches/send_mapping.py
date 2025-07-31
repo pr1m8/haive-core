@@ -43,10 +43,7 @@ class SendMapping(BaseModel):
                 if not condition_value:
                     return None
             except Exception as e:
-                logger.exception(
-                    f"Error evaluating condition {
-                        self.condition}: {e}"
-                )
+                logger.exception(f"Error evaluating condition {self.condition}: {e}")
                 return None
 
         # Extract and transform values for Send

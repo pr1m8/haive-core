@@ -173,7 +173,7 @@ def test_complete_file_system():
     for file_path, expected_source in test_files.items():
         source = enhanced_registry.create_source(file_path)
         if source and source.source_type == expected_source:
-            passe}")
+            pass
         else:
             actual = source.source_type if source else "None"
 

@@ -212,7 +212,8 @@ def example_parent_child_sharing() -> None:
 
     # Child would receive shared fields
     child = ResearchState(
-        messages=parent.messages, user_query=parent.user_query  # Shared fields
+        messages=parent.messages,
+        user_query=parent.user_query,  # Shared fields
     )
 
     # Child does work

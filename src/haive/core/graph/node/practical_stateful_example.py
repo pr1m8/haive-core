@@ -373,7 +373,6 @@ def backward_compatibility_example() -> dict[str, Any]:
 # =============================================================================
 
 if __name__ == "__main__":
-
     practical_stateful_example()
 
     meta_state_integration_example()

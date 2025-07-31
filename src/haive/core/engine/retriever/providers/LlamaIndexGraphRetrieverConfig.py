@@ -143,7 +143,7 @@ class LlamaIndexGraphRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
         """Validate graph type."""
         valid_types = ["neo4j", "networkx", "knowledge_graph"]
         if v not in valid_types:
-            raise ValueError(f"graph_type must be one of {valid_types}, got {v}")
+            raise TypeError(f"graph_type must be one of {valid_types}, got {v}")
         return v
 
     @field_validator("query_type")
@@ -152,7 +152,7 @@ class LlamaIndexGraphRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
         """Validate query type."""
         valid_types = ["node", "relationship", "path", "subgraph"]
         if v not in valid_types:
-            raise ValueError(f"query_type must be one of {valid_types}, got {v}")
+            raise TypeError(f"query_type must be one of {valid_types}, got {v}")
         return v
 
     @field_validator("connection_url")
@@ -210,7 +210,7 @@ class LlamaIndexGraphRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
         # Add graph-specific configuration
         if self.graph_type == "neo4j":
             if not self.connection_url:
-                raise ValueError("connection_url is required for Neo4j graph type")
+                raise TypeError("connection_url is required for Neo4j graph type")
 
             kwargs.update(
                 {

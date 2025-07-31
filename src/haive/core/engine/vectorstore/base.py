@@ -93,8 +93,7 @@ class BaseVectorStoreConfig(InvokableEngine):
             )
             _VECTOR_STORE_REGISTRY[type_str] = config_cls
             logger.info(
-                f"Registered vector store config: {
-                    config_cls.__name__} as {type_str}"
+                f"Registered vector store config: {config_cls.__name__} as {type_str}"
             )
             return config_cls
 

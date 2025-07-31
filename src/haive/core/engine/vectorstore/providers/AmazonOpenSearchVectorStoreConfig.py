@@ -281,8 +281,7 @@ class AmazonOpenSearchVectorStoreConfig(BaseVectorStoreConfig):
                 from opensearchpy import RequestsAWSV4SignerAuth
             except ImportError as e:
                 raise ImportError(
-                    "AWS authentication requires boto3. "
-                    "Install with: pip install boto3"
+                    "AWS authentication requires boto3. Install with: pip install boto3"
                 ) from e
 
             # Create AWS credentials

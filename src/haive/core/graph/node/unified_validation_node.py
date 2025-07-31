@@ -77,10 +77,7 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
 
         This is the main entry point that processes tool calls and routes them.
         """
-        logger.info(
-            f"Unified validation processing for engine: {
-                self.engine_name}"
-        )
+        logger.info(f"Unified validation processing for engine: {self.engine_name}")
 
         # Get messages and engine
         messages = state.get("messages", [])

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Debug with logging to see what's happening."""
 
+import contextlib
 import logging
 
 from haive.core.engine.aug_llm.config import AugLLMConfig
@@ -25,7 +26,5 @@ for field in ["messages", "token_usage", "engine", "engines"]:
     has_field = field in schema_class.model_fields
 
 # Try to create instance
-try:
+with contextlib.suppress(Exception):
     instance = schema_class()
-except Exception:
-    pass

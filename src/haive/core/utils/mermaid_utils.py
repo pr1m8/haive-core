@@ -10,6 +10,9 @@ import subprocess
 import tempfile
 from enum import Enum
 
+import IPython
+from IPython.display import HTML, Image, Markdown, display
+
 
 class Environment(str, Enum):
     """Execution environment types."""
@@ -30,7 +33,6 @@ def detect_environment() -> Environment:
     """
     try:
         # Check if running in IPython
-        import IPython
 
         # Test if we're in a notebook environment at all
         shell = IPython.get_ipython().__class__.__name__
@@ -174,8 +176,6 @@ def display_mermaid(
     ]:
         # We're in a notebook environment
         try:
-            from IPython.display import HTML, Image, Markdown, display
-
             # First approach: Try direct Mermaid rendering via Markdown
             # This works in JupyterLab with the mermaid extension
             try:

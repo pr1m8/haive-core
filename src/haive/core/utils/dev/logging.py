@@ -19,9 +19,7 @@ try:
     from rich.console import Console
     from rich.logging import RichHandler
     from rich.panel import Panel
-    from rich.progress import track
     from rich.table import Table
-    from rich.text import Text
     from rich.traceback import install as install_rich_traceback
 
     HAS_RICH = True
@@ -33,8 +31,6 @@ except ImportError:
 
 # Try to import structlog for structured logging
 try:
-    import structlog
-
     HAS_STRUCTLOG = True
 except ImportError:
     HAS_STRUCTLOG = False
@@ -263,7 +259,7 @@ class DevLogger:
         else:
             self.info(f"Table: {title}")
             for i, row in enumerate(data):
-                self.info(f"  Row {i+1}: {row}")
+                self.info(f"  Row {i + 1}: {row}")
 
     def json(self, data: Any, title: str = "JSON Data") -> None:
         """Log data as formatted JSON."""

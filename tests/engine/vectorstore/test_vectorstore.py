@@ -15,8 +15,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-def make_default_config(docs: list[Document]
-                        | None = None) -> VectorStoreConfig:
+def make_default_config(docs: list[Document] | None = None) -> VectorStoreConfig:
     used_docs = (
         docs
         if docs is not None
@@ -24,7 +23,8 @@ def make_default_config(docs: list[Document]
     )
     logger.info(
         f"[make_default_config] Initializing with {
-            len(used_docs)} document(s)")
+            len(used_docs)} document(s)"
+    )
     for i, doc in enumerate(used_docs):
         logger.info(f" - Doc {i}: {doc.page_content}")
 
@@ -71,11 +71,13 @@ def test_input_output_schemas():
     logger.info(
         f"✅ Input schema fields: {
             list(
-                input_schema.model_fields.keys())}")
+                input_schema.model_fields.keys())}"
+    )
     logger.info(
         f"✅ Output schema fields: {
             list(
-                output_schema.model_fields.keys())}")
+                output_schema.model_fields.keys())}"
+    )
     assert "query" in input_schema.model_fields
     assert "documents" in output_schema.model_fields
 

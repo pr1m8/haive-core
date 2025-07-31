@@ -83,9 +83,6 @@ def main():
     game_logger.error("Game error (hidden - suppressed)")
 
     # Demo 6: Show current status
-    print(f"Root logger level: {logging.getLogger().level}")
-    print(f"Engine logger level: {logging.getLogger('haive.core.engine.test').level}")
-    print(f"Game logger level: {logging.getLogger('haive.games.demo').level}")
 
     # Demo 7: Only show specific modules (would need custom filter)
     # Reset levels for demo
@@ -103,8 +100,7 @@ def main():
         logging.DEBUG,
         logging.NOTSET,
     ]
-    for i, level in enumerate(levels):
-        print(f"\nVerbosity level {i}:")
+    for _i, level in enumerate(levels):
         logging.getLogger().setLevel(level)
         core_logger.debug("  Debug")
         core_logger.info("  Info")
@@ -115,7 +111,6 @@ def main():
     # Demo 9: Configuration management (basic example)
     # Set debug level
     logging.getLogger().setLevel(logging.DEBUG)
-    print("\nConfiguration would be saved in real implementation")
 
     # Reset for performance demo
     logging.getLogger().setLevel(logging.INFO)

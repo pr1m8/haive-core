@@ -27,17 +27,17 @@ from haive.core.engine.base.registry import EngineRegistry
 from haive.core.engine.base.types import EngineType
 
 __all__ = [
-    # Base engine classes
-    "Engine",
-    "InvokableEngine",
-    "NonInvokableEngine",
-    # Registry and type system
-    "EngineRegistry",
-    "EngineType",
+    "AsyncInvokable",
     # Factory and reference patterns
     "ComponentFactory",
     "ComponentRef",
+    # Base engine classes
+    "Engine",
+    # Registry and type system
+    "EngineRegistry",
+    "EngineType",
     # Protocols
     "Invokable",
-    "AsyncInvokable",
+    "InvokableEngine",
+    "NonInvokableEngine",
 ]

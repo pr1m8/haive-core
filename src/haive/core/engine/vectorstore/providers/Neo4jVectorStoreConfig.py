@@ -136,7 +136,7 @@ class Neo4jVectorStoreConfig(BaseVectorStoreConfig):
         """Validate search type is supported."""
         valid_types = ["vector", "hybrid"]
         if v not in valid_types:
-            raise ValueError(f"search_type must be one of {valid_types}, got {v}")
+            raise TypeError(f"search_type must be one of {valid_types}, got {v}")
         return v
 
     @field_validator("distance_strategy")

@@ -35,8 +35,7 @@ class StandardCommandHandler:
             and config.command_goto is not None
         ):
             logger.debug(
-                f"Wrapping preserved BaseModel in Command: {
-                    result.__class__.__name__}"
+                f"Wrapping preserved BaseModel in Command: {result.__class__.__name__}"
             )
             return Command(update=result, goto=config.command_goto)
 
@@ -46,10 +45,7 @@ class StandardCommandHandler:
 
             # Only modify if it has no goto but config does
             if result.goto is None and config.command_goto is not None:
-                logger.debug(
-                    f"Modifying Command to add goto: {
-                        config.command_goto}"
-                )
+                logger.debug(f"Modifying Command to add goto: {config.command_goto}")
 
                 # Handle the update attribute carefully
                 if hasattr(result, "update") and not callable(result.update):
@@ -81,10 +77,7 @@ class StandardCommandHandler:
 
         # Not Command/Send - apply command_goto if specified
         if config.command_goto is not None:
-            logger.debug(
-                f"Creating new Command with goto: {
-                    config.command_goto}"
-            )
+            logger.debug(f"Creating new Command with goto: {config.command_goto}")
 
             new_command = Command(update=result, goto=config.command_goto)
             logger.debug(f"Created new Command: {new_command}")
@@ -107,8 +100,7 @@ class DirectInputProcessor:
         # Preserve BaseModel state directly
         if isinstance(state, BaseModel) and getattr(config, "preserve_model", True):
             logger.debug(
-                f"Preserving BaseModel state directly: {
-                    state.__class__.__name__}"
+                f"Preserving BaseModel state directly: {state.__class__.__name__}"
             )
             return state
 
@@ -127,8 +119,7 @@ class DirectInputProcessor:
         ):
             messages = state.messages
             logger.debug(
-                f"Using direct messages from BaseModel: {
-                    len(messages) if messages else 0}"
+                f"Using direct messages from BaseModel: {len(messages) if messages else 0}"
             )
             return messages
 
@@ -153,10 +144,7 @@ class MappedInputProcessor:
         # Apply mapping - handle BaseModel state specially
         mapped_input = {}
         if isinstance(state, BaseModel):
-            logger.debug(
-                f"Mapping from BaseModel state: {
-                    state.__class__.__name__}"
-            )
+            logger.debug(f"Mapping from BaseModel state: {state.__class__.__name__}")
             for state_key, input_key in config.input_mapping.items():
                 if hasattr(state, state_key):
                     mapped_input[input_key] = getattr(state, state_key)
@@ -172,17 +160,10 @@ class MappedInputProcessor:
         # directly
         if len(config.input_mapping) == 1 and len(mapped_input) == 1:
             result = next(iter(mapped_input.values()))
-            logger.debug(
-                f"Returning single mapped value: {
-                    type(result).__name__}"
-            )
+            logger.debug(f"Returning single mapped value: {type(result).__name__}")
             return result
 
-        logger.debug(
-            f"Returning mapped input with keys: {
-                list(
-                    mapped_input.keys())}"
-        )
+        logger.debug(f"Returning mapped input with keys: {list(mapped_input.keys())}")
         return mapped_input
 
 
@@ -205,10 +186,7 @@ class StandardOutputProcessor:
             and preserve_model
             and not config.output_mapping
         ):
-            logger.debug(
-                f"Returning BaseModel directly: {
-                    result.__class__.__name__}"
-            )
+            logger.debug(f"Returning BaseModel directly: {result.__class__.__name__}")
             return result
 
         # If original state is a BaseModel and we want to preserve, make a copy
@@ -217,22 +195,19 @@ class StandardOutputProcessor:
                 # Pydantic v2
                 updates = original_state.model_copy(deep=True)
                 logger.debug(
-                    f"Created deep copy of original BaseModel: {
-                        updates.__class__.__name__}"
+                    f"Created deep copy of original BaseModel: {updates.__class__.__name__}"
                 )
             else:
                 # Pydantic v1
                 updates = original_state.copy(deep=True)
                 logger.debug(
-                    f"Created deep copy of original BaseModel: {
-                        updates.__class__.__name__}"
+                    f"Created deep copy of original BaseModel: {updates.__class__.__name__}"
                 )
 
             # Handle string result with output mapping
             if isinstance(result, str) and config.output_mapping:
                 logger.debug(
-                    f"Processing string result with output mapping: {
-                        config.output_mapping}"
+                    f"Processing string result with output mapping: {config.output_mapping}"
                 )
                 for output_key, state_key in config.output_mapping.items():
                     if output_key == "output":
@@ -247,18 +222,11 @@ class StandardOutputProcessor:
 
             # Handle different result types
             if isinstance(result, dict):
-                logger.debug(
-                    f"Processing dict result with keys: {
-                        list(
-                            result.keys())}"
-                )
+                logger.debug(f"Processing dict result with keys: {list(result.keys())}")
 
                 # Apply output mapping if exists
                 if config.output_mapping:
-                    logger.debug(
-                        f"Applying output mapping: {
-                            config.output_mapping}"
-                    )
+                    logger.debug(f"Applying output mapping: {config.output_mapping}")
                     for output_key, state_key in config.output_mapping.items():
                         if output_key in result:
                             try:
@@ -306,10 +274,7 @@ class StandardOutputProcessor:
 
                 # Apply output mapping if exists
                 if config.output_mapping:
-                    logger.debug(
-                        f"Applying output mapping: {
-                            config.output_mapping}"
-                    )
+                    logger.debug(f"Applying output mapping: {config.output_mapping}")
                     for output_key, state_key in config.output_mapping.items():
                         if hasattr(result, output_key):
                             try:
@@ -388,8 +353,7 @@ class StandardOutputProcessor:
                                             )
             elif isinstance(result, BaseMessage):
                 logger.debug(
-                    f"Processing direct BaseMessage: {
-                        result.__class__.__name__}"
+                    f"Processing direct BaseMessage: {result.__class__.__name__}"
                 )
 
                 # Add to messages list if it exists
@@ -465,18 +429,13 @@ class StandardOutputProcessor:
 
         # Handle BaseMessage result
         if isinstance(result, BaseMessage):
-            logger.debug(
-                f"Processing BaseMessage result: {
-                    type(result).__name__}"
-            )
+            logger.debug(f"Processing BaseMessage result: {type(result).__name__}")
 
             # Add message to existing messages if present
             if "messages" in updates and isinstance(updates["messages"], list):
                 updates["messages"].append(result)
                 logger.debug(
-                    f"Added message to existing messages list (now {
-                        len(
-                            updates['messages'])})"
+                    f"Added message to existing messages list (now {len(updates['messages'])})"
                 )
             else:
                 updates["messages"] = [result]
@@ -496,18 +455,11 @@ class StandardOutputProcessor:
 
         # Handle dictionary result
         if isinstance(result, dict):
-            logger.debug(
-                f"Processing dict result with keys: {
-                    list(
-                        result.keys())}"
-            )
+            logger.debug(f"Processing dict result with keys: {list(result.keys())}")
 
             # Apply output mapping if exists
             if config.output_mapping:
-                logger.debug(
-                    f"Applying output mapping: {
-                        config.output_mapping}"
-                )
+                logger.debug(f"Applying output mapping: {config.output_mapping}")
                 # src/haive/core/graph/node/handlers.py (continued)
 
                 for output_key, state_key in config.output_mapping.items():
@@ -604,8 +556,7 @@ class StructuredOutputProcessor:
         # Special handling for string results when output mapping is provided
         if isinstance(result, str) and config.output_mapping:
             logger.debug(
-                f"Processing string result with output mapping: {
-                    config.output_mapping}"
+                f"Processing string result with output mapping: {config.output_mapping}"
             )
 
             # Handle BaseModel original state specially
@@ -648,8 +599,7 @@ class StructuredOutputProcessor:
         # Special handling for BaseMessages (like AIMessage)
         if isinstance(result, BaseMessage):
             logger.debug(
-                f"Processing BaseMessage (structured): {
-                    result.__class__.__name__}"
+                f"Processing BaseMessage (structured): {result.__class__.__name__}"
             )
 
             # Handle BaseModel original state specially
@@ -686,10 +636,7 @@ class StructuredOutputProcessor:
 
                 # Apply output mapping if exists
                 if config.output_mapping:
-                    logger.debug(
-                        f"Applying output mapping: {
-                            config.output_mapping}"
-                    )
+                    logger.debug(f"Applying output mapping: {config.output_mapping}")
                     for output_key, state_key in config.output_mapping.items():
                         if output_key == "output" and hasattr(result, "content"):
                             try:
@@ -724,10 +671,7 @@ class StructuredOutputProcessor:
 
             # Apply output mapping if exists
             if config.output_mapping:
-                logger.debug(
-                    f"Applying output mapping: {
-                        config.output_mapping}"
-                )
+                logger.debug(f"Applying output mapping: {config.output_mapping}")
                 for output_key, state_key in config.output_mapping.items():
                     if output_key == "output" and hasattr(result, "content"):
                         updates[state_key] = result.content
@@ -748,8 +692,7 @@ class StructuredOutputProcessor:
             and not config.output_mapping
         ):
             logger.debug(
-                f"Returning BaseModel result directly: {
-                    result.__class__.__name__}"
+                f"Returning BaseModel result directly: {result.__class__.__name__}"
             )
             return result
 
@@ -760,15 +703,13 @@ class StructuredOutputProcessor:
                 # Pydantic v2
                 updates = original_state.model_copy(deep=True)
                 logger.debug(
-                    f"Created deep copy of original BaseModel: {
-                        updates.__class__.__name__}"
+                    f"Created deep copy of original BaseModel: {updates.__class__.__name__}"
                 )
             else:
                 # Pydantic v1
                 updates = original_state.copy(deep=True)
                 logger.debug(
-                    f"Created deep copy of original BaseModel: {
-                        updates.__class__.__name__}"
+                    f"Created deep copy of original BaseModel: {updates.__class__.__name__}"
                 )
 
             # Handle BaseModel result
@@ -862,8 +803,7 @@ class StructuredOutputProcessor:
             # For string results, map them according to output_mapping
             if isinstance(result, str) and config.output_mapping:
                 logger.debug(
-                    f"Processing string result with output mapping: {
-                        config.output_mapping}"
+                    f"Processing string result with output mapping: {config.output_mapping}"
                 )
                 for output_key, state_key in config.output_mapping.items():
                     if output_key == "output" and hasattr(updates, state_key):
@@ -946,9 +886,7 @@ class StructuredOutputProcessor:
                 if "messages" in updates and isinstance(updates["messages"], list):
                     updates["messages"].append(result)
                     logger.debug(
-                        f"Added message to existing messages list (now {
-                            len(
-                                updates['messages'])})"
+                        f"Added message to existing messages list (now {len(updates['messages'])})"
                     )
                 else:
                     # Create a new messages list
@@ -962,10 +900,7 @@ class StructuredOutputProcessor:
 
             # Extract fields if output mapping exists
             if config.output_mapping:
-                logger.debug(
-                    f"Applying output mapping: {
-                        config.output_mapping}"
-                )
+                logger.debug(f"Applying output mapping: {config.output_mapping}")
                 for output_key, state_key in config.output_mapping.items():
                     if hasattr(result, output_key):
                         updates[state_key] = getattr(result, output_key)
@@ -980,8 +915,7 @@ class StructuredOutputProcessor:
         # Handle string results with output mapping
         if isinstance(result, str) and config.output_mapping:
             logger.debug(
-                f"Processing string result with output mapping: {
-                    config.output_mapping}"
+                f"Processing string result with output mapping: {config.output_mapping}"
             )
             for output_key, state_key in config.output_mapping.items():
                 if output_key == "output":

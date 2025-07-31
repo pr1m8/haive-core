@@ -186,8 +186,7 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
             logger.warning("No tools available after filtering")
             return self._create_error_response(
                 messages,
-                f"No tools match allowed routes: {
-                    self.allowed_routes}",
+                f"No tools match allowed routes: {self.allowed_routes}",
             )
 
         logger.info(f"Using {len(filtered_tools)} tools after filtering")
@@ -243,10 +242,7 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
                 attr_value = getattr(engine, attr)
                 if attr_value:
                     tools.extend(attr_value)
-                    logger.debug(
-                        f"Found {
-                            len(attr_value)} tools in engine.{attr}"
-                    )
+                    logger.debug(f"Found {len(attr_value)} tools in engine.{attr}")
 
         return tools
 
@@ -295,8 +291,7 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
                 logger.debug(f"Including tool '{tool_name}' (route: {route})")
             else:
                 logger.debug(
-                    f"Excluding tool '{tool_name}' "
-                    f"(route: {route} not in {self.allowed_routes})"
+                    f"Excluding tool '{tool_name}' (route: {route} not in {self.allowed_routes})"
                 )
 
         return filtered

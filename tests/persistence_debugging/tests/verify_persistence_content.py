@@ -16,8 +16,9 @@ sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agent
 def test_simple_agent_persistence():
     """Test simple agent with message persistence."""
 
-    from haive.agents.simple.agent import SimpleAgent
     from langchain_core.messages import HumanMessage
+
+    from haive.agents.simple.agent import SimpleAgent
 
     timestamp = datetime.now().strftime("%H%M%S")
 
@@ -74,11 +75,10 @@ def verify_checkpoint_content(thread_id: str, expected_messages: int):
         return
 
     try:
-        with psycopg.connect(conn_string) as conn:
-            with conn.cursor() as cur:
-                # Get latest checkpoint
-                cur.execute(
-                    """
+        with psycopg.connect(conn_string) as conn, conn.cursor() as cur:
+            # Get latest checkpoint
+            cur.execute(
+                """
                     SELECT
                         checkpoint_id,
                         checkpoint
@@ -87,46 +87,46 @@ def verify_checkpoint_content(thread_id: str, expected_messages: int):
                     ORDER BY checkpoint_id DESC
                     LIMIT 1
                 """,
-                    (thread_id,),
+                (thread_id,),
+            )
+
+            result = cur.fetchone()
+            if result:
+                checkpoint_id, checkpoint_data = result
+
+                # Parse checkpoint
+                cp_dict = (
+                    json.loads(checkpoint_data)
+                    if isinstance(checkpoint_data, str)
+                    else checkpoint_data
                 )
 
-                result = cur.fetchone()
-                if result:
-                    checkpoint_id, checkpoint_data = result
+                # Check channel values
+                if (
+                    "channel_values" in cp_dict
+                    and "messages" in cp_dict["channel_values"]
+                ):
+                    messages = cp_dict["channel_values"]["messages"]
 
-                    # Parse checkpoint
-                    cp_dict = (
-                        json.loads(checkpoint_data)
-                        if isinstance(checkpoint_data, str)
-                        else checkpoint_data
-                    )
-
-                    # Check channel values
-                    if (
-                        "channel_values" in cp_dict
-                        and "messages" in cp_dict["channel_values"]
-                    ):
-                        messages = cp_dict["channel_values"]["messages"]
-
-                        if len(messages) == expected_messages:
-                            pass
-                        else:
-                            pass
-
-                        # Show messages
-                        for _i, msg in enumerate(messages):
-                            msg.get("type", "unknown")
-                            msg.get("content", "")[:100]
+                    if len(messages) == expected_messages:
+                        pass
                     else:
                         pass
+
+                    # Show messages
+                    for _i, msg in enumerate(messages):
+                        msg.get("type", "unknown")
+                        msg.get("content", "")[:100]
                 else:
                     pass
+            else:
+                pass
 
-                # Check prepared statements
-                cur.execute(
-                    "SELECT COUNT(*) FROM pg_prepared_statements WHERE name LIKE '%pg%'"
-                )
-                cur.fetchone()[0]
+            # Check prepared statements
+            cur.execute(
+                "SELECT COUNT(*) FROM pg_prepared_statements WHERE name LIKE '%pg%'"
+            )
+            cur.fetchone()[0]
 
     except Exception:
         pass

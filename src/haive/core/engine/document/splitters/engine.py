@@ -193,7 +193,7 @@ class DocumentSplitterEngine(InvokableEngine[DocumentState, DocumentState]):
                 document_state = DocumentState.model_validate(input_data)
                 documents_to_split = document_state.raw_documents or []
             else:
-                raise ValueError(f"Invalid input type: {type(input_data)}")
+                raise TypeError(f"Invalid input type: {type(input_data)}")
 
             # Use engine config for splitting parameters
             splitter_type = self.config.splitter_type

@@ -1,4 +1,5 @@
 # Factory functions for PostgreSQL checkpointer operations
+
 import asyncio
 import json
 import logging
@@ -6,23 +7,26 @@ import random
 import time
 from typing import Any
 
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.postgres import ShallowPostgresSaver
+from langgraph.checkpoint.postgres.aio import AsyncShallowPostgresSaver
+from psycopg_pool import AsyncConnectionPool, ConnectionPool
+
+from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
+from haive.core.persistence.postgres_saver_override import (
+    AsyncPostgresSaverNoPreparedStatements as AsyncPostgresSaver,
+)
+from haive.core.persistence.postgres_saver_override import (
+    PostgresSaverNoPreparedStatements as PostgresSaver,
+)
+from haive.core.persistence.serializers import create_production_serializer
+
 # Check if PostgreSQL is available
 try:
-    from langgraph.checkpoint.postgres import ShallowPostgresSaver
-    from langgraph.checkpoint.postgres.aio import AsyncShallowPostgresSaver
-
-    from haive.core.persistence.postgres_saver_override import (
-        AsyncPostgresSaverNoPreparedStatements as AsyncPostgresSaver,
-    )
-    from haive.core.persistence.postgres_saver_override import (
-        PostgresSaverNoPreparedStatements as PostgresSaver,
-    )
-
     POSTGRES_AVAILABLE = True
 except ImportError:
     POSTGRES_AVAILABLE = False
 
-from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +44,6 @@ def create_postgres_checkpointer(config: PostgresCheckpointerConfig) -> Any:
         logger.warning(
             "PostgreSQL dependencies not available, falling back to memory checkpointer"
         )
-        from langgraph.checkpoint.memory import MemorySaver
 
         return MemorySaver()
 
@@ -63,8 +66,6 @@ def create_postgres_checkpointer(config: PostgresCheckpointerConfig) -> Any:
             # Create connection pool with retries
             for retry in range(config.max_retries):
                 try:
-                    from psycopg_pool import ConnectionPool
-
                     pool = ConnectionPool(
                         conninfo=db_uri,
                         min_size=config.min_pool_size,
@@ -85,17 +86,13 @@ def create_postgres_checkpointer(config: PostgresCheckpointerConfig) -> Any:
                         if config.retry_jitter:
                             delay *= 0.5 + random.random()
                         logger.warning(
-                            f"Connection attempt {
-                                retry +
-                                1} failed: {e}. Retrying in {
-                                delay:.2f}s"
+                            f"Connection attempt {retry + 1} failed: {e}. Retrying in {delay:.2f}s"
                         )
                         time.sleep(delay)
                     else:
                         raise
 
         # Create appropriate PostgresSaver with secure serializer
-        from haive.core.persistence.serializers import create_production_serializer
 
         # Create secure serializer that handles SecretStr
         serializer = create_production_serializer()
@@ -121,7 +118,6 @@ def create_postgres_checkpointer(config: PostgresCheckpointerConfig) -> Any:
     except Exception as e:
         logger.exception(f"Error creating PostgreSQL checkpointer: {e}")
         logger.warning("Falling back to memory checkpointer")
-        from langgraph.checkpoint.memory import MemorySaver
 
         return MemorySaver()
 
@@ -139,7 +135,6 @@ async def acreate_postgres_checkpointer(config: PostgresCheckpointerConfig) -> A
         logger.warning(
             "PostgreSQL dependencies not available, falling back to memory checkpointer"
         )
-        from langgraph.checkpoint.memory import MemorySaver
 
         return MemorySaver()
 
@@ -170,7 +165,6 @@ async def acreate_postgres_checkpointer(config: PostgresCheckpointerConfig) -> A
             for retry in range(config.max_retries):
                 try:
                     # Create pool
-                    from psycopg_pool import AsyncConnectionPool
 
                     async_pool = AsyncConnectionPool(
                         conninfo=db_uri,
@@ -192,17 +186,15 @@ async def acreate_postgres_checkpointer(config: PostgresCheckpointerConfig) -> A
                         if config.retry_jitter:
                             delay *= 0.5 + random.random()
                         logger.warning(
-                            f"Async connection attempt {
-                                retry +
-                                1} failed: {e}. Retrying in {
-                                delay:.2f}s"
+                            f"Async connection attempt {retry + 1} failed: {e}. Retrying in {
+                                delay:.2f
+                            }s"
                         )
                         await asyncio.sleep(delay)
                     else:
                         raise
 
         # Create appropriate async checkpoint saver with secure serializer
-        from haive.core.persistence.serializers import create_production_serializer
 
         # Create secure serializer that handles SecretStr
         serializer = create_production_serializer()
@@ -230,7 +222,6 @@ async def acreate_postgres_checkpointer(config: PostgresCheckpointerConfig) -> A
     except Exception as e:
         logger.exception(f"Error creating async PostgreSQL checkpointer: {e}")
         logger.warning("Falling back to memory checkpointer")
-        from langgraph.checkpoint.memory import MemorySaver
 
         return MemorySaver()
 
@@ -256,7 +247,6 @@ def register_postgres_thread(
         checkpointer = create_postgres_checkpointer(config)
 
         # Skip if we got a MemorySaver fallback
-        from langgraph.checkpoint.memory import MemorySaver
 
         if isinstance(checkpointer, MemorySaver):
             return
@@ -349,10 +339,9 @@ def register_postgres_thread(
                     if config.retry_jitter:
                         delay *= 0.5 + random.random()
                     logger.warning(
-                        f"Thread registration attempt {
-                            retry +
-                            1} failed: {e}. Retrying in {
-                            delay:.2f}s"
+                        f"Thread registration attempt {retry + 1} failed: {e}. Retrying in {
+                            delay:.2f
+                        }s"
                     )
                     time.sleep(delay)
                 else:
@@ -383,7 +372,6 @@ async def aregister_postgres_thread(
         checkpointer = await acreate_postgres_checkpointer(config)
 
         # Skip if we got a MemorySaver fallback
-        from langgraph.checkpoint.memory import MemorySaver
 
         if isinstance(checkpointer, MemorySaver):
             return
@@ -470,10 +458,9 @@ async def aregister_postgres_thread(
                     if config.retry_jitter:
                         delay *= 0.5 + random.random()
                     logger.warning(
-                        f"Async thread registration attempt {
-                            retry +
-                            1} failed: {e}. Retrying in {
-                            delay:.2f}s"
+                        f"Async thread registration attempt {retry + 1} failed: {e}. Retrying in {
+                            delay:.2f
+                        }s"
                     )
                     await asyncio.sleep(delay)
                 else:
@@ -546,10 +533,7 @@ def put_postgres_checkpoint(
                 if config.retry_jitter:
                     delay *= 0.5 + random.random()
                 logger.warning(
-                    f"Checkpoint storage attempt {
-                        retry +
-                        1} failed: {e}. Retrying in {
-                        delay:.2f}s"
+                    f"Checkpoint storage attempt {retry + 1} failed: {e}. Retrying in {delay:.2f}s"
                 )
                 time.sleep(delay)
             else:
@@ -591,15 +575,11 @@ async def aput_postgres_checkpoint(
 
     # Log complete config for debugging
     logger.debug(
-        f"Writing checkpoint with config: {
-            json.dumps(
-                config_dict,
-                default=str)}"
+        f"Writing checkpoint with config: {json.dumps(config_dict, default=str)}"
     )
     logger.debug(f"Data type: {type(data)}, Data preview: {str(data)[:100]}")
 
     # Skip for MemorySaver fallback
-    from langgraph.checkpoint.memory import MemorySaver
 
     if isinstance(checkpointer, MemorySaver):
         logger.info("Using MemorySaver fallback for checkpoint storage")
@@ -632,17 +612,10 @@ async def aput_postgres_checkpoint(
                 try:
                     # Log exactly what we're passing to aput
                     logger.debug(
-                        f"Calling aput with config: {
-                            json.dumps(
-                                config_dict,
-                                default=str)}"
+                        f"Calling aput with config: {json.dumps(config_dict, default=str)}"
                     )
                     logger.debug(
-                        f"Checkpoint data: {
-                            json.dumps(
-                                checkpoint_data,
-                                default=str)[
-                                :200]}"
+                        f"Checkpoint data: {json.dumps(checkpoint_data, default=str)[:200]}"
                     )
 
                     next_config = await checkpointer.aput(
@@ -654,10 +627,7 @@ async def aput_postgres_checkpoint(
 
                     # Log the returned config
                     logger.debug(
-                        f"aput returned config: {
-                            json.dumps(
-                                next_config,
-                                default=str)}"
+                        f"aput returned config: {json.dumps(next_config, default=str)}"
                     )
                     return next_config
                 except TypeError as te:
@@ -679,18 +649,13 @@ async def aput_postgres_checkpoint(
                 if config.retry_jitter:
                     delay *= 0.5 + random.random()
                 logger.warning(
-                    f"Async checkpoint storage attempt {
-                        retry +
-                        1} failed: {
-                        e!s}. Retrying in {
-                        delay:.2f}s"
+                    f"Async checkpoint storage attempt {retry + 1} failed: {e!s}. Retrying in {
+                        delay:.2f
+                    }s"
                 )
                 await asyncio.sleep(delay)
             else:
-                logger.exception(
-                    f"All async checkpoint storage attempts failed: {
-                        e!s}"
-                )
+                logger.exception(f"All async checkpoint storage attempts failed: {e!s}")
                 return config_dict
 
     # Should not reach here
@@ -738,10 +703,9 @@ def get_postgres_checkpoint(
                 if config.retry_jitter:
                     delay *= 0.5 + random.random()
                 logger.warning(
-                    f"Checkpoint retrieval attempt {
-                        retry +
-                        1} failed: {e}. Retrying in {
-                        delay:.2f}s"
+                    f"Checkpoint retrieval attempt {retry + 1} failed: {e}. Retrying in {
+                        delay:.2f
+                    }s"
                 )
                 time.sleep(delay)
             else:
@@ -778,14 +742,10 @@ async def aget_postgres_checkpoint(
 
     # Log complete config for debugging
     logger.debug(
-        f"Reading checkpoint with config: {
-            json.dumps(
-                config_dict,
-                default=str)}"
+        f"Reading checkpoint with config: {json.dumps(config_dict, default=str)}"
     )
 
     # Skip for MemorySaver fallback
-    from langgraph.checkpoint.memory import MemorySaver
 
     if isinstance(checkpointer, MemorySaver):
         logger.info("Using MemorySaver fallback for checkpoint retrieval")
@@ -800,20 +760,16 @@ async def aget_postgres_checkpoint(
             # Get the checkpoint asynchronously
             if hasattr(checkpointer, "aget") and callable(checkpointer.aget):
                 logger.debug(
-                    f"Using async aget with config: {
-                        json.dumps(
-                            config_dict,
-                            default=str)}"
+                    f"Using async aget with config: {json.dumps(config_dict, default=str)}"
                 )
                 result = await checkpointer.aget(config_dict)
 
                 # Log the result structure
                 if result is not None:
                     logger.debug(
-                        f"aget result type: {
-                            type(result)}, keys: {
-                            result.keys() if isinstance(
-                                result, dict) else 'not a dict'}"
+                        f"aget result type: {type(result)}, keys: {
+                            result.keys() if isinstance(result, dict) else 'not a dict'
+                        }"
                     )
                 else:
                     logger.warning("aget returned None")
@@ -847,11 +803,9 @@ async def aget_postgres_checkpoint(
                 if config.retry_jitter:
                     delay *= 0.5 + random.random()
                 logger.warning(
-                    f"Async checkpoint retrieval attempt {
-                        retry +
-                        1} failed: {
-                        e!s}. Retrying in {
-                        delay:.2f}s"
+                    f"Async checkpoint retrieval attempt {retry + 1} failed: {e!s}. Retrying in {
+                        delay:.2f
+                    }s"
                 )
                 await asyncio.sleep(delay)
             else:

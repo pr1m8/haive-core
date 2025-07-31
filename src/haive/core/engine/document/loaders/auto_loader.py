@@ -460,10 +460,7 @@ class AutoLoader:
         self._cache: dict[str, tuple[list[Document], datetime]] = {}
         self._registration_ensured = False
 
-        logger.info(
-            f"AutoLoader initialized with {
-                self.config.preference} preference"
-        )
+        logger.info(f"AutoLoader initialized with {self.config.preference} preference")
 
     def _ensure_registration(self):
         """Ensure auto-registration has been completed (lazy loading)."""
@@ -505,7 +502,7 @@ class AutoLoader:
             return source_info
         except Exception as e:
             logger.exception(f"Failed to detect source for {path_or_url}: {e}")
-            raise ValueError(f"Could not detect source type for: {path_or_url}") from e
+            raise TypeError(f"Could not detect source type for: {path_or_url}") from e
 
     def get_best_loader(self, source_info: SourceInfo) -> tuple[str, dict[str, Any]]:
         """Get the best loader for a source based on preferences.
@@ -545,10 +542,7 @@ class AutoLoader:
             return loader_name, loader_config
 
         except Exception as e:
-            logger.exception(
-                f"Failed to get loader for {
-                    source_info.source_type}: {e}"
-            )
+            logger.exception(f"Failed to get loader for {source_info.source_type}: {e}")
             raise ValueError(
                 f"No suitable loader found for {source_info.source_type}"
             ) from e
@@ -764,9 +758,7 @@ class AutoLoader:
 
             loading_time = (datetime.now() - start_time).total_seconds()
             logger.info(
-                f"Loaded {
-                    len(documents)} documents from {
-                    source_info.source_type} "
+                f"Loaded {len(documents)} documents from {source_info.source_type} "
                 f"in {loading_time:.2f}s using {loader_name}"
             )
 
@@ -1126,8 +1118,7 @@ class AutoLoader:
             # Check if source supports scrape_all
             if not hasattr(source_instance, "scrape_all"):
                 logger.warning(
-                    f"Source {
-                        source_info.source_type} doesn't support scrape_all"
+                    f"Source {source_info.source_type} doesn't support scrape_all"
                 )
                 return self.load(path_or_url, **kwargs)
 
@@ -1257,8 +1248,7 @@ class AutoLoader:
                     documents = loader_instance.load_and_split()
                 else:
                     raise ValueError(
-                        f"Loader {
-                            type(loader_instance)} has no supported load method "
+                        f"Loader {type(loader_instance)} has no supported load method "
                         f"(load_documents, load, or load_and_split)"
                     )
 
@@ -1272,15 +1262,12 @@ class AutoLoader:
                 last_exception = e
                 if attempt < self.config.retry_attempts:
                     logger.warning(
-                        f"Attempt {
-                            attempt + 1} failed for {source_type}: {e}. Retrying..."
+                        f"Attempt {attempt + 1} failed for {source_type}: {e}. Retrying..."
                     )
                     asyncio.sleep(min(2**attempt, 10))  # Exponential backoff
                 else:
                     logger.exception(
-                        f"All {
-                            self.config.retry_attempts +
-                            1} attempts failed for {source_type}"
+                        f"All {self.config.retry_attempts + 1} attempts failed for {source_type}"
                     )
 
         raise last_exception

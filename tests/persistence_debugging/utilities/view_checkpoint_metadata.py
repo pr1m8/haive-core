@@ -3,7 +3,6 @@
 
 import json
 import os
-from datetime import datetime
 
 import psycopg
 
@@ -16,10 +15,9 @@ def view_checkpoint_metadata(thread_id: str | None = None):
         return
 
     try:
-        with psycopg.connect(conn_string) as conn:
-            with conn.cursor() as cur:
-                # Build query
-                query = """
+        with psycopg.connect(conn_string) as conn, conn.cursor() as cur:
+            # Build query
+            query = """
                     SELECT
                         thread_id,
                         checkpoint_id,
@@ -27,70 +25,68 @@ def view_checkpoint_metadata(thread_id: str | None = None):
                     FROM public.checkpoints
                     WHERE metadata IS NOT NULL
                 """
-                params = []
+            params = []
 
-                if thread_id:
-                    query += " AND thread_id = %s"
-                    params.append(thread_id)
-                else:
-                    query += " AND metadata::text LIKE '%error%'"
+            if thread_id:
+                query += " AND thread_id = %s"
+                params.append(thread_id)
+            else:
+                query += " AND metadata::text LIKE '%error%'"
 
-                query += " ORDER BY checkpoint_id DESC LIMIT 10"
+            query += " ORDER BY checkpoint_id DESC LIMIT 10"
 
-                cur.execute(query, params)
-                checkpoints = cur.fetchall()
+            cur.execute(query, params)
+            checkpoints = cur.fetchall()
 
-                for thread, cp_id, metadata in checkpoints:
+            for _thread, _cp_id, metadata in checkpoints:
 
-                    try:
-                        meta_dict = (
-                            json.loads(metadata)
-                            if isinstance(metadata, str)
-                            else metadata
-                        )
+                try:
+                    meta_dict = (
+                        json.loads(metadata) if isinstance(metadata, str) else metadata
+                    )
 
-                        # Show key fields
-                        if "step" in meta_dict:
-                            pass
+                    # Show key fields
+                    if "step" in meta_dict:
+                        pass
 
-                        if "langgraph_node" in meta_dict:
-                            pass
+                    if "langgraph_node" in meta_dict:
+                        pass
 
-                        if "error" in meta_dict:
-                            pass
+                    if "error" in meta_dict:
+                        pass
 
-                        # Check writes for errors
-                        if "writes" in meta_dict:
-                            writes = meta_dict["writes"]
-                            if isinstance(writes, dict):
-                                for node, data in writes.items():
-                                    if isinstance(data, dict):
-                                        if "error" in data:
-                                            pass
-                                        if "process_response" in data:
-                                            pr = data["process_response"]
-                                            if (
-                                                isinstance(pr, dict)
-                                                and "contributions" in pr
-                                            ):
-                                                # Check for errors in contributions
-                                                for contrib in pr["contributions"]:
+                    # Check writes for errors
+                    if "writes" in meta_dict:
+                        writes = meta_dict["writes"]
+                        if isinstance(writes, dict):
+                            for _node, data in writes.items():
+                                if isinstance(data, dict):
+                                    if "error" in data:
+                                        pass
+                                    if "process_response" in data:
+                                        pr = data["process_response"]
+                                        if (
+                                            isinstance(pr, dict)
+                                            and "contributions" in pr
+                                        ):
+                                            # Check for errors in contributions
+                                            for contrib in pr["contributions"]:
+                                                if (
+                                                    isinstance(contrib, list)
+                                                    and len(contrib) >= 3
+                                                ):
+                                                    content = str(contrib[2])
                                                     if (
-                                                        isinstance(contrib, list)
-                                                        and len(contrib) >= 3
+                                                        "error" in content.lower()
+                                                        or "prepared statement"
+                                                        in content.lower()
                                                     ):
-                                                        content = str(contrib[2])
-                                                        if (
-                                                            "error" in content.lower()
-                                                            or "prepared statement"
-                                                            in content.lower()
-                                                        ):
-                                                            pass
+                                                        pass
 
-                    except Exception as e:
-                        passe}")
+                except Exception:
+                    pass
 
-    except Exception as e:
+    except Exception:
         pass
 
 
@@ -106,7 +102,7 @@ def organize_test_files():
         "analysis": "Analysis and debugging scripts",
     }
 
-    for subdir, description in subdirs.items():
+    for subdir, _description in subdirs.items():
         path = os.path.join(test_dir, subdir)
         os.makedirs(path, exist_ok=True)
 
@@ -135,7 +131,6 @@ def organize_test_files():
                         os.rename(file_path, new_path)
                         moved += 1
                     break
-
 
     # Update README
     readme_content = """# PostgreSQL Persistence Debugging
@@ -187,7 +182,6 @@ python utilities/check_db.py
 
     with open(os.path.join(test_dir, "README.md"), "w") as f:
         f.write(readme_content)
-
 
 
 def main():

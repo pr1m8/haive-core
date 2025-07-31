@@ -18,10 +18,8 @@ def test_create_node_function_with_real_engine(real_llm_engine):
     logger.debug(f"Using real_llm_engine: {real_llm_engine}")
 
     # Create node function
-    logger.debug(
-        "Calling NodeFactory.create_node_function with engine and END")
-    node_function = NodeFactory.create_node_function(
-        real_llm_engine, command_goto=END)
+    logger.debug("Calling NodeFactory.create_node_function with engine and END")
+    node_function = NodeFactory.create_node_function(real_llm_engine, command_goto=END)
     logger.debug(f"Created node function: {node_function}")
 
     # Verify it's callable
@@ -166,8 +164,7 @@ def test_node_function_with_callable():
 
     # Create node function
     logger.debug("Calling NodeFactory.create_node_function with callable")
-    node_function = NodeFactory.create_node_function(
-        test_callable, command_goto=END)
+    node_function = NodeFactory.create_node_function(test_callable, command_goto=END)
     logger.debug(f"Created node function: {node_function}")
 
     # Verify it's callable
@@ -186,7 +183,8 @@ def test_node_function_with_callable():
         f"Asserted result type is Command: {
             isinstance(
                 result_cmd,
-                Command)}")
+                Command)}"
+    )
     assert result_cmd.goto is END
     logger.debug(f"Asserted result.goto is END: {result_cmd.goto is END}")
     assert "processed" in result_cmd.update
@@ -219,16 +217,14 @@ def test_extract_input():
 
     # Test with mapping
     mapping_multi = {"key1": "input1", "key3": "input3"}  # key3 doesn't exist
-    logger.debug(
-        f"Testing _extract_input with multi-key mapping: {mapping_multi}")
+    logger.debug(f"Testing _extract_input with multi-key mapping: {mapping_multi}")
     result_multi_map = NodeFactory._extract_input(state, mapping_multi)
     logger.debug(f"Result (multi-key mapping): {result_multi_map}")
     assert result_multi_map == {"input1": "value1"}  # Only key1 mapped
 
     # Test with single field mapping
     mapping_single = {"key2": "input2"}
-    logger.debug(
-        f"Testing _extract_input with single-key mapping: {mapping_single}")
+    logger.debug(f"Testing _extract_input with single-key mapping: {mapping_single}")
     result_single_map = NodeFactory._extract_input(state, mapping_single)
     logger.debug(f"Result (single-key mapping): {result_single_map}")
     assert result_single_map == "value2"  # Returns value directly
@@ -285,8 +281,7 @@ def test_process_output():
 
     # Test with no mapping (should return output as-is)
     output_dict = {"key1": "value1", "key2": "value2"}
-    logger.debug(
-        f"Testing _process_output with dict and no mapping: {output_dict}")
+    logger.debug(f"Testing _process_output with dict and no mapping: {output_dict}")
     result_no_map = NodeFactory._process_output(output_dict, None)
     logger.debug(f"Result (no mapping): {result_no_map}")
     assert result_no_map == output_dict
@@ -303,8 +298,7 @@ def test_process_output():
 
     # Test with non-dict output and no mapping
     output_str = "string output"
-    logger.debug(
-        f"Testing _process_output with non-dict and no mapping: {output_str}")
+    logger.debug(f"Testing _process_output with non-dict and no mapping: {output_str}")
     result_non_dict = NodeFactory._process_output(output_str, None)
     logger.debug(f"Result (non-dict, no mapping): {result_non_dict}")
     assert result_non_dict == {"result": output_str}

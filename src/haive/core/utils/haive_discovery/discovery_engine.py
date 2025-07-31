@@ -74,8 +74,7 @@ class EnhancedComponentDiscovery:
 
                 if new_components:
                     logger.debug(
-                        f"Found {
-                            len(new_components)} components in {module_path}"
+                        f"Found {len(new_components)} components in {module_path}"
                     )
                     components.extend(new_components)
 

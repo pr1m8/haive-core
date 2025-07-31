@@ -49,7 +49,6 @@ from haive.core.schema.schema_composer import SchemaComposer
 
 # Check if PostgreSQL dependencies are available
 try:
-
     from haive.core.persistence.memory import MemoryCheckpointerConfig
     from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
 
@@ -558,7 +557,6 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                                 logger.debug(
                                     "Retriever module not available for pattern components"
                                 )
-                                pass
         except ImportError:
             # Pattern system not available
             logger.debug("Pattern system not available for schema component extraction")
@@ -808,10 +806,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
             agent_class = self._resolve_agent_class_by_name()
 
         if agent_class is None:
-            raise TypeError(
-                f"No agent class found for {
-                    self.__class__.__name__}"
-            )
+            raise TypeError(f"No agent class found for {self.__class__.__name__}")
 
         # Instantiate the agent
         agent = agent_class(config=self)
@@ -833,33 +828,32 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         # Verify that agent implements the core protocol
         if not isinstance(agent, AgentProtocol):
             raise TypeError(
-                f"Agent class {
-                    agent.__class__.__name__} must implement AgentProtocol"
+                f"Agent class {agent.__class__.__name__} must implement AgentProtocol"
             )
 
         # Log warnings for optional protocols
         if not isinstance(agent, StreamingAgentProtocol):
             logger.warning(
-                f"Agent class {
-                    agent.__class__.__name__} doesn't implement StreamingAgentProtocol"
+                f"Agent class {agent.__class__.__name__} doesn't implement StreamingAgentProtocol"
             )
 
         if not isinstance(agent, PersistentAgentProtocol):
             logger.warning(
-                f"Agent class {
-                    agent.__class__.__name__} doesn't implement PersistentAgentProtocol"
+                f"Agent class {agent.__class__.__name__} doesn't implement PersistentAgentProtocol"
             )
 
         if not isinstance(agent, VisualizationAgentProtocol):
             logger.warning(
                 f"Agent class {
-                    agent.__class__.__name__} doesn't implement VisualizationAgentProtocol"
+                    agent.__class__.__name__
+                } doesn't implement VisualizationAgentProtocol"
             )
 
         if not isinstance(agent, ExtensibilityAgentProtocol):
             logger.warning(
                 f"Agent class {
-                    agent.__class__.__name__} doesn't implement ExtensibilityAgentProtocol"
+                    agent.__class__.__name__
+                } doesn't implement ExtensibilityAgentProtocol"
             )
 
     def _resolve_agent_class_by_name(self) -> type["Agent"] | None:
@@ -1122,11 +1116,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                 data["persistence"] = data["persistence"].to_dict()
 
         # Add class information for type reconstruction
-        data["agent_class"] = (
-            f"{
-            self.__class__.__module__}.{
-            self.__class__.__name__}"
-        )
+        data["agent_class"] = f"{self.__class__.__module__}.{self.__class__.__name__}"
 
         return data
 
@@ -1440,15 +1430,13 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                 test_instance = agent_class(config=test_config)
             except Exception as e:
                 logger.warning(
-                    f"Could not create test instance of {
-                        agent_class.__name__}: {e}"
+                    f"Could not create test instance of {agent_class.__name__}: {e}"
                 )
 
             # If we have an instance, verify it implements required protocols
             if test_instance and not isinstance(test_instance, AgentProtocol):
                 raise TypeError(
-                    f"Agent class {
-                        agent_class.__name__} must implement AgentProtocol"
+                    f"Agent class {agent_class.__name__} must implement AgentProtocol"
                 )
         except Exception as e:
             logger.warning(f"Protocol validation failed: {e}")
@@ -1462,7 +1450,5 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         agent_class.config_class = cls
 
         logger.info(
-            f"Registered agent class {
-                agent_class.__name__} for config {
-                cls.__name__}"
+            f"Registered agent class {agent_class.__name__} for config {cls.__name__}"
         )

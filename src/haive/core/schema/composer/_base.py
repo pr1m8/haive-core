@@ -135,11 +135,9 @@ class _SchemaComposerBase:
             )
 
         logger.debug(
-            f"Building {
-                self.name} with {
-                len(
-                    self.fields)} fields using base class {
-                base_class.__name__}"
+            f"Building {self.name} with {len(self.fields)} fields using base class {
+                base_class.__name__
+            }"
         )
 
         field_defs = {}
@@ -158,13 +156,7 @@ class _SchemaComposerBase:
         if is_state_schema_base:
             base_shared = set(getattr(base_class, "__shared_fields__", []))
             schema.__shared_fields__ = list(base_shared | self.shared_fields)
-            logger.debug(
-                f"Shared fields: {
-                    getattr(
-                        schema,
-                        '__shared_fields__',
-                        [])}"
-            )
+            logger.debug(f"Shared fields: {getattr(schema, '__shared_fields__', [])}")
 
             schema.__serializable_reducers__ = {}
             schema.__reducer_fields__ = {}

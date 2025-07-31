@@ -396,11 +396,7 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
             data["output_schema_name"] = self.output_schema.__name__
 
         # Add class information for type reconstruction
-        data["engine_class"] = (
-            f"{
-            self.__class__.__module__}.{
-            self.__class__.__name__}"
-        )
+        data["engine_class"] = f"{self.__class__.__module__}.{self.__class__.__name__}"
 
         return data
 
@@ -632,8 +628,7 @@ class InvokableEngine(Engine[TIn, TOut]):
                 raise
 
         raise NotImplementedError(
-            f"Engine {
-                self.name} creates a runnable that does not support invoke"
+            f"Engine {self.name} creates a runnable that does not support invoke"
         )
 
     async def ainvoke(
@@ -691,8 +686,7 @@ class InvokableEngine(Engine[TIn, TOut]):
                 raise
 
         raise NotImplementedError(
-            f"Engine {
-                self.name} creates a runnable that does not support ainvoke"
+            f"Engine {self.name} creates a runnable that does not support ainvoke"
         )
 
 

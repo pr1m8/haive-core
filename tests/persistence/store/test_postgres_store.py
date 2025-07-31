@@ -271,7 +271,6 @@ class TestStoreIntegration:
             pytest.skip("No POSTGRES_CONNECTION_STRING environment variable")
 
         from haive.agents.simple import SimpleAgent
-
         from haive.core.engine.aug_llm import AugLLMConfig
         from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
         from haive.core.persistence.types import CheckpointerMode, CheckpointStorageMode

@@ -132,7 +132,8 @@ class StatefulValidationNode(BaseNodeConfig):
                 if validation_result.validation_type == "pydantic_model":
                     tool_msg = ToolMessage(
                         content=f"Successfully validated {tool_name}: {
-                            validation_result.validated_args}",
+                            validation_result.validated_args
+                        }",
                         tool_call_id=tool_id,
                         name=tool_name,
                     )
@@ -184,9 +185,7 @@ class StatefulValidationNode(BaseNodeConfig):
         goto = self._determine_destination(destinations, validation_results)
 
         logger.info(
-            f"StatefulValidation: Processed {
-                len(validation_results)} tool calls, "
-            f"routing to {goto}"
+            f"StatefulValidation: Processed {len(validation_results)} tool calls, routing to {goto}"
         )
 
         return Command(update=update_dict, goto=goto)

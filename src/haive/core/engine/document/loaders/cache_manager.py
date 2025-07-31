@@ -130,8 +130,7 @@ class RegistryCacheManager:
                 self._cache_loaded = True
 
             logger.info(
-                f"Saved registry cache with {
-                    metadata['stats']['total_sources']} sources "
+                f"Saved registry cache with {metadata['stats']['total_sources']} sources "
                 f"and {metadata['stats']['total_loaders']} loaders"
             )
             return True
@@ -179,8 +178,7 @@ class RegistryCacheManager:
             current_version = self._get_haive_version()
             if metadata.get("haive_version") != current_version:
                 logger.debug(
-                    f"Version mismatch: {
-                        metadata.get('haive_version')} != {current_version}"
+                    f"Version mismatch: {metadata.get('haive_version')} != {current_version}"
                 )
                 return False
 

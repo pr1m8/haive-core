@@ -290,7 +290,7 @@ def mock_enhanced_registry():
             if preference == LoaderPreference.QUALITY:
                 return "playwright"
             return "beautiful_soup"
-        raise ValueError(f"Unknown source type: {source_type}")
+        raise TypeError(f"Unknown source type: {source_type}")
 
     def mock_get_loader_config(source_type: str, loader_name: str):
         return registry._sources[source_type].loaders[loader_name]
@@ -300,7 +300,7 @@ def mock_enhanced_registry():
             return mock_pdf_source
         if source_type == "web":
             return mock_web_source
-        raise ValueError(f"Unknown source type: {source_type}")
+        raise TypeError(f"Unknown source type: {source_type}")
 
     def mock_get_loader_class(source_type: str, loader_name: str):
         return mock_document_loader

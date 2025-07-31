@@ -232,13 +232,11 @@ class AdvancedNodeComposer(NodeSchemaComposer):
             if validate_types:
                 if not isinstance(state, state_type):
                     logger.warning(
-                        f"State type mismatch: expected {state_type}, got {
-                            type(state)}"
+                        f"State type mismatch: expected {state_type}, got {type(state)}"
                     )
                 if not isinstance(config, config_type):
                     logger.warning(
-                        f"Config type mismatch: expected {config_type}, got {
-                            type(config)}"
+                        f"Config type mismatch: expected {config_type}, got {type(config)}"
                     )
 
             result = func(state, config)
@@ -246,8 +244,7 @@ class AdvancedNodeComposer(NodeSchemaComposer):
             # Validate output type if specified
             if validate_types and result_type and not isinstance(result, result_type):
                 logger.warning(
-                    f"Result type mismatch: expected {result_type}, got {
-                        type(result)}"
+                    f"Result type mismatch: expected {result_type}, got {type(result)}"
                 )
 
             return result

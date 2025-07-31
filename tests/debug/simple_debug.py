@@ -4,11 +4,12 @@ import asyncio
 import logging
 import sys
 
+from langchain_core.messages import HumanMessage
+
 from haive.agents.reasoning_and_critique.self_discover.v2.agent import (
     DEFAULT_REASONING_MODULES,
     self_discovery,
 )
-from langchain_core.messages import HumanMessage
 
 # Suppress all logging except errors
 logging.getLogger().setLevel(logging.ERROR)

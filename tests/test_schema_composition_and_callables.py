@@ -117,10 +117,7 @@ def demonstrate_schema_composition():
                 all_fields[field_name] = (field_type, field_default)
 
     # Create composite schema dynamically
-    CompositeState = create_model(
-        "CompositeState",
-        __base__=StateSchema,
-        **all_fields)
+    CompositeState = create_model("CompositeState", __base__=StateSchema, **all_fields)
 
     for _name, _field_info in CompositeState.model_fields.items():
         pass
@@ -271,9 +268,7 @@ def demonstrate_state_agnostic_wrapper():
     token_threshold = CallableNodeConfig(
         name="token_threshold",
         callable_func=universal_threshold_check,
-        parameter_mapping={
-            "value": "token_count",
-            "threshold": "limits.max_tokens"},
+        parameter_mapping={"value": "token_count", "threshold": "limits.max_tokens"},
         extraction_paths={
             "threshold": "limits.max_tokens"  # Use advanced path extraction
         },
@@ -285,9 +280,7 @@ def demonstrate_state_agnostic_wrapper():
     cost_threshold = CallableNodeConfig(
         name="cost_threshold",
         callable_func=universal_threshold_check,
-        parameter_mapping={
-            "value": "total_cost",
-            "threshold": "limits.max_cost"},
+        parameter_mapping={"value": "total_cost", "threshold": "limits.max_cost"},
         extraction_paths={
             "threshold": "limits.max_cost"  # Use advanced path extraction
         },

@@ -196,8 +196,7 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
         """Execute the message transformation."""
         if self.debug:
             console.print(
-                f"[cyan]MessageTransformation[/] Starting {
-                    self.transformation_type} transformation"
+                f"[cyan]MessageTransformation[/] Starting {self.transformation_type} transformation"
             )
 
         try:
@@ -205,10 +204,7 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
             messages = self._get_messages_from_state(state)
 
             if not messages:
-                logger.warning(
-                    f"No messages found in field '{
-                        self.messages_field}'"
-                )
+                logger.warning(f"No messages found in field '{self.messages_field}'")
                 return self._create_output_command({}, goto=self._get_goto_node())
 
             if self.debug:
@@ -219,8 +215,7 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
             if self.debug:
                 console.print(
-                    f"[green]Transformed to {
-                        len(transformed_messages)} messages[/]"
+                    f"[green]Transformed to {len(transformed_messages)} messages[/]"
                 )
 
             # Create update dictionary
@@ -509,8 +504,7 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
                 if self.debug:
                     console.print(
-                        f"[green]Added engine_id to AI message:[/] {
-                            self.engine_id}"
+                        f"[green]Added engine_id to AI message:[/] {self.engine_id}"
                     )
             else:
                 # Keep other messages unchanged
@@ -605,9 +599,7 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         if self.debug:
             console.print(
-                f"[green]Merged {
-                    len(messages)} messages into {
-                    len(transformed)}[/]"
+                f"[green]Merged {len(messages)} messages into {len(transformed)}[/]"
             )
 
         return transformed
@@ -657,9 +649,9 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
             if self.debug:
                 console.print(
-                    f"[green]Applied custom transformation:[/] {
-                        len(messages)} → {
-                        len(result)} messages"
+                    f"[green]Applied custom transformation:[/] {len(messages)} → {
+                        len(result)
+                    } messages"
                 )
 
             return result

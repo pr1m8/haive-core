@@ -108,8 +108,7 @@ class BaseEmbeddingConfig(SecureConfigMixin, InvokableEngine):
             )
             _EMBEDDING_REGISTRY[type_str] = config_cls
             logger.info(
-                f"Registered embedding config: {
-                    config_cls.__name__} as {type_str}"
+                f"Registered embedding config: {config_cls.__name__} as {type_str}"
             )
             return config_cls
 

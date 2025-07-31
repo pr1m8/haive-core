@@ -3,9 +3,9 @@
 from datetime import datetime
 from typing import Any
 
-from haive.agents.planning.p_and_e.models import ExecutionResult, Plan
 from pydantic import Field, computed_field
 
+from haive.agents.planning.p_and_e.models import ExecutionResult, Plan
 from haive.core.schema.prebuilt.messages.messages_state import MessagesState
 
 

@@ -11,10 +11,10 @@ import contextlib
 import sys
 from typing import Any
 
-from haive.agents.simple.agent import SimpleAgent
 from langchain_core.messages import BaseMessage, HumanMessage
 from pydantic import Field
 
+from haive.agents.simple.agent import SimpleAgent
 from haive.core.engine.llm.factories.litellm_factory import LiteLLMFactory
 from haive.core.schema.agent_schema_composer import AgentSchemaComposer, BuildMode
 from haive.core.schema.state_schema import StateSchema

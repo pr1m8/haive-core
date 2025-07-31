@@ -35,15 +35,11 @@ except ImportError:
     HAS_PYINSTRUMENT = False
 
 try:
-    import scalene
-
     HAS_SCALENE = True
 except ImportError:
     HAS_SCALENE = False
 
 try:
-    import py_spy
-
     HAS_PY_SPY = True
 except ImportError:
     HAS_PY_SPY = False
@@ -56,9 +52,7 @@ except ImportError:
     HAS_PSUTIL = False
 
 try:
-    from rich.bar import Bar
     from rich.console import Console
-    from rich.panel import Panel
     from rich.progress import track
     from rich.table import Table
 
@@ -421,7 +415,6 @@ class ProfilingUtilities:
                 if cpu_profiler:
                     self.console.print("🔥 CPU Profile:", style="bold red")
             else:
-
                 if start_memory:
                     end_memory = self.memory_profiler._get_memory_usage()
                     memory_delta = end_memory - start_memory

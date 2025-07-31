@@ -129,10 +129,9 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         self._component_registry.initialize_all()
 
         logger.debug(
-            f"Initialized ModularBaseGraph '{
-                self.name}' with {
-                len(
-                    self._component_registry.get_all())} components"
+            f"Initialized ModularBaseGraph '{self.name}' with {
+                len(self._component_registry.get_all())
+            } components"
         )
 
     # =================================================================
@@ -330,10 +329,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         self.entry_point = node_name
         self.updated_at = datetime.now()
 
-        logger.debug(
-            f"Set entry point to '{node_name}' in graph '{
-                self.name}'"
-        )
+        logger.debug(f"Set entry point to '{node_name}' in graph '{self.name}'")
 
         return self
 
@@ -355,10 +351,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         self.finish_point = node_name
         self.updated_at = datetime.now()
 
-        logger.debug(
-            f"Set finish point to '{node_name}' in graph '{
-                self.name}'"
-        )
+        logger.debug(f"Set finish point to '{node_name}' in graph '{self.name}'")
 
         return self
 
@@ -420,8 +413,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         # Validate graph before compilation
         validation_errors = self.validate_graph()
         if validation_errors:
-            error_msg = f"Graph validation failed: {
-                '; '.join(validation_errors)}"
+            error_msg = f"Graph validation failed: {'; '.join(validation_errors)}"
             if raise_on_validation_error:
                 raise ValueError(error_msg)
             logger.warning(error_msg)
@@ -429,10 +421,9 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         # TODO: Implement actual compilation to LangGraph
         # This would integrate with the existing LangGraph compilation logic
         logger.info(
-            f"Compiling graph '{
-                self.name}' with {
-                self.get_node_count()} nodes and {
-                self.get_edge_count()} edges"
+            f"Compiling graph '{self.name}' with {self.get_node_count()} nodes and {
+                self.get_edge_count()
+            } edges"
         )
 
         # Placeholder - return self for now

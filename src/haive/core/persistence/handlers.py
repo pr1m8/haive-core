@@ -20,10 +20,13 @@ This module enables a more declarative approach to persistence configuration,
 allowing users to specify what they want rather than how to implement it.
 """
 
+import inspect
 import json
 import logging
 from typing import Any
 
+from psycopg_pool.base import BaseConnectionPool
+from psycopg_pool.pool import AsyncConnectionPool, ConnectionPool
 from pydantic import BaseModel, SecretStr
 
 from haive.core.persistence.memory import MemoryCheckpointerConfig
@@ -187,7 +190,6 @@ async def setup_async_checkpointer(config: Any) -> Any:
     Returns:
         A configured async checkpointer instance
     """
-    import logging
 
     logger = logging.getLogger(__name__)
 
@@ -200,7 +202,6 @@ async def setup_async_checkpointer(config: Any) -> Any:
                     'name',
                     'unnamed')}. Using memory checkpointer."
         )
-        from haive.core.persistence.memory import MemoryCheckpointerConfig
 
         memory_config = MemoryCheckpointerConfig()
         return memory_config.create_checkpointer()
@@ -220,7 +221,6 @@ async def setup_async_checkpointer(config: Any) -> Any:
                         'name',
                         'unnamed')}"
             )
-            from haive.core.persistence.memory import MemoryCheckpointerConfig
 
             memory_config = MemoryCheckpointerConfig()
             return memory_config.create_checkpointer()
@@ -232,7 +232,6 @@ async def setup_async_checkpointer(config: Any) -> Any:
 
         if persistence_type == "memory":
             # Memory checkpointer
-            from haive.core.persistence.memory import MemoryCheckpointerConfig
 
             memory_config = MemoryCheckpointerConfig()
             return memory_config.create_checkpointer()
@@ -241,13 +240,6 @@ async def setup_async_checkpointer(config: Any) -> Any:
             # PostgreSQL checkpointer
             try:
                 # Get connection parameters
-                from haive.core.persistence.postgres_config import (
-                    PostgresCheckpointerConfig,
-                )
-                from haive.core.persistence.types import (
-                    CheckpointerMode,
-                    CheckpointStorageMode,
-                )
 
                 # Extract configuration
                 use_shallow = config.persistence.get("shallow", False)
@@ -287,7 +279,6 @@ async def setup_async_checkpointer(config: Any) -> Any:
                             'name',
                             'unnamed')}"
                 )
-                from haive.core.persistence.memory import MemoryCheckpointerConfig
 
                 memory_config = MemoryCheckpointerConfig()
                 return memory_config.create_checkpointer()
@@ -300,7 +291,6 @@ async def setup_async_checkpointer(config: Any) -> Any:
                 'name',
                 'unnamed')}"
     )
-    from haive.core.persistence.memory import MemoryCheckpointerConfig
 
     memory_config = MemoryCheckpointerConfig()
     return memory_config.create_checkpointer()
@@ -325,7 +315,6 @@ def ensure_pool_open(checkpointer: Any) -> Any | None:
 
             # Import here to avoid dependency issues
             try:
-                from psycopg_pool.base import BaseConnectionPool
 
                 # Check if it's a pool
                 if isinstance(conn, BaseConnectionPool):
@@ -402,7 +391,6 @@ async def ensure_async_pool_open(checkpointer: Any) -> Any | None:
     Returns:
         The opened pool if one was found and opened, None otherwise
     """
-    import logging
 
     logger = logging.getLogger(__name__)
 
@@ -421,7 +409,6 @@ async def ensure_async_pool_open(checkpointer: Any) -> Any | None:
 
             # Import here to avoid dependency issues
             try:
-                from psycopg_pool.pool import AsyncConnectionPool
 
                 # Check if it's an async pool
                 if isinstance(conn, AsyncConnectionPool):
@@ -475,7 +462,6 @@ async def ensure_async_pool_open(checkpointer: Any) -> Any | None:
         if not opened_pool and hasattr(checkpointer, "setup"):
             try:
                 # If setup method is async, call it
-                import inspect
 
                 if inspect.iscoroutinefunction(checkpointer.setup):
                     await checkpointer.setup()
@@ -499,7 +485,6 @@ async def close_async_pool_if_needed(checkpointer: Any, pool: Any = None) -> Non
         pool: The pool to close. If None, will try to find the pool
             from the checkpointer.
     """
-    import logging
 
     logger = logging.getLogger(__name__)
 
@@ -513,7 +498,6 @@ async def close_async_pool_if_needed(checkpointer: Any, pool: Any = None) -> Non
 
     # Close the pool if it's an AsyncConnectionPool
     try:
-        from psycopg_pool.pool import AsyncConnectionPool
 
         if isinstance(pool, AsyncConnectionPool):
             try:
@@ -543,8 +527,6 @@ async def register_async_thread_if_needed(
         thread_id: Thread ID to register
         metadata: Optional metadata to associate with the thread
     """
-    import json
-    import logging
 
     logger = logging.getLogger(__name__)
 
@@ -558,7 +540,6 @@ async def register_async_thread_if_needed(
     # Handle async PostgreSQL checkpointers
     if hasattr(checkpointer, "conn"):
         try:
-            from psycopg_pool.pool import AsyncConnectionPool
 
             pool = checkpointer.conn
 
@@ -643,7 +624,6 @@ def close_pool_if_needed(checkpointer: Any, pool: Any = None) -> None:
 
     # Close the pool if it's a ConnectionPool
     try:
-        from psycopg_pool.pool import ConnectionPool
 
         if isinstance(pool, ConnectionPool) and pool.is_open():
             logger.debug("Closing PostgreSQL connection pool")
@@ -673,7 +653,6 @@ async def close_async_pool_if_needed(checkpointer: Any, pool: Any = None) -> Non
 
     # Close the pool if it's an AsyncConnectionPool
     try:
-        from psycopg_pool.pool import AsyncConnectionPool
 
         if isinstance(pool, AsyncConnectionPool) and await pool.is_open():
             logger.debug("Closing async PostgreSQL connection pool")

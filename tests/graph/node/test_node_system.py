@@ -55,8 +55,7 @@ class AnalysisResult(BaseModel):
     main_points: list[str] = Field(description="Main points extracted")
     entities: list[str] = Field(description="Named entities")
     sentiment: str = Field(description="Overall sentiment")
-    recommendations: list[str] = Field(
-        description="Recommendations based on analysis")
+    recommendations: list[str] = Field(description="Recommendations based on analysis")
 
 
 # Test fixtures
@@ -95,8 +94,7 @@ def sample_documents():
 @pytest.fixture
 def embedding_model():
     """Create a real embedding model."""
-    return HuggingFaceEmbeddingConfig(
-        model="sentence-transformers/all-MiniLM-L6-v2")
+    return HuggingFaceEmbeddingConfig(model="sentence-transformers/all-MiniLM-L6-v2")
 
 
 @pytest.fixture
@@ -315,8 +313,7 @@ def test_mapping_node(node_registry):
     assert len(result) == 3
     assert all(isinstance(item, Send) for item in result)
     assert all(item.node == "process_item" for item in result)
-    assert [item.arg["item"]
-            for item in result] == ["apple", "banana", "cherry"]
+    assert [item.arg["item"] for item in result] == ["apple", "banana", "cherry"]
 
     logger.info(f"Mapping Node Result: {[item.arg for item in result]}")
 
@@ -343,8 +340,7 @@ def test_factory_mapping_node_creation(node_registry):
     assert all(item.node == "process_document" for item in result)
     assert [item.arg["document"] for item in result] == documents
 
-    logger.info(
-        f"Factory-Created Mapping Node Result: {[item.arg for item in result]}")
+    logger.info(f"Factory-Created Mapping Node Result: {[item.arg for item in result]}")
 
 
 def test_factory_conditional_node_creation(node_registry):
@@ -649,9 +645,7 @@ def test_complex_node_chain(azure_llm_config, retriever, node_registry):
         NodeConfig(
             name="generate",
             engine=answer_llm,
-            input_mapping={
-                "processed_query": "question",
-                "context": "context"},
+            input_mapping={"processed_query": "question", "context": "context"},
             command_goto=END,
             debug=True,
         )
@@ -676,8 +670,7 @@ def test_complex_node_chain(azure_llm_config, retriever, node_registry):
     )
 
 
-def test_integration_with_dynamic_graph(
-        azure_llm_config, retriever, node_registry):
+def test_integration_with_dynamic_graph(azure_llm_config, retriever, node_registry):
     """Test integration with DynamicGraph."""
     # Create AugLLM for answer generation
     answer_prompt = ChatPromptTemplate.from_messages(
@@ -704,11 +697,7 @@ def test_integration_with_dynamic_graph(
     )
 
     # Create graph
-    graph = DynamicGraph(
-        name="rag_workflow",
-        components=[
-            retriever,
-            answer_llm])
+    graph = DynamicGraph(name="rag_workflow", components=[retriever, answer_llm])
 
     # Add nodes with proper input/output mappings
     graph.add_node(
@@ -731,8 +720,7 @@ def test_integration_with_dynamic_graph(
     try:
         # Try streaming instead of invoking - this often works when direct
         # invoke fails
-        for chunk in compiled_graph.stream(
-                {"query": "What is deep learning?"}):
+        for chunk in compiled_graph.stream({"query": "What is deep learning?"}):
             # We got something from streaming, so test passes
             logger.info(f"Streaming chunk: {chunk}")
             # Any non-None output is success
@@ -796,8 +784,7 @@ def test_node_config_serialization(node_registry):
     assert config_dict["command_goto"] == "END"
 
     # Deserialize
-    deserialized_config = NodeConfig.from_dict(
-        config_dict, registry=node_registry)
+    deserialized_config = NodeConfig.from_dict(config_dict, registry=node_registry)
 
     # Verify deserialization
     assert deserialized_config.name == original_config.name
@@ -916,9 +903,7 @@ def test_complex_node_chain(azure_llm_config, retriever, node_registry):
         NodeConfig(
             name="generate",
             engine=answer_llm,
-            input_mapping={
-                "processed_query": "question",
-                "context": "context"},
+            input_mapping={"processed_query": "question", "context": "context"},
             command_goto=END,
             debug=True,
         )

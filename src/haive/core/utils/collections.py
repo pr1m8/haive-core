@@ -5,6 +5,7 @@ This module includes advanced collection types and utilities that extend
 standard Python collections with additional functionality.
 """
 
+import uuid
 from collections.abc import Iterable
 from typing import Any, Generic, TypeVar
 
@@ -148,8 +149,6 @@ class NamedDict(BaseModel, Generic[T], GetterMixin[T]):
 
             # If no key found, generate UUID
             if not key:
-                import uuid
-
                 key = str(uuid.uuid4())
 
         self.values[key] = item

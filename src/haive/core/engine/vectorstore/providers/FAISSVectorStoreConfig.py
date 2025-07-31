@@ -122,7 +122,7 @@ class FAISSVectorStoreConfig(BaseVectorStoreConfig):
         """Validate index type is supported."""
         valid_types = ["Flat", "IVFFlat", "HNSW", "LSH"]
         if v not in valid_types:
-            raise ValueError(f"index_type must be one of {valid_types}, got {v}")
+            raise TypeError(f"index_type must be one of {valid_types}, got {v}")
         return v
 
     @field_validator("distance_metric")
@@ -216,7 +216,7 @@ class FAISSVectorStoreConfig(BaseVectorStoreConfig):
         # Handle GPU configuration
         if self.use_gpu:
             try:
-                import faiss
+                pass
 
                 # This would require additional GPU setup logic
                 # For now, we'll use the default CPU implementation

@@ -140,8 +140,7 @@ class ChromaVectorStoreConfig(BaseVectorStoreConfig):
                 from langchain_community.vectorstores import Chroma
             except ImportError:
                 raise ImportError(
-                    "Chroma requires chromadb package. "
-                    "Install with: pip install chromadb"
+                    "Chroma requires chromadb package. Install with: pip install chromadb"
                 )
 
         # Validate embedding
@@ -152,7 +151,6 @@ class ChromaVectorStoreConfig(BaseVectorStoreConfig):
         client_settings = None
         if self.chroma_server_host:
             try:
-                import chromadb
                 from chromadb.config import Settings
 
                 client_settings = Settings(
@@ -162,8 +160,7 @@ class ChromaVectorStoreConfig(BaseVectorStoreConfig):
                 )
             except ImportError:
                 raise ImportError(
-                    "Server mode requires chromadb package. "
-                    "Install with: pip install chromadb"
+                    "Server mode requires chromadb package. Install with: pip install chromadb"
                 )
 
         # Map distance metric to Chroma's expected format

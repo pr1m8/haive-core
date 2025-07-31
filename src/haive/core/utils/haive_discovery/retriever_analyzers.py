@@ -124,10 +124,7 @@ class RetrieverAnalyzer(ComponentAnalyzer):
                     return {"error": str(e), "success": False}
 
             # Create safe tool name
-            tool_name = f"retrieve_{
-                component_info.name.lower().replace(
-                    ' ', '_').replace(
-                    '-', '_')}"
+            tool_name = f"retrieve_{component_info.name.lower().replace(' ', '_').replace('-', '_')}"
             tool_name = "".join(
                 c if c.isalnum() or c == "_" else "_" for c in tool_name
             )
@@ -135,8 +132,7 @@ class RetrieverAnalyzer(ComponentAnalyzer):
             return StructuredTool.from_function(
                 func=retriever_function,
                 name=tool_name,
-                description=f"Retrieve documents using {
-                    component_info.class_name}",
+                description=f"Retrieve documents using {component_info.class_name}",
                 args_schema=RetrieverArgs,
             )
 
@@ -228,10 +224,7 @@ class VectorStoreAnalyzer(ComponentAnalyzer):
                 }
 
             # Create safe tool name
-            tool_name = f"search_{
-                component_info.name.lower().replace(
-                    ' ', '_').replace(
-                    '-', '_')}"
+            tool_name = f"search_{component_info.name.lower().replace(' ', '_').replace('-', '_')}"
             tool_name = "".join(
                 c if c.isalnum() or c == "_" else "_" for c in tool_name
             )
@@ -239,8 +232,7 @@ class VectorStoreAnalyzer(ComponentAnalyzer):
             return StructuredTool.from_function(
                 func=vectorstore_search,
                 name=tool_name,
-                description=f"Search documents using {
-                    component_info.class_name}",
+                description=f"Search documents using {component_info.class_name}",
                 args_schema=VectorStoreArgs,
             )
 

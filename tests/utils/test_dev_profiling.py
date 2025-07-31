@@ -546,9 +546,10 @@ class TestGlobalProfileInstance:
 
     def test_global_profile_context(self):
         """Test global profile context manager."""
-        with redirect_stdout(io.StringIO()) as f:
-            with profile.profile_context("global_context"):
-                time.sleep(0.001)
+        with redirect_stdout(io.StringIO()) as f, profile.profile_context(
+            "global_context"
+        ):
+            time.sleep(0.001)
 
         output = f.getvalue()
         assert "global_context" in output

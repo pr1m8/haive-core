@@ -82,10 +82,7 @@ class EngineRegistry(AbstractRegistry[Engine]):
         self.engines[item.engine_type][item.name] = item
         self.engine_ids[item.id] = item
         logger.debug(
-            f"Registered engine {
-                item.name} (id: {
-                item.id}) of type {
-                item.engine_type}"
+            f"Registered engine {item.name} (id: {item.id}) of type {item.engine_type}"
         )
         return item
 

@@ -99,10 +99,7 @@ class DocumentLoaderFactory:
         )
 
         if not loader_mapping:
-            logger.error(
-                f"No loader found for source type: {
-                    source.source_type}"
-            )
+            logger.error(f"No loader found for source type: {source.source_type}")
             return None
 
         # Create loader
@@ -120,15 +117,11 @@ class DocumentLoaderFactory:
         except ImportError as e:
             packages = ", ".join(loader_mapping.requires_packages)
             logger.exception(
-                f"Failed to import {loader_mapping.name}: {e}\n"
-                f"Required packages: {packages}"
+                f"Failed to import {loader_mapping.name}: {e}\nRequired packages: {packages}"
             )
             return None
         except Exception as e:
-            logger.exception(
-                f"Failed to create loader {
-                    loader_mapping.name}: {e}"
-            )
+            logger.exception(f"Failed to create loader {loader_mapping.name}: {e}")
             return None
 
     def load_documents(

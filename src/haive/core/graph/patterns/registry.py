@@ -276,7 +276,7 @@ class GraphPatternRegistry(AbstractRegistry[P]):
             )
 
         else:
-            raise ValueError(f"Unsupported pattern type: {type(pattern)}")
+            raise TypeError(f"Unsupported pattern type: {type(pattern)}")
 
         return pattern_obj
 
@@ -397,6 +397,6 @@ class GraphPatternRegistry(AbstractRegistry[P]):
             branch_obj.parameters = parameters
 
         else:
-            raise ValueError(f"Unsupported branch type: {type(branch)}")
+            raise TypeError(f"Unsupported branch type: {type(branch)}")
 
         return branch_obj

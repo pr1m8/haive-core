@@ -127,14 +127,12 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         # Check that entry and finish points exist if set
         if self.entry_point and self.entry_point not in self.nodes:
             raise ValueError(
-                f"Entry point '{
-                    self.entry_point}' references non-existent node"
+                f"Entry point '{self.entry_point}' references non-existent node"
             )
 
         if self.finish_point and self.finish_point not in self.nodes:
             raise ValueError(
-                f"Finish point '{
-                    self.finish_point}' references non-existent node"
+                f"Finish point '{self.finish_point}' references non-existent node"
             )
 
         return self
@@ -626,22 +624,15 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
                     and branch.then not in self.nodes
                 ):
                     raise ValueError(
-                        f"Branch 'then' references non-existent node '{
-                            branch.then}'"
+                        f"Branch 'then' references non-existent node '{branch.then}'"
                     )
 
         # Check entry and finish points
         if self.entry_point and self.entry_point not in self.nodes:
-            raise ValueError(
-                f"Entry point '{
-                    self.entry_point}' does not exist"
-            )
+            raise ValueError(f"Entry point '{self.entry_point}' does not exist")
 
         if self.finish_point and self.finish_point not in self.nodes:
-            raise ValueError(
-                f"Finish point '{
-                    self.finish_point}' does not exist"
-            )
+            raise ValueError(f"Finish point '{self.finish_point}' does not exist")
 
         # Check all nodes are reachable
         if self.entry_point:

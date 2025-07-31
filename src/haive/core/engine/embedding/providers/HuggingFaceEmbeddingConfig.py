@@ -204,10 +204,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
             try:
                 os.makedirs(self.cache_folder, exist_ok=True)
             except OSError as e:
-                raise ValueError(
-                    f"Cannot create cache folder {
-                        self.cache_folder}: {e}"
-                )
+                raise ValueError(f"Cannot create cache folder {self.cache_folder}: {e}")
 
     def get_default_model(self) -> str:
         """Get the default model for HuggingFace embeddings."""

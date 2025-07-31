@@ -424,9 +424,7 @@ class UniversalDocumentLoader:
         for source_type, confidence in source_candidates:
             try:
                 logger.info(
-                    f"Trying {
-                        source_type.__name__} (confidence: {
-                        confidence:.2f})"
+                    f"Trying {source_type.__name__} (confidence: {confidence:.2f})"
                 )
 
                 # Create source instance
@@ -439,16 +437,12 @@ class UniversalDocumentLoader:
                     loader = source_instance.create_loader()
                     if loader:
                         logger.info(
-                            f"Successfully created loader using {
-                                source_type.__name__}"
+                            f"Successfully created loader using {source_type.__name__}"
                         )
                         return loader
                     logger.warning(f"{source_type.__name__} could not create loader")
                 else:
-                    logger.warning(
-                        f"Could not create {
-                            source_type.__name__} instance"
-                    )
+                    logger.warning(f"Could not create {source_type.__name__} instance")
 
             except Exception as e:
                 logger.warning(
@@ -485,10 +479,7 @@ class UniversalDocumentLoader:
             return source_type(**source_kwargs)
 
         except Exception as e:
-            logger.exception(
-                f"Failed to create {
-                    source_type.__name__} instance: {e}"
-            )
+            logger.exception(f"Failed to create {source_type.__name__} instance: {e}")
             return None
 
     def _extract_source_kwargs(

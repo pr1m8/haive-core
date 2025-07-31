@@ -73,8 +73,7 @@ class ValidationMixin:
             if cycles:
                 cycle_strs = [" -> ".join(cycle) for cycle in cycles]
                 issues.append(
-                    f"Graph contains circular dependencies: {
-                        ', '.join(cycle_strs)}"
+                    f"Graph contains circular dependencies: {', '.join(cycle_strs)}"
                 )
 
         # Check for orphan nodes (no incoming or outgoing edges)
@@ -86,27 +85,18 @@ class ValidationMixin:
         dangling_edges = self.find_dangling_edges()
         if dangling_edges:
             edge_strs = [f"{src} -> {dst}" for src, dst in dangling_edges]
-            issues.append(
-                f"Graph contains dangling edges: {
-                    ', '.join(edge_strs)}"
-            )
+            issues.append(f"Graph contains dangling edges: {', '.join(edge_strs)}")
 
         # Check for unreachable nodes
         unreachable = self.find_unreachable_nodes()
         if unreachable:
-            issues.append(
-                f"Graph contains unreachable nodes: {
-                    ', '.join(unreachable)}"
-            )
+            issues.append(f"Graph contains unreachable nodes: {', '.join(unreachable)}")
 
         # Check for nodes that can't reach END (if required)
         if self.require_end_path:
             no_end_path = self.find_nodes_without_end_path()
             if no_end_path:
-                issues.append(
-                    f"Nodes without path to END: {
-                        ', '.join(no_end_path)}"
-                )
+                issues.append(f"Nodes without path to END: {', '.join(no_end_path)}")
 
         # Check for missing entry point
         if not self.has_entry_point():

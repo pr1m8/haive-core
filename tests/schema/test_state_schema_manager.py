@@ -46,8 +46,7 @@ def simple_model_class():
         name: str
         value: int = 0
         items: list[str] = Field(default_factory=list)
-        description: str | None = Field(
-            default=None, description="A description field")
+        description: str | None = Field(default=None, description="A description field")
 
     return SimpleModel
 
@@ -129,7 +128,8 @@ class TestStateSchemaManagerInit:
             logger.debug(
                 f"Created manager with fields: {
                     list(
-                        manager.fields.keys())}")
+                        manager.fields.keys())}"
+            )
 
             assert "text" in manager.fields
             assert "number" in manager.fields
@@ -165,7 +165,8 @@ class TestStateSchemaManagerInit:
         logger.debug(
             f"Created manager with fields: {
                 list(
-                    manager.fields.keys())}")
+                    manager.fields.keys())}"
+        )
 
         assert manager.name == "SimpleModel"
         assert "name" in manager.fields
@@ -184,7 +185,8 @@ class TestStateSchemaManagerInit:
         logger.debug(
             f"Created manager with fields: {
                 list(
-                    manager.fields.keys())}")
+                    manager.fields.keys())}"
+        )
 
         assert "text" in manager.fields
         assert "count" in manager.fields
@@ -214,11 +216,7 @@ class TestStateSchemaManagerFields:
         logger.info("Testing field addition with description")
 
         manager = StateSchemaManager(name="TestSchema")
-        manager.add_field(
-            "count",
-            int,
-            default=0,
-            description="A counter field")
+        manager.add_field("count", int, default=0, description="A counter field")
 
         logger.debug(
             f"Added field with description: {
@@ -284,7 +282,8 @@ class TestStateSchemaManagerFields:
 
         logger.debug(
             f"Added optional field with type: {
-                manager.fields['maybe'][0]}")
+                manager.fields['maybe'][0]}"
+        )
         assert "maybe" in manager.fields
 
         field_type, _ = manager.fields["maybe"]
@@ -324,18 +323,17 @@ class TestStateSchemaManagerFields:
 
         logger.debug(
             f"Initial field default: {
-                manager.fields['count'][1].default}")
+                manager.fields['count'][1].default}"
+        )
         assert manager.fields["count"][1].default == 0
 
         # Modify the field
-        manager.modify_field(
-            "count",
-            new_default=10,
-            new_description="Modified count")
+        manager.modify_field("count", new_default=10, new_description="Modified count")
 
         logger.debug(
             f"Modified field default: {
-                manager.fields['count'][1].default}")
+                manager.fields['count'][1].default}"
+        )
         logger.debug(
             f"Modified field description: {
                 manager.field_descriptions.get('count')}"
@@ -353,10 +351,12 @@ class TestStateSchemaManagerFields:
 
         logger.debug(
             f"Checking existing field: {
-                manager.has_field('existing')}")
+                manager.has_field('existing')}"
+        )
         logger.debug(
             f"Checking nonexistent field: {
-                manager.has_field('nonexistent')}")
+                manager.has_field('nonexistent')}"
+        )
 
         assert manager.has_field("existing") is True
         assert manager.has_field("nonexistent") is False
@@ -457,7 +457,8 @@ class TestStateSchemaManagerModel:
         logger.debug(
             f"Creating model from fields: {
                 list(
-                    manager.fields.keys())}")
+                    manager.fields.keys())}"
+        )
         model_cls = manager.get_model()
 
         logger.debug(f"Created model class: {model_cls.__name__}")
@@ -571,8 +572,7 @@ class TestStateSchemaManagerModel:
                 manager.add_computed_property(
                     "full_name", full_name.fget, full_name.fset
                 )
-                logger.debug(
-                    "Added computed property using add_computed_property")
+                logger.debug("Added computed property using add_computed_property")
 
                 # Create the model
                 model_cls = manager.get_model()
@@ -600,14 +600,14 @@ class TestStateSchemaManagerModel:
             logger.debug(
                 f"Model fields: {
                     list(
-                        model_cls.model_fields.keys())}")
+                        model_cls.model_fields.keys())}"
+            )
 
             logger.debug("Creating model with dynamically added property")
 
             # Check if property was added correctly
             if not hasattr(model_cls, "full_name"):
-                logger.warning(
-                    "Property wasn't properly added, test might fail")
+                logger.warning("Property wasn't properly added, test might fail")
 
             # Create instance and check fields
             instance = model_cls()
@@ -640,7 +640,8 @@ class TestStateSchemaManagerModel:
             if hasattr(instance, "full_name"):
                 logger.debug(
                     f"Testing full_name property: {
-                        instance.full_name}")
+                        instance.full_name}"
+                )
                 assert instance.full_name == "Jane Doe"
 
                 # Test setting through property if it has a setter
@@ -663,8 +664,7 @@ class TestNodeAndCommand:
         logger.info("Testing create_command")
 
         manager = StateSchemaManager()
-        command = manager.create_command(
-            update={"result": "success"}, goto="next_node")
+        command = manager.create_command(update={"result": "success"}, goto="next_node")
 
         logger.debug(f"Created command: {command}")
         assert isinstance(command, Command)
@@ -713,10 +713,8 @@ class TestNodeAndCommand:
         # Check if create_node_function exists
         if hasattr(manager, "create_node_function"):
             # Use the method if available
-            node_func = manager.create_node_function(
-                my_node, command_goto="next")
-            logger.debug(
-                "Created node function using create_node_function method")
+            node_func = manager.create_node_function(my_node, command_goto="next")
+            logger.debug("Created node function using create_node_function method")
         else:
             # Create node function manually without relying on
             # create_node_function
@@ -789,14 +787,16 @@ class TestNewFeatures:
             instance = model_cls()
             logger.debug(
                 f"Instance dynamic_text value: {
-                    instance.dynamic_text}")
+                    instance.dynamic_text}"
+            )
             assert instance.dynamic_text == "start"
 
             # Create a new instance with updated value
             instance2 = model_cls(dynamic_text="new")
             logger.debug(
                 f"Instance2 dynamic_text value: {
-                    instance2.dynamic_text}")
+                    instance2.dynamic_text}"
+            )
             assert instance2.dynamic_text == "new"
         except Exception as e:
             log_exception(e)

@@ -115,7 +115,6 @@ class MessagesState(StateSchema):
                 and not data.get("structured_output_parser")
                 and data.get("parse_structured_outputs", False)
             ):
-
                 # Use PydanticToolsParser to convert models to tool calls
                 data["structured_output_parser"] = PydanticToolsParser(
                     tools=data["structured_output_models"]

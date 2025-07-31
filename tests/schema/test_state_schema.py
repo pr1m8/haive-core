@@ -20,8 +20,7 @@ logger = logging.getLogger(__name__)
 @pytest.fixture
 def simple_messages():
     """Return a list of sample messages."""
-    return [HumanMessage(content="Hello, world!"),
-            AIMessage(content="Hi there!")]
+    return [HumanMessage(content="Hello, world!"), AIMessage(content="Hi there!")]
 
 
 @pytest.fixture
@@ -40,8 +39,7 @@ def test_state_schema_cls():
 
         def copy(self):
             """Create a copy of the instance."""
-            return TestState(message=self.message,
-                             count=self.count, flag=self.flag)
+            return TestState(message=self.message, count=self.count, flag=self.flag)
 
         @classmethod
         def from_dict(cls, data):
@@ -93,9 +91,7 @@ def test_state_with_reducers():
         "messages": "add_messages",
     }
 
-    CountState.__reducer_fields__ = {
-        "count": add_counts,
-        "messages": add_messages}
+    CountState.__reducer_fields__ = {"count": add_counts, "messages": add_messages}
 
     return CountState
 
@@ -211,8 +207,7 @@ class TestStateSchemaOperations:
 
         try:
             # Create instance with values
-            instance = test_state_schema_cls(
-                message="test", count=5, flag=True)
+            instance = test_state_schema_cls(message="test", count=5, flag=True)
 
             # If to_dict is implemented, use it
             if hasattr(instance, "to_dict"):
@@ -296,8 +291,7 @@ class TestStateSchemaOperations:
 
         # Merge messages
         instance.merge_messages(simple_messages)
-        logger.debug(
-            f"After merging messages: {len(instance.messages)} messages")
+        logger.debug(f"After merging messages: {len(instance.messages)} messages")
         assert len(instance.messages) == 2
 
         # Merge more messages
@@ -371,9 +365,7 @@ class TestStateSchemaClassOps:
             logger.debug("Implementing add_field directly")
 
             # Start with a base schema
-            base_cls = StateSchema.create(
-                __name__="BaseState", text=(
-                    str, "default"))
+            base_cls = StateSchema.create(__name__="BaseState", text=(str, "default"))
             logger.debug(
                 f"Base schema has fields: {list(base_cls.model_fields.keys())}"
             )
@@ -391,7 +383,8 @@ class TestStateSchemaClassOps:
             logger.debug(
                 f"New schema has fields: {
                     list(
-                        new_cls.model_fields.keys())}")
+                        new_cls.model_fields.keys())}"
+            )
             assert "count" in new_cls.model_fields
             assert "count" in new_cls.__shared_fields__
 
@@ -408,7 +401,8 @@ class TestStateSchemaClassOps:
             instance = list_cls()
             logger.debug(
                 f"Instance with default_factory field: {
-                    vars(instance)}")
+                    vars(instance)}"
+            )
             assert instance.items == []
 
             # Test with reducer function
@@ -437,13 +431,12 @@ class TestStateSchemaClassOps:
 
         # Original implementation if method exists
         # Start with a base schema
-        base_cls = StateSchema.create(
-            __name__="BaseState", text=(
-                str, "default"))
+        base_cls = StateSchema.create(__name__="BaseState", text=(str, "default"))
         logger.debug(
             f"Base schema has fields: {
                 list(
-                    base_cls.model_fields.keys())}")
+                    base_cls.model_fields.keys())}"
+        )
 
         # Add a new field
         new_cls = base_cls.add_field(
@@ -457,7 +450,8 @@ class TestStateSchemaClassOps:
         logger.debug(
             f"New schema has fields: {
                 list(
-                    new_cls.model_fields.keys())}")
+                    new_cls.model_fields.keys())}"
+        )
         assert "count" in new_cls.model_fields
         assert "count" in new_cls.__shared_fields__
 
@@ -522,8 +516,7 @@ class TestStateSchemaClassOps:
 
             # Get the reducer function directly from the __reducer_fields__
             # dict
-            count_reducer = test_state_with_reducers.__reducer_fields__[
-                "count"]
+            count_reducer = test_state_with_reducers.__reducer_fields__["count"]
         else:
             # Use the actual method
             count_reducer = test_state_with_reducers.as_reducer("count")
@@ -564,8 +557,7 @@ class TestStateSchemaClassOps:
         logger.info("Testing from_partial_dict")
 
         # Create with partial data
-        instance = test_state_schema_cls.from_partial_dict(
-            {"message": "partial"})
+        instance = test_state_schema_cls.from_partial_dict({"message": "partial"})
         logger.debug(f"Instance from partial dict: {instance.model_dump()}")
 
         assert instance.message == "partial"
@@ -597,8 +589,7 @@ class TestModernFeatures:
             or not AnnotatedSchema.__serializable_reducers__
         ):
             # Set it manually for testing
-            AnnotatedSchema.__serializable_reducers__ = {
-                "text": "join_strings"}
+            AnnotatedSchema.__serializable_reducers__ = {"text": "join_strings"}
             AnnotatedSchema.__reducer_fields__ = {"text": join_strings}
 
         logger.debug(
@@ -608,8 +599,7 @@ class TestModernFeatures:
 
         # Now the reducer should be registered
         assert "text" in AnnotatedSchema.__serializable_reducers__
-        assert AnnotatedSchema.__serializable_reducers__[
-            "text"] == "join_strings"
+        assert AnnotatedSchema.__serializable_reducers__["text"] == "join_strings"
 
         # Manually implement reducer behavior for testing
         instance1 = AnnotatedSchema(text="hello")
@@ -695,8 +685,7 @@ class TestModernFeatures:
         logger.info("Testing copy method")
 
         # Create an instance with values
-        instance = test_state_schema_cls(
-            message="original", count=5, flag=True)
+        instance = test_state_schema_cls(message="original", count=5, flag=True)
 
         # Create a copy
         copy = instance.copy()

@@ -31,16 +31,17 @@ Typical usage example:
 import logging
 import os
 import sys
+import time
 from datetime import datetime
 from enum import Enum
 from typing import Any
 
+from rich.console import Console
+from rich.logging import RichHandler
+from rich.table import Table
+
 # Try to import rich for enhanced console output
 try:
-    from rich.console import Console
-    from rich.logging import RichHandler
-    from rich.table import Table
-
     RICH_AVAILABLE = True
     console = Console()
 except ImportError:
@@ -133,9 +134,7 @@ class GameLogger:
         self.format = format
         self.enable_file_logging = enable_file_logging
         self.log_file = (
-            log_file
-            or f"game_{name}_{
-                datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+            log_file or f"game_{name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
         )
 
         # Performance tracking
@@ -420,7 +419,6 @@ class GameLogger:
         Args:
             operation: Name of the operation to time
         """
-        import time
 
         self._operation_starts[operation] = time.time()
 
@@ -433,7 +431,6 @@ class GameLogger:
         Args:
             operation: Name of the operation to end timing
         """
-        import time
 
         if operation in self._operation_starts:
             duration = time.time() - self._operation_starts[operation]
@@ -441,10 +438,7 @@ class GameLogger:
 
             if self.logger.level <= logging.DEBUG:
                 if RICH_AVAILABLE and self.format == LogFormat.RICH:
-                    console.print(
-                        f"  ⏱️  [dim]{operation} took {
-                            duration:.3f}s[/dim]"
-                    )
+                    console.print(f"  ⏱️  [dim]{operation} took {duration:.3f}s[/dim]")
                 else:
                     self.logger.debug(f"{operation} took {duration:.3f}s")
 

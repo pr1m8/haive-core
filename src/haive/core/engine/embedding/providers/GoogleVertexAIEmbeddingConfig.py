@@ -126,7 +126,7 @@ class GoogleVertexAIEmbeddingConfig(BaseEmbeddingConfig):
         }
 
         if v not in valid_types:
-            raise ValueError(f"Invalid task_type: {v}. Valid types: {valid_types}")
+            raise TypeError(f"Invalid task_type: {v}. Valid types: {valid_types}")
 
         return v
 

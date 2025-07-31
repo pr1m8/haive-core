@@ -78,18 +78,13 @@ from haive.core.engine.base import (
 # from haive.core.engine.document import (...)
 # Embedding imports are lazy-loaded to avoid numpy/pandas imports
 # from haive.core.engine.embedding import (...)
-from haive.core.engine.output_parser import (
-    OutputParserEngine,
-    OutputParserType,
-)
+from haive.core.engine.output_parser import OutputParserEngine, OutputParserType
 
 # Prompt template imports are lazy-loaded to avoid circular import with schema_composer
 # from haive.core.engine.prompt_template import (...)
 # Retriever imports are lazy-loaded to avoid expensive initialization
 # from haive.core.engine.retriever import (...)
-from haive.core.engine.tool import (
-    ToolEngine,
-)
+from haive.core.engine.tool import ToolEngine
 
 # Vectorstore imports are lazy-loaded to avoid pandas imports
 # from haive.core.engine.vectorstore import (...)
@@ -201,16 +196,6 @@ def __getattr__(name: str):
     """Lazy loading for agent, document and retriever components to avoid expensive initialization."""
     if name in _AGENT_COMPONENTS:
         # Only import agent module when actually needed (17+ second schema_composer delay)
-        from haive.core.engine.agent import (
-            AGENT_REGISTRY,
-            Agent,
-            AgentConfig,
-            AgentProtocol,
-            PatternConfig,
-            PatternManager,
-            PersistentAgentProtocol,
-            StreamingAgentProtocol,
-        )
 
         # Return the requested component
         return locals()[name]
@@ -270,43 +255,24 @@ def __getattr__(name: str):
 
     if name in _RETRIEVER_COMPONENTS:
         # Only import retriever module when actually needed
-        from haive.core.engine.retriever import (
-            BaseRetrieverConfig,
-            RetrieverType,
-            VectorStoreRetrieverConfig,
-        )
 
         # Return the requested component
         return locals()[name]
 
     if name in _PROMPT_COMPONENTS:
         # Only import prompt template module when actually needed
-        from haive.core.engine.prompt_template import PromptTemplateEngine
 
         # Return the requested component
         return locals()[name]
 
     if name in _EMBEDDING_COMPONENTS:
         # Only import embedding module when actually needed
-        from haive.core.engine.embedding import (
-            BaseEmbeddingConfig,
-            EmbeddingType,
-            create_embedding_config,
-        )
 
         # Return the requested component
         return locals()[name]
 
     if name in _VECTORSTORE_COMPONENTS:
         # Only import vectorstore module when actually needed
-        from haive.core.engine.vectorstore import (
-            VectorStoreConfig,
-            create_retriever,
-            create_retriever_from_documents,
-            create_vectorstore,
-            create_vs_config_from_documents,
-            create_vs_from_documents,
-        )
 
         # Return the requested component
         return locals()[name]

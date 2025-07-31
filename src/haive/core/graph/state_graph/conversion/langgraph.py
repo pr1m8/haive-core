@@ -45,9 +45,7 @@ def convert_to_langgraph(
         schema = dict
 
     console.print(
-        f"Schema: [yellow]{
-            schema.__name__ if hasattr(
-                schema, '__name__') else schema}[/yellow]"
+        f"Schema: [yellow]{schema.__name__ if hasattr(schema, '__name__') else schema}[/yellow]"
     )
 
     # Create StateGraph with schema
@@ -81,9 +79,7 @@ def convert_to_langgraph(
             destinations[key] = value
 
         console.print(
-            f"Branch from [yellow]{source}[/yellow] with conditions: {
-                list(
-                    destinations.keys())}"
+            f"Branch from [yellow]{source}[/yellow] with conditions: {list(destinations.keys())}"
         )
 
         # Add conditional edges based on branch type

@@ -22,8 +22,7 @@ def test_schema_composer_diagnostics():
     )
 
     # Step 1: Check engine field definitions
-    console.print(
-        "\n[bold yellow]Step 1: Engine Field Definitions[/bold yellow]")
+    console.print("\n[bold yellow]Step 1: Engine Field Definitions[/bold yellow]")
 
     # Check LLM engine
     console.print("\n[green]LLM Engine:[/green]")
@@ -86,8 +85,7 @@ def test_schema_composer_diagnostics():
             console.print(f"    Required: {field_info.is_required()}")
 
     # Step 4: Test instance creation with different data
-    console.print(
-        "\n[bold yellow]Step 4: Test Instance Creation[/bold yellow]")
+    console.print("\n[bold yellow]Step 4: Test Instance Creation[/bold yellow]")
 
     # Try minimal instance creation
     try:
@@ -98,7 +96,8 @@ def test_schema_composer_diagnostics():
             f"  Has 'content': {
                 hasattr(
                     minimal_instance,
-                    'content')}")
+                    'content')}"
+        )
     except Exception as e:
         console.print(f"[red]✗ Minimal instance failed: {e}[/red]")
 
@@ -114,7 +113,8 @@ def test_schema_composer_diagnostics():
                 getattr(
                     full_instance,
                     'query',
-                    'N/A')}")
+                    'N/A')}"
+        )
         console.print(f"  Has 'content': {hasattr(full_instance, 'content')}")
     except Exception as e:
         console.print(f"[red]✗ Full instance failed: {e}[/red]")

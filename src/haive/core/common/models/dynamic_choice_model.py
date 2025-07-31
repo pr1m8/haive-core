@@ -211,10 +211,10 @@ class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
     def _debug_print_initial(self) -> None:
         """Print initial state."""
         panel_content = f"""
-[bold]Options:[/bold] {', '.join(self._option_names)}
+[bold]Options:[/bold] {", ".join(self._option_names)}
 [bold]Include END:[/bold] {self.include_end}
 [bold]Name Field:[/bold] {self.name_field}
-[bold]Model Name:[/bold] {self._current_model.__name__ if self._current_model else 'None'}
+[bold]Model Name:[/bold] {self._current_model.__name__ if self._current_model else "None"}
 """
         console.print(
             Panel(

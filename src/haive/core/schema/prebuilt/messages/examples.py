@@ -148,7 +148,6 @@ def agent_handoff_example() -> Any:
                 agent2.add_message(msg)
 
         for msg in agent2.messages:
-
             # Check metadata on transferred messages
             if hasattr(msg, "additional_kwargs") and msg.additional_kwargs:
                 pass

@@ -4,7 +4,6 @@
 
 from haive.agents.multi.clean import MultiAgent
 from haive.agents.simple.agent import SimpleAgent
-
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.graph.state_graph.base_graph2 import BaseGraph
 

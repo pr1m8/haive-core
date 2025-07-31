@@ -39,7 +39,6 @@ async def test_memory_classifier():
             MemoryClassifier,
             MemoryClassifierConfig,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
 
         # Create classifier with real LLM
@@ -105,7 +104,6 @@ async def test_memory_store_manager():
             MemoryStoreConfig,
             MemoryStoreManager,
         )
-
         from haive.core.tools.store_manager import StoreManager
 
         # Create store manager with correct API
@@ -132,8 +130,10 @@ async def test_memory_store_manager():
         # Test 2: Retrieve memory by ID
         memory = await memory_store.get_memory_by_id(memory_id)
         print_result(
-            "Retrieve by ID", memory is not None, f"Found: {
-                memory is not None}"
+            "Retrieve by ID",
+            memory is not None,
+            f"Found: {
+                memory is not None}",
         )
 
         # Test 3: Search memories
@@ -141,8 +141,11 @@ async def test_memory_store_manager():
             query="Alice engineer", namespace=("test", "facts"), limit=5
         )
         print_result(
-            "Search memories", True, f"Found {
-                len(memories)} memories")
+            "Search memories",
+            True,
+            f"Found {
+                len(memories)} memories",
+        )
 
         # Test 4: Update memory (access is updated automatically in
         # get_memory_by_id)
@@ -154,9 +157,11 @@ async def test_memory_store_manager():
         # Test 5: Get memory statistics
         stats = await memory_store.get_memory_statistics(("test", "facts"))
         print_result(
-            "Get statistics", True, f"Total memories: {
+            "Get statistics",
+            True,
+            f"Total memories: {
                 stats.get(
-                    'total_memories', 0)}"
+                    'total_memories', 0)}",
         )
 
         return True
@@ -184,7 +189,6 @@ async def test_kg_generator_agent():
             KGGeneratorAgent,
             KGGeneratorAgentConfig,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
         from haive.core.tools.store_manager import StoreManager
 
@@ -221,8 +225,7 @@ async def test_kg_generator_agent():
         # Test 1: Extract entities from memories
         entities = await kg_agent.extract_entities_from_memories(limit=5)
         print_result(
-            "Extract entities", len(
-                entities) > 0, f"Found {len(entities)} entities"
+            "Extract entities", len(entities) > 0, f"Found {len(entities)} entities"
         )
 
         # Test 2: Extract relationships
@@ -255,7 +258,8 @@ async def test_kg_generator_agent():
             "Run KG agent",
             len(result) > 0,
             f"Response length: {
-                len(result)}")
+                len(result)}",
+        )
 
         return True
 
@@ -286,7 +290,6 @@ async def test_graph_rag_retriever():
             KGGeneratorAgent,
             KGGeneratorAgentConfig,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
         from haive.core.tools.store_manager import StoreManager
 
@@ -391,7 +394,6 @@ async def test_agentic_rag_coordinator():
             KGGeneratorAgent,
             KGGeneratorAgentConfig,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
         from haive.core.tools.store_manager import StoreManager
 
@@ -485,8 +487,7 @@ async def test_agentic_rag_coordinator():
         # Test 5: Run agent
         response = await rag_coordinator.run("What have I learned recently?")
         print_result(
-            "Run RAG agent", len(
-                response) > 0, f"Response length: {len(response)}"
+            "Run RAG agent", len(response) > 0, f"Response length: {len(response)}"
         )
 
         return True
@@ -519,7 +520,6 @@ async def test_multi_agent_coordinator():
             MultiAgentCoordinatorConfig,
             MultiAgentMemoryCoordinator,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
         from haive.core.tools.store_manager import StoreManager
 
@@ -564,8 +564,7 @@ async def test_multi_agent_coordinator():
 
         # Test 1: Store memory through coordinator
         result = await coordinator.store_memory("Multi-agent test memory")
-        print_result("Store via coordinator",
-                     "success" in result.lower(), result[:50])
+        print_result("Store via coordinator", "success" in result.lower(), result[:50])
 
         # Test 2: Retrieve memories
         memories = await coordinator.retrieve_memories(query="test memory", limit=5)
@@ -577,17 +576,11 @@ async def test_multi_agent_coordinator():
 
         # Test 3: Analyze memory
         analysis = await coordinator.analyze_memory("Analyze this test content")
-        print_result(
-            "Analyze memory",
-            analysis["success"],
-            "Analysis completed")
+        print_result("Analyze memory", analysis["success"], "Analysis completed")
 
         # Test 4: Generate knowledge graph
         kg_result = await coordinator.generate_knowledge_graph()
-        print_result(
-            "Generate KG",
-            kg_result["success"],
-            "Knowledge graph generated")
+        print_result("Generate KG", kg_result["success"], "Knowledge graph generated")
 
         # Test 5: Execute custom task
         task = MemoryTask(
@@ -660,8 +653,10 @@ async def test_unified_memory_system():
             content="Unified system test memory", metadata={"test": True}
         )
         print_result(
-            "Store memory", result.success, f"Time: {
-                result.execution_time_ms:.1f}ms"
+            "Store memory",
+            result.success,
+            f"Time: {
+                result.execution_time_ms:.1f}ms",
         )
 
         # Test 2: Retrieve memories
@@ -687,16 +682,15 @@ async def test_unified_memory_system():
         # Test 4: Generate knowledge graph
         result = await memory_system.generate_knowledge_graph()
         print_result(
-            "Generate KG", result.success, f"Time: {
-                result.execution_time_ms:.1f}ms"
+            "Generate KG",
+            result.success,
+            f"Time: {
+                result.execution_time_ms:.1f}ms",
         )
 
         # Test 5: Consolidate memories
         result = await memory_system.consolidate_memories(dry_run=True)
-        print_result(
-            "Consolidate memories",
-            result.success,
-            "Dry run completed")
+        print_result("Consolidate memories", result.success, "Dry run completed")
 
         # Test 6: Get statistics
         result = await memory_system.get_memory_statistics()
@@ -705,8 +699,10 @@ async def test_unified_memory_system():
         # Test 7: Search entities
         result = await memory_system.search_entities(entity_name="test")
         print_result(
-            "Search entities", result.success, f"Time: {
-                result.execution_time_ms:.1f}ms"
+            "Search entities",
+            result.success,
+            f"Time: {
+                result.execution_time_ms:.1f}ms",
         )
 
         # Test 8: Run diagnostic

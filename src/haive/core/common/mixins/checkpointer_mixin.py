@@ -117,9 +117,7 @@ class CheckpointerMixin(BaseModel):
             try:
                 self._async_checkpointer = await persistence.create_async_checkpointer()
                 logger.debug(
-                    f"Initialized async checkpointer: {
-                        type(
-                            self._async_checkpointer).__name__}"
+                    f"Initialized async checkpointer: {type(self._async_checkpointer).__name__}"
                 )
             except Exception as e:
                 logger.warning(f"Failed to create async checkpointer: {e}")

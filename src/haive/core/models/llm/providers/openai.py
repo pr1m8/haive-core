@@ -216,8 +216,7 @@ class OpenAIProvider(BaseLLMProvider):
             return sorted(chat_models)
         except ImportError:
             raise ImportError(
-                "openai package is required to list models. "
-                "Install with: pip install openai"
+                "openai package is required to list models. Install with: pip install openai"
             )
         except Exception as e:
             raise Exception(f"Failed to retrieve OpenAI models: {e!s}")

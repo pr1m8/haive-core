@@ -90,10 +90,7 @@ def extract_state_snapshot(snapshot: Any) -> dict[str, Any]:
         pass
 
     # Last resort - empty dict
-    logger.warning(
-        f"Couldn't extract state from snapshot of type {
-            type(snapshot)}"
-    )
+    logger.warning(f"Couldn't extract state from snapshot of type {type(snapshot)}")
     return {}
 
 

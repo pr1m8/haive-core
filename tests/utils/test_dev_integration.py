@@ -104,11 +104,10 @@ class TestBasicWorkflows:
 
     def test_logging_workflow(self):
         """Test basic logging workflow."""
-        with redirect_stdout(io.StringIO()) as f:
-            with self.log.context("test_operation"):
-                self.log.info("Starting process")
-                self.log.progress("Processing data", step=1)
-                self.log.success("Process completed")
+        with redirect_stdout(io.StringIO()) as f, self.log.context("test_operation"):
+            self.log.info("Starting process")
+            self.log.progress("Processing data", step=1)
+            self.log.success("Process completed")
 
         output = f.getvalue()
         assert "test_operation" in output
@@ -280,7 +279,7 @@ class TestIntegratedWorkflows:
                         self.debug.ice(f"Processing: {item}")
 
                         # Simulate some computation
-                        if isinstance(item, (int, float)):
+                        if isinstance(item, int | float):
                             processed_item = item**2
                         else:
                             processed_item = len(str(item))

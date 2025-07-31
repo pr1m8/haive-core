@@ -94,7 +94,7 @@ def extract_input_schema(
             strict_typing,
             include_signature,
         )
-    raise ValueError(f"Unsupported tool type: {type(tool_or_callable)}")
+    raise TypeError(f"Unsupported tool type: {type(tool_or_callable)}")
 
 
 def _extract_from_langchain_tool(tool: Any, schema_name: str) -> type[BaseModel]:
@@ -123,8 +123,8 @@ def _extract_from_langchain_tool(tool: Any, schema_name: str) -> type[BaseModel]
     # Fallback: create a generic schema
     logger.warning(
         f"Could not extract specific schema from tool {
-            tool.name if hasattr(
-                tool, 'name') else 'unknown'}"
+            tool.name if hasattr(tool, 'name') else 'unknown'
+        }"
     )
     return create_model(schema_name, input=(str, Field(description="Tool input")))
 
@@ -180,7 +180,7 @@ def _extract_from_callable(
         # Handle missing type annotations
         if param_type == inspect.Parameter.empty:
             if strict_typing:
-                raise ValueError(f"Parameter {param_name} has no type annotation")
+                raise TypeError(f"Parameter {param_name} has no type annotation")
             param_type = Any
 
         # Handle default values
@@ -212,9 +212,8 @@ def _extract_from_callable(
     if not fields:
         logger.warning(
             f"Function {
-                func.__name__ if hasattr(
-                    func,
-                    '__name__') else 'unknown'} has no extractable parameters"
+                func.__name__ if hasattr(func, '__name__') else 'unknown'
+            } has no extractable parameters"
         )
         schema = create_model(schema_name)
         if include_signature:
@@ -286,7 +285,7 @@ def _extract_param_descriptions(docstring: str) -> dict[str, str]:
         # Match parameter lines: "param_name: description" or "param_name
         # (type): description"
         param_matches = re.findall(
-            r"^\s*(\w+)(?:\s*\([^)]+\))?\s*:\s*(.+?)(?=^\s*\w+(?:\s*\([^)]+\))?\s*:|$)",
+            r"^\s*()(?:\s*\([^)]+\))?\s*:\s*(.+?)(?=^\s*(?:\s*\([^)]+\))?\s*:|$)",
             args_section,
             re.MULTILINE | re.DOTALL,
         )
@@ -304,7 +303,7 @@ def _extract_param_descriptions(docstring: str) -> dict[str, str]:
             params_section = numpy_match.group(1)
             # Match parameter blocks
             param_blocks = re.findall(
-                r"(\w+)\s*:\s*([^:]+?)(?=\n\w+\s*:|$)", params_section, re.DOTALL
+                r"()\s*:\s*([^:]+?)(?=\n\s*:|$)", params_section, re.DOTALL
             )
             for param_name, description in param_blocks:
                 descriptions[param_name.strip()] = " ".join(description.strip().split())
@@ -312,7 +311,7 @@ def _extract_param_descriptions(docstring: str) -> dict[str, str]:
     # Try Sphinx style: ":param name: description"
     if not descriptions:
         sphinx_matches = re.findall(
-            r":param\s+(\w+)\s*:\s*(.+?)(?=:param|\Z)", docstring, re.DOTALL
+            r":param ()\s*:\s*(.+?)(?=:param|\Z)", docstring, re.DOTALL
         )
         for param_name, description in sphinx_matches:
             descriptions[param_name.strip()] = " ".join(description.strip().split())
@@ -603,10 +602,7 @@ def create_goal_tool_node(
                     # Call executor with the goal instance
                     return executor_function(goal_instance, **kwargs)
                 except Exception as e:
-                    logger.exception(
-                        f"Error executing goal {
-                            schema_cls.__name__}: {e}"
-                    )
+                    logger.exception(f"Error executing goal {schema_cls.__name__}: {e}")
                     return f"Error: {e!s}"
 
             # Copy metadata

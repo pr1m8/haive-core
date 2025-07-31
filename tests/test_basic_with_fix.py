@@ -3,11 +3,11 @@
 
 import sys
 
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
 import haive.core.graph.node.engine_node as engine_node_module
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.graph.node.engine_node_test import (
     EngineNodeConfig as TestEngineNodeConfig,

@@ -52,11 +52,7 @@ class DynamicLiteral(str, Generic[T], metaclass=_DynLitMeta):
             if not isinstance(v, str):
                 raise TypeError("string required")
             if v not in cls._values:
-                raise ValueError(
-                    f"invalid literal; allowed = {
-                        sorted(
-                            cls._values)!r}"
-                )
+                raise ValueError(f"invalid literal; allowed = {sorted(cls._values)!r}")
             return v
 
         return core_schema.no_info_plain_validator_function(_validate)

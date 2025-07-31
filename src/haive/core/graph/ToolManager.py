@@ -198,7 +198,8 @@ class ToolManager:
         if state_param is None:
             raise ValueError(
                 f"Function {
-                    func.__name__} must have a parameter named 'state' or ending with '_state'"
+                    func.__name__
+                } must have a parameter named 'state' or ending with '_state'"
             )
 
         # Create wrapper function with state injection
@@ -255,7 +256,8 @@ class ToolManager:
         if store_param is None:
             raise ValueError(
                 f"Function {
-                    func.__name__} must have a parameter named 'store' or ending with '_store'"
+                    func.__name__
+                } must have a parameter named 'store' or ending with '_store'"
             )
 
         # Create wrapper function with store injection
@@ -318,13 +320,15 @@ class ToolManager:
         if state_param is None:
             raise ValueError(
                 f"Function {
-                    func.__name__} must have a parameter named 'state' or ending with '_state'"
+                    func.__name__
+                } must have a parameter named 'state' or ending with '_state'"
             )
 
         if store_param is None:
             raise ValueError(
                 f"Function {
-                    func.__name__} must have a parameter named 'store' or ending with '_store'"
+                    func.__name__
+                } must have a parameter named 'store' or ending with '_store'"
             )
 
         # Create wrapper function with injections

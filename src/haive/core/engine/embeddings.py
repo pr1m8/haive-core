@@ -7,7 +7,7 @@ from langchain_core.embeddings import Embeddings
 from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, ConfigDict, Field, create_model, field_validator
 
-from haive.core.engine.base import InvokableEngine, NonInvokableEngine
+from haive.core.engine.base import NonInvokableEngine
 from haive.core.engine.base.types import EngineType
 from haive.core.models.embeddings.base import BaseEmbeddingConfig
 
@@ -27,7 +27,8 @@ class EmbeddingsEngineConfig(
 
     # Core configuration
     embedding_config: BaseEmbeddingConfig = Field(
-        ..., description="Configuration for the embedding model"  # Required
+        ...,
+        description="Configuration for the embedding model",  # Required
     )
 
     # Batch processing parameters
@@ -46,7 +47,7 @@ class EmbeddingsEngineConfig(
     @classmethod
     def validate_engine_type(cls, v) -> Any:
         if v != EngineType.EMBEDDINGS:
-            raise ValueError("engine_type must be EMBEDDINGS")
+            raise TypeError("engine_type must be EMBEDDINGS")
         return v
 
     def create_runnable(

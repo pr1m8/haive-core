@@ -698,9 +698,7 @@ class AgentSchemaComposer(SchemaComposer):
         for _field_name, field_sources in all_fields.items():
             for agent_id, fname, ftype, finfo in field_sources:
                 agent_name = agent_id_to_name.get(agent_id, agent_id)
-                namespaced_name = f"{
-                    agent_name.lower().replace(
-                        ' ', '_')}_{fname}"
+                namespaced_name = f"{agent_name.lower().replace(' ', '_')}_{fname}"
 
                 if hasattr(finfo, "default_factory"):
                     composer.add_field(

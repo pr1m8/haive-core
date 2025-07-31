@@ -177,10 +177,10 @@ def prepare_merged_input(
     """
     logger.debug(
         f"Preparing merged input with schemas - Input: {
-            input_schema.__name__ if hasattr(
-                input_schema, '__name__') else type(input_schema)}, State: {
-            state_schema.__name__ if hasattr(
-                state_schema, '__name__') else type(state_schema)}"
+            input_schema.__name__ if hasattr(input_schema, '__name__') else type(input_schema)
+        }, State: {
+            state_schema.__name__ if hasattr(state_schema, '__name__') else type(state_schema)
+        }"
     )
 
     # Process the input based on schema

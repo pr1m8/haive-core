@@ -294,7 +294,7 @@ def example_field_validation() -> Any:
     )
 
     validator.add_field_validator(
-        "email", ValidatorBuilder.for_pattern(r"^[\w\.-]+@[\w\.-]+\.\w+$", "email")
+        "email", ValidatorBuilder.for_pattern(r"^[\w\.-]+@[\w\.-]+\.$", "email")
     )
 
     validator.add_field_validator(

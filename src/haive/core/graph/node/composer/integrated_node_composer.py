@@ -169,9 +169,7 @@ class IntegratedNodeComposer(NodeSchemaComposer):
             return FieldDefinition(
                 name=mapping.target_path,
                 type_=original_def.type_,
-                description=f"Mapped from {
-                    mapping.source_path}: {
-                    original_def.description}",
+                description=f"Mapped from {mapping.source_path}: {original_def.description}",
                 owner=base_node.name,
                 sharing_strategy=original_def.sharing_strategy,
                 persistence_strategy=original_def.persistence_strategy,

@@ -68,9 +68,6 @@ def main():
     # Show how to check status
 
     # Show current logging configuration
-    print(f"Root logger level: {logging.root.level}")
-    print(f"Handlers: {len(logging.root.handlers)}")
-    print(f"Active loggers: {len(logging.Logger.manager.loggerDict)}")
 
 
 if __name__ == "__main__":

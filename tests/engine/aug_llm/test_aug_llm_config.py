@@ -38,9 +38,7 @@ class SearchResult(BaseModel):
     """Search result schema for testing structured output."""
 
     answer: str = Field(description="Answer to the query")
-    sources: list[str] = Field(
-        default_factory=list,
-        description="Source documents")
+    sources: list[str] = Field(default_factory=list, description="Source documents")
     confidence: float = Field(default=0.0, description="Confidence score")
 
 
@@ -61,9 +59,7 @@ class ConversationState(StateSchema):
     messages: Annotated[list[BaseMessage], operator.add] = Field(
         default_factory=list, description="Conversation messages"
     )
-    context: list[str] = Field(
-        default_factory=list,
-        description="Context documents")
+    context: list[str] = Field(default_factory=list, description="Context documents")
     query: str | None = Field(default=None, description="User query")
     response: str | None = Field(default=None, description="AI response")
 
@@ -227,7 +223,8 @@ def test_get_input_variables():
     if hasattr(chat_prompt, "input_variables"):
         logger.info(
             f"Chat prompt input_variables: {
-                chat_prompt.input_variables}")
+                chat_prompt.input_variables}"
+        )
 
     # Test with regular PromptTemplate
     text_prompt = PromptTemplate(
@@ -331,7 +328,8 @@ def test_pydantic_output_parser():
     logger.info(
         f"Output schema fields: {
             list(
-                output_schema.model_fields.keys())}")
+                output_schema.model_fields.keys())}"
+    )
 
     # Check fields that should always be present
     assert "content" in output_schema.model_fields
@@ -342,7 +340,8 @@ def test_pydantic_output_parser():
     for field in ["answer", "sources", "confidence"]:
         logger.info(
             f"Field '{field}' present: {
-                field in output_schema.model_fields}")
+                field in output_schema.model_fields}"
+        )
 
     # Also log the structured_output_model to confirm it's being set correctly
     logger.info(f"Structured output model: {aug_llm.structured_output_model}")
@@ -435,7 +434,8 @@ def test_schema_composer_with_aug_llm():
     for var in input_vars:
         logger.info(
             f"Input variable '{var}' present: {
-                var in schema.model_fields}")
+                var in schema.model_fields}"
+        )
 
     # Log what's in the engine I/O mappings
     if hasattr(schema, "__engine_io_mappings__"):
@@ -510,12 +510,14 @@ def test_multiple_engines_schema():
     for var in qa_vars:
         logger.info(
             f"QA input var '{var}' present: {
-                var in schema.model_fields}")
+                var in schema.model_fields}"
+        )
 
     for var in agent_vars:
         logger.info(
             f"Agent input var '{var}' present: {
-                var in schema.model_fields}")
+                var in schema.model_fields}"
+        )
 
     # Log which output model fields were included
     if hasattr(SearchResult, "model_fields"):
@@ -562,8 +564,7 @@ def test_schema_with_reducers():
     )
 
     # Combine them with SchemaComposer
-    schema = SchemaComposer.from_components(
-        [CustomState, aug_llm], name="ReducerState")
+    schema = SchemaComposer.from_components([CustomState, aug_llm], name="ReducerState")
     logger.info(f"Created reducer schema: {schema.__name__}")
 
     # Display schema with rich UI

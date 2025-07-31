@@ -48,9 +48,7 @@ class RateLimitingMixin:
         """
         # Check if any rate limiting is configured
         if not any(
-            [self.requests_per_second,
-             self.tokens_per_second,
-             self.tokens_per_minute]
+            [self.requests_per_second, self.tokens_per_second, self.tokens_per_minute]
         ):
             logger.debug("No rate limiting configured, returning original LLM")
             return llm
@@ -90,8 +88,7 @@ class RateLimitingMixin:
                 return llm.with_rate_limiter(rate_limiter)
             # Otherwise, wrap it manually
             logger.warning(
-                f"LLM {
-                    type(llm).__name__} does not support with_rate_limiter method. "
+                f"LLM {type(llm).__name__} does not support with_rate_limiter method. "
                 "Rate limiting may not work as expected."
             )
             return llm

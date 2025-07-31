@@ -121,10 +121,7 @@ class DirectorySource(BaseSource):
     def validate_directory_exists(self) -> Self:
         """Validate the directory exists after model initialization."""
         if not os.path.isdir(self.directory_path):
-            raise ValueError(
-                f"Directory does not exist: {
-                    self.directory_path}"
-            )
+            raise ValueError(f"Directory does not exist: {self.directory_path}")
         return self
 
     def get_source_value(self) -> DirectoryPath:

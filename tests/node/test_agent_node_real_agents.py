@@ -7,11 +7,11 @@ Tests real field updates, synchronization, and complex workflows.
 from typing import Any
 
 import pytest
-from haive.agents.simple import SimpleAgent
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.types import Command
 from pydantic import BaseModel, Field
 
+from haive.agents.simple import SimpleAgent
 from haive.core.engine.aug_llm import AugLLMConfig
 
 # Import and create agent node function to handle forward refs

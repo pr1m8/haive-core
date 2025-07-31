@@ -687,10 +687,7 @@ class MultiAgentState(ToolState):
             if agent_engines:
                 agent_eng_branch = engines_branch.add("🤖 Agent Engines")
                 for agent_name, engine_names in agent_engines.items():
-                    agent_eng_branch.add(
-                        f"{agent_name}: {
-                            len(engine_names)} engines"
-                    )
+                    agent_eng_branch.add(f"{agent_name}: {len(engine_names)} engines")
 
             # Show global engines
             if global_engines:

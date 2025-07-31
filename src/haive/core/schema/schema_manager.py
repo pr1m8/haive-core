@@ -324,10 +324,7 @@ class StateSchemaManager:
                     ):
                         self.validators[name] = attr
         except Exception as e:
-            logger.exception(
-                f"Error loading from model {
-                    model_cls.__name__}: {e}"
-            )
+            logger.exception(f"Error loading from model {model_cls.__name__}: {e}")
             # Add a placeholder field as fallback
             self.fields["placeholder"] = (str, create_field(str, "")[1])
             self.field_definitions["placeholder"] = FieldDefinition(
@@ -1217,7 +1214,7 @@ class StateSchemaManager:
         elif method_type == "static":
             self.static_methods[name] = method
         else:
-            raise ValueError(f"Unknown method type: {method_type}")
+            raise TypeError(f"Unknown method type: {method_type}")
 
         return self
 

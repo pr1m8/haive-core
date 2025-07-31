@@ -78,15 +78,13 @@ class TestPersistenceManager:
                 assert isinstance(setup_result, bool)
             except Exception as e:
                 # If exception bubbles up, the setup failed catastrophically
-                raise AssertionError(
-                    f"Setup failed with unhandled exception: {e}")
+                raise AssertionError(f"Setup failed with unhandled exception: {e}")
 
         except Exception:
             # Connection to real database failed but it should just use memory saver
             # as a fallback (or handle the error gracefully)
             checkpointer = manager.checkpointer
-            assert checkpointer is None or isinstance(
-                checkpointer, MemorySaver)
+            assert checkpointer is None or isinstance(checkpointer, MemorySaver)
 
     def test_create_runnable_config(self):
         """Test creating a runnable config."""
@@ -142,8 +140,7 @@ class TestPersistenceManager:
         # Test with explicit thread ID and user info
         explicit_id = f"test-thread-{uuid.uuid4()}"
         user_info = {"user_id": f"user-{uuid.uuid4()}"}
-        config, returned_id = manager.prepare_for_agent_run(
-            explicit_id, user_info)
+        config, returned_id = manager.prepare_for_agent_run(explicit_id, user_info)
         assert config["configurable"]["thread_id"] == explicit_id
         assert config["configurable"]["auth"] == user_info
         assert returned_id == explicit_id
@@ -173,8 +170,7 @@ class TestPersistenceManager:
             user_info = {"user_id": f"test-user-{uuid.uuid4()}"}
 
             # Try to register thread
-            registration_result = manager.register_thread(
-                test_thread_id, user_info)
+            registration_result = manager.register_thread(test_thread_id, user_info)
 
             # Registration should either succeed or fail gracefully
             assert isinstance(registration_result, bool)
@@ -240,8 +236,7 @@ class TestPersistenceManager:
 
         except Exception as e:
             # This would indicate a real bug, not just a connection failure
-            raise AssertionError(
-                f"Unhandled exception in thread cleanup test: {e}")
+            raise AssertionError(f"Unhandled exception in thread cleanup test: {e}")
 
     def test_from_env(self):
         """Test creating manager from environment variables."""
@@ -377,8 +372,7 @@ class TestPersistenceManager:
             # Should return False when setup fails
             assert isinstance(result, bool)
         except Exception as e:
-            raise AssertionError(
-                f"setup() should handle connection error: {e}")
+            raise AssertionError(f"setup() should handle connection error: {e}")
 
         # Thread registration should handle connection error gracefully
         try:
@@ -396,8 +390,7 @@ class TestPersistenceManager:
             # Should return an empty list when listing fails
             assert isinstance(threads, list)
         except Exception as e:
-            raise AssertionError(
-                f"list_threads() should handle connection error: {e}")
+            raise AssertionError(f"list_threads() should handle connection error: {e}")
 
         # Delete thread should handle connection error gracefully
         try:
@@ -405,8 +398,7 @@ class TestPersistenceManager:
             # Should return False when deletion fails
             assert isinstance(result, bool)
         except Exception as e:
-            raise AssertionError(
-                f"delete_thread() should handle connection error: {e}")
+            raise AssertionError(f"delete_thread() should handle connection error: {e}")
 
     def test_complex_config_extraction(self):
         """Test extraction of configuration from various complex config objects."""
@@ -587,7 +579,9 @@ class TestPersistenceManager:
 
         except Exception as e:
             # The manager should handle all database errors gracefully
-            assert True, f"Error occurred but should be handled gracefully: {
+            assert (
+                True
+            ), f"Error occurred but should be handled gracefully: {
                 e!s}"
 
     def test_connection_parameters_with_special_chars(self):

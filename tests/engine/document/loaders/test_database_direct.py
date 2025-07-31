@@ -143,7 +143,7 @@ def test_database_system():
                 strategies_tested += 1
 
             except Exception as e:
-                passe}")
+                pass
 
 
     except Exception as e:

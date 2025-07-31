@@ -26,8 +26,11 @@ import uuid
 from datetime import datetime
 from typing import Any, Self
 
+from haive.dataflow.db.supabase import get_supabase_client as _get_client
 from pydantic import Field, model_validator
+from supabase import create_client
 
+from haive.core.persistence import SupabaseCheckpointerConfig
 from haive.core.persistence.base import CheckpointerConfig
 from haive.core.persistence.types import CheckpointerType
 from haive.core.persistence.utils import deserialize_metadata, serialize_metadata
@@ -36,8 +39,6 @@ logger = logging.getLogger(__name__)
 
 # Check if Supabase dependencies are available
 try:
-    from supabase import create_client
-
     SUPABASE_AVAILABLE = True
 except ImportError:
     SUPABASE_AVAILABLE = False
@@ -51,8 +52,6 @@ def get_supabase_client() -> Any | None:
     # Only import when actually needed
     if os.getenv("HAIVE_ENABLE_DATAFLOW") == "1":
         try:
-            from haive.dataflow.db.supabase import get_supabase_client as _get_client
-
             return _get_client()
         except ImportError:
             pass
@@ -118,8 +117,7 @@ class SupabaseSaver:
         """
         if not SUPABASE_AVAILABLE:
             raise ImportError(
-                "Supabase dependencies not available. Please install with: "
-                "pip install supabase"
+                "Supabase dependencies not available. Please install with: pip install supabase"
             )
 
         self.user_id = user_id
@@ -1024,7 +1022,6 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
 
     Example:
         ```python
-        from haive.core.persistence import SupabaseCheckpointerConfig
 
         # Create a Supabase checkpointer with direct credentials
         config = SupabaseCheckpointerConfig(
@@ -1073,8 +1070,7 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
         """Validate that Supabase dependencies are available."""
         if not SUPABASE_AVAILABLE:
             raise ImportError(
-                "Supabase dependencies not available. Please install with: "
-                "pip install supabase"
+                "Supabase dependencies not available. Please install with: pip install supabase"
             )
         return self
 

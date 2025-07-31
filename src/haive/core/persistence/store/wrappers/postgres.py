@@ -51,14 +51,12 @@ class PostgresStoreWrapper(SerializableStoreWrapper):
         # Create store
         if index_config:
             logger.info(
-                f"Creating PostgresStore with semantic search for {
-                    self.config.connection_id}"
+                f"Creating PostgresStore with semantic search for {self.config.connection_id}"
             )
             store = PostgresStore(pool, index=index_config)
         else:
             logger.info(
-                f"Creating PostgresStore without semantic search for {
-                    self.config.connection_id}"
+                f"Creating PostgresStore without semantic search for {self.config.connection_id}"
             )
             store = PostgresStore(pool)
 
@@ -127,14 +125,14 @@ class AsyncPostgresStoreWrapper(SerializableStoreWrapper):
         # Create store
         if index_config:
             logger.info(
-                f"Creating AsyncPostgresStore with semantic search for {
-                    self.config.connection_id}"
+                f"Creating AsyncPostgresStore with semantic search for {self.config.connection_id}"
             )
             store = AsyncPostgresStore(pool, index=index_config)
         else:
             logger.info(
                 f"Creating AsyncPostgresStore without semantic search for {
-                    self.config.connection_id}"
+                    self.config.connection_id
+                }"
             )
             store = AsyncPostgresStore(pool)
 
