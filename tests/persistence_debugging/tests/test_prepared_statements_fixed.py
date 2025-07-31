@@ -117,6 +117,7 @@ def main():
     # Summary
 
     if final_count > initial_count:
+        pass
 
 
 if __name__ == "__main__":
