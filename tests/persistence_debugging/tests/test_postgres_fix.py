@@ -131,7 +131,7 @@ def test_conversation_agent_persistence():
         except Exception as e:
             if "prepared statement" in str(e).lower():
                 return False
-            print(f"⚠️  Other error in agent (might be normal): {e}")e}")
+            print(f"⚠️  Other error in agent (might be normal): {e}")
 
         return True
 
