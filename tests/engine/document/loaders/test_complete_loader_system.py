@@ -156,6 +156,7 @@ def test_comprehensive_system():
 
         # They should be different for PDF
         if fast_loader and quality_loader:
+            pass
 
             # Test 6: Bulk Loading Capabilities
 

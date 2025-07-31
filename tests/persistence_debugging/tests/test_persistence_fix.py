@@ -48,6 +48,7 @@ def test_persistence_fix():
             checkpoint_config = {"configurable": {"thread_id": thread_id}}
             checkpoint = session2.checkpointer.get(checkpoint_config)
             if checkpoint:
+                pass
             else:
                 pass
         except Exception as e:
