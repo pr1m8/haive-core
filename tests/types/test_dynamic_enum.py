@@ -35,10 +35,10 @@ def test_dynamic_removal():
 
 
 def test_json_schema():
-            schema = Animal.model_json_schema()
+    schema = Animal.model_json_schema()
 
 
-            def test_dynamic_enum_factory():
+def test_dynamic_enum_factory():
             PlanetType = create_dynamic_enum(
           "PlanetType", ["earth", "mars", "venus"])
 

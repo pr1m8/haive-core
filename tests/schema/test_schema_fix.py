@@ -73,6 +73,7 @@ def test_schema_formation():
 
     # Check if engine has modified output schema
     if hasattr(agent.engine, "output_schema") and agent.engine.output_schema:
+        pass
     else:
         pass
 
