@@ -68,7 +68,9 @@ from haive.core.persistence.handlers import setup_checkpointer
 from haive.core.persistence.memory import MemoryCheckpointerConfig
 from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
 from haive.core.persistence.sqlite_config import SQLiteCheckpointerConfig
-from haive.core.persistence.supabase_config import SupabaseCheckpointerConfig
+
+# Temporarily commented out due to dependency issues
+# from haive.core.persistence.supabase_config import SupabaseCheckpointerConfig
 from haive.core.persistence.types import (
     CheckpointerMode,
     CheckpointerType,

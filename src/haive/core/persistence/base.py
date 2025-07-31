@@ -16,8 +16,9 @@ from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, Field
 
-from haive.core.persistence.memory import MemoryCheckpointerConfig
-from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
+# Imports removed to fix circular import - these will be imported where needed
+# from haive.core.persistence.memory import MemoryCheckpointerConfig
+# from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
 from haive.core.persistence.types import (
     CheckpointerMode,
     CheckpointerType,

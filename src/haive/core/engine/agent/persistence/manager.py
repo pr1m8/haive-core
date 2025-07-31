@@ -52,7 +52,7 @@ class PersistenceManager:
     5. Integration with HaiveRunnableConfigManager for authentication
     """
 
-    def __init__(self, config: dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize persistence manager with optional configuration.
 
         Args:
@@ -65,7 +65,7 @@ class PersistenceManager:
         self.pool_opened = False
 
     def get_checkpointer(
-        self, persistence_type=None, persistence_config: dict[str, Any] = None
+        self, persistence_type=None, persistence_config: dict[str, Any] | None = None
     ):
         """Create and return the appropriate checkpointer based on configuration and available dependencies.
 
@@ -536,7 +536,7 @@ class PersistenceManager:
         return config, current_thread_id
 
     @staticmethod
-    def get_or_create_thread_id(config: dict[str, Any] = None):
+    def get_or_create_thread_id(config: dict[str, Any] | None = None):
         """Get thread ID from config or create a new one.
 
         Args:
