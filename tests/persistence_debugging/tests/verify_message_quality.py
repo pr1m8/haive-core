@@ -112,6 +112,7 @@ def check_ssl_connection_issue():
                 sslmode = match.group(1)
 
                 if sslmode == "require":
+                    pass
         else:
             pass
 
