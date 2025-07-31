@@ -211,7 +211,7 @@ def main():
         print(f"  • {pkg.name}")
 
     # Ask for confirmation
-    response = input("\n🤔 Proceed with fixing all packages? (y/N): ": ").strip().lower()
+    response = input("\n🤔 Proceed with fixing all packages? (y/N): ").strip().lower()
     if response not in ("y", "yes"):
         print("❌ Aborted by user")
         sys.exit(0)

@@ -417,7 +417,7 @@ class Test_PostgresShallowCheckpointer:
         counter = state.get("_counter", None)
         assert counter == 3, f"Expected counter 3, got {counter}"
 
-        logger.info("✅ Shallow mode correctly retained only the latest checkpoint"t")
+        logger.info("✅ Shallow mode correctly retained only the latest checkpoint")
 
 
 class Test_PostgresAsyncCheckpointer:
