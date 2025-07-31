@@ -104,6 +104,7 @@ if __name__ == "__main__":
         # Check for the expected field
         expected_field = "queryrefinementresponse"
         if hasattr(result, "keys") and expected_field in result:
+            pass
         else:
             pass
 
