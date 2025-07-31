@@ -274,7 +274,7 @@ def test_database_loaders_system():
 
 
     except Exception as e:
-        pass")
+        pass
 
     # Test 7: Database-Specific Features
 
@@ -303,10 +303,10 @@ def test_database_loaders_system():
 
                 db_specific_success += 1
             else:
-                pass")
+                pass
 
         except Exception as e:
-            passe}")
+            pass
 
 
     # Test 8: Document State Schema Integration
@@ -338,7 +338,7 @@ def test_database_loaders_system():
 
 
     except Exception as e:
-        pass")
+        pass
 
     # Test 9: Multi-Database Integration Test
 
@@ -380,10 +380,10 @@ def test_database_loaders_system():
 
                 multi_db_success += 1
             else:
-                pass")
+                pass
 
         except Exception as e:
-            passe}")
+            pass
 
 
     # Test 10: Overall System Statistics
