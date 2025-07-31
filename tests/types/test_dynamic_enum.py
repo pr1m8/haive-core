@@ -34,7 +34,7 @@ def test_dynamic_removal():
         pass
 
 
-            def test_json_schema():
+def test_json_schema():
             schema = Animal.model_json_schema()
 
 

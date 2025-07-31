@@ -133,7 +133,7 @@ def trace_pydantic_validation():
             if isinstance(obj, dict) and all(
                 k in obj for k in ["name", "input_variables", "optional_variables"]
             ):
-                logger.error("🚨 FOUND THE PROBLEMATIC DICT!"T!")
+                logger.error("🚨 FOUND THE PROBLEMATIC DICT!")
                 logger.error(f"   Dict keys: {list(obj.keys())}")
                 logger.error(f"   Dict values: {obj}")
 
