@@ -6,11 +6,11 @@ capabilities including timing, load testing, and comparison utilities.
 """
 
 try:
-    from .core import BenchmarkSuite
-    from .load import LoadTester
-    from .timing import TimingBenchmark
+    from haive.core.utils.debugkit.benchmarking.core import BenchmarkSuite
+    from haive.core.utils.debugkit.benchmarking.load import LoadTester
+    from haive.core.utils.debugkit.benchmarking.timing import TimingBenchmark
 except ImportError:
-    from ..fallbacks import FallbackBenchmark as BenchmarkSuite
+    from haive.core.utils.debugkit.fallbacks import FallbackBenchmark as BenchmarkSuite
 
     TimingBenchmark = None
     LoadTester = None
