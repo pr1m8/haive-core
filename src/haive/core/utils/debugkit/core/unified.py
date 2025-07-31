@@ -1,98 +1,38 @@
-"""
-Unified development utilities for Python debugging, profiling, and analysis.
+"""Unified development interface components.
 
-This package provides a comprehensive suite of development tools including:
-- Enhanced debugging with multiple debugger integrations
-- Rich logging with structured output and context management
-- Advanced code tracing and execution analysis
-- Performance profiling with multiple profiler backends
-- Comprehensive static analysis orchestration
-- Code complexity and type analysis
-- Benchmarking and load testing utilities
-
-All utilities are designed to work together seamlessly and provide
-both simple interfaces for quick debugging and advanced features
-for comprehensive code analysis.
-
-Examples:
-    Quick start with unified interface::
-
-        from haive.core.utils.debugkit import debugkit
-
-        # Enhanced debugging
-        debugkit.ice("Debug variable", value=42)
-
-        # Rich logging with context
-        with debugkit.context("operation") as ctx:
-            ctx.log("Starting process")
-            # ... work ...
-            ctx.log("Process complete")
-
-        # Complete analysis
-        @debugkit.instrument(analyze=True, profile=True)
-        def my_function(data: List[str]) -> Dict[str, int]:
-            return process_data(data)
-
-    Individual component usage::
-
-        from haive.core.utils.debugkit import debug, log, trace, profile
-
-        # Use specific components
-        debug.ice("Variable inspection", data=my_data)
-        log.info("Process started", context={"user": "alice"})
-
-        @trace.calls
-        @profile.time
-        def traced_function():
-            return complex_operation()
-
-    Advanced analysis::
-
-        from haive.core.utils.debugkit import debugkit
-
-        # Analyze code quality
-        analysis = debugkit.analyze_code(my_function)
-        print(f"Type coverage: {analysis.type_analysis.type_coverage:.1%}")
-        print(f"Complexity grade: {analysis.complexity_analysis.complexity_grade}")
-
-        # Run static analysis
-        results = debugkit.static_analysis.analyze_file(Path("module.py"))
-        report = debugkit.static_analysis.generate_report(results)
+This module contains the main UnifiedDev class and CodeAnalysisReport
+that were previously in the main __init__.py file.
 """
 
-from typing import TYPE_CHECKING
-
-# Core configuration
-from haive.core.utils.debugkit.config import DevConfig, Environment, LogLevel, StorageBackend, config
-
-# Core components
-from haive.core.utils.debugkit.core import DevContext
-
-# Individual component interfaces with fallbacks
-from haive.core.utils.debugkit.debug import debug
-from haive.core.utils.debugkit.logging import log
-from haive.core.utils.debugkit.tracing import trace
-from haive.core.utils.debugkit.profiling import profile
-from haive.core.utils.debugkit.benchmarking import benchmark
-
-# Analysis components
-from haive.core.utils.debugkit.analysis import get_type_analyzer, get_complexity_analyzer, get_static_orchestrator
-
-if TYPE_CHECKING:
-    from haive.core.utils.debugkit.analysis.complexity import ComplexityAnalyzer, ComplexityReport
-    from haive.core.utils.debugkit.analysis.static import AnalysisResult, StaticAnalysisOrchestrator
-    from haive.core.utils.debugkit.analysis.types import FunctionTypeAnalysis, TypeAnalyzer
-
-
-# Import the main UnifiedDev class (temporarily from old location)
-# TODO: Move to core.unified module
 import asyncio
 import functools
 import inspect
 import time
 import uuid
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+
+from haive.core.utils.debugkit.analysis import (
+    get_complexity_analyzer,
+    get_static_orchestrator,
+    get_type_analyzer,
+)
+from haive.core.utils.debugkit.config import config
+from haive.core.utils.debugkit.core.context import DevContext
+
+if TYPE_CHECKING:
+    from haive.core.utils.debugkit.analysis.complexity import (
+        ComplexityAnalyzer,
+        ComplexityReport,
+    )
+    from haive.core.utils.debugkit.analysis.static import (
+        AnalysisResult,
+        StaticAnalysisOrchestrator,
+    )
+    from haive.core.utils.debugkit.analysis.types import (
+        FunctionTypeAnalysis,
+        TypeAnalyzer,
+    )
 
 
 class CodeAnalysisReport:
@@ -275,12 +215,19 @@ class UnifiedDev:
             )
     """
 
-    def __init__(self, custom_config: Optional[DevConfig] = None):
+    def __init__(self, custom_config: Optional["DevConfig"] = None):
         """Initialize unified development utilities.
 
         Args:
             custom_config: Custom configuration (uses global config if None)
         """
+        from haive.core.utils.debugkit.benchmarking import benchmark
+        from haive.core.utils.debugkit.config import DevConfig
+        from haive.core.utils.debugkit.debug import debug
+        from haive.core.utils.debugkit.logging import log
+        from haive.core.utils.debugkit.profiling import profile
+        from haive.core.utils.debugkit.tracing import trace
+
         self.config = custom_config or config
 
         # Component interfaces
@@ -685,25 +632,3 @@ class UnifiedDev:
             )
 
         return stats
-
-
-# Create global instance
-debugkit = UnifiedDev()
-
-# Export main interface and individual components
-__all__ = [
-    "debugkit",
-    "debug",
-    "log",
-    "trace",
-    "profile",
-    "benchmark",
-    "config",
-    "DevConfig",
-    "DevContext",
-    "CodeAnalysisReport",
-    "UnifiedDev",
-    "Environment",
-    "LogLevel",
-    "StorageBackend",
-]
