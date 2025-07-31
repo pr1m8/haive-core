@@ -200,7 +200,7 @@ def verify_database_content(thread_id: str):
                                     if isinstance(msg, dict) and "content" in msg:
                                         pass
                         except Exception as e:
-                            passe}")
+                            pass
 
                     # Check metadata
                     if metadata:
