@@ -244,7 +244,7 @@ def test_database_loaders_system():
             splitter_tests_passed += 1
 
         except Exception as e:
-            pass")
+            pass
 
 
     # Test 6: Fetch All Configuration
