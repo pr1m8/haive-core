@@ -162,7 +162,7 @@ def test_text_splitter_config():
             splitter_tests_passed += 1
 
         except Exception as e:
-            passe}")
+            pass
 
 
     return splitter_tests_passed >= 5
