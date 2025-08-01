@@ -12,7 +12,7 @@ class HackerNewsSource(URLSource):
     source_type: SourceType = Field(default=SourceType.HACKER_NEWS)
     url: HttpUrl = Field(description="The url of the hacker news post.")
 
-    @field_validatorvalidate_url
+    @field_validator("url")
     @classmethod
     def validate_url(cls, v) -> Any:
         if not v.startswith("https://news.ycombinator.com/"):

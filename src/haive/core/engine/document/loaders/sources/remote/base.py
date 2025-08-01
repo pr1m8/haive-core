@@ -13,7 +13,7 @@ class URLSource(BaseSource):
     url: HttpUrl = Field(description="The url of the remote file.")
     url_prefix: str | None = Field(default="", description="The prefix of the url.")
 
-    @field_validatorvalidate_url
+    @field_validator("url")
     @classmethod
     def validate_url(cls, v) -> Any:
         if not v.is_valid():
@@ -31,10 +31,3 @@ class URLSource(BaseSource):
         if isinstance(url, str):
             url = HttpUrl(url)
         return cls(url=url)
-
-    @field_validatorvalidate_url
-    @classmethod
-    def validate_url(cls, v) -> Any:
-        if not v.is_valid():
-            raise ValueError(f"Invalid url: {v}")
-        return v

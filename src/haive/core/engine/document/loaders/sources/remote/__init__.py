@@ -12,7 +12,7 @@ class RemoteSource(BaseSource):
     )
     url: HttpUrl = Field(description="The url of the remote file.")
 
-    @field_validatorvalidate_url
+    @field_validator("url")
     @classmethod
     def validate_url(cls, v):
         if not v.is_valid():
