@@ -1,6 +1,6 @@
 from typing import Any
 
-from pydantic import Field, HttpUrl
+from pydantic import Field, HttpUrl, field_validator
 
 from haive.core.engine.loaders.sources.base import BaseSource
 from haive.core.engine.loaders.sources.types import SourceType
