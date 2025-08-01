@@ -112,6 +112,20 @@ Examples:
 from haive.core.models.vectorstore.base import VectorStoreConfig, VectorStoreProvider
 
 __all__ = [
+    "Chroma",
+    "FAISS",
+    "InMemory",
+    "Milvus",
+    "Pinecone",
+    "Qdrant",
     "VectorStoreConfig",
     "VectorStoreProvider",
+    "Weaviate",
+    "Zilliz",
+    "add_document",
+    "create_retriever",
+    "create_retriever_from_documents",
+    "create_vectorstore",
+    "create_vs_config_from_documents",
+    "create_vs_from_documents",
 ]

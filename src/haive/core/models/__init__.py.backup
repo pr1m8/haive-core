@@ -128,43 +128,69 @@ Advanced Features:
    MetadataMixin
 """
 
-import lazy_loader as lazy
-
-# Define submodules to lazy load
-submodules = ["llm", "embeddings", "retriever", "vectorstore"]
-
-# Define specific attributes from submodules to expose
-submod_attrs = {
-    "llm": [
-        "LLMConfig",
-        "LLMFactory",
-        "LLMProvider",
-        "create_llm",
-        "get_available_providers",
-        "get_provider_models",
-    ],
-    "embeddings": [
-        "BaseEmbeddingConfig",
-        "EmbeddingProvider",
-        "HuggingFaceEmbeddingConfig",
-        "OpenAIEmbeddingConfig",
-        "create_embeddings",
-    ],
-    "retriever": ["RetrieverConfig", "RetrieverType", "VectorStoreRetrieverConfig"],
-    "vectorstore": ["VectorStoreConfig", "VectorStoreProvider"],
-}
-
-# Attach lazy loading - this creates __getattr__, __dir__, and __all__
-__getattr__, __dir__, __all__ = lazy.attach(
-    __name__, submodules=submodules, submod_attrs=submod_attrs
+# Embeddings module imports - with most commonly used configs
+from haive.core.models.embeddings import (
+    BaseEmbeddingConfig,
+    EmbeddingProvider,
+    HuggingFaceEmbeddingConfig,
+    OpenAIEmbeddingConfig,
+    create_embeddings,
 )
 
-# Eagerly load lightweight metadata utilities
-from .metadata import ModelMetadata
-from .metadata_mixin import ModelMetadataMixin as MetadataMixin
+# LLM module imports - comprehensive provider support
+from haive.core.models.llm import (
+    LLMConfig,
+    LLMFactory,
+    LLMProvider,
+    create_llm,
+)
+from haive.core.models.llm import get_available_providers as get_llm_providers
+from haive.core.models.llm import (
+    get_provider_models,
+)
 
-# Add eager imports to __all__
-__all__ += ["ModelMetadata", "MetadataMixin"]
+# Core metadata utilities
+from haive.core.models.metadata import ModelMetadata
+from haive.core.models.metadata_mixin import ModelMetadataMixin as MetadataMixin
+
+# Retriever imports - configuration and types
+from haive.core.models.retriever import (
+    RetrieverConfig,
+    RetrieverType,
+    VectorStoreRetrieverConfig,
+)
+
+# Vector store imports - core configuration and providers
+from haive.core.models.vectorstore import (
+    VectorStoreConfig,
+    VectorStoreProvider,
+)
 
 # Note: Submodules are available as imports but heavy dependencies
 # (torch, transformers, etc.) are only loaded when actually instantiated
+
+__all__ = [
+    # Metadata utilities
+    "ModelMetadata",
+    "MetadataMixin",
+    # LLM components
+    "LLMConfig",
+    "LLMFactory",
+    "LLMProvider",
+    "create_llm",
+    "get_llm_providers",
+    "get_provider_models",
+    # Embedding components
+    "BaseEmbeddingConfig",
+    "EmbeddingProvider",
+    "HuggingFaceEmbeddingConfig",
+    "OpenAIEmbeddingConfig",
+    "create_embeddings",
+    # Vector store components
+    "VectorStoreConfig",
+    "VectorStoreProvider",
+    # Retriever components
+    "RetrieverConfig",
+    "RetrieverType",
+    "VectorStoreRetrieverConfig",
+]

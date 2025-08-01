@@ -73,26 +73,44 @@ from haive.core.models.embeddings.base import (  # Base classes; Cloud providers
 from haive.core.models.embeddings.provider_types import EmbeddingProvider
 
 __all__ = [
+    "ANYSCALE",
+    "AZURE",
     "AnyscaleEmbeddingConfig",
-    # Cloud providers
     "AzureEmbeddingConfig",
-    # Base class
+    "BEDROCK",
     "BaseEmbeddingConfig",
     "BedrockEmbeddingConfig",
+    "CLOUDFLARE",
+    "COHERE",
     "CloudflareEmbeddingConfig",
     "CohereEmbeddingConfig",
-    # Enum
     "EmbeddingProvider",
+    "FASTEMBED",
     "FastEmbedEmbeddingConfig",
-    # Local providers
+    "HUGGINGFACE",
     "HuggingFaceEmbeddingConfig",
+    "JINA",
     "JinaEmbeddingConfig",
+    "LLAMACPP",
     "LlamaCppEmbeddingConfig",
+    "NOVITA",
+    "OLLAMA",
+    "OPENAI",
     "OllamaEmbeddingConfig",
     "OpenAIEmbeddingConfig",
+    "SENTENCE_TRANSFORMERS",
+    "SecureConfigMixin",
     "SentenceTransformerEmbeddingConfig",
+    "TestEmbeddingProviders",
+    "VERTEXAI",
+    "VOYAGEAI",
     "VertexAIEmbeddingConfig",
     "VoyageAIEmbeddingConfig",
-    # Factory function
     "create_embeddings",
+    "get_api_key",
+    "instantiate",
+    "resolve_api_key",
+    "test_config_classes_exist",
+    "test_factory_function",
+    "test_provider_enum_values",
 ]

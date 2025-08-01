@@ -55,40 +55,72 @@ See Also:
 import importlib
 import logging
 import os
+import pkgutil
+from pathlib import Path
 
 # ============================================================================
-# Lazy Core Imports - Performance Optimization
+# Module Discovery - Expose all submodules
 # ============================================================================
 
-# Define lazy import mappings to avoid heavy loading at import time
-_CORE_IMPORTS = {
-    # Engine components (heaviest - lazy load these)
-    "AugLLMConfig": ("haive.core.engine", "AugLLMConfig"),
-    "AugLLMFactory": ("haive.core.engine", "AugLLMFactory"),
-    "Engine": ("haive.core.engine", "Engine"),
-    "InvokableEngine": ("haive.core.engine", "InvokableEngine"),
-    "NonInvokableEngine": ("haive.core.engine", "NonInvokableEngine"),
-    # Graph and other components (lighter weight)
-    "BaseGraph": ("haive.core.graph", "BaseGraph"),
-    "DynamicRegistry": ("haive.core.registry", "DynamicRegistry"),
-    "RegistryItem": ("haive.core.registry", "RegistryItem"),
-    "SchemaComposer": ("haive.core.schema", "SchemaComposer"),
-}
+# Get the package directory
+_package_dir = Path(__file__).resolve().parent
+
+# Core modules to expose (in order of importance)
+_CORE_MODULES = [
+    "engine",  # Engine system - most important
+    "graph",  # Graph building
+    "schema",  # Schema management
+    "tools",  # Tool system
+    "types",  # Type definitions
+    "utils",  # Utilities
+    "models",  # Model configurations
+    "registry",  # Component registry
+    "runtime",  # Runtime system
+    "persistence",  # State persistence
+    "config",  # Configuration
+    "common",  # Common utilities
+    "errors",  # Error types
+]
+
+# ============================================================================
+# Lazy Module Loading with __getattr__
+# ============================================================================
 
 
 def __getattr__(name: str):
-    """Lazy load core components to avoid heavy import overhead."""
-    if name in _CORE_IMPORTS:
-        module_path, class_name = _CORE_IMPORTS[name]
+    """Lazy load modules and their contents on demand."""
+    # Check if it's a module name
+    if name in _CORE_MODULES:
+        module = importlib.import_module(f".{name}", package=__name__)
+        # Cache in globals
+        globals()[name] = module
+        return module
 
-        # Import module and get class only when accessed
+    # Check if it's a specific class/function from a module
+    # First try the common imports from before
+    _common_imports = {
+        # Engine components
+        "AugLLMConfig": ("engine", "AugLLMConfig"),
+        "AugLLMFactory": ("engine", "AugLLMFactory"),
+        "Engine": ("engine", "Engine"),
+        "InvokableEngine": ("engine", "InvokableEngine"),
+        "NonInvokableEngine": ("engine", "NonInvokableEngine"),
+        # Graph components
+        "BaseGraph": ("graph", "BaseGraph"),
+        # Registry
+        "DynamicRegistry": ("registry", "DynamicRegistry"),
+        "RegistryItem": ("registry", "RegistryItem"),
+        # Schema
+        "SchemaComposer": ("schema", "SchemaComposer"),
+    }
 
-        module = importlib.import_module(module_path)
-        component = getattr(module, class_name)
-
-        # Cache in globals for subsequent access
-        globals()[name] = component
-        return component
+    if name in _common_imports:
+        module_name, attr_name = _common_imports[name]
+        module = importlib.import_module(f".{module_name}", package=__name__)
+        attr = getattr(module, attr_name)
+        # Cache in globals
+        globals()[name] = attr
+        return attr
 
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
@@ -122,10 +154,23 @@ os.environ.setdefault("HAIVE_DEBUG_CONFIG", "false")
 
 __version__ = "0.1.0"
 
-# Core imports for convenience
-
-# Public API
+# Public API - includes both modules and common classes
 __all__ = [
+    # Modules
+    "engine",
+    "graph",
+    "schema",
+    "tools",
+    "types",
+    "utils",
+    "models",
+    "registry",
+    "runtime",
+    "persistence",
+    "config",
+    "common",
+    "errors",
+    # Common classes for convenience
     "AugLLMConfig",
     "AugLLMFactory",
     "BaseGraph",
