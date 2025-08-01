@@ -86,11 +86,16 @@ See Also:
     - Plugin development guides
 """
 
+from typing import Any, Dict
+
 from haive.core.registry.base import AbstractRegistry
 from haive.core.registry.decorators import register_component
 from haive.core.registry.dynamic_registry import DynamicRegistry, RegistryItem
 from haive.core.registry.manager import RegistryManager
 from haive.core.registry.memory import MemoryRegistry
+
+# Type alias for component metadata
+ComponentMetadata = Dict[str, Any]
 
 # Initialize registry types
 RegistryManager.register_registry_type("memory", MemoryRegistry)
@@ -98,43 +103,10 @@ RegistryManager.register_registry_type("memory", MemoryRegistry)
 # Export primary classes
 __all__ = [
     "AbstractRegistry",
+    "ComponentMetadata",
     "DynamicRegistry",
-    "E",
     "MemoryRegistry",
-    "RegistryFactory",
     "RegistryItem",
     "RegistryManager",
-    "T",
-    "activate",
-    "clear",
-    "clear_inactive",
-    "create",
-    "create_registry",
-    "deactivate",
-    "decorator",
-    "find",
-    "find_by_id",
-    "get",
-    "get_active_components",
-    "get_active_items",
-    "get_all",
-    "get_component",
-    "get_inactive_items",
-    "get_instance",
-    "get_item",
-    "get_registry",
-    "get_stats",
-    "is_active",
-    "list",
-    "list_components",
-    "new_init",
-    "register",
     "register_component",
-    "register_instance",
-    "register_registry_type",
-    "set_registry",
-    "validate_active_items",
-    "validate_id",
-    "validate_max_active",
-    "validate_name",
 ]
