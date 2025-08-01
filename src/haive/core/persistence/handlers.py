@@ -317,7 +317,7 @@ def ensure_pool_open(checkpointer: Any) -> Any | None:
             try:
 
                 # Check if it's a pool
-                if isinstance(conn, BaseConnectionPool):
+                if isinstance(conn, (ConnectionPool, AsyncConnectionPool)):
                     # Check if the pool is already open
                     try:
                         if hasattr(conn, "is_open"):
