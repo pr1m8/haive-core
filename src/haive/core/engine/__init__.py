@@ -97,7 +97,7 @@ from haive.core.engine.tool import ToolEngine
 # Agent components - Heavy due to schema_composer (17+ seconds)
 _AGENT_COMPONENTS = {
     "AGENT_REGISTRY",
-    "Agent",
+    # "Agent",  # Moved to haive-agents package
     "AgentConfig",
     "AgentProtocol",
     "PatternConfig",
@@ -192,126 +192,39 @@ _VECTORSTORE_COMPONENTS = {
 }
 
 
-def __getattr__(name: str):
-    """Lazy loading for agent, document and retriever components to avoid expensive initialization."""
-    if name in _AGENT_COMPONENTS:
-        # Only import agent module when actually needed (17+ second schema_composer delay)
+# Import core components directly - lazy loading was causing too many issues
+from haive.core.engine.aug_llm import AugLLMConfig
+from haive.core.engine.base import Engine, EngineRegistry, EngineType, InvokableEngine
+from haive.core.engine.embedding import (
+    BaseEmbeddingConfig,
+    EmbeddingType,
+    create_embedding_config,
+)
+from haive.core.engine.output_parser import OutputParserEngine, OutputParserType
 
-        # Return the requested component
-        return locals()[name]
-
-    if name in _DOCUMENT_COMPONENTS:
-        # Only import document module when actually needed
-        from haive.core.engine.document import (  # Core engine components; Factory functions; Configuration models; Enums; Path analysis; Loaders; Processors; Advanced components
-            AutoLoaderFactory,
-            BaseDocumentLoader,
-            ChunkingProcessor,
-            ChunkingStrategy,
-            CloudProvider,
-            ContentNormalizer,
-            CredentialManager,
-            DatabaseType,
-            DocumentChunk,
-            DocumentEngine,
-            DocumentEngineConfig,
-            DocumentFormat,
-            DocumentInput,
-            DocumentLoaderRegistry,
-            DocumentOutput,
-            DocumentProcessor,
-            DocumentSourceType,
-            EnhancedSource,
-            FileCategory,
-            FormatDetector,
-            LoaderCapability,
-            LoaderPreference,
-            LoaderPriority,
-            LoaderStrategy,
-            MetadataExtractor,
-            MongoDBSource,
-            PathAnalysisResult,
-            PathType,
-            PostgreSQLSource,
-            ProcessedDocument,
-            ProcessingStrategy,
-            SimpleDocumentLoader,
-            TextDocumentLoader,
-            analyze_path_comprehensive,
-            analyze_source,
-            create_directory_document_engine,
-            create_document_engine,
-            create_document_loader,
-            create_file_document_engine,
-            create_loader,
-            create_web_document_engine,
-            get_default_registry,
-            get_loader,
-            load_documents,
-            register_loader,
-        )
-
-        # Return the requested component
-        return locals()[name]
-
-    if name in _RETRIEVER_COMPONENTS:
-        # Only import retriever module when actually needed
-
-        # Return the requested component
-        return locals()[name]
-
-    if name in _PROMPT_COMPONENTS:
-        # Only import prompt template module when actually needed
-
-        # Return the requested component
-        return locals()[name]
-
-    if name in _EMBEDDING_COMPONENTS:
-        # Only import embedding module when actually needed
-
-        # Return the requested component
-        return locals()[name]
-
-    if name in _VECTORSTORE_COMPONENTS:
-        # Only import vectorstore module when actually needed
-
-        # Return the requested component
-        return locals()[name]
-
-    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+# Note: Heavy components (agent, document, retriever, vectorstore) are available
+# via explicit imports but not auto-imported to avoid startup cost
 
 
 __all__ = [
-    # Agent Components - Lazy loaded via __getattr__
-    # (All agent components are available but loaded on demand to avoid 17+ second schema_composer delay)
-    *_AGENT_COMPONENTS,
-    # LLM Components
+    # Core LLM Components
     "AugLLMConfig",
-    "AugLLMFactory",
-    # Temporarily commented out to fix circular import
-    # "MCPAugLLMConfig",
-    "compose_runnable",
-    "merge_configs",
     # Base Engine Classes
     "Engine",
-    "EngineRegistry",
-    "EngineType",
     "InvokableEngine",
-    "NonInvokableEngine",
-    # Document Components - Lazy loaded via __getattr__
-    # (All document components are available but loaded on demand)
-    *_DOCUMENT_COMPONENTS,
-    # Retriever Components - Lazy loaded via __getattr__
-    # (All retriever components are available but loaded on demand)
-    *_RETRIEVER_COMPONENTS,
-    # Embedding Components - Lazy loaded via __getattr__
-    *_EMBEDDING_COMPONENTS,
+    "EngineType",
+    "EngineRegistry",
+    # Embedding Components
+    "BaseEmbeddingConfig",
+    "EmbeddingType",
+    "create_embedding_config",
     # Output Parser Components
     "OutputParserEngine",
     "OutputParserType",
-    # Prompt Template Components - Lazy loaded via __getattr__
-    *_PROMPT_COMPONENTS,
-    # Tool Components
-    "ToolEngine",
-    # Vector Store Components - Lazy loaded via __getattr__
-    *_VECTORSTORE_COMPONENTS,
+    # Note: Heavy components (agent, document, retriever, vectorstore)
+    # are available via explicit submodule imports:
+    # from haive.core.engine.agent import ...
+    # from haive.core.engine.document import ...
+    # from haive.core.engine.retriever import ...
+    # from haive.core.engine.vectorstore import ...
 ]

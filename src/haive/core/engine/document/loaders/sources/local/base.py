@@ -77,7 +77,8 @@ class FileSource(ABC, LocalSource):
         return v
 
     @model_validator(mode="before")
-    def validate_file_type(self, v) -> Any:
+    @classmethod
+    def validate_file_type(cls, v) -> Any:
         if not isinstance(v, LocalSourceFileType):
             v = LocalSourceFileType(v.suffix)
         return v

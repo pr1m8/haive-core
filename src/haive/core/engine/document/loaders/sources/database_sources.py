@@ -203,8 +203,10 @@ class DatabaseSource(BaseSource):
     timeout: int = Field(30, ge=1, description="Query timeout in seconds")
     retry_attempts: int = Field(3, ge=1, description="Number of retry attempts")
 
-    @validator("connection_string")
-    def validate_connection_string(self, v) -> Any:
+    @classmethod
+    @field_validator("connection_string")
+    @classmethod
+    def validate_connection_string(cls, v) -> Any:
         """Validate connection string format."""
         if not v or not isinstance(v, str):
             raise ValueError("Connection string must be a non-empty string")

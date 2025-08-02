@@ -34,7 +34,6 @@ class ValidationAwareToolState(ToolState):
     - Supports validation-based routing strategies
     """
 
-    # Validation tracking fields
     validation_results: list[ToolCallValidationResult] = Field(
         default_factory=list, description="Current validation results from tool calls"
     )
@@ -44,8 +43,6 @@ class ValidationAwareToolState(ToolState):
     validation_stats: dict[str, Any] = Field(
         default_factory=dict, description="Computed validation statistics"
     )
-
-    # Validation configuration
     validation_history_limit: int = Field(
         default=100, description="Maximum validation results to keep in history"
     )
@@ -58,9 +55,8 @@ class ValidationAwareToolState(ToolState):
     def current_validation_success_rate(self) -> float:
         """Current validation success rate from recent results."""
         if not self.validation_results:
-            return 1.0  # No validations yet, assume success
-
-        valid_count = sum(1 for r in self.validation_results if r.is_valid)
+            return 1.0
+        valid_count = sum((1 for r in self.validation_results if r.is_valid))
         return valid_count / len(self.validation_results)
 
     @computed_field
@@ -68,9 +64,8 @@ class ValidationAwareToolState(ToolState):
     def overall_validation_success_rate(self) -> float:
         """Overall validation success rate from history."""
         if not self.validation_history:
-            return 1.0  # No history yet, assume success
-
-        valid_count = sum(1 for r in self.validation_history if r.is_valid)
+            return 1.0
+        valid_count = sum((1 for r in self.validation_history if r.is_valid))
         return valid_count / len(self.validation_history)
 
     @computed_field
@@ -79,17 +74,14 @@ class ValidationAwareToolState(ToolState):
         """Validation success rate by tool name."""
         if not self.validation_history:
             return {}
-
         tool_stats = {}
         for result in self.validation_history:
             tool_name = result.tool_name
             if tool_name not in tool_stats:
                 tool_stats[tool_name] = {"total": 0, "valid": 0}
-
             tool_stats[tool_name]["total"] += 1
             if result.is_valid:
                 tool_stats[tool_name]["valid"] += 1
-
         return {
             tool_name: stats["valid"] / stats["total"] if stats["total"] > 0 else 0
             for tool_name, stats in tool_stats.items()
@@ -101,17 +93,14 @@ class ValidationAwareToolState(ToolState):
         """Validation success rate by validation type."""
         if not self.validation_history:
             return {}
-
         type_stats = {}
         for result in self.validation_history:
             vtype = result.validation_type
             if vtype not in type_stats:
                 type_stats[vtype] = {"total": 0, "valid": 0}
-
             type_stats[vtype]["total"] += 1
             if result.is_valid:
                 type_stats[vtype]["valid"] += 1
-
         return {
             vtype: stats["valid"] / stats["total"] if stats["total"] > 0 else 0
             for vtype, stats in type_stats.items()
@@ -139,15 +128,13 @@ class ValidationAwareToolState(ToolState):
         """Recommended routing strategy based on validation patterns."""
         if not self.validation_history:
             return "default"
-
         current_rate = self.current_validation_success_rate
         overall_rate = self.overall_validation_success_rate
-
         if current_rate < 0.5:
-            return "conservative"  # Route to safer options
+            return "conservative"
         if current_rate > 0.9 and overall_rate > 0.8:
-            return "aggressive"  # Route to more complex tools
-        return "balanced"  # Standard routing
+            return "aggressive"
+        return "balanced"
 
     @computed_field
     @property
@@ -155,21 +142,18 @@ class ValidationAwareToolState(ToolState):
         """Trend in validation success (improving, declining, stable)."""
         if len(self.validation_history) < 10:
             return "insufficient_data"
-
-        # Compare recent vs older validation rates
         recent_results = self.validation_history[-10:]
         older_results = (
             self.validation_history[-20:-10]
             if len(self.validation_history) >= 20
             else []
         )
-
         if not older_results:
             return "insufficient_data"
-
-        recent_rate = sum(1 for r in recent_results if r.is_valid) / len(recent_results)
-        older_rate = sum(1 for r in older_results if r.is_valid) / len(older_results)
-
+        recent_rate = sum((1 for r in recent_results if r.is_valid)) / len(
+            recent_results
+        )
+        older_rate = sum((1 for r in older_results if r.is_valid)) / len(older_results)
         if recent_rate > older_rate + 0.1:
             return "improving"
         if recent_rate < older_rate - 0.1:
@@ -179,51 +163,38 @@ class ValidationAwareToolState(ToolState):
     @model_validator(mode="after")
     def update_validation_stats(self) -> Self:
         """Update validation statistics after model creation."""
-        # Call parent validator
         super().sync_tools_and_update_routes()
-
-        # Update validation stats if we have new results
         if self.validation_results:
             self._update_validation_statistics()
-
         return self
 
     def _update_validation_statistics(self) -> None:
         """Update internal validation statistics."""
         if not self.validation_history:
             return
-
-        # Calculate basic stats
         total_validations = len(self.validation_history)
-        valid_validations = sum(1 for r in self.validation_history if r.is_valid)
+        valid_validations = sum((1 for r in self.validation_history if r.is_valid))
         invalid_validations = total_validations - valid_validations
-
-        # Calculate stats by validation type
         type_stats = {}
         for result in self.validation_history:
             vtype = result.validation_type
             if vtype not in type_stats:
                 type_stats[vtype] = {"total": 0, "valid": 0, "invalid": 0}
-
             type_stats[vtype]["total"] += 1
             if result.is_valid:
                 type_stats[vtype]["valid"] += 1
             else:
                 type_stats[vtype]["invalid"] += 1
-
-        # Calculate stats by tool name
         tool_stats = {}
         for result in self.validation_history:
             tool_name = result.tool_name
             if tool_name not in tool_stats:
                 tool_stats[tool_name] = {"total": 0, "valid": 0, "invalid": 0}
-
             tool_stats[tool_name]["total"] += 1
             if result.is_valid:
                 tool_stats[tool_name]["valid"] += 1
             else:
                 tool_stats[tool_name]["invalid"] += 1
-
         self.validation_stats = {
             "total_validations": total_validations,
             "valid_validations": valid_validations,
@@ -240,16 +211,11 @@ class ValidationAwareToolState(ToolState):
         """Add a new validation result and update statistics."""
         self.validation_results.append(result)
         self.validation_history.append(result)
-
-        # Limit history size
         if len(self.validation_history) > self.validation_history_limit:
             self.validation_history = self.validation_history[
                 -self.validation_history_limit :
             ]
-
-        # Update statistics
         self._update_validation_statistics()
-
         logger.debug(
             f"Added validation result for {result.tool_name}: {result.is_valid}"
         )
@@ -276,8 +242,7 @@ class ValidationAwareToolState(ToolState):
     def should_route_to_tool(self, tool_name: str) -> bool:
         """Determine if a tool should be routed to based on validation history."""
         if tool_name not in self.validation_success_by_tool:
-            return True  # No history, allow routing
-
+            return True
         success_rate = self.validation_success_by_tool[tool_name]
         return success_rate >= self.validation_success_threshold
 
@@ -292,17 +257,12 @@ class ValidationAwareToolState(ToolState):
     def get_routing_recommendation(self, available_destinations: list[str]) -> str:
         """Get routing recommendation based on validation patterns."""
         strategy = self.recommended_routing_strategy
-
         if strategy == "conservative":
-            # Prefer parser over tool execution
             if "parse_output" in available_destinations:
                 return "parse_output"
             if "END" in available_destinations:
                 return "END"
         elif strategy == "aggressive":
-            # Prefer tool execution over parsing
             if "tool_node" in available_destinations:
                 return "tool_node"
-
-        # Default/balanced strategy
         return available_destinations[0] if available_destinations else "END"

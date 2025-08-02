@@ -17,18 +17,16 @@ class WebSource(BaseSource):
     verify_ssl: bool = Field(
         default=True, description="Whether to verify SSL certificates"
     )
-
-    # Class variable for domain-based source type mapping
     DOMAIN_PATTERNS: ClassVar[dict[str, SourceType]] = {
-        r"github\.com": SourceType.GITHUB,
-        r"arxiv\.org": SourceType.ARXIV,
-        r"reddit\.com": SourceType.REDDIT,
-        r"twitter\.com": SourceType.TWITTER,
-        r"youtube\.com": SourceType.YOUTUBE,
-        r"youtu\.be": SourceType.YOUTUBE,
-        r"wikipedia\.org": SourceType.WIKIPEDIA,
-        r"news\.ycombinator\.com": SourceType.HACKER_NEWS,
-        r"collegeconfidential\.com": SourceType.COLLEGE_CONFIDENTIAL,
+        "github\\.com": SourceType.GITHUB,
+        "arxiv\\.org": SourceType.ARXIV,
+        "reddit\\.com": SourceType.REDDIT,
+        "twitter\\.com": SourceType.TWITTER,
+        "youtube\\.com": SourceType.YOUTUBE,
+        "youtu\\.be": SourceType.YOUTUBE,
+        "wikipedia\\.org": SourceType.WIKIPEDIA,
+        "news\\.ycombinator\\.com": SourceType.HACKER_NEWS,
+        "collegeconfidential\\.com": SourceType.COLLEGE_CONFIDENTIAL,
     }
 
     @model_validator(mode="after")
@@ -37,13 +35,10 @@ class WebSource(BaseSource):
         url_str = str(self.url)
         parsed = urlparse(url_str)
         domain = parsed.netloc
-
-        # Check for specific domain matches
         for pattern, source_type in self.DOMAIN_PATTERNS.items():
             if re.search(pattern, domain, re.IGNORECASE):
                 self.source_type = source_type
                 break
-
         return self
 
     def get_source_value(self) -> HttpUrl:
@@ -54,7 +49,7 @@ class WebSource(BaseSource):
         """Basic validation of URL format.
         Note: This doesn't check if the URL is accessible.
         """
-        return True  # URL is already validated by Pydantic
+        return True
 
     @computed_field
     def domain(self) -> str:
@@ -101,11 +96,9 @@ class WebSource(BaseSource):
     @classmethod
     def from_url(cls, url: str | HttpUrl, **kwargs) -> "WebSource":
         """Create a WebSource from a URL."""
-        # Set default name from domain if not provided
         if "name" not in kwargs:
             parsed = urlparse(str(url))
             kwargs["name"] = parsed.netloc
-
         return cls(url=url, **kwargs)
 
 

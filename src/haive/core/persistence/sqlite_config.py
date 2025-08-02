@@ -649,6 +649,28 @@ class SQLiteCheckpointerConfig(CheckpointerConfig):
 
         return result
 
+    async def create_async_checkpointer(self) -> Any:
+        """Create an asynchronous checkpointer instance.
+
+        Note: SQLite doesn't have true async support, so this returns
+        the same checkpointer as create_checkpointer().
+
+        Returns:
+            Any: A SQLiteSaver instance (same as synchronous version)
+        """
+        return self.create_checkpointer()
+
+    async def initialize_async_checkpointer(self) -> Any:
+        """Initialize an async checkpointer.
+
+        Note: SQLite doesn't require async initialization, so this
+        simply returns the checkpointer instance.
+
+        Returns:
+            Any: A SQLiteSaver instance ready for use
+        """
+        return self.create_checkpointer()
+
     def close(self) -> None:
         """Close any resources associated with this checkpointer."""
         # SQLite connections are closed automatically after each operation

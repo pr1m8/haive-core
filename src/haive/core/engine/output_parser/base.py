@@ -24,7 +24,8 @@ from langchain_core.runnables import RunnableConfig
 
 from haive.core.engine.base import InvokableEngine
 from haive.core.engine.base.types import EngineType
-from haive.core.registry.decorators import register_component
+
+# Deferred import to avoid circular dependency - registry imports engine
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +48,8 @@ TOut = TypeVar(
 TIn = TypeVar("TIn", bound=str | BaseMessage | list[BaseMessage] | dict[str, Any])
 
 
-@register_component(registry_getter="engine_registry", component_type=EngineType.TOOL)
+# TODO: Re-enable registration after fixing circular imports
+# @register_component(registry_getter="engine_registry", component_type=EngineType.OUTPUT_PARSER)
 class OutputParserEngine(InvokableEngine[TIn, TOut]):
     """Engine that wraps LangChain OutputParsers to convert text to structured data.
 

@@ -75,119 +75,83 @@ class DocumentEngineConfig(BaseModel):
     processing capabilities, chunking strategies, and integration options.
     """
 
-    # Engine identification
     engine_type: EngineType = Field(
         default=EngineType.DOCUMENT_LOADER, description="Type of the engine"
     )
-
     name: str = Field(
         default="document_engine", description="Name of the engine instance"
     )
-
-    # Source configuration
     source_type: DocumentSourceType | None = Field(
         default=None, description="Explicit source type (auto-detected if not provided)"
     )
-
-    # Loader configuration
     loader_name: str | None = Field(
         default=None,
         description="Specific loader to use (auto-selected if not provided)",
     )
-
     loader_preference: LoaderPreference = Field(
         default=LoaderPreference.BALANCED, description="Preference for loader selection"
     )
-
-    # Processing configuration
     processing_strategy: ProcessingStrategy = Field(
         default=ProcessingStrategy.ENHANCED,
         description="Strategy for document processing",
     )
-
-    # Chunking configuration
     chunking_strategy: ChunkingStrategy = Field(
         default=ChunkingStrategy.RECURSIVE, description="Strategy for document chunking"
     )
-
     chunk_size: int = Field(
         default=1000, description="Size of chunks in characters", ge=1
     )
-
     chunk_overlap: int = Field(
         default=200, description="Overlap between chunks in characters", ge=0
     )
-
-    # Loading options
     recursive: bool = Field(
         default=True, description="Whether to recursively process directories"
     )
-
     max_documents: int | None = Field(
         default=None, description="Maximum number of documents to load", ge=1
     )
-
     use_async: bool = Field(
         default=False, description="Whether to use async loading when available"
     )
-
     parallel_processing: bool = Field(
         default=True, description="Whether to enable parallel processing"
     )
-
     max_workers: int = Field(
         default=4, description="Maximum number of worker threads", ge=1, le=32
     )
-
-    # Filtering options
     include_patterns: list[str] = Field(
         default_factory=list, description="Glob patterns for files to include"
     )
-
     exclude_patterns: list[str] = Field(
         default_factory=list, description="Glob patterns for files to exclude"
     )
-
     supported_formats: list[DocumentFormat] = Field(
         default_factory=lambda: list(DocumentFormat),
         description="Supported document formats",
     )
-
-    # Content processing
     extract_metadata: bool = Field(
         default=True, description="Whether to extract document metadata"
     )
-
     normalize_content: bool = Field(
         default=True, description="Whether to normalize content (whitespace, encoding)"
     )
-
     detect_language: bool = Field(
         default=False, description="Whether to detect document language"
     )
-
-    # Error handling
     raise_on_error: bool = Field(
         default=False,
         description="Whether to raise exceptions on individual document errors",
     )
-
     skip_invalid: bool = Field(
         default=True, description="Whether to skip invalid documents"
     )
-
-    # Caching
     enable_caching: bool = Field(
         default=False, description="Whether to enable document caching"
     )
-
     cache_ttl: int = Field(default=3600, description="Cache TTL in seconds", ge=0)
-
-    # Additional options
     loader_options: dict[str, Any] = Field(
         default_factory=dict, description="Additional options passed to loaders"
     )
-
     processing_options: dict[str, Any] = Field(
         default_factory=dict, description="Additional options for processing"
     )
@@ -206,47 +170,33 @@ class DocumentEngineConfig(BaseModel):
 class DocumentInput(BaseModel):
     """Input model for document operations."""
 
-    # Primary source
     source: str | Path | dict[str, Any] = Field(
         ..., description="Source to process (path, URL, or configuration dict)"
     )
-
-    # Override options
     source_type: DocumentSourceType | None = Field(
         default=None, description="Override source type for this operation"
     )
-
     loader_name: str | None = Field(
         default=None, description="Override loader for this operation"
     )
-
-    # Processing overrides
     chunking_strategy: ChunkingStrategy | None = Field(
         default=None, description="Override chunking strategy"
     )
-
     chunk_size: int | None = Field(
         default=None, description="Override chunk size", ge=1
     )
-
     chunk_overlap: int | None = Field(
         default=None, description="Override chunk overlap", ge=0
     )
-
-    # Filtering overrides
     include_patterns: list[str] | None = Field(
         default=None, description="Override include patterns"
     )
-
     exclude_patterns: list[str] | None = Field(
         default=None, description="Override exclude patterns"
     )
-
-    # Additional options
     loader_options: dict[str, Any] = Field(
         default_factory=dict, description="Additional loader options"
     )
-
     processing_options: dict[str, Any] = Field(
         default_factory=dict, description="Additional processing options"
     )
@@ -256,19 +206,14 @@ class DocumentChunk(BaseModel):
     """Model for a document chunk."""
 
     content: str = Field(..., description="Chunk content")
-
     metadata: dict[str, Any] = Field(default_factory=dict, description="Chunk metadata")
-
     chunk_index: int = Field(..., description="Index of this chunk in the document")
-
     chunk_id: str | None = Field(
         default=None, description="Unique identifier for this chunk"
     )
-
     start_char: int | None = Field(
         default=None, description="Start character position in original document"
     )
-
     end_char: int | None = Field(
         default=None, description="End character position in original document"
     )
@@ -277,28 +222,19 @@ class DocumentChunk(BaseModel):
 class ProcessedDocument(BaseModel):
     """Model for a processed document with chunks."""
 
-    # Original document info
     source: str = Field(..., description="Source of the document")
     source_type: DocumentSourceType = Field(..., description="Type of source")
     format: DocumentFormat = Field(..., description="Document format")
-
-    # Content
     content: str = Field(..., description="Full document content")
     chunks: list[DocumentChunk] = Field(
         default_factory=list, description="Document chunks"
     )
-
-    # Metadata
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Document metadata"
     )
-
-    # Processing info
     loader_name: str = Field(..., description="Loader used")
     processing_time: float = Field(..., description="Processing time in seconds")
     chunk_count: int = Field(default=0, description="Number of chunks")
-
-    # Statistics
     character_count: int = Field(default=0, description="Total character count")
     word_count: int = Field(default=0, description="Estimated word count")
 
@@ -314,46 +250,30 @@ class ProcessedDocument(BaseModel):
 class DocumentOutput(BaseModel):
     """Output model for document operations."""
 
-    # Processed documents
     documents: list[ProcessedDocument] = Field(
         default_factory=list, description="Processed documents"
     )
-
-    # Operation metadata
     total_documents: int = Field(0, description="Total documents processed")
     successful_documents: int = Field(0, description="Successfully processed documents")
     failed_documents: int = Field(0, description="Failed document count")
-
-    # Timing
     operation_time: float = Field(0.0, description="Total operation time in seconds")
     average_processing_time: float = Field(
         0.0, description="Average processing time per document"
     )
-
-    # Source info
     original_source: str = Field(..., description="Original source")
     source_type: DocumentSourceType = Field(..., description="Source type used")
-
-    # Processing info
     loader_names: list[str] = Field(default_factory=list, description="Loaders used")
-
     processing_strategy: ProcessingStrategy = Field(
         ..., description="Processing strategy used"
     )
-
-    # Errors and warnings
     errors: list[dict[str, Any]] = Field(
         default_factory=list, description="Errors encountered"
     )
-
     warnings: list[dict[str, Any]] = Field(
         default_factory=list, description="Warnings generated"
     )
-
     has_errors: bool = Field(False, description="Whether errors occurred")
     has_warnings: bool = Field(False, description="Whether warnings occurred")
-
-    # Statistics
     total_chunks: int = Field(0, description="Total chunks across all documents")
     total_characters: int = Field(0, description="Total characters processed")
     total_words: int = Field(0, description="Total estimated words")
@@ -364,22 +284,18 @@ class DocumentOutput(BaseModel):
         self.total_documents = len(self.documents)
         self.successful_documents = len([d for d in self.documents if d.content])
         self.failed_documents = self.total_documents - self.successful_documents
-
         if self.documents:
             self.average_processing_time = sum(
-                d.processing_time for d in self.documents
+                (d.processing_time for d in self.documents)
             ) / len(self.documents)
-            self.total_chunks = sum(d.chunk_count for d in self.documents)
-            self.total_characters = sum(d.character_count for d in self.documents)
-            self.total_words = sum(d.word_count for d in self.documents)
-
+            self.total_chunks = sum((d.chunk_count for d in self.documents))
+            self.total_characters = sum((d.character_count for d in self.documents))
+            self.total_words = sum((d.word_count for d in self.documents))
         self.has_errors = len(self.errors) > 0
         self.has_warnings = len(self.warnings) > 0
-
         return self
 
 
-# Export all models
 __all__ = [
     "ChunkingStrategy",
     "DocumentChunk",

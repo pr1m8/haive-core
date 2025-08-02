@@ -76,7 +76,7 @@ class OllamaEmbeddingConfig(BaseEmbeddingConfig):
         default="ollama", description="Provider name for API key resolution"
     )
 
-    @validator("model")
+    @field_validator("model")
     @classmethod
     def validate_model(cls, v) -> Any:
         """Validate the Ollama model name."""
@@ -97,7 +97,7 @@ class OllamaEmbeddingConfig(BaseEmbeddingConfig):
             logger.info(f"Using Ollama model: {v}. Popular models: {popular_models}")
         return v
 
-    @validator("base_url")
+    @field_validator("base_url")
     @classmethod
     def validate_base_url(cls, v) -> Any:
         """Validate Ollama server URL."""

@@ -89,7 +89,7 @@ class AzureOpenAIEmbeddingConfig(BaseEmbeddingConfig):
         default="azure", description="Provider name for API key resolution"
     )
 
-    @validator("azure_endpoint")
+    @field_validator("azure_endpoint")
     @classmethod
     def validate_azure_endpoint(cls, v) -> Any:
         """Validate Azure OpenAI endpoint format."""
@@ -107,7 +107,7 @@ class AzureOpenAIEmbeddingConfig(BaseEmbeddingConfig):
 
         return v
 
-    @validator("deployment_name")
+    @field_validator("deployment_name")
     @classmethod
     def validate_deployment_name(cls, v) -> Any:
         """Validate deployment name."""
@@ -115,7 +115,7 @@ class AzureOpenAIEmbeddingConfig(BaseEmbeddingConfig):
             raise ValueError("Deployment name is required and cannot be empty")
         return v.strip()
 
-    @validator("api_version")
+    @field_validator("api_version")
     @classmethod
     def validate_api_version(cls, v) -> Any:
         """Validate API version format."""

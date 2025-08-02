@@ -49,63 +49,33 @@ class FlexibleMultiAgentState(StateSchema):
         ```
     """
 
-    # ========================================================================
-    # AGENT MANAGEMENT - Core fields
-    # ========================================================================
-
     agents: list["Agent"] | dict[str, "Agent"] = Field(
         default_factory=dict, description="Agent instances - can be list or dict"
     )
-
     agent_states: dict[str, dict[str, Any]] = Field(
         default_factory=dict, description="Isolated state for each agent"
     )
-
-    # ========================================================================
-    # COORDINATION FIELDS - Optional
-    # ========================================================================
-
     current_agent: str | None = Field(
         default=None, description="Currently executing agent"
     )
-
     completed_agents: list[str] = Field(
         default_factory=list, description="Agents that have completed execution"
     )
-
     agent_outputs: dict[str, Any] = Field(
         default_factory=dict, description="Outputs from each agent"
     )
-
-    # ========================================================================
-    # FLEXIBLE SHARED CONTEXT - Optional
-    # ========================================================================
-
     shared_context: dict[str, Any] = Field(
         default_factory=dict,
         description="Shared context between agents - completely flexible",
     )
-
-    # Optional error tracking
     error: str | None = Field(default=None, description="Error message if any")
-
-    # Optional final result
     final_result: Any | None = Field(
         default=None, description="Final result from multi-agent execution"
     )
-
-    # ========================================================================
-    # STATE TRANSFER CONFIGURATION
-    # ========================================================================
-
     state_transfers: dict[str, dict[str, str]] = Field(
         default_factory=dict,
         description="Configuration for state transfers between agents",
     )
-
-    # ========================================================================
-    # VALIDATORS
-    # ========================================================================
 
     @field_validator("agents", mode="before")
     @classmethod
@@ -130,10 +100,6 @@ class FlexibleMultiAgentState(StateSchema):
                 if agent_name not in self.agent_states:
                     self.agent_states[agent_name] = {}
         return self
-
-    # ========================================================================
-    # STATE MANAGEMENT METHODS
-    # ========================================================================
 
     def get_agent_state(self, agent_name: str) -> dict[str, Any]:
         """Get state for specific agent."""
@@ -168,11 +134,9 @@ class FlexibleMultiAgentState(StateSchema):
             transfers = self.state_transfers[transfer_key]
             from_state = self.get_agent_state(from_agent)
             to_updates = {}
-
             for from_field, to_field in transfers.items():
                 if from_field in from_state:
                     to_updates[to_field] = from_state[from_field]
-
             if to_updates:
                 self.update_agent_state(to_agent, to_updates)
 
@@ -189,11 +153,9 @@ class ContainerMultiAgentState(FlexibleMultiAgentState):
     agent_execution_order: list[str] = Field(
         default_factory=list, description="Order of agent execution"
     )
-
     agent_metadata: dict[str, dict[str, Any]] = Field(
         default_factory=dict, description="Metadata about each agent"
     )
-
     recompilation_needed: bool = Field(
         default=False, description="Whether graph recompilation is needed"
     )

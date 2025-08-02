@@ -97,7 +97,6 @@ class MCPAugLLMConfig(_get_mcp_mixin(), AugLLMConfig):
             )
     """
 
-    # Override mcp_config to ensure proper typing
     mcp_config: Optional["MCPConfig"] = Field(
         None, description="MCP configuration for server connections"
     )
@@ -109,14 +108,11 @@ class MCPAugLLMConfig(_get_mcp_mixin(), AugLLMConfig):
         Ensures that MCP configuration is compatible with the base
         AugLLMConfig settings and tool management.
         """
-        # If MCP is enabled and we have tool conflicts, log warning
         if self.mcp_config and self.mcp_config.enabled:
-            if self.force_tool_use and not self.tools:
+            if self.force_tool_use and (not self.tools):
                 logger.warning(
-                    "force_tool_use is True but no tools specified. "
-                    "MCP tools will be discovered during setup."
+                    "force_tool_use is True but no tools specified. MCP tools will be discovered during setup."
                 )
-
         return self
 
     async def setup(self) -> None:
@@ -130,23 +126,14 @@ class MCPAugLLMConfig(_get_mcp_mixin(), AugLLMConfig):
         Should be called after creating the configuration but before
         using it with an agent.
         """
-        # Initialize MCP first
         await self.setup_mcp()
-
-        # Enhance system message if MCP is enabled
         if self.mcp_config and self.mcp_config.enabled and self.system_message:
             enhanced_message = self.enhance_system_prompt_with_mcp(self.system_message)
             self.system_message = enhanced_message
             logger.debug("Enhanced system message with MCP information")
-
-        # Update tool lists with MCP tools
         self._integrate_mcp_tools()
-
         logger.info(
-            f"MCPAugLLMConfig setup complete: "
-            f"{len(self.get_mcp_tools())} MCP tools, "
-            f"{len(self.mcp_resources)} resources, "
-            f"{len(self.mcp_prompts)} prompts"
+            f"MCPAugLLMConfig setup complete: {len(self.get_mcp_tools())} MCP tools, {len(self.mcp_resources)} resources, {len(self.mcp_prompts)} prompts"
         )
 
     def _integrate_mcp_tools(self) -> None:
@@ -160,19 +147,12 @@ class MCPAugLLMConfig(_get_mcp_mixin(), AugLLMConfig):
         mcp_tools = self.get_mcp_tools()
         if not mcp_tools:
             return
-
-        # Add MCP tool names to the tools list
         mcp_tool_names = [tool.name for tool in mcp_tools]
-
-        # Ensure tools list exists
         if not self.tools:
             self.tools = []
-
-        # Add MCP tools that aren't already in the list
         for name in mcp_tool_names:
             if name not in self.tools:
                 self.tools.append(name)
-
         logger.debug(f"Integrated {len(mcp_tool_names)} MCP tools into configuration")
 
     def get_all_tools(self) -> list[str]:
@@ -182,12 +162,9 @@ class MCPAugLLMConfig(_get_mcp_mixin(), AugLLMConfig):
             Combined list of regular tools and MCP tool names
         """
         all_tools = list(self.tools) if self.tools else []
-
-        # Add MCP tools
         for tool in self.get_mcp_tools():
             if tool.name not in all_tools:
                 all_tools.append(tool.name)
-
         return all_tools
 
     def get_tool_by_name(self, name: str) -> Any | None:
@@ -199,16 +176,12 @@ class MCPAugLLMConfig(_get_mcp_mixin(), AugLLMConfig):
         Returns:
             Tool instance or None if not found
         """
-        # First check ToolRouteMixin's tool instances
         tool = self.get_tool(name)
         if tool:
             return tool
-
-        # Then check MCP tools
         for mcp_tool in self.get_mcp_tools():
             if mcp_tool.name == name:
                 return mcp_tool
-
         return None
 
     def debug_mcp_state(self) -> None:
@@ -220,52 +193,37 @@ class MCPAugLLMConfig(_get_mcp_mixin(), AugLLMConfig):
         from rich.table import Table
 
         console = Console()
-
-        # MCP Configuration Status
         if self.mcp_config:
             status_table = Table(title="MCP Configuration Status")
             status_table.add_column("Setting", style="cyan")
             status_table.add_column("Value", style="green")
-
             status_table.add_row("Enabled", str(self.mcp_config.enabled))
             status_table.add_row("Auto Discover", str(self.mcp_config.auto_discover))
             status_table.add_row("Servers", str(len(self.mcp_config.servers)))
             status_table.add_row("Tools Discovered", str(len(self.get_mcp_tools())))
             status_table.add_row("Resources Loaded", str(len(self.mcp_resources)))
             status_table.add_row("Prompts Available", str(len(self.mcp_prompts)))
-
             console.print(status_table)
-
-        # MCP Servers
         if self.mcp_config and self.mcp_config.servers:
             server_table = Table(title="MCP Servers")
             server_table.add_column("Server", style="cyan")
             server_table.add_column("Transport", style="yellow")
             server_table.add_column("Status", style="green")
-
             for name, server in self.mcp_config.servers.items():
                 status = "Enabled" if server.enabled else "Disabled"
                 server_table.add_row(name, server.transport.value, status)
-
             console.print(server_table)
-
-        # MCP Tools
         mcp_tools = self.get_mcp_tools()
         if mcp_tools:
             tool_table = Table(title="MCP Tools")
             tool_table.add_column("Tool Name", style="cyan")
             tool_table.add_column("Server", style="yellow")
             tool_table.add_column("Route", style="green")
-
             for tool in mcp_tools:
-                # Extract server name from tool name
                 server = tool.name.split("_")[0] if "_" in tool.name else "unknown"
                 route = self.get_tool_route(tool.name) or "mcp_tool"
                 tool_table.add_row(tool.name, server, route)
-
             console.print(tool_table)
-
-        # Call parent debug method for tool routes
         if hasattr(super(), "debug_tool_routes"):
             super().debug_tool_routes()
 
@@ -278,12 +236,8 @@ class MCPAugLLMConfig(_get_mcp_mixin(), AugLLMConfig):
         logger.info("MCPAugLLMConfig cleanup complete")
 
 
-# Factory function for convenience
 async def create_mcp_aug_llm_config(
-    name: str,
-    model: str = "gpt-4",
-    mcp_servers: dict[str, Any] | None = None,
-    **kwargs,
+    name: str, model: str = "gpt-4", mcp_servers: dict[str, Any] | None = None, **kwargs
 ) -> MCPAugLLMConfig:
     """Factory function to create and initialize MCPAugLLMConfig.
 
@@ -313,10 +267,8 @@ async def create_mcp_aug_llm_config(
                 temperature=0.7
             )
     """
-    # Lazy import to avoid circular dependencies
     from haive.mcp.config import MCPConfig, MCPServerConfig
 
-    # Create MCP config if servers provided
     mcp_config = None
     if mcp_servers:
         servers = {}
@@ -327,18 +279,12 @@ async def create_mcp_aug_llm_config(
                 )
             else:
                 servers[server_name] = server_config
-
         mcp_config = MCPConfig(enabled=True, servers=servers)
-
-    # Create config
     config = MCPAugLLMConfig(
         name=name,
         llm_config={"provider": "openai", "model": model},
         mcp_config=mcp_config,
         **kwargs,
     )
-
-    # Initialize
     await config.setup()
-
     return config

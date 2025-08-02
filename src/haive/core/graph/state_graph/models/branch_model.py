@@ -22,7 +22,6 @@ class BranchModel(SerializableModel):
     branch_type: Literal["conditional", "parallel", "switch"] = Field(
         default="conditional", description="Type of branch"
     )
-
     __model_type__: ClassVar[str] = "branch"
     __abstract__ = False
 
@@ -38,8 +37,7 @@ class BranchModel(SerializableModel):
     @model_validator(mode="after")
     def ensure_valid_branch(self) -> Self:
         """Ensure the branch specification is valid."""
-        # For conditional branches, we need either ends or then
-        if self.branch_type == "conditional" and not self.ends and not self.then:
+        if self.branch_type == "conditional" and (not self.ends) and (not self.then):
             raise ValueError("Conditional branch must have either 'ends' or 'then'")
         return self
 
@@ -50,33 +48,22 @@ class BranchModel(SerializableModel):
         """Create a BranchModel from a branch object."""
         if branch is None:
             return None
-
         branch_model = cls(name=name, source_node=source)
-
-        # Handle path (condition function)
         if hasattr(branch, "path"):
             branch_model.path = FunctionReference.from_callable(
                 branch.path, name=f"{source}_{name}_condition"
             )
-
-        # Handle ends (routing targets)
         if hasattr(branch, "ends"):
             if isinstance(branch.ends, dict):
-                branch_model.ends = dict(branch.ends)  # Make a copy
+                branch_model.ends = dict(branch.ends)
             elif isinstance(branch.ends, list | tuple):
-                # Convert list/tuple to dict with index keys
                 branch_model.ends = {str(i): v for i, v in enumerate(branch.ends)}
             else:
                 branch_model.ends = {"target": str(branch.ends)}
-
-        # Handle then (next node)
         if hasattr(branch, "then"):
             branch_model.then = branch.then
-
-        # Determine branch type
         if hasattr(branch, "type"):
             branch_model.branch_type = branch.type
         elif hasattr(branch, "branch_type"):
             branch_model.branch_type = branch.branch_type
-
         return branch_model

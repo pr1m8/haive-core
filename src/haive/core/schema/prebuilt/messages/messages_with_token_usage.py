@@ -1,11 +1,6 @@
 from typing import Self
 
-"""MessagesState with integrated token usage tracking.
-
-This module provides THE standard messages state schema with automatic token tracking.
-This should be used as the base for all conversational agents that need token awareness.
-"""
-
+"MessagesState with integrated token usage tracking.\n\nThis module provides THE standard messages state schema with automatic token tracking.\nThis should be used as the base for all conversational agents that need token awareness.\n"
 from langchain_core.messages import AnyMessage, messages_from_dict
 from pydantic import model_validator
 
@@ -56,11 +51,8 @@ class MessagesStateWithTokenUsage(MessagesState, TokenUsageMixin):
         """Automatically track token usage for ALL messages in the state.
         This ensures token tracking happens no matter how messages are added.
         """
-        # Track tokens for ALL messages
         for message in self.messages:
-            # Track tokens for any message type that might have usage data
             self.track_message_tokens(message)
-
         return self
 
     def add_message(self, message: AnyMessage | dict) -> None:
@@ -72,14 +64,9 @@ class MessagesStateWithTokenUsage(MessagesState, TokenUsageMixin):
         Args:
             message: Message to add (dict or Message object)
         """
-        # Convert dict to message if needed
         if isinstance(message, dict):
             message = messages_from_dict([message])[0]
-
-        # Add to messages list
         self.messages.append(message)
-
-        # Track token usage immediately for any message
         self.track_message_tokens(message)
 
     @classmethod
@@ -105,15 +92,10 @@ class MessagesStateWithTokenUsage(MessagesState, TokenUsageMixin):
             Dictionary with cost breakdown and analysis
         """
         summary = self.get_token_usage_summary()
-
-        # Calculate average tokens per round
         avg_tokens_per_round = (
             summary["total_tokens"] / summary["rounds"] if summary["rounds"] > 0 else 0
         )
-
-        # Get capacity status
         capacity_status = self.get_capacity_status()
-
         return {
             "total_cost": summary["total_cost"],
             "total_tokens": summary["total_tokens"],
@@ -125,8 +107,6 @@ class MessagesStateWithTokenUsage(MessagesState, TokenUsageMixin):
             "capacity_status": capacity_status,
             "capacity_percentage": summary.get("capacity_percentage", 0.0),
             "has_cached_tokens": summary.get("has_cached_tokens", False),
-            "has_special_tokens": (
-                summary.get("has_audio_tokens", False)
-                or summary.get("has_reasoning_tokens", False)
-            ),
+            "has_special_tokens": summary.get("has_audio_tokens", False)
+            or summary.get("has_reasoning_tokens", False),
         }

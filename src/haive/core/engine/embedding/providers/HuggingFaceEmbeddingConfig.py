@@ -3,7 +3,7 @@
 import os
 from typing import Any
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.embedding.base import BaseEmbeddingConfig
 from haive.core.engine.embedding.types import EmbeddingType
@@ -89,7 +89,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
         default="huggingface", description="Provider name for API key resolution"
     )
 
-    @validator("model")
+    @field_validator("model")
     @classmethod
     def validate_model(cls, v) -> Any:
         """Validate the HuggingFace model name."""
@@ -97,7 +97,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
             raise ValueError("Model name is required and cannot be empty")
         return v.strip()
 
-    @validator("model_kwargs")
+    @field_validator("model_kwargs")
     @classmethod
     def validate_model_kwargs(cls, v) -> Any:
         """Validate and set default model kwargs."""
@@ -115,7 +115,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
 
         return v
 
-    @validator("cache_folder")
+    @field_validator("cache_folder")
     @classmethod
     def validate_cache_folder(cls, v, values) -> Any:
         """Set default cache folder if not specified."""

@@ -14,8 +14,6 @@ class FileSource(BaseSource):
     """Base class for all file-based sources."""
 
     file_path: FilePath = Field(description="Path to the file")
-
-    # Class variable for MIME type mapping
     MIME_TYPES: ClassVar[dict[str, str]] = {
         ".pdf": "application/pdf",
         ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -72,19 +70,14 @@ class FileSource(BaseSource):
     @computed_field
     def content_type(self) -> str:
         """Get the content type (MIME type)."""
-        # Try from class mapping first
         if self.file_extension in self.MIME_TYPES:
             return self.MIME_TYPES[self.file_extension]
-
-        # Use mimetypes module as fallback
         mime_type, _ = mimetypes.guess_type(str(self.file_path))
         return mime_type or "application/octet-stream"
 
     def get_metadata(self) -> dict[str, Any]:
         """Get file metadata."""
         metadata = super().get_metadata()
-
-        # Add file-specific metadata
         metadata.update(
             {
                 "file_name": self.file_name,
@@ -95,7 +88,6 @@ class FileSource(BaseSource):
                 "file_path": str(self.file_path),
             }
         )
-
         return metadata
 
     @classmethod
@@ -103,11 +95,8 @@ class FileSource(BaseSource):
         """Create a FileSource from a path."""
         if isinstance(path, str):
             path = Path(path)
-
-        # Set default name from filename if not provided
         if "name" not in kwargs:
             kwargs["name"] = os.path.basename(path)
-
         return cls(file_path=path, **kwargs)
 
 
@@ -192,9 +181,6 @@ class DirectorySource(BaseSource):
         """Create a DirectorySource from a path."""
         if isinstance(path, str):
             path = Path(path)
-
-        # Set default name from directory name if not provided
         if "name" not in kwargs:
             kwargs["name"] = os.path.basename(path)
-
         return cls(directory_path=path, **kwargs)

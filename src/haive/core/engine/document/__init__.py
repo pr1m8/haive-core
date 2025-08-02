@@ -58,6 +58,7 @@ from haive.core.engine.document.loaders.sources.implementation import (
     CredentialManager,
     EnhancedSource,
 )
+from haive.core.engine.document.loaders.sources.registry import source_registry
 from haive.core.engine.document.loaders.specific import (  # Database sources
     MongoDBSource,
     PostgreSQLSource,
@@ -198,8 +199,7 @@ __all__ = [
     # "SmartSourceRegistry",
     # "load_document",
     # "analyze_document_source",
-    # Enhanced source system
-    "EnhancedSourceType",
+    # Enhanced source system (EnhancedSourceType removed - not found)
     "FileCategory",
     "FileDocumentAgent",
     "FormatDetector",

@@ -301,8 +301,9 @@ class NamedList(BaseModel, Generic[T]):
         if isinstance(v, cls):
             return v
 
-        # Create new instance with the input
-        return cls(items=v)
+        # Return the input directly to avoid recursion
+        # Let the field validators handle the actual validation
+        return v
 
     def __repr__(self) -> str:
         resolved_count = len(self.values())

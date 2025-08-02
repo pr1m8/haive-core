@@ -17,17 +17,16 @@ from typing import (
 from pydantic import BaseModel, Field, computed_field, model_serializer, model_validator
 from pydantic.functional_validators import BeforeValidator
 
-# ────────────────────────────  Typing helpers  ─────────────────────────── #
 BuildT = TypeVar("BuildT")
 C = TypeVar("C")
 
 
 @runtime_checkable
 class Buildable(Protocol[BuildT]):
+
     def build(self) -> BuildT: ...
 
 
-# ───────────────────────────── Registry Base  ───────────────────────────── #
 class Registered(BaseModel, Generic[BuildT], abc.ABC):
     """Registry-aware base class for pluggable, composable components."""
 
@@ -37,12 +36,10 @@ class Registered(BaseModel, Generic[BuildT], abc.ABC):
         "validate_assignment": True,
         "arbitrary_types_allowed": True,
     }
-
     NAME: ClassVar[str]
     VERSION: ClassVar[str | None] = None
     DESCRIPTION: ClassVar[str | None] = None
     ALIASES: ClassVar[set[str]] = set()
-
     _registry: ClassVar[dict[str, type[Registered]]] = {}
     _EP_GROUP: ClassVar[str] = "haive.plugins"
 
@@ -52,7 +49,6 @@ class Registered(BaseModel, Generic[BuildT], abc.ABC):
             return
         if not hasattr(cls, "NAME"):
             raise TypeError(f"{cls.__name__} must define class attr NAME")
-
         cls._register_key(cls.NAME, cls)
         for alias in cls.ALIASES:
             cls._register_key(alias, cls)
@@ -65,7 +61,7 @@ class Registered(BaseModel, Generic[BuildT], abc.ABC):
 
     @classmethod
     def factory(cls, name: str, /, **data: Any) -> Registered:
-        return cls.get_class(name)(**data)  # type: ignore
+        return cls.get_class(name)(**data)
 
     @classmethod
     def get_class(cls, name: str) -> type[Registered]:
@@ -95,19 +91,17 @@ class Registered(BaseModel, Generic[BuildT], abc.ABC):
 
     @model_serializer(mode="plain")
     def _serialize(self) -> dict[str, Any]:
-        # Use `__dict__` to avoid triggering serialization again
         data = dict(self.__dict__)
         data["type"] = self.__class__.NAME
         return data
 
 
-# ───────────────────────────── Component Spec  ───────────────────────────── #
 def _type_validator(value: str) -> str:
     Registered.get_class(value)
     return value
 
 
-TypeKey = Annotated[str, BeforeValidator(_type_validator)]  # type: ignore
+TypeKey = Annotated[str, BeforeValidator(_type_validator)]
 
 
 class ComponentSpec(BaseModel, Generic[C]):
@@ -117,14 +111,10 @@ class ComponentSpec(BaseModel, Generic[C]):
     """
 
     model_config = {"extra": "forbid"}
-
     type: TypeKey | None = Field(
         default=None, description="Registry key / alias (exclusive with 'inline')"
     )
     params: dict[str, Any] = Field(default_factory=dict)
-
-    # NOTE: inline must be a real BaseModel (e.g. Registered[C]) for schema
-    # support
     inline: Registered[C] | None = None
 
     @model_validator(mode="after")
@@ -136,12 +126,11 @@ class ComponentSpec(BaseModel, Generic[C]):
     def build(self) -> C:
         if self.inline is not None:
             return self.inline.build()
-        cls = Registered.get_class(self.type)  # type: ignore
+        cls = Registered.get_class(self.type)
         instance = cls(**self.params)
         return instance.build()
 
 
-# ──────────────────────────── Example Components ─────────────────────────── #
 class Tokenizer(Registered[list[str]]):
     NAME = "whitespace-tokenizer"
     DESCRIPTION = "Splits input text by whitespace"
@@ -160,11 +149,9 @@ class Lowercaser(Registered[str]):
         return self.text.lower()
 
 
-# ───────────────────────────── Composite Pipeline ─────────────────────────── #
 class TextPipeline(Registered[list[str]]):
     NAME = "basic-text-pipeline"
     DESCRIPTION = "Applies tokenization and normalization"
-
     tokenizer: ComponentSpec[list[str]]
     normaliser: ComponentSpec[str]
 
@@ -174,20 +161,8 @@ class TextPipeline(Registered[list[str]]):
         return [t.lower() for t in tokens] + [norm]
 
 
-# ───────────────────────────── Advanced Registry Alias ─────────────────────────── #
-# Provide AdvancedRegistry as an alias to Registered for compatibility
 AdvancedRegistry = Registered
-
-# Export for external use
-__all__ = [
-    "AdvancedRegistry",
-    "Buildable",
-    "ComponentSpec",
-    "Registered",
-    "TypeKey",
-]
-
-# ───────────────────────────── Smoke Test Runner ─────────────────────────── #
+__all__ = ["AdvancedRegistry", "Buildable", "ComponentSpec", "Registered", "TypeKey"]
 if __name__ == "__main__":
     cfg = {
         "tokenizer": {
@@ -196,5 +171,4 @@ if __name__ == "__main__":
         },
         "normaliser": {"type": "lowercaser", "params": {"text": "MiXeD CaSe"}},
     }
-
     pipeline = TextPipeline(**cfg)

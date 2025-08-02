@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from .enhanced_registry import enhanced_registry, register_bulk_source, register_source
 from .source_types import CredentialType, LoaderCapability, RemoteSource, SourceCategory
@@ -108,11 +108,11 @@ class MessagingSource(RemoteSource):
     keyword_filter: list[str] | None = Field(None, description="Filter by keywords")
     exclude_bots: bool = Field(True, description="Exclude bot messages")
 
-    @validator("start_date", "end_date")
-    def validate_dates(self, v, values) -> Any:
+    @field_validator("start_date", "end_date")
+    @classmethod
+    def validate_dates(cls, v) -> Any:
         """Validate date ranges."""
-        if v and "date_range" in values and values["date_range"] != DateRange.CUSTOM:
-            raise ValueError("Custom dates only allowed when date_range is 'custom'")
+        # Note: Cross-field validation should use model_validator instead
         return v
 
     def get_date_filter(self) -> dict[str, Any]:

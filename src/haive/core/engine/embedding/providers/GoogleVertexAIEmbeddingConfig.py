@@ -87,7 +87,7 @@ class GoogleVertexAIEmbeddingConfig(BaseEmbeddingConfig):
         default="google", description="Provider name for API key resolution"
     )
 
-    @validator("model")
+    @field_validator("model")
     @classmethod
     def validate_model(cls, v) -> Any:
         """Validate the Vertex AI model name."""
@@ -110,7 +110,7 @@ class GoogleVertexAIEmbeddingConfig(BaseEmbeddingConfig):
             )
         return v
 
-    @validator("task_type")
+    @field_validator("task_type")
     @classmethod
     def validate_task_type(cls, v) -> Any:
         """Validate task type."""
@@ -130,7 +130,7 @@ class GoogleVertexAIEmbeddingConfig(BaseEmbeddingConfig):
 
         return v
 
-    @validator("location")
+    @field_validator("location")
     @classmethod
     def validate_location(cls, v) -> Any:
         """Validate Google Cloud location."""
@@ -138,7 +138,7 @@ class GoogleVertexAIEmbeddingConfig(BaseEmbeddingConfig):
             raise ValueError("Location is required")
         return v.strip()
 
-    @validator("project")
+    @field_validator("project")
     @classmethod
     def validate_project(cls, v) -> Any:
         """Validate Google Cloud project ID."""

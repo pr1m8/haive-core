@@ -331,8 +331,10 @@ class YouTubeSource(RemoteSource):
     save_audio_file: bool = Field(False, description="Save audio file locally")
     audio_format: str = Field("mp3", description="Audio format for download")
 
-    @validator("video_id", always=True)
-    def extract_video_id(self, v, values) -> Any:
+    @classmethod
+    @field_validator("video_id", always=True)
+    @classmethod
+    def extract_video_id(cls, v, values) -> Any:
         """Extract video ID from URL if provided."""
         if not v and values.get("video_url"):
             url = values["video_url"]

@@ -26,8 +26,6 @@ class TokenUsage(BaseModel):
     input_tokens: int = Field(default=0, description="Number of input tokens")
     output_tokens: int = Field(default=0, description="Number of output tokens")
     total_tokens: int = Field(default=0, description="Total tokens (input + output)")
-
-    # Advanced token types
     input_tokens_cached: int | None = Field(
         default=None, description="Number of cached input tokens (if supported)"
     )
@@ -37,13 +35,9 @@ class TokenUsage(BaseModel):
     reasoning_tokens: int | None = Field(
         default=None, description="Number of reasoning tokens (for reasoning models)"
     )
-
-    # Cost tracking
     input_token_cost: float = Field(default=0.0, description="Cost of input tokens")
     output_token_cost: float = Field(default=0.0, description="Cost of output tokens")
     total_cost: float = Field(default=0.0, description="Total cost")
-
-    # Capacity tracking
     capacity_percentage: float = Field(
         default=0.0, description="Percentage of model's context window used"
     )
@@ -53,10 +47,8 @@ class TokenUsage(BaseModel):
         """Ensure total_tokens and total_cost are calculated if not set."""
         if self.total_tokens == 0:
             self.total_tokens = self.input_tokens + self.output_tokens
-
         if self.total_cost == 0.0:
             self.total_cost = self.input_token_cost + self.output_token_cost
-
         return self
 
     def add(self, other: "TokenUsage") -> "TokenUsage":
@@ -109,8 +101,6 @@ def extract_token_usage_from_message(
     """
     if not isinstance(message, AIMessage):
         return None
-
-    # Check for usage_metadata (newer LangChain versions)
     if hasattr(message, "usage_metadata") and message.usage_metadata:
         metadata = message.usage_metadata
         return TokenUsage(
@@ -124,12 +114,8 @@ def extract_token_usage_from_message(
             output_token_cost=metadata.get("output_token_cost", 0.0),
             total_cost=metadata.get("total_cost", 0.0),
         )
-
-    # Check response_metadata (common pattern)
     if hasattr(message, "response_metadata") and message.response_metadata:
         metadata = message.response_metadata
-
-        # OpenAI pattern
         if "usage" in metadata:
             usage = metadata["usage"]
             return TokenUsage(
@@ -138,19 +124,14 @@ def extract_token_usage_from_message(
                 total_tokens=usage.get("total_tokens", 0),
                 input_tokens_cached=usage.get("prompt_tokens_cached"),
             )
-
-        # Anthropic pattern
         if "usage" in metadata:
             usage = metadata["usage"]
             return TokenUsage(
                 input_tokens=usage.get("input_tokens", 0),
                 output_tokens=usage.get("output_tokens", 0),
-                total_tokens=(
-                    usage.get("input_tokens", 0) + usage.get("output_tokens", 0)
-                ),
+                total_tokens=usage.get("input_tokens", 0)
+                + usage.get("output_tokens", 0),
             )
-
-        # Direct token counts in metadata
         if "input_tokens" in metadata or "prompt_tokens" in metadata:
             return TokenUsage(
                 input_tokens=metadata.get(
@@ -161,8 +142,6 @@ def extract_token_usage_from_message(
                 ),
                 total_tokens=metadata.get("total_tokens", 0),
             )
-
-    # Check additional_kwargs (older patterns)
     if hasattr(message, "additional_kwargs") and message.additional_kwargs:
         kwargs = message.additional_kwargs
         if "usage" in kwargs:
@@ -177,7 +156,6 @@ def extract_token_usage_from_message(
                     ),
                     total_tokens=usage.get("total_tokens", 0),
                 )
-
     return None
 
 
@@ -191,12 +169,10 @@ def aggregate_token_usage(messages: list[BaseMessage]) -> TokenUsage:
         Combined TokenUsage instance
     """
     total_usage = TokenUsage()
-
     for message in messages:
         usage = extract_token_usage_from_message(message)
         if usage:
             total_usage = total_usage + usage
-
     return total_usage
 
 
@@ -217,17 +193,13 @@ def calculate_token_cost(
     Returns:
         New TokenUsage instance with calculated costs
     """
-    # Calculate base costs
-    input_cost = (usage.input_tokens / 1000) * input_cost_per_1k
-    output_cost = (usage.output_tokens / 1000) * output_cost_per_1k
-
-    # Adjust for cached tokens if applicable
+    input_cost = usage.input_tokens / 1000 * input_cost_per_1k
+    output_cost = usage.output_tokens / 1000 * output_cost_per_1k
     if usage.input_tokens_cached and cached_input_cost_per_1k is not None:
-        cached_cost = (usage.input_tokens_cached / 1000) * cached_input_cost_per_1k
+        cached_cost = usage.input_tokens_cached / 1000 * cached_input_cost_per_1k
         uncached_tokens = usage.input_tokens - usage.input_tokens_cached
-        uncached_cost = (uncached_tokens / 1000) * input_cost_per_1k
+        uncached_cost = uncached_tokens / 1000 * input_cost_per_1k
         input_cost = cached_cost + uncached_cost
-
     return usage.model_copy(
         update={
             "input_token_cost": input_cost,

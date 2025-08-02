@@ -8,34 +8,26 @@ from __future__ import annotations
 
 from typing import Any, Self
 
-# Import BaseOutputParser for type resolution in LangGraph
-# This ensures it's available when LangGraph evaluates type hints
 from pydantic import Field, computed_field, model_validator
 
-# Direct import - simpler approach
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.schema.prebuilt.tool_state import ToolState
 
-# Model-specific context lengths (approximate)
 MODEL_CONTEXT_LENGTHS = {
-    # GPT-4 variants
     "gpt-4": 8192,
     "gpt-4-32k": 32768,
     "gpt-4-turbo": 128000,
     "gpt-4-turbo-preview": 128000,
     "gpt-4o": 128000,
     "gpt-4o-mini": 128000,
-    # GPT-3.5 variants
     "gpt-3.5-turbo": 4096,
     "gpt-3.5-turbo-16k": 16384,
-    # Claude variants
     "claude-3-opus": 200000,
     "claude-3-sonnet": 200000,
     "claude-3-haiku": 200000,
     "claude-2.1": 200000,
     "claude-2": 100000,
     "claude-instant": 100000,
-    # Other models
     "llama-2-70b": 4096,
     "mixtral-8x7b": 32768,
     "gemini-pro": 32768,
@@ -93,16 +85,9 @@ class LLMState(ToolState):
         ```
     """
 
-    # Override to make engine optional for LLM agents to prevent PydanticUndefined serialization errors
-    # When creating state instances, engine can be None initially and set later
     engine: AugLLMConfig | None = Field(
         default=None, description="The LLM engine for this agent"
     )
-
-    # engines field inherited from ToolState (via StateSchema)
-    # No need to override - ToolState manages engines properly
-
-    # Threshold configuration
     warning_threshold: float = Field(
         default=0.75,
         ge=0.0,
@@ -110,13 +95,11 @@ class LLMState(ToolState):
         description="Threshold for warning about token usage (0.0-1.0)",
     )
     critical_threshold: float = Field(
-        default=0.90,
+        default=0.9,
         ge=0.0,
         le=1.0,
         description="Threshold for critical token usage (0.0-1.0)",
     )
-
-    # Context length override (if not auto-detected)
     context_length_override: int | None = Field(
         default=None, description="Override auto-detected context length"
     )
@@ -127,20 +110,13 @@ class LLMState(ToolState):
 
         This works with ToolState's engine management to provide consistent access.
         """
-        # Call parent validators in correct order
-        # ToolState calls MessagesStateWithTokenUsage validators automatically
         super().sync_tools_and_update_routes()
-
         if self.engine:
-            # Add primary engine to engines dict under standard keys
             self.engines["main"] = self.engine
             self.engines["llm"] = self.engine
             self.engines["primary"] = self.engine
-
-            # Also add by engine name if it has one
             if hasattr(self.engine, "name") and self.engine.name:
                 self.engines[self.engine.name] = self.engine
-
         return self
 
     @computed_field
@@ -149,14 +125,9 @@ class LLMState(ToolState):
         """Get the context length for the current model."""
         if self.context_length_override:
             return self.context_length_override
-
         if not self.engine:
-            return 4096  # Default
-
-        # Try to get model name from various places
+            return 4096
         model_name = None
-
-        # Check engine attributes
         if hasattr(self.engine, "model"):
             model_name = self.engine.model
         elif hasattr(self.engine, "model_name"):
@@ -167,23 +138,15 @@ class LLMState(ToolState):
                 model_name = llm_config.model
             elif hasattr(llm_config, "model_name"):
                 model_name = llm_config.model_name
-
         if model_name:
-            # Check exact match first
             if model_name in MODEL_CONTEXT_LENGTHS:
                 return MODEL_CONTEXT_LENGTHS[model_name]
-
-            # Check partial matches
             model_lower = model_name.lower()
             for key, length in MODEL_CONTEXT_LENGTHS.items():
                 if key in model_lower or model_lower in key:
                     return length
-
-        # Try to get from engine max_tokens
         if hasattr(self.engine, "max_tokens") and self.engine.max_tokens:
             return self.engine.max_tokens
-
-        # Default based on engine type
         return 4096
 
     @computed_field
@@ -192,20 +155,19 @@ class LLMState(ToolState):
         """Get token usage as percentage of context length."""
         if not self.token_usage:
             return 0.0
-
-        return (self.token_usage.total_tokens / self.context_length) * 100
+        return self.token_usage.total_tokens / self.context_length * 100
 
     @computed_field
     @property
     def is_approaching_token_limit(self) -> bool:
         """Check if token usage is approaching the warning threshold."""
-        return (self.token_usage_percentage / 100) >= self.warning_threshold
+        return self.token_usage_percentage / 100 >= self.warning_threshold
 
     @computed_field
     @property
     def is_at_critical_limit(self) -> bool:
         """Check if token usage has reached the critical threshold."""
-        return (self.token_usage_percentage / 100) >= self.critical_threshold
+        return self.token_usage_percentage / 100 >= self.critical_threshold
 
     @computed_field
     @property
@@ -219,9 +181,7 @@ class LLMState(ToolState):
         """Calculate remaining tokens before hitting the limit."""
         if not self.engine:
             return 0
-
-        # Get max tokens
-        max_tokens = 4000  # default
+        max_tokens = 4000
         if hasattr(self.engine, "max_tokens") and self.engine.max_tokens:
             max_tokens = self.engine.max_tokens
         elif (
@@ -230,31 +190,22 @@ class LLMState(ToolState):
             and self.engine.llm_config.max_tokens
         ):
             max_tokens = self.engine.llm_config.max_tokens
-
         if not self.token_usage:
             return max_tokens
-
         return max(0, max_tokens - self.token_usage.total_tokens)
 
     def get_engine_metadata(self) -> dict[str, Any]:
         """Get metadata from the engine for threshold comparisons."""
         if not self.engine:
             return {}
-
         metadata = {}
-
-        # Extract common metadata
         if hasattr(self.engine, "metadata"):
             metadata.update(self.engine.metadata)
-
-        # Extract specific fields
         for field in ["temperature", "max_tokens", "model", "model_name"]:
             if hasattr(self.engine, field):
                 value = getattr(self.engine, field)
                 if value is not None:
                     metadata[field] = value
-
-        # Check in llm_config if available
         if hasattr(self.engine, "llm_config") and self.engine.llm_config:
             llm_config = self.engine.llm_config
             for field in ["temperature", "max_tokens", "model"]:
@@ -262,7 +213,6 @@ class LLMState(ToolState):
                     value = getattr(llm_config, field)
                     if value is not None:
                         metadata[f"llm_{field}"] = value
-
         return metadata
 
     def should_summarize_context(self, threshold: float = 0.75) -> bool:
@@ -274,7 +224,7 @@ class LLMState(ToolState):
         Returns:
             True if token usage exceeds threshold percentage of max tokens
         """
-        return (self.token_usage_percentage / 100) > threshold
+        return self.token_usage_percentage / 100 > threshold
 
     @classmethod
     def from_engine(cls, engine: AugLLMConfig, **kwargs) -> LLMState:

@@ -16,8 +16,9 @@ from pydantic import Field, validator
 from haive.core.schema import (
     SchemaComposer,
     StateSchema,
-    create_agent_state,
+    create_age,
     create_message_state,
+    field_validatort_state,
     get_schema_info,
     validate_schema,
 )
@@ -296,51 +297,55 @@ def example_validation_and_custom_methods() -> Any:
         score: float = Field(default=0.0)
         tags: list[str] = Field(default_factory=list)
 
-        @validator("email")
-        def validate_email(self, v) -> Any:
-            if v and "@" not in v:
-                raise ValueError("Invalid email format")
-            return v.lower()  # Normalize
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v) -> Any:
+        if v and "@" not in v:
+            raise ValueError("Invalid email format")
+        return v.lower()  # Normalize
 
-        @validator("age")
-        def validate_age(self, v) -> Any:
-            if v < 0:
-                raise ValueError("Age cannot be negative")
-            if v > 150:
-                raise ValueError("Age seems unrealistic")
-            return v
+    @field_validator("age")
+    @classmethod
+    def validate_age(cls, v) -> Any:
+        if v < 0:
+            raise ValueError("Age cannot be negative")
+        if v > 150:
+            raise ValueError("Age seems unrealistic")
+        return v
 
-        @validator("score")
-        def validate_score(self, v) -> Any:
-            return max(0.0, min(1.0, v))  # Clamp to [0, 1]
+    @field_validator("score")
+    @classmethod
+    def validate_score(cls, v) -> Any:
+        return max(0.0, min(1.0, v))  # Clamp to [0, 1]
 
-        @validator("tags")
-        def validate_tags(self, v) -> Any:
-            # Remove duplicates and empty strings
-            return list({tag.strip() for tag in v if tag.strip()})
+    @field_validator("tags")
+    @classmethod
+    def validate_tags(cls, v) -> Any:
+        # Remove duplicates and empty strings
+        return list({tag.strip() for tag in v if tag.strip()})
 
-        def get_risk_level(self) -> str:
-            """Calculate risk level based on score."""
-            if self.score < 0.3:
-                return "low"
-            if self.score < 0.7:
-                return "medium"
-            return "high"
+    def get_risk_level(self) -> str:
+        """Calculate risk level based on score."""
+        if self.score < 0.3:
+            return "low"
+        if self.score < 0.7:
+            return "medium"
+        return "high"
 
-        def add_tag(self, tag: str) -> None:
-            """Add a tag if not already present."""
-            tag = tag.strip()
-            if tag and tag not in self.tags:
-                self.tags.append(tag)
+    def add_tag(self, tag: str) -> None:
+        """Add a tag if not already present."""
+        tag = tag.strip()
+        if tag and tag not in self.tags:
+            self.tags.append(tag)
 
-        def to_summary(self) -> dict[str, Any]:
-            """Generate summary of state."""
-            return {
-                "email": self.email,
-                "age_group": "adult" if self.age >= 18 else "minor",
-                "risk_level": self.get_risk_level(),
-                "tag_count": len(self.tags),
-            }
+    def to_summary(self) -> dict[str, Any]:
+        """Generate summary of state."""
+        return {
+            "email": self.email,
+            "age_group": "adult" if self.age >= 18 else "minor",
+            "risk_level": self.get_risk_level(),
+            "tag_count": len(self.tags),
+        }
 
     # Test validation
     with contextlib.suppress(ValueError):

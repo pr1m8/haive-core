@@ -122,8 +122,8 @@ from haive.core.schema.field_utils import (
 )
 from haive.core.schema.multi_agent_state_schema import (
     MultiAgentSchemaComposer,
-    MultiAgentStateSchema,
 )
+from haive.core.schema.multi_agent_state_schema import MultiAgentStateSchema
 from haive.core.schema.multi_agent_state_schema import (
     MultiAgentStateSchema as PrebuiltMultiAgentStateSchema,
 )
@@ -338,7 +338,21 @@ def create_agent_state(
                 }
             )
     """
-    composer = AgentSchemaComposer(name=f"{agent_name}State")
+    # Determine base schema
+    base_schema = None
+    if include_messages and include_tools:
+        base_schema = ToolState
+    elif include_messages:
+        base_schema = MessagesState
+    elif include_tools:
+        base_schema = ToolState
+    else:
+        base_schema = MessagesState
+
+    # Create composer with base schema
+    composer = AgentSchemaComposer(
+        name=f"{agent_name}State", base_state_schema=base_schema
+    )
 
     # Add engines
     if engines:
@@ -349,16 +363,6 @@ def create_agent_state(
     if tools:
         for tool in tools:
             composer.add_tool(tool)
-
-    # Configure base schema
-    if include_messages and include_tools:
-        composer.set_base_schema(ToolState)
-    elif include_messages:
-        composer.set_base_schema(MessagesState)
-    elif include_tools:
-        composer.set_base_schema(ToolState)
-    else:
-        composer.set_base_schema(MessagesState)
 
     # Add custom fields
     if custom_fields:

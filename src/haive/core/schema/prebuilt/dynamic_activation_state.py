@@ -17,7 +17,7 @@ from haive.core.registry import DynamicRegistry
 from haive.core.schema.prebuilt.meta_state import MetaStateSchema
 from haive.core.schema.state_schema import StateSchema
 
-T = TypeVar("T")  # Generic type for components
+T = TypeVar("T")
 
 
 class DynamicActivationState(StateSchema):
@@ -104,51 +104,34 @@ class DynamicActivationState(StateSchema):
                 print(f"- {event['component_name']} at {event['timestamp']}")
     """
 
-    # Core registry for component management
     registry: DynamicRegistry = Field(
         default_factory=DynamicRegistry, description="Registry of available components"
     )
-
-    # MetaStateSchema instances for active components
     active_meta_states: dict[str, MetaStateSchema] = Field(
         default_factory=dict,
         description="MetaStateSchema instances for active components",
     )
-
-    # Discovery configuration
     discovery_config: dict[str, Any] = Field(
         default_factory=dict, description="Configuration for component discovery"
     )
-
-    # Activation history tracking
     activation_history: list[dict[str, Any]] = Field(
         default_factory=list, description="History of activation/deactivation events"
     )
-
-    # Task and capability tracking
     current_task: str = Field(default="", description="Current task being processed")
-
     required_capabilities: list[str] = Field(
         default_factory=list, description="Capabilities needed for current task"
     )
-
     missing_capabilities: list[str] = Field(
         default_factory=list, description="Capabilities currently missing"
     )
-
-    # Execution context
     execution_context: dict[str, Any] = Field(
         default_factory=dict, description="Current execution context and metadata"
     )
-
-    # Define shared fields for graph communication
     __shared_fields__ = [
         "active_meta_states",
         "activation_history",
         "execution_context",
     ]
-
-    # Define reducers for dynamic fields
     __reducer_fields__ = {
         "activation_history": lambda a, b: (a or []) + (b or []),
         "execution_context": lambda a, b: {**(a or {}), **(b or {})},
@@ -183,7 +166,6 @@ class DynamicActivationState(StateSchema):
         3. Validates capability consistency
         4. Initializes tracking systems
         """
-        # Initialize discovery config if empty
         if not self.discovery_config:
             self.discovery_config = {
                 "auto_discover": False,
@@ -191,28 +173,20 @@ class DynamicActivationState(StateSchema):
                 "discovery_timeout": 30,
                 "created_at": str(datetime.now()),
             }
-
-        # Initialize execution context
         if not self.execution_context:
             self.execution_context = {
                 "created_at": str(datetime.now()),
                 "activation_mode": "dynamic",
                 "state_version": "1.0",
             }
-
-        # Validate capability consistency
         if self.missing_capabilities:
-            # Remove missing capabilities that aren't required
             self.missing_capabilities = [
                 cap
                 for cap in self.missing_capabilities
                 if cap in self.required_capabilities
             ]
-
-        # Initialize tracking if we have active components
         if self.active_meta_states:
             self.execution_context["active_components"] = len(self.active_meta_states)
-
         return self
 
     def activate_component(self, component_id: str) -> MetaStateSchema | None:
@@ -253,8 +227,6 @@ class DynamicActivationState(StateSchema):
         """
         if self.registry.activate(component_id):
             item = self.registry.items[component_id]
-
-            # Create MetaStateSchema wrapper for component
             meta_state = MetaStateSchema(
                 agent=item.component,
                 agent_state={"activated_at": str(datetime.now())},
@@ -265,11 +237,7 @@ class DynamicActivationState(StateSchema):
                     "component_description": item.description,
                 },
             )
-
-            # Store in active meta states
             self.active_meta_states[component_id] = meta_state
-
-            # Track activation in history
             self.activation_history.append(
                 {
                     "timestamp": str(datetime.now()),
@@ -281,13 +249,9 @@ class DynamicActivationState(StateSchema):
                     "total_active": len(self.active_meta_states),
                 }
             )
-
-            # Update execution context
             self.execution_context["last_activation"] = str(datetime.now())
             self.execution_context["active_components"] = len(self.active_meta_states)
-
             return meta_state
-
         return None
 
     def deactivate_component(self, component_id: str) -> bool:
@@ -315,11 +279,8 @@ class DynamicActivationState(StateSchema):
                 assert len(state.active_meta_states) == 0
         """
         if self.registry.deactivate(component_id):
-            # Remove from active meta states
             if component_id in self.active_meta_states:
                 del self.active_meta_states[component_id]
-
-            # Track deactivation in history
             item = self.registry.items.get(component_id)
             if item:
                 self.activation_history.append(
@@ -332,13 +293,9 @@ class DynamicActivationState(StateSchema):
                         "total_active": len(self.active_meta_states),
                     }
                 )
-
-            # Update execution context
             self.execution_context["last_deactivation"] = str(datetime.now())
             self.execution_context["active_components"] = len(self.active_meta_states)
-
             return True
-
         return False
 
     def get_active_components(self) -> list[Any]:
@@ -413,16 +370,12 @@ class DynamicActivationState(StateSchema):
         self.required_capabilities = [
             cap.strip().lower() for cap in required if cap.strip()
         ]
-
         if missing is None:
-            # Default to all required capabilities as missing
             self.missing_capabilities = self.required_capabilities.copy()
         else:
             self.missing_capabilities = [
                 cap.strip().lower() for cap in missing if cap.strip()
             ]
-
-        # Update execution context
         self.execution_context["capabilities_updated"] = str(datetime.now())
         self.execution_context["required_count"] = len(self.required_capabilities)
         self.execution_context["missing_count"] = len(self.missing_capabilities)
@@ -453,11 +406,8 @@ class DynamicActivationState(StateSchema):
                     print("Web search was not in missing capabilities")
         """
         capability = capability.strip().lower()
-
         if capability in self.missing_capabilities:
             self.missing_capabilities.remove(capability)
-
-            # Track in history
             self.activation_history.append(
                 {
                     "timestamp": str(datetime.now()),
@@ -466,9 +416,7 @@ class DynamicActivationState(StateSchema):
                     "remaining_missing": len(self.missing_capabilities),
                 }
             )
-
             return True
-
         return False
 
     def get_activation_stats(self) -> dict[str, Any]:
@@ -487,15 +435,12 @@ class DynamicActivationState(StateSchema):
                 print(f"Most activated: {stats['most_activated_component']}")
         """
         registry_stats = self.registry.get_stats()
-
-        # Count different types of events
         activations = sum(
-            1 for event in self.activation_history if event["action"] == "activate"
+            (1 for event in self.activation_history if event["action"] == "activate")
         )
         deactivations = sum(
-            1 for event in self.activation_history if event["action"] == "deactivate"
+            (1 for event in self.activation_history if event["action"] == "deactivate")
         )
-
         return {
             **registry_stats,
             "meta_states_active": len(self.active_meta_states),
@@ -505,10 +450,8 @@ class DynamicActivationState(StateSchema):
             "capabilities_required": len(self.required_capabilities),
             "capabilities_missing": len(self.missing_capabilities),
             "capability_satisfaction_rate": (
-                (
-                    (len(self.required_capabilities) - len(self.missing_capabilities))
-                    / len(self.required_capabilities)
-                )
+                (len(self.required_capabilities) - len(self.missing_capabilities))
+                / len(self.required_capabilities)
                 if self.required_capabilities
                 else 1.0
             ),
@@ -569,17 +512,12 @@ class DynamicActivationState(StateSchema):
                 state.current_task = "new task"
                 state.required_capabilities = ["new", "capabilities"]
         """
-        # Deactivate all components
         active_ids = list(self.active_meta_states.keys())
         for comp_id in active_ids:
             self.deactivate_component(comp_id)
-
-        # Reset task and capabilities
         self.current_task = ""
         self.required_capabilities = []
         self.missing_capabilities = []
-
-        # Reset context but keep some metadata
         created_at = self.execution_context.get("created_at")
         self.execution_context = {
             "created_at": created_at or str(datetime.now()),
@@ -587,8 +525,6 @@ class DynamicActivationState(StateSchema):
             "activation_mode": "dynamic",
             "state_version": "1.0",
         }
-
-        # Add reset event to history
         self.activation_history.append(
             {
                 "timestamp": str(datetime.now()),

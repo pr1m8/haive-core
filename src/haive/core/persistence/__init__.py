@@ -96,9 +96,9 @@ __all__ = [
     "MemoryCheckpointerConfig",
     "PostgresCheckpointerConfig",
     "SQLiteCheckpointerConfig",
-    "SupabaseCheckpointerConfig",
-    "acreate_postgres_checkpointer",
+    # Note: SupabaseCheckpointerConfig temporarily commented out due to dependency issues
     # Factory functions
+    "acreate_postgres_checkpointer",
     "create_postgres_checkpointer",
     # Handlers
     "setup_checkpointer",

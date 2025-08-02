@@ -80,7 +80,7 @@ class CohereEmbeddingConfig(BaseEmbeddingConfig):
         default="cohere", description="Provider name for API key resolution"
     )
 
-    @validator("model")
+    @field_validator("model")
     @classmethod
     def validate_model(cls, v) -> Any:
         """Validate the Cohere model name."""
@@ -104,7 +104,7 @@ class CohereEmbeddingConfig(BaseEmbeddingConfig):
             )
         return v
 
-    @validator("input_type")
+    @field_validator("input_type")
     @classmethod
     def validate_input_type(cls, v) -> Any:
         """Validate input type."""
@@ -123,7 +123,7 @@ class CohereEmbeddingConfig(BaseEmbeddingConfig):
 
         return v
 
-    @validator("truncate")
+    @field_validator("truncate")
     @classmethod
     def validate_truncate(cls, v) -> Any:
         """Validate truncate parameter."""

@@ -47,7 +47,7 @@ from langchain_community.embeddings.voyageai import VoyageEmbeddings
 from langchain_google_vertexai import VertexAIEmbeddings
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import AzureOpenAIEmbeddings, OpenAIEmbeddings
-from pydantic import BaseModel, Field, SecretStr, field_validator
+from pydantic import BaseModel, Field, SecretStr, ValidationInfo, field_validator
 
 from haive.core.config.constants import EMBEDDINGS_CACHE_DIR
 from haive.core.models.embeddings.provider_types import EmbeddingProvider
@@ -65,12 +65,12 @@ class SecureConfigMixin:
 
     @field_validator("api_key", mode="after")
     @classmethod
-    def resolve_api_key(cls, v, values) -> Any:
+    def resolve_api_key(cls, v, info: ValidationInfo) -> Any:
         """Resolve API key from provided value or environment variables.
 
         Args:
             v: The provided API key value
-            values: The other field values
+            info: ValidationInfo containing field data
 
         Returns:
             SecretStr: The resolved API key as a SecretStr
@@ -78,7 +78,7 @@ class SecureConfigMixin:
         if v and v.get_secret_value().strip():
             return v
 
-        provider = values.get("provider")
+        provider = info.data.get("provider")
         if not provider:
             return SecretStr("")
 

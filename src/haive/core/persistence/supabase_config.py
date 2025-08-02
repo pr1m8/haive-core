@@ -26,6 +26,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Self
 
+from haive.dataflow.db.supabase import get_supabase_client as _get_client
 from pydantic import Field, model_validator
 from supabase import create_client
 
@@ -33,23 +34,17 @@ from haive.core.persistence import SupabaseCheckpointerConfig
 from haive.core.persistence.base import CheckpointerConfig
 from haive.core.persistence.types import CheckpointerType
 from haive.core.persistence.utils import deserialize_metadata, serialize_metadata
-from haive.dataflow.db.supabase import get_supabase_client as _get_client
 
 logger = logging.getLogger(__name__)
-
-# Check if Supabase dependencies are available
 try:
     SUPABASE_AVAILABLE = True
 except ImportError:
     SUPABASE_AVAILABLE = False
-
-# Minimal dataflow integration - no heavy imports
 DATAFLOW_AVAILABLE = False
 
 
 def get_supabase_client() -> Any | None:
     """Lazy import of supabase client to avoid heavy initialization."""
-    # Only import when actually needed
     if os.getenv("HAIVE_ENABLE_DATAFLOW") == "1":
         try:
             return _get_client()
@@ -60,11 +55,9 @@ def get_supabase_client() -> Any | None:
 
 def sanitize_sql(sql: str) -> str:
     """Basic SQL sanitization without dataflow dependency."""
-    # Simple sanitization - could be enhanced if needed
     return sql.replace("'", "''").replace(";", "")
 
 
-# Only set flag if environment enables dataflow
 DATAFLOW_AVAILABLE = os.getenv("HAIVE_ENABLE_DATAFLOW") == "1"
 
 
@@ -119,21 +112,16 @@ class SupabaseSaver:
             raise ImportError(
                 "Supabase dependencies not available. Please install with: pip install supabase"
             )
-
         self.user_id = user_id
-
-        # Use provided client or create new one
         if client:
             self.client = client
         elif DATAFLOW_AVAILABLE:
             try:
                 self.client = get_supabase_client()
-                self.supabase_url = None  # Not storing credentials when using env vars
+                self.supabase_url = None
                 self.supabase_key = None
             except Exception as e:
                 logger.warning(f"Failed to get Supabase client from dataflow: {e}")
-
-                # Fall back to direct client creation with provided credentials
                 if supabase_url and supabase_key:
                     self.supabase_url = supabase_url
                     self.supabase_key = supabase_key
@@ -150,7 +138,6 @@ class SupabaseSaver:
             raise ValueError(
                 "Supabase URL and key required when dataflow module not available"
             )
-
         if initialize_schema:
             self.setup()
 
@@ -161,351 +148,108 @@ class SupabaseSaver:
         and RLS policies for secure access.
         """
         try:
-            # Execute SQL - either using dataflow utility or directly
+
             def execute_sql(sql: str):
                 clean_sql = sql.strip().rstrip(";").strip()
-
                 if DATAFLOW_AVAILABLE:
                     clean_sql = sanitize_sql(sql)
-
                 try:
                     self.client.rpc("execute_sql", {"sql": clean_sql}).execute()
                 except Exception as e:
                     logger.exception(f"SQL Error: {e}\nSQL: {clean_sql[:100]}...")
                     raise
 
-            # Check if tables already exist
-            tables_query = """
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'public'
-            AND table_name IN ('agent_users', 'agent_threads', 'agent_checkpoints', 'agent_checkpoint_data')
-            """
-
+            tables_query = "\n            SELECT table_name\n            FROM information_schema.tables\n            WHERE table_schema = 'public'\n            AND table_name IN ('agent_users', 'agent_threads', 'agent_checkpoints', 'agent_checkpoint_data')\n            "
             result = self.client.rpc(
                 "execute_sql", {"sql": tables_query.strip()}
             ).execute()
             existing_tables = {row.get("table_name") for row in result.data}
-
-            # Create tables with prefixes to avoid conflicts with existing
-            # tables
             if "agent_users" not in existing_tables:
-                # Create users table
                 execute_sql(
-                    """
-                CREATE TABLE IF NOT EXISTS public.agent_users (
-                    id UUID PRIMARY KEY,
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                    email TEXT,
-                    metadata JSONB
+                    "\n                CREATE TABLE IF NOT EXISTS public.agent_users (\n                    id UUID PRIMARY KEY,\n                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),\n                    email TEXT,\n                    metadata JSONB\n                )\n                "
                 )
-                """
-                )
-
-                # Set up RLS policy for users
                 execute_sql(
-                    """
-                -- Enable RLS on agent_users table
-                ALTER TABLE public.agent_users ENABLE ROW LEVEL SECURITY
-                """
+                    "\n                -- Enable RLS on agent_users table\n                ALTER TABLE public.agent_users ENABLE ROW LEVEL SECURITY\n                "
                 )
-
                 execute_sql(
-                    """
-                -- Create policy for users to see only their own data
-                CREATE POLICY "Users can view own data"
-                ON public.agent_users
-                FOR SELECT
-                USING (auth.uid() = id)
-                """
+                    '\n                -- Create policy for users to see only their own data\n                CREATE POLICY "Users can view own data"\n                ON public.agent_users\n                FOR SELECT\n                USING (auth.uid() = id)\n                '
                 )
-
                 execute_sql(
-                    """
-                -- Create policy for users to update only their own data
-                CREATE POLICY "Users can update own data"
-                ON public.agent_users
-                FOR UPDATE
-                USING (auth.uid() = id)
-                """
+                    '\n                -- Create policy for users to update only their own data\n                CREATE POLICY "Users can update own data"\n                ON public.agent_users\n                FOR UPDATE\n                USING (auth.uid() = id)\n                '
                 )
-
             if "agent_threads" not in existing_tables:
-                # Create threads table
                 execute_sql(
-                    """
-                CREATE TABLE IF NOT EXISTS public.agent_threads (
-                    id UUID PRIMARY KEY,
-                    user_id UUID REFERENCES public.agent_users(id) ON DELETE CASCADE,
-                    external_id TEXT,
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                    last_access TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                    metadata JSONB,
-                    name TEXT,
-                    UNIQUE(user_id, external_id)
+                    "\n                CREATE TABLE IF NOT EXISTS public.agent_threads (\n                    id UUID PRIMARY KEY,\n                    user_id UUID REFERENCES public.agent_users(id) ON DELETE CASCADE,\n                    external_id TEXT,\n                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),\n                    last_access TIMESTAMPTZ NOT NULL DEFAULT NOW(),\n                    metadata JSONB,\n                    name TEXT,\n                    UNIQUE(user_id, external_id)\n                )\n                "
                 )
-                """
-                )
-
-                # Create indexes
                 execute_sql(
-                    """
-                CREATE INDEX IF NOT EXISTS agent_threads_user_id_idx ON public.agent_threads(user_id)
-                """
+                    "\n                CREATE INDEX IF NOT EXISTS agent_threads_user_id_idx ON public.agent_threads(user_id)\n                "
                 )
-
                 execute_sql(
-                    """
-                CREATE INDEX IF NOT EXISTS agent_threads_external_id_idx ON public.agent_threads(external_id)
-                """
+                    "\n                CREATE INDEX IF NOT EXISTS agent_threads_external_id_idx ON public.agent_threads(external_id)\n                "
                 )
-
-                # Set up RLS policy for threads
                 execute_sql(
-                    """
-                -- Enable RLS on agent_threads table
-                ALTER TABLE public.agent_threads ENABLE ROW LEVEL SECURITY
-                """
+                    "\n                -- Enable RLS on agent_threads table\n                ALTER TABLE public.agent_threads ENABLE ROW LEVEL SECURITY\n                "
                 )
-
                 execute_sql(
-                    """
-                -- Create policy for users to see only their own threads
-                CREATE POLICY "Users can view own threads"
-                ON public.agent_threads
-                FOR SELECT
-                USING (auth.uid() = user_id)
-                """
+                    '\n                -- Create policy for users to see only their own threads\n                CREATE POLICY "Users can view own threads"\n                ON public.agent_threads\n                FOR SELECT\n                USING (auth.uid() = user_id)\n                '
                 )
-
                 execute_sql(
-                    """
-                -- Create policy for users to update only their own threads
-                CREATE POLICY "Users can update own threads"
-                ON public.agent_threads
-                FOR UPDATE
-                USING (auth.uid() = user_id)
-                """
+                    '\n                -- Create policy for users to update only their own threads\n                CREATE POLICY "Users can update own threads"\n                ON public.agent_threads\n                FOR UPDATE\n                USING (auth.uid() = user_id)\n                '
                 )
-
                 execute_sql(
-                    """
-                -- Create policy for users to insert only own threads
-                CREATE POLICY "Users can insert own threads"
-                ON public.agent_threads
-                FOR INSERT
-                WITH CHECK (auth.uid() = user_id)
-                """
+                    '\n                -- Create policy for users to insert only own threads\n                CREATE POLICY "Users can insert own threads"\n                ON public.agent_threads\n                FOR INSERT\n                WITH CHECK (auth.uid() = user_id)\n                '
                 )
-
                 execute_sql(
-                    """
-                -- Create policy for users to delete only their own threads
-                CREATE POLICY "Users can delete own threads"
-                ON public.agent_threads
-                FOR DELETE
-                USING (auth.uid() = user_id)
-                """
+                    '\n                -- Create policy for users to delete only their own threads\n                CREATE POLICY "Users can delete own threads"\n                ON public.agent_threads\n                FOR DELETE\n                USING (auth.uid() = user_id)\n                '
                 )
-
             if "agent_checkpoints" not in existing_tables:
-                # Create checkpoints table
                 execute_sql(
-                    """
-                CREATE TABLE IF NOT EXISTS public.agent_checkpoints (
-                    id UUID PRIMARY KEY,
-                    thread_id UUID REFERENCES public.agent_threads(id) ON DELETE CASCADE,
-                    checkpoint_ns TEXT DEFAULT '',
-                    parent_id UUID REFERENCES public.agent_checkpoints(id) ON DELETE SET NULL,
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                    metadata JSONB,
-                    versions JSONB,
-                    UNIQUE(thread_id, checkpoint_ns, id)
+                    "\n                CREATE TABLE IF NOT EXISTS public.agent_checkpoints (\n                    id UUID PRIMARY KEY,\n                    thread_id UUID REFERENCES public.agent_threads(id) ON DELETE CASCADE,\n                    checkpoint_ns TEXT DEFAULT '',\n                    parent_id UUID REFERENCES public.agent_checkpoints(id) ON DELETE SET NULL,\n                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),\n                    metadata JSONB,\n                    versions JSONB,\n                    UNIQUE(thread_id, checkpoint_ns, id)\n                )\n                "
                 )
-                """
-                )
-
-                # Create indexes
                 execute_sql(
-                    """
-                CREATE INDEX IF NOT EXISTS agent_checkpoints_thread_id_idx ON public.agent_checkpoints(thread_id)
-                """
+                    "\n                CREATE INDEX IF NOT EXISTS agent_checkpoints_thread_id_idx ON public.agent_checkpoints(thread_id)\n                "
                 )
-
                 execute_sql(
-                    """
-                CREATE INDEX IF NOT EXISTS agent_checkpoints_parent_id_idx ON public.agent_checkpoints(parent_id)
-                """
+                    "\n                CREATE INDEX IF NOT EXISTS agent_checkpoints_parent_id_idx ON public.agent_checkpoints(parent_id)\n                "
                 )
-
-                # Set up RLS policy for checkpoints
                 execute_sql(
-                    """
-                -- Enable RLS on agent_checkpoints table
-                ALTER TABLE public.agent_checkpoints ENABLE ROW LEVEL SECURITY
-                """
+                    "\n                -- Enable RLS on agent_checkpoints table\n                ALTER TABLE public.agent_checkpoints ENABLE ROW LEVEL SECURITY\n                "
                 )
-
                 execute_sql(
-                    """
-                -- Create policy for users to see only checkpoints from their own threads
-                CREATE POLICY "Users can view own checkpoints"
-                ON public.agent_checkpoints
-                FOR SELECT
-                USING (
-                    EXISTS (
-                        SELECT 1 FROM public.agent_threads
-                        WHERE agent_threads.id = agent_checkpoints.thread_id
-                        AND agent_threads.user_id = auth.uid()
-                    )
+                    '\n                -- Create policy for users to see only checkpoints from their own threads\n                CREATE POLICY "Users can view own checkpoints"\n                ON public.agent_checkpoints\n                FOR SELECT\n                USING (\n                    EXISTS (\n                        SELECT 1 FROM public.agent_threads\n                        WHERE agent_threads.id = agent_checkpoints.thread_id\n                        AND agent_threads.user_id = auth.uid()\n                    )\n                )\n                '
                 )
-                """
-                )
-
                 execute_sql(
-                    """
-                -- Create policy for users to update only checkpoints from their own threads
-                CREATE POLICY "Users can update own checkpoints"
-                ON public.agent_checkpoints
-                FOR UPDATE
-                USING (
-                    EXISTS (
-                        SELECT 1 FROM public.agent_threads
-                        WHERE agent_threads.id = agent_checkpoints.thread_id
-                        AND agent_threads.user_id = auth.uid()
-                    )
+                    '\n                -- Create policy for users to update only checkpoints from their own threads\n                CREATE POLICY "Users can update own checkpoints"\n                ON public.agent_checkpoints\n                FOR UPDATE\n                USING (\n                    EXISTS (\n                        SELECT 1 FROM public.agent_threads\n                        WHERE agent_threads.id = agent_checkpoints.thread_id\n                        AND agent_threads.user_id = auth.uid()\n                    )\n                )\n                '
                 )
-                """
-                )
-
                 execute_sql(
-                    """
-                -- Create policy for users to insert only checkpoints in their own threads
-                CREATE POLICY "Users can insert own checkpoints"
-                ON public.agent_checkpoints
-                FOR INSERT
-                WITH CHECK (
-                    EXISTS (
-                        SELECT 1 FROM public.agent_threads
-                        WHERE agent_threads.id = agent_checkpoints.thread_id
-                        AND agent_threads.user_id = auth.uid()
-                    )
+                    '\n                -- Create policy for users to insert only checkpoints in their own threads\n                CREATE POLICY "Users can insert own checkpoints"\n                ON public.agent_checkpoints\n                FOR INSERT\n                WITH CHECK (\n                    EXISTS (\n                        SELECT 1 FROM public.agent_threads\n                        WHERE agent_threads.id = agent_checkpoints.thread_id\n                        AND agent_threads.user_id = auth.uid()\n                    )\n                )\n                '
                 )
-                """
-                )
-
                 execute_sql(
-                    """
-                -- Create policy for users to delete only checkpoints from their own threads
-                CREATE POLICY "Users can delete own checkpoints"
-                ON public.agent_checkpoints
-                FOR DELETE
-                USING (
-                    EXISTS (
-                        SELECT 1 FROM public.agent_threads
-                        WHERE agent_threads.id = agent_checkpoints.thread_id
-                        AND agent_threads.user_id = auth.uid()
-                    )
+                    '\n                -- Create policy for users to delete only checkpoints from their own threads\n                CREATE POLICY "Users can delete own checkpoints"\n                ON public.agent_checkpoints\n                FOR DELETE\n                USING (\n                    EXISTS (\n                        SELECT 1 FROM public.agent_threads\n                        WHERE agent_threads.id = agent_checkpoints.thread_id\n                        AND agent_threads.user_id = auth.uid()\n                    )\n                )\n                '
                 )
-                """
-                )
-
             if "agent_checkpoint_data" not in existing_tables:
-                # Create checkpoint_data table for storing the actual
-                # checkpoint data
                 execute_sql(
-                    """
-                CREATE TABLE IF NOT EXISTS public.agent_checkpoint_data (
-                    checkpoint_id UUID PRIMARY KEY REFERENCES public.agent_checkpoints(id) ON DELETE CASCADE,
-                    thread_id UUID REFERENCES public.agent_threads(id) ON DELETE CASCADE,
-                    data JSONB NOT NULL,
-                    channel_values JSONB,
-                    pending_sends JSONB
+                    "\n                CREATE TABLE IF NOT EXISTS public.agent_checkpoint_data (\n                    checkpoint_id UUID PRIMARY KEY REFERENCES public.agent_checkpoints(id) ON DELETE CASCADE,\n                    thread_id UUID REFERENCES public.agent_threads(id) ON DELETE CASCADE,\n                    data JSONB NOT NULL,\n                    channel_values JSONB,\n                    pending_sends JSONB\n                )\n                "
                 )
-                """
-                )
-
-                # Create indexes
                 execute_sql(
-                    """
-                CREATE INDEX IF NOT EXISTS agent_checkpoint_data_thread_id_idx ON public.agent_checkpoint_data(thread_id)
-                """
+                    "\n                CREATE INDEX IF NOT EXISTS agent_checkpoint_data_thread_id_idx ON public.agent_checkpoint_data(thread_id)\n                "
                 )
-
-                # Set up RLS policy for checkpoint_data
                 execute_sql(
-                    """
-                -- Enable RLS on agent_checkpoint_data table
-                ALTER TABLE public.agent_checkpoint_data ENABLE ROW LEVEL SECURITY
-                """
+                    "\n                -- Enable RLS on agent_checkpoint_data table\n                ALTER TABLE public.agent_checkpoint_data ENABLE ROW LEVEL SECURITY\n                "
                 )
-
                 execute_sql(
-                    """
-                -- Create policy for users to see only data from their own checkpoints
-                CREATE POLICY "Users can view own checkpoint data"
-                ON public.agent_checkpoint_data
-                FOR SELECT
-                USING (
-                    EXISTS (
-                        SELECT 1 FROM public.agent_threads
-                        WHERE agent_threads.id = agent_checkpoint_data.thread_id
-                        AND agent_threads.user_id = auth.uid()
-                    )
+                    '\n                -- Create policy for users to see only data from their own checkpoints\n                CREATE POLICY "Users can view own checkpoint data"\n                ON public.agent_checkpoint_data\n                FOR SELECT\n                USING (\n                    EXISTS (\n                        SELECT 1 FROM public.agent_threads\n                        WHERE agent_threads.id = agent_checkpoint_data.thread_id\n                        AND agent_threads.user_id = auth.uid()\n                    )\n                )\n                '
                 )
-                """
-                )
-
                 execute_sql(
-                    """
-                -- Create policy for users to update only data from their own checkpoints
-                CREATE POLICY "Users can update own checkpoint data"
-                ON public.agent_checkpoint_data
-                FOR UPDATE
-                USING (
-                    EXISTS (
-                        SELECT 1 FROM public.agent_threads
-                        WHERE agent_threads.id = agent_checkpoint_data.thread_id
-                        AND agent_threads.user_id = auth.uid()
-                    )
+                    '\n                -- Create policy for users to update only data from their own checkpoints\n                CREATE POLICY "Users can update own checkpoint data"\n                ON public.agent_checkpoint_data\n                FOR UPDATE\n                USING (\n                    EXISTS (\n                        SELECT 1 FROM public.agent_threads\n                        WHERE agent_threads.id = agent_checkpoint_data.thread_id\n                        AND agent_threads.user_id = auth.uid()\n                    )\n                )\n                '
                 )
-                """
-                )
-
                 execute_sql(
-                    """
-                -- Create policy for users to insert only data for their own checkpoints
-                CREATE POLICY "Users can insert own checkpoint data"
-                ON public.agent_checkpoint_data
-                FOR INSERT
-                WITH CHECK (
-                    EXISTS (
-                        SELECT 1 FROM public.agent_threads
-                        WHERE agent_threads.id = agent_checkpoint_data.thread_id
-                        AND agent_threads.user_id = auth.uid()
-                    )
+                    '\n                -- Create policy for users to insert only data for their own checkpoints\n                CREATE POLICY "Users can insert own checkpoint data"\n                ON public.agent_checkpoint_data\n                FOR INSERT\n                WITH CHECK (\n                    EXISTS (\n                        SELECT 1 FROM public.agent_threads\n                        WHERE agent_threads.id = agent_checkpoint_data.thread_id\n                        AND agent_threads.user_id = auth.uid()\n                    )\n                )\n                '
                 )
-                """
-                )
-
                 execute_sql(
-                    """
-                -- Create policy for users to delete only data from their own checkpoints
-                CREATE POLICY "Users can delete own checkpoint data"
-                ON public.agent_checkpoint_data
-                FOR DELETE
-                USING (
-                    EXISTS (
-                        SELECT 1 FROM public.agent_threads
-                        WHERE agent_threads.id = agent_checkpoint_data.thread_id
-                        AND agent_threads.user_id = auth.uid()
-                    )
+                    '\n                -- Create policy for users to delete only data from their own checkpoints\n                CREATE POLICY "Users can delete own checkpoint data"\n                ON public.agent_checkpoint_data\n                FOR DELETE\n                USING (\n                    EXISTS (\n                        SELECT 1 FROM public.agent_threads\n                        WHERE agent_threads.id = agent_checkpoint_data.thread_id\n                        AND agent_threads.user_id = auth.uid()\n                    )\n                )\n                '
                 )
-                """
-                )
-
             logger.info("Successfully set up Supabase schema")
-
         except Exception as e:
             logger.exception(f"Error setting up Supabase schema: {e}")
             raise
@@ -526,24 +270,17 @@ class SupabaseSaver:
         Returns:
             The user ID
         """
-        # Check if user already exists
         existing_user = (
             self.client.table("agent_users").select("*").eq("id", user_id).execute()
         )
-
         if not existing_user.data:
-            # Convert metadata to JSON string
             metadata_json = serialize_metadata(metadata or {})
-
-            # Insert new user
             self.client.table("agent_users").insert(
                 {"id": user_id, "email": email, "metadata": metadata_json}
             ).execute()
-
             logger.info(f"User {user_id} registered in Supabase")
         else:
             logger.debug(f"User {user_id} already exists in Supabase")
-
         return user_id
 
     def register_thread(
@@ -564,16 +301,10 @@ class SupabaseSaver:
         Returns:
             The internal database ID for the thread
         """
-        # Use provided user_id or default to the instance's user_id
         user_id = user_id or self.user_id
-
         if not user_id:
             raise ValueError("User ID is required to register a thread")
-
-        # Ensure user exists
         self.register_user(user_id)
-
-        # Check if thread already exists (by external ID and user_id)
         existing_thread = (
             self.client.table("agent_threads")
             .select("id")
@@ -581,25 +312,15 @@ class SupabaseSaver:
             .eq("user_id", user_id)
             .execute()
         )
-
         if existing_thread.data:
-            # Thread exists, return its internal ID
             internal_id = existing_thread.data[0]["id"]
-
-            # Update last access time
             self.client.table("agent_threads").update(
                 {"last_access": datetime.now().isoformat()}
             ).eq("id", internal_id).execute()
-
             logger.debug(f"Thread {thread_id} already exists, updated last access")
             return internal_id
-        # Generate internal ID
         internal_id = str(uuid.uuid4())
-
-        # Convert metadata to JSON string
         metadata_json = serialize_metadata(metadata or {})
-
-        # Insert new thread
         self.client.table("agent_threads").insert(
             {
                 "id": internal_id,
@@ -609,7 +330,6 @@ class SupabaseSaver:
                 "metadata": metadata_json,
             }
         ).execute()
-
         logger.info(
             f"Thread {thread_id} registered in Supabase with internal ID {internal_id}"
         )
@@ -627,13 +347,9 @@ class SupabaseSaver:
         Returns:
             Internal thread ID if found, None otherwise
         """
-        # Use provided user_id or default to the instance's user_id
         user_id = user_id or self.user_id
-
         if not user_id:
             raise ValueError("User ID is required to get thread ID")
-
-        # Look up thread
         result = (
             self.client.table("agent_threads")
             .select("id")
@@ -641,10 +357,8 @@ class SupabaseSaver:
             .eq("user_id", user_id)
             .execute()
         )
-
         if result.data:
             return result.data[0]["id"]
-
         return None
 
     def get(self, config: dict[str, Any]) -> dict[str, Any] | None:
@@ -660,19 +374,13 @@ class SupabaseSaver:
         checkpoint_id = config["configurable"].get("checkpoint_id")
         checkpoint_ns = config["configurable"].get("checkpoint_ns", "")
         user_id = self.user_id
-
         if not user_id:
             raise ValueError("User ID is required to get checkpoints")
-
         try:
-            # Get internal thread ID
             internal_thread_id = self.get_internal_thread_id(thread_id, user_id)
-
             if not internal_thread_id:
                 logger.warning(f"Thread {thread_id} not found")
                 return None
-
-            # Build query
             query = (
                 self.client.from_("agent_checkpoint_data")
                 .select(
@@ -685,20 +393,13 @@ class SupabaseSaver:
                 )
                 .eq("agent_checkpoints.checkpoint_ns", checkpoint_ns)
             )
-
             if checkpoint_id:
-                # Get specific checkpoint
                 query = query.eq("agent_checkpoints.id", checkpoint_id)
             else:
-                # Get latest checkpoint
                 query = query.order("agent_checkpoints.created_at", desc=True).limit(1)
-
             result = query.execute()
-
             if result.data:
                 checkpoint_data = result.data[0]
-
-                # Reconstruct checkpoint structure
                 if checkpoint_data.get("channel_values"):
                     channel_values = (
                         json.loads(checkpoint_data["channel_values"])
@@ -706,17 +407,13 @@ class SupabaseSaver:
                         else checkpoint_data["channel_values"]
                     )
                     return channel_values
-
-                # Fall back to data
                 data = (
                     json.loads(checkpoint_data["data"])
                     if isinstance(checkpoint_data["data"], str)
                     else checkpoint_data["data"]
                 )
                 return data
-
             return None
-
         except Exception as e:
             logger.exception(f"Error retrieving checkpoint: {e}")
             return None
@@ -743,25 +440,15 @@ class SupabaseSaver:
         checkpoint_ns = config["configurable"].get("checkpoint_ns", "")
         parent_checkpoint_id = config["configurable"].get("checkpoint_id")
         user_id = self.user_id
-
         if not user_id:
             raise ValueError("User ID is required to save checkpoints")
-
         try:
-            # Generate a checkpoint ID if not present in the data
             checkpoint_id = str(uuid.uuid4())
             if "id" in checkpoint:
-                # If ID is in checkpoint data, use that instead
                 checkpoint_id = checkpoint["id"] or checkpoint_id
-
-            # Ensure thread exists and get internal ID
             internal_thread_id = self.register_thread(thread_id, user_id)
-
-            # Check if parent checkpoint ID needs to be converted to internal
-            # ID
             internal_parent_id = None
             if parent_checkpoint_id:
-                # Look up the parent checkpoint to get its internal ID
                 parent_result = (
                     self.client.table("agent_checkpoints")
                     .select("id")
@@ -769,23 +456,16 @@ class SupabaseSaver:
                     .eq("checkpoint_ns", checkpoint_ns)
                     .execute()
                 )
-
                 if parent_result.data:
                     internal_parent_id = parent_result.data[0]["id"]
-
-            # Serialize data and metadata
             serialized_metadata = serialize_metadata(metadata or {})
             serialized_versions = json.dumps(new_versions or {})
-
-            # Extract channel values if present
             channel_values = None
             pending_sends = None
             if "channel_values" in checkpoint:
                 channel_values = json.dumps(checkpoint["channel_values"])
             if "pending_sends" in checkpoint:
                 pending_sends = json.dumps(checkpoint["pending_sends"])
-
-            # Insert checkpoint record
             checkpoint_internal_id = str(uuid.uuid4())
             self.client.table("agent_checkpoints").insert(
                 {
@@ -797,8 +477,6 @@ class SupabaseSaver:
                     "versions": serialized_versions,
                 }
             ).execute()
-
-            # Insert checkpoint data
             self.client.table("agent_checkpoint_data").insert(
                 {
                     "checkpoint_id": checkpoint_internal_id,
@@ -808,8 +486,6 @@ class SupabaseSaver:
                     "pending_sends": pending_sends,
                 }
             ).execute()
-
-            # Return updated config
             return {
                 "configurable": {
                     "thread_id": thread_id,
@@ -817,10 +493,8 @@ class SupabaseSaver:
                     "checkpoint_id": checkpoint_internal_id,
                 }
             }
-
         except Exception as e:
             logger.exception(f"Error saving checkpoint: {e}")
-            # Return original config
             return config
 
     def list(
@@ -844,24 +518,17 @@ class SupabaseSaver:
         thread_id = config["configurable"]["thread_id"]
         checkpoint_ns = config["configurable"].get("checkpoint_ns", "")
         user_id = self.user_id
-
         if not user_id:
             raise ValueError("User ID is required to list checkpoints")
-
         try:
-            # Get internal thread ID
             internal_thread_id = self.get_internal_thread_id(thread_id, user_id)
-
             if not internal_thread_id:
                 logger.warning(f"Thread {thread_id} not found")
                 return []
-
-            # Build query
             query = (
                 self.client.from_("agent_checkpoints")
                 .select(
-                    "agent_checkpoints.id, agent_checkpoints.parent_id, agent_checkpoints.metadata, agent_checkpoints.versions, "
-                    "agent_checkpoint_data.data, agent_checkpoint_data.channel_values, agent_checkpoint_data.pending_sends"
+                    "agent_checkpoints.id, agent_checkpoints.parent_id, agent_checkpoints.metadata, agent_checkpoints.versions, agent_checkpoint_data.data, agent_checkpoint_data.channel_values, agent_checkpoint_data.pending_sends"
                 )
                 .eq("agent_checkpoints.thread_id", internal_thread_id)
                 .eq("agent_checkpoints.checkpoint_ns", checkpoint_ns)
@@ -871,36 +538,26 @@ class SupabaseSaver:
                 )
                 .order("agent_checkpoints.created_at", desc=True)
             )
-
-            # Apply limit if specified
             if limit is not None:
                 query = query.limit(limit)
-
-            # Apply before constraint if specified
             if (
                 before
                 and "configurable" in before
-                and "checkpoint_id" in before["configurable"]
+                and ("checkpoint_id" in before["configurable"])
             ):
                 before_id = before["configurable"]["checkpoint_id"]
-                # Get created_at timestamp of the before checkpoint
                 before_result = (
                     self.client.table("agent_checkpoints")
                     .select("created_at")
                     .eq("id", before_id)
                     .execute()
                 )
-
                 if before_result.data:
                     before_timestamp = before_result.data[0]["created_at"]
                     query = query.lt("agent_checkpoints.created_at", before_timestamp)
-
             result = query.execute()
-
-            # Construct checkpoint tuples
             checkpoint_tuples = []
             for row in result.data:
-                # Create config for this checkpoint
                 checkpoint_config = {
                     "configurable": {
                         "thread_id": thread_id,
@@ -908,8 +565,6 @@ class SupabaseSaver:
                         "checkpoint_id": row["id"],
                     }
                 }
-
-                # Create parent config if available
                 parent_config = None
                 if row["parent_id"]:
                     parent_config = {
@@ -919,8 +574,6 @@ class SupabaseSaver:
                             "checkpoint_id": row["parent_id"],
                         }
                     }
-
-                # Parse data
                 data = (
                     json.loads(row["data"])
                     if isinstance(row["data"], str)
@@ -928,8 +581,8 @@ class SupabaseSaver:
                 )
                 metadata_dict = deserialize_metadata(row["metadata"])
 
-                # Create namedtuple-like object
                 class CheckpointTuple:
+
                     def __init__(
                         self, config, checkpoint, metadata, parent_config, writes=None
                     ):
@@ -944,9 +597,7 @@ class SupabaseSaver:
                         checkpoint_config, data, metadata_dict, parent_config
                     )
                 )
-
             return checkpoint_tuples
-
         except Exception as e:
             logger.exception(f"Error listing checkpoints: {e}")
             return []
@@ -961,29 +612,19 @@ class SupabaseSaver:
         Returns:
             True if successful, False otherwise
         """
-        # Use provided user_id or default to the instance's user_id
         user_id = user_id or self.user_id
-
         if not user_id:
             raise ValueError("User ID is required to delete a thread")
-
         try:
-            # Get internal thread ID
             internal_thread_id = self.get_internal_thread_id(thread_id, user_id)
-
             if not internal_thread_id:
                 logger.warning(f"Thread {thread_id} not found")
                 return False
-
-            # Delete thread (cascade will delete checkpoints and
-            # checkpoint_data)
             self.client.table("agent_threads").delete().eq(
                 "id", internal_thread_id
             ).execute()
-
             logger.info(f"Thread {thread_id} deleted")
             return True
-
         except Exception as e:
             logger.exception(f"Error deleting thread: {e}")
             return False
@@ -1045,8 +686,6 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
     """
 
     type: CheckpointerType = CheckpointerType.SUPABASE
-
-    # Supabase configuration
     supabase_url: str | None = Field(
         default=None,
         description="Supabase project URL (optional if using shared client from dataflow)",
@@ -1056,13 +695,9 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
         description="Supabase API key (optional if using shared client from dataflow)",
     )
     user_id: str | None = Field(default=None, description="User ID for RLS policies")
-
-    # Runtime settings
     setup_needed: bool = Field(
         default=True, description="Whether to initialize DB tables on startup"
     )
-
-    # Internal state (not serialized)
     checkpointer: Any | None = Field(default=None, exclude=True)
 
     @model_validator(mode="after")
@@ -1117,16 +752,12 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
         """
         if self.checkpointer is None:
             try:
-                # Create client if needed (optional if using dataflow
-                # utilities)
                 client = None
                 if DATAFLOW_AVAILABLE:
                     try:
                         client = get_supabase_client()
                     except Exception as e:
                         logger.warning(f"Failed to get shared Supabase client: {e}")
-                        # Will fall back to direct client creation
-
                 self.checkpointer = SupabaseSaver(
                     supabase_url=self.supabase_url,
                     supabase_key=self.supabase_key,
@@ -1134,19 +765,13 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
                     user_id=self.user_id,
                     initialize_schema=self.setup_needed,
                 )
-
-                # Don't try to set up schema again
                 self.setup_needed = False
-
             except Exception as e:
                 logger.exception(f"Error creating Supabase checkpointer: {e}")
                 logger.warning("Falling back to memory checkpointer")
-
-                # Fall back to memory saver
                 from langgraph.checkpoint.memory import MemorySaver
 
                 self.checkpointer = MemorySaver()
-
         return self.checkpointer
 
     def register_thread(
@@ -1165,21 +790,14 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
         if not self.user_id:
             logger.warning("No user_id provided, cannot register thread")
             return
-
         checkpointer = self.create_checkpointer()
-
         if isinstance(checkpointer, SupabaseSaver):
             checkpointer.register_thread(thread_id, self.user_id, name, metadata)
         elif hasattr(checkpointer, "register_thread"):
-            # Fall back to any other implementation that supports
-            # register_thread
             checkpointer.register_thread(thread_id, name, metadata)
 
     def put_checkpoint(
-        self,
-        config: dict[str, Any],
-        data: Any,
-        metadata: dict[str, Any] | None = None,
+        self, config: dict[str, Any], data: Any, metadata: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """Store a checkpoint in the Supabase database.
 
@@ -1192,29 +810,18 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
             Updated config with checkpoint_id
         """
         checkpointer = self.create_checkpointer()
-
-        # Structure the data as expected
         checkpoint_data = {
-            "id": config["configurable"].get(
-                "checkpoint_id", ""
-            ),  # Will be auto-generated if empty
+            "id": config["configurable"].get("checkpoint_id", ""),
             "channel_values": data,
         }
-
-        # Store using appropriate API based on checkpointer type
         if isinstance(checkpointer, SupabaseSaver):
             return checkpointer.put(config, checkpoint_data, metadata)
-        # Try standard methods
         try:
-            # Check method signature
             import inspect
 
             sig = inspect.signature(checkpointer.put)
-
             if "metadata" in sig.parameters and "new_versions" in sig.parameters:
-                # New API
                 return checkpointer.put(config, checkpoint_data, metadata or {}, {})
-            # Old API
             return checkpointer.put(config, checkpoint_data)
         except (AttributeError, Exception) as e:
             logger.exception(f"Error storing checkpoint: {e}")
@@ -1230,19 +837,13 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
             The checkpoint data if found, None otherwise
         """
         checkpointer = self.create_checkpointer()
-
-        # Retrieve using appropriate method
         if isinstance(checkpointer, SupabaseSaver):
             return checkpointer.get(config)
         if hasattr(checkpointer, "get"):
             result = checkpointer.get(config)
-
-            # Extract channel_values if available
-            if result and isinstance(result, dict) and "channel_values" in result:
+            if result and isinstance(result, dict) and ("channel_values" in result):
                 return result["channel_values"]
-
             return result
-
         return None
 
     def list_checkpoints(
@@ -1258,8 +859,6 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
             List of (config, checkpoint) tuples
         """
         checkpointer = self.create_checkpointer()
-
-        # List using appropriate method
         if isinstance(checkpointer, SupabaseSaver):
             checkpoint_tuples = checkpointer.list(config, limit=limit)
             return [(cp.config, cp.checkpoint) for cp in checkpoint_tuples]
@@ -1270,7 +869,6 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
             except Exception as e:
                 logger.exception(f"Error listing checkpoints: {e}")
                 return []
-
         return []
 
     def close(self) -> None:

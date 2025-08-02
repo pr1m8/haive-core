@@ -5,13 +5,14 @@ from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from haive.core.engine.base.protocols import ExtensibleProtocol
+# TODO: Define ExtensibleProtocol if needed
+# from haive.core.engine.base.protocols import ExtensibleProtocol
 from haive.core.runtime.extension.protocols import ExtensionProtocol
 
 T = TypeVar("T")  # Target type
 
 
-class Extension(BaseModel, Generic[T], ExtensionProtocol[T]):
+class Extension(BaseModel, Generic[T]):
     """Base class for component extensions."""
 
     id: str = Field(default_factory=lambda: f"ext_{uuid.uuid4().hex[:8]}")
@@ -23,7 +24,8 @@ class Extension(BaseModel, Generic[T], ExtensionProtocol[T]):
 
     def apply_to(self, target: T) -> T:
         """Apply this extension to a target object."""
-        if isinstance(target, ExtensibleProtocol):
+        # TODO: Re-enable when ExtensibleProtocol is defined
+        if hasattr(target, "apply_extensions"):
             target.apply_extensions([self])
         return target
 

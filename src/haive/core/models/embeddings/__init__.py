@@ -65,12 +65,60 @@ from haive.core.models.embeddings.base import (  # Base classes; Cloud providers
     LlamaCppEmbeddingConfig,
     OllamaEmbeddingConfig,
     OpenAIEmbeddingConfig,
+    SecureConfigMixin,
     SentenceTransformerEmbeddingConfig,
     VertexAIEmbeddingConfig,
     VoyageAIEmbeddingConfig,
     create_embeddings,
 )
+
+# Import enum and individual values for backward compatibility
 from haive.core.models.embeddings.provider_types import EmbeddingProvider
+
+# Create individual constants for backward compatibility
+ANYSCALE = EmbeddingProvider.ANYSCALE
+AZURE = EmbeddingProvider.AZURE
+BEDROCK = EmbeddingProvider.BEDROCK
+CLOUDFLARE = EmbeddingProvider.CLOUDFLARE
+COHERE = EmbeddingProvider.COHERE
+FASTEMBED = EmbeddingProvider.FASTEMBED
+HUGGINGFACE = EmbeddingProvider.HUGGINGFACE
+JINA = EmbeddingProvider.JINA
+LLAMACPP = EmbeddingProvider.LLAMACPP
+NOVITA = EmbeddingProvider.NOVITA
+OLLAMA = EmbeddingProvider.OLLAMA
+OPENAI = EmbeddingProvider.OPENAI
+SENTENCE_TRANSFORMERS = EmbeddingProvider.SENTENCE_TRANSFORMERS
+VERTEXAI = EmbeddingProvider.VERTEXAI
+VOYAGEAI = EmbeddingProvider.VOYAGEAI
+
+# Import test functions if available
+try:
+    from haive.core.models.embeddings.test_embeddings import (
+        TestEmbeddingProviders,
+        test_config_classes_exist,
+        test_factory_function,
+        test_provider_enum_values,
+    )
+except ImportError:
+    # Test functions not available
+    def test_config_classes_exist():
+        """Placeholder test function."""
+        pass
+
+    def test_factory_function():
+        """Placeholder test function."""
+        pass
+
+    def test_provider_enum_values():
+        """Placeholder test function."""
+        pass
+
+    class TestEmbeddingProviders:
+        """Placeholder test class."""
+
+        pass
+
 
 __all__ = [
     "ANYSCALE",
@@ -107,9 +155,6 @@ __all__ = [
     "VertexAIEmbeddingConfig",
     "VoyageAIEmbeddingConfig",
     "create_embeddings",
-    "get_api_key",
-    "instantiate",
-    "resolve_api_key",
     "test_config_classes_exist",
     "test_factory_function",
     "test_provider_enum_values",

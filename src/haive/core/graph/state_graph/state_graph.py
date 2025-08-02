@@ -17,7 +17,6 @@ from haive.core.graph.state_graph.branch_spec import BranchSpec
 from haive.core.graph.state_graph.node_spec import NodeSpec
 from haive.core.graph.state_graph.serializer import FunctionReference, TypeReference
 
-# Generic type for node specification
 TNode = TypeVar("TNode", bound=Any)
 
 
@@ -51,8 +50,6 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         default_factory=lambda: str(uuid4()), description="Unique identifier"
     )
     name: str = Field(default="unnamed_graph", description="Graph name")
-
-    # Basic properties
     edges: set[tuple[str, str]] = Field(default_factory=set, description="Graph edges")
     waiting_edges: set[tuple[tuple[str, ...], str]] = Field(
         default_factory=set, description="Edges that wait for multiple source nodes"
@@ -60,12 +57,8 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
     compiled: bool = Field(
         default=False, description="Whether the graph has been compiled"
     )
-
-    # Entry and exit points
     entry_point: str | None = Field(default=None, description="Entry point node name")
     finish_point: str | None = Field(default=None, description="Finish point node name")
-
-    # Schemas
     schema: TypeReference | None = Field(default=None, description="State schema type")
     input_schema: TypeReference | None = Field(
         default=None, description="Input schema type"
@@ -76,16 +69,12 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
     config_schema: TypeReference | None = Field(
         default=None, description="Config schema type"
     )
-
-    # Nodes and branches
     nodes: dict[str, NodeSpec[TNode]] = Field(
         default_factory=dict, description="Node specifications"
     )
     branches: dict[str, dict[str, BranchSpec]] = Field(
         default_factory=lambda: defaultdict(dict), description="Branch specifications"
     )
-
-    # Metadata
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
@@ -96,11 +85,8 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
     updated_at: datetime = Field(
         default_factory=datetime.now, description="Last update timestamp"
     )
-
-    # Private attribute for change tracking
     _modified: bool = PrivateAttr(default=False)
     _reserved_nodes: ClassVar[list[str]] = ["__start__", "__end__"]
-
     model_config = ConfigDict(
         extra="allow",
         arbitrary_types_allowed=True,
@@ -124,17 +110,14 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
     @model_validator(mode="after")
     def validate_graph_structure(self) -> Self:
         """Validate the overall graph structure."""
-        # Check that entry and finish points exist if set
         if self.entry_point and self.entry_point not in self.nodes:
             raise ValueError(
                 f"Entry point '{self.entry_point}' references non-existent node"
             )
-
         if self.finish_point and self.finish_point not in self.nodes:
             raise ValueError(
                 f"Finish point '{self.finish_point}' references non-existent node"
             )
-
         return self
 
     @computed_field
@@ -150,7 +133,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         return (
             len(self.edges)
             + len(self.waiting_edges)
-            + sum(len(branch_dict) for branch_dict in self.branches.values())
+            + sum((len(branch_dict) for branch_dict in self.branches.values()))
         )
 
     @computed_field
@@ -158,18 +141,12 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
     def all_edges(self) -> list[dict[str, Any]]:
         """Get all edges in the graph in a structured format."""
         result = []
-
-        # Regular edges
         for src, dst in self.edges:
             result.append({"type": "edge", "source": src, "target": dst})
-
-        # Waiting edges
         for srcs, dst in self.waiting_edges:
             result.append(
                 {"type": "waiting_edge", "sources": list(srcs), "target": dst}
             )
-
-        # Branch edges
         for src, branch_dict in self.branches.items():
             for branch_name, branch in branch_dict.items():
                 if branch.ends:
@@ -192,7 +169,6 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
                             "branch": branch_name,
                         }
                     )
-
         return result
 
     def mark_modified(self) -> None:
@@ -204,10 +180,8 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         """Add a node to the graph."""
         if name in self._reserved_nodes:
             raise ValueError(f"Cannot add reserved node name: {name}")
-
         if name in self.nodes:
             raise ValueError(f"Node '{name}' already exists")
-
         self.nodes[name] = NodeSpec(name=name, spec=node_spec)
         self.mark_modified()
         return self
@@ -216,73 +190,46 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         """Remove a node and all its connected edges and branches."""
         if name in self._reserved_nodes:
             raise ValueError(f"Cannot remove reserved node: {name}")
-
         if name not in self.nodes:
             raise ValueError(f"Node '{name}' does not exist")
-
-        # Remove edges to/from this node
         self.edges = {(src, dst) for src, dst in self.edges if name not in (src, dst)}
-
-        # Remove waiting edges involving this node
         new_waiting_edges = set()
         for srcs, dst in self.waiting_edges:
             if dst != name and name not in srcs:
                 new_waiting_edges.add((srcs, dst))
             elif dst != name:
-                # Filter out this node from sources
-                new_srcs = tuple(src for src in srcs if src != name)
+                new_srcs = tuple((src for src in srcs if src != name))
                 if new_srcs:
                     new_waiting_edges.add((new_srcs, dst))
         self.waiting_edges = new_waiting_edges
-
-        # Remove branches from this node
         if name in self.branches:
             del self.branches[name]
-
-        # Remove branches targeting this node
         for source, branch_dict in list(self.branches.items()):
             for branch_name, branch in list(branch_dict.items()):
                 if branch.ends:
-                    # Filter out ends that point to the removed node
                     branch.ends = {k: v for k, v in branch.ends.items() if v != name}
-
-                    # Remove branch if it has no ends left
-                    if not branch.ends and not branch.then:
+                    if not branch.ends and (not branch.then):
                         branch_dict.pop(branch_name, None)
-
-                # Remove branches with 'then' pointing to this node
                 elif branch.then == name:
                     branch.then = None
                     if not branch.ends:
                         branch_dict.pop(branch_name, None)
-
-            # Remove empty branch dictionaries
             if not branch_dict:
                 self.branches.pop(source, None)
-
-        # Update entry/finish points
         if self.entry_point == name:
             self.entry_point = None
-
         if self.finish_point == name:
             self.finish_point = None
-
-        # Remove the node
         del self.nodes[name]
-
         self.mark_modified()
         return self
 
     def add_edge(self, source: str, target: str) -> "StateGraphSerializable":
         """Add an edge between two nodes."""
-        # Special handling for reserved nodes
         if source not in self.nodes and source != "__start__":
             raise ValueError(f"Source node '{source}' does not exist")
-
         if target not in self.nodes and target != "__end__":
             raise ValueError(f"Target node '{target}' does not exist")
-
-        # Add the edge
         self.edges.add((source, target))
         self.mark_modified()
         return self
@@ -291,7 +238,6 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         """Remove an edge between two nodes."""
         if (source, target) not in self.edges:
             raise ValueError(f"Edge from '{source}' to '{target}' does not exist")
-
         self.edges.remove((source, target))
         self.mark_modified()
         return self
@@ -300,15 +246,11 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         self, sources: list[str], target: str
     ) -> "StateGraphSerializable":
         """Add a waiting edge (edge that waits for multiple source nodes to complete)."""
-        # Check nodes exist
         for source in sources:
             if source not in self.nodes and source not in self._reserved_nodes:
                 raise ValueError(f"Source node '{source}' does not exist")
-
         if target not in self.nodes and target != "__end__":
             raise ValueError(f"Target node '{target}' does not exist")
-
-        # Add the waiting edge
         self.waiting_edges.add((tuple(sources), target))
         self.mark_modified()
         return self
@@ -322,7 +264,6 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
             raise ValueError(
                 f"Waiting edge from {sources} to '{target}' does not exist"
             )
-
         self.waiting_edges.remove((source_tuple, target))
         self.mark_modified()
         return self
@@ -331,7 +272,6 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         """Set the entry point for the graph."""
         if node not in self.nodes:
             raise ValueError(f"Node '{node}' does not exist")
-
         self.entry_point = node
         self.mark_modified()
         return self
@@ -340,7 +280,6 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         """Set the finish point for the graph."""
         if node not in self.nodes:
             raise ValueError(f"Node '{node}' does not exist")
-
         self.finish_point = node
         self.mark_modified()
         return self
@@ -358,28 +297,20 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         """
         if not nodes:
             raise ValueError("Sequence requires at least one node")
-
         previous_name = None
-
         for node in nodes:
             if isinstance(node, tuple) and len(node) == 2:
                 name, node_spec = node
             else:
                 name = node
                 node_spec = None
-
-            # Add node if it doesn't exist and spec is provided
             if name not in self.nodes and node_spec is not None:
                 self.add_node(name, node_spec)
             elif name not in self.nodes:
                 raise ValueError(f"Node '{name}' does not exist and no spec provided")
-
-            # Connect to previous node
             if previous_name is not None:
                 self.add_edge(previous_name, name)
-
             previous_name = name
-
         self.mark_modified()
         return self
 
@@ -403,19 +334,12 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         """
         if source not in self.nodes:
             raise ValueError(f"Source node '{source}' does not exist")
-
-        # Check target nodes exist
         for target in targets.values():
             if target not in self.nodes and target != "__end__":
                 raise ValueError(f"Target node '{target}' does not exist")
-
-        if then and then not in self.nodes and then != "__end__":
+        if then and then not in self.nodes and (then != "__end__"):
             raise ValueError(f"Then node '{then}' does not exist")
-
-        # Create branch name
         branch_name = f"condition_{len(self.branches.get(source, {})) + 1}"
-
-        # Create branch spec
         branch = BranchSpec(
             name=branch_name,
             path=(
@@ -427,12 +351,9 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
             then=then,
             branch_type="conditional",
         )
-
-        # Add to branches
         if source not in self.branches:
             self.branches[source] = {}
         self.branches[source][branch_name] = branch
-
         self.mark_modified()
         return self
 
@@ -450,14 +371,9 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         """
         if source not in self.branches or branch_name not in self.branches[source]:
             raise ValueError(f"Branch '{branch_name}' from '{source}' does not exist")
-
-        # Remove the branch
         del self.branches[source][branch_name]
-
-        # Remove the branch dictionary if empty
         if not self.branches[source]:
             del self.branches[source]
-
         self.mark_modified()
         return self
 
@@ -478,25 +394,18 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
             "incoming_branches": [],
             "outgoing_branches": [],
         }
-
-        # Regular edges
         for src, dst in self.edges:
             if src == node:
                 result["outgoing_edges"].append(dst)
             elif dst == node:
                 result["incoming_edges"].append(src)
-
-        # Waiting edges
         for srcs, dst in self.waiting_edges:
             if node in srcs:
                 result["outgoing_waiting_edges"].append(dst)
             elif dst == node:
                 result["incoming_waiting_edges"].extend(list(srcs))
-
-        # Branches
         for src, branch_dict in self.branches.items():
             if src == node:
-                # Outgoing branches
                 for _branch_name, branch in branch_dict.items():
                     if branch.ends:
                         for target in branch.ends.values():
@@ -505,15 +414,12 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
                     if branch.then and branch.then not in result["outgoing_branches"]:
                         result["outgoing_branches"].append(branch.then)
             else:
-                # Incoming branches
                 for _branch_name, branch in branch_dict.items():
                     targets = list(branch.ends.values()) if branch.ends else []
                     if branch.then:
                         targets.append(branch.then)
-
                     if node in targets and src not in result["incoming_branches"]:
                         result["incoming_branches"].append(src)
-
         return result
 
     def is_node_reachable(self, node: str) -> bool:
@@ -527,43 +433,27 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         """
         if node not in self.nodes:
             return False
-
-        # Check if there's an entry point
         if not self.entry_point:
-            # If no entry point, check if there's a path from __start__
             return self._is_reachable("__start__", node)
-
-        # Check if there's a path from the entry point
         return self._is_reachable(self.entry_point, node)
 
     def _is_reachable(self, start: str, target: str) -> bool:
         """Internal method to check if target is reachable from start."""
-        # Simple BFS
         visited = set()
         queue = [start]
-
         while queue:
             current = queue.pop(0)
-
             if current == target:
                 return True
-
             if current in visited:
                 continue
-
             visited.add(current)
-
-            # Add neighbors from edges
             for src, dst in self.edges:
                 if src == current and dst not in visited:
                     queue.append(dst)
-
-            # Add neighbors from waiting edges
             for srcs, dst in self.waiting_edges:
                 if current in srcs and dst not in visited:
                     queue.append(dst)
-
-            # Add neighbors from branches
             if current in self.branches:
                 for _branch_name, branch in self.branches[current].items():
                     if branch.ends:
@@ -572,7 +462,6 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
                                 queue.append(dst)
                     if branch.then and branch.then not in visited:
                         queue.append(branch.then)
-
         return False
 
     def validate(self) -> bool:
@@ -586,14 +475,11 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         Returns:
             True if valid, raises ValueError otherwise
         """
-        # Check edges reference valid nodes
         for src, dst in self.edges:
             if src != "__start__" and src not in self.nodes:
                 raise ValueError(f"Edge references non-existent source node '{src}'")
             if dst != "__end__" and dst not in self.nodes:
                 raise ValueError(f"Edge references non-existent target node '{dst}'")
-
-        # Check waiting edges
         for srcs, dst in self.waiting_edges:
             for src in srcs:
                 if src != "__start__" and src not in self.nodes:
@@ -604,12 +490,9 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
                 raise ValueError(
                     f"Waiting edge references non-existent target node '{dst}'"
                 )
-
-        # Check branches
         for src, branch_dict in self.branches.items():
             if src not in self.nodes:
                 raise ValueError(f"Branch from non-existent node '{src}'")
-
             for _branch_name, branch in branch_dict.items():
                 if branch.ends:
                     for end in branch.ends.values():
@@ -617,29 +500,22 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
                             raise ValueError(
                                 f"Branch references non-existent target node '{end}'"
                             )
-
                 if (
                     branch.then
                     and branch.then != "__end__"
-                    and branch.then not in self.nodes
+                    and (branch.then not in self.nodes)
                 ):
                     raise ValueError(
                         f"Branch 'then' references non-existent node '{branch.then}'"
                     )
-
-        # Check entry and finish points
         if self.entry_point and self.entry_point not in self.nodes:
             raise ValueError(f"Entry point '{self.entry_point}' does not exist")
-
         if self.finish_point and self.finish_point not in self.nodes:
             raise ValueError(f"Finish point '{self.finish_point}' does not exist")
-
-        # Check all nodes are reachable
         if self.entry_point:
             for node in self.nodes:
                 if not self._is_reachable(self.entry_point, node):
                     logger.warning(f"Node '{node}' is not reachable from entry point")
-
         return True
 
     def is_modified(self) -> bool:
@@ -676,27 +552,18 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
             waiting_edges=set(graph.waiting_edges),
             compiled=graph.compiled,
         )
-
-        # Handle schemas
         if hasattr(graph, "schema"):
             serializable.schema = TypeReference.from_type(graph.schema)
-
         if hasattr(graph, "input"):
             serializable.input_schema = TypeReference.from_type(graph.input)
-
         if hasattr(graph, "output"):
             serializable.output_schema = TypeReference.from_type(graph.output)
-
         if hasattr(graph, "config_schema"):
             serializable.config_schema = TypeReference.from_type(graph.config_schema)
-
-        # Handle nodes
         for name, node_spec in graph.nodes.items():
             node = NodeSpec.from_node_spec(name, node_spec)
             if node:
                 serializable.nodes[name] = node
-
-        # Handle branches
         for source, branch_dict in graph.branches.items():
             for branch_name, branch in branch_dict.items():
                 branch_spec = BranchSpec.from_branch(branch_name, branch)
@@ -704,15 +571,9 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
                     if source not in serializable.branches:
                         serializable.branches[source] = {}
                     serializable.branches[source][branch_name] = branch_spec
-
-        # Handle entry and finish points
         if hasattr(graph, "entry_point"):
             serializable.entry_point = graph.entry_point
-
         if hasattr(graph, "finish_point"):
             serializable.finish_point = graph.finish_point
-
-        # Reset modified flag after initialization
         serializable._modified = False
-
         return serializable

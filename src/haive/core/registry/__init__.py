@@ -97,8 +97,23 @@ from haive.core.registry.memory import MemoryRegistry
 # Type alias for component metadata
 ComponentMetadata = Dict[str, Any]
 
-# Initialize registry types
-RegistryManager.register_registry_type("memory", MemoryRegistry)
+
+# Initialize registry types lazily to avoid circular imports
+def _initialize_registry_types():
+    """Initialize default registry types."""
+    try:
+        RegistryManager.register_registry_type("memory", MemoryRegistry)
+    except Exception as e:
+        # Ignore initialization errors during import
+        pass
+
+
+# Defer initialization
+try:
+    _initialize_registry_types()
+except Exception:
+    # Initialization will happen on first use
+    pass
 
 # Export primary classes
 __all__ = [

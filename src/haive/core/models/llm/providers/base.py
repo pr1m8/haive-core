@@ -72,13 +72,8 @@ class ProviderImportError(ImportError):
         """
         self.provider = provider
         self.package = package
-
         if message is None:
-            message = (
-                f"{provider} provider is not available. "
-                f"Please install it with: pip install {package}"
-            )
-
+            message = f"{provider} provider is not available. Please install it with: pip install {package}"
         super().__init__(message)
 
 
@@ -139,8 +134,6 @@ class BaseLLMProvider(
         default_factory=dict, description="Additional provider-specific parameters"
     )
     debug: bool = Field(default=False, description="Enable debug output")
-
-    # Rate limiting fields (from RateLimitingMixin)
     requests_per_second: float | None = Field(
         default=None,
         description="Maximum number of requests per second. None means no limit.",
@@ -174,7 +167,6 @@ class BaseLLMProvider(
         description="Maximum burst size for rate limiting. None uses default.",
         ge=1,
     )
-
     model_config = {"arbitrary_types_allowed": True}
 
     @model_validator(mode="after")
@@ -187,14 +179,10 @@ class BaseLLMProvider(
         Returns:
             The validated instance
         """
-        # Set default model if not provided
         if self.model is None:
             self.model = self._get_default_model()
-
-        # Set default name if not provided
         if self.name is None:
             self.name = self.model
-
         return self
 
     @abstractmethod
@@ -235,7 +223,6 @@ class BaseLLMProvider(
             The environment variable name (e.g., OPENAI_API_KEY)
         """
         provider_upper = self.provider.value.upper()
-        # Handle special cases
         if provider_upper == "TOGETHER_AI":
             return "TOGETHER_AI_API_KEY"
         if provider_upper == "FIREWORKS_AI":
@@ -255,10 +242,8 @@ class BaseLLMProvider(
             The API key (from input or environment)
         """
         if v.get_secret_value() == "" and hasattr(info, "data"):
-            # Get provider from instance data
             provider = info.data.get("provider")
             if provider:
-                # Construct env var name
                 env_key = f"{provider.value.upper()}_API_KEY"
                 env_value = os.getenv(env_key, "")
                 return SecretStr(env_value)
@@ -283,15 +268,11 @@ class BaseLLMProvider(
             **(self.extra_params or {}),
             **kwargs,
         }
-
-        # Add API key if available
         api_key = self.get_api_key()
         if api_key:
-            # Most providers use 'api_key' but some have specific names
             api_key_param = self._get_api_key_param_name()
             if api_key_param:
                 params[api_key_param] = api_key
-
         return params
 
     def _get_api_key_param_name(self) -> str | None:
@@ -303,7 +284,6 @@ class BaseLLMProvider(
         Returns:
             The parameter name for API key, or None if no key needed
         """
-        # Default for most providers
         return "api_key"
 
     def instantiate(self, **kwargs) -> Any:
@@ -324,21 +304,14 @@ class BaseLLMProvider(
             ValueError: If required configuration is missing
             RuntimeError: If instantiation fails
         """
-        # Get the chat class
         try:
             chat_class = self._get_chat_class()
         except ImportError as e:
             raise ProviderImportError(
                 provider=self.provider.value, package=self._get_import_package()
             ) from e
-
-        # Validate required configuration
         self._validate_config()
-
-        # Get initialization parameters
         params = self._get_initialization_params(**kwargs)
-
-        # Create LLM instance
         try:
             llm = chat_class(**params)
         except Exception as e:
@@ -348,10 +321,7 @@ class BaseLLMProvider(
             raise RuntimeError(
                 f"Failed to instantiate {self.provider.value} model: {e!s}"
             ) from e
-
-        # Apply rate limiting if configured
         llm = self.apply_rate_limiting(llm)
-
         return llm
 
     def _validate_config(self) -> None:
@@ -364,12 +334,10 @@ class BaseLLMProvider(
         Raises:
             ValueError: If configuration is invalid
         """
-        # Most providers require an API key
-        if self._requires_api_key() and not self.get_api_key():
+        if self._requires_api_key() and (not self.get_api_key()):
             env_key = self._get_env_key_name()
             raise ValueError(
-                f"{self.provider.value} API key is required. "
-                f"Please set {env_key} environment variable or provide an API key."
+                f"{self.provider.value} API key is required. Please set {env_key} environment variable or provide an API key."
             )
 
     def _requires_api_key(self) -> bool:
@@ -378,8 +346,6 @@ class BaseLLMProvider(
         Returns:
             True if API key is required (default), False otherwise
         """
-        # Most providers require API keys
-        # Subclasses can override for local models
         return True
 
     @classmethod

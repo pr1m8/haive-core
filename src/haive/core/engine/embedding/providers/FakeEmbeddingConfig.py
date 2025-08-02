@@ -53,7 +53,7 @@ class FakeEmbeddingConfig(BaseEmbeddingConfig):
         default="fake", description="Provider name for API key resolution"
     )
 
-    @validator("size")
+    @field_validator("size")
     @classmethod
     def validate_size(cls, v) -> Any:
         """Validate embedding size."""
@@ -63,7 +63,7 @@ class FakeEmbeddingConfig(BaseEmbeddingConfig):
             raise ValueError("Embedding size too large (max 4096)")
         return v
 
-    @validator("model")
+    @field_validator("model")
     @classmethod
     def validate_model(cls, v) -> Any:
         """Validate fake model name."""

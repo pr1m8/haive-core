@@ -42,10 +42,7 @@ from haive.core.graph.common.field_utils import extract_field, get_last_message_
 from haive.core.graph.common.references import CallableReference
 from haive.core.graph.common.types import ConfigLike, NodeOutput, StateLike
 
-# Set up logging
 logger = logging.getLogger(__name__)
-
-# Type variables for generic parameters
 T = TypeVar("T", bound=StateLike)
 C = TypeVar("C", bound=ConfigLike)
 O = TypeVar("O", bound=NodeOutput)
@@ -103,18 +100,13 @@ class Branch(BaseModel, Generic[T, C, O]):
         ```
     """
 
-    # Core identification
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str = Field(default_factory=lambda: f"branch_{uuid.uuid4().hex[:8]}")
-
-    # Connection information
     source_node: str | None = Field(default=None)
     destinations: dict[bool | str, str] = Field(
         default_factory=lambda: {True: "continue", False: END}
     )
     default: str | None = None
-
-    # Evaluation properties
     mode: BranchMode = BranchMode.DIRECT
     key: str | None = None
     value: Any = None
@@ -123,7 +115,6 @@ class Branch(BaseModel, Generic[T, C, O]):
     function_ref: CallableReference | None = None
     allow_none: bool = False
     message_key: str = "messages"
-
     model_config = {"arbitrary_types_allowed": True}
 
     @model_validator(mode="after")
@@ -135,16 +126,12 @@ class Branch(BaseModel, Generic[T, C, O]):
         Returns:
             The validated Branch instance
         """
-        # Resolve function from reference
-        if self.function_ref and not self.function:
+        if self.function_ref and (not self.function):
             resolved = self.function_ref.resolve()
-            # Handle case where resolve returns a tuple
             if isinstance(resolved, tuple) and len(resolved) > 0:
-                # Extract the function from the tuple
                 self.function = resolved[0]
             else:
                 self.function = resolved
-
         return self
 
     @model_validator(mode="after")
@@ -159,16 +146,12 @@ class Branch(BaseModel, Generic[T, C, O]):
         if not self.destinations:
             self.destinations = {True: "continue", False: END}
         elif len(self.destinations) == 1:
-            # If only one destination is provided, map it to True and END to
-            # False
             true_dest = next(iter(self.destinations.values()))
             self.destinations = {True: true_dest, False: END}
-        # Only set default if we have multiple destinations and no default is set
-        # AND we don't have a list of destinations (True/False mapping)
         elif (
             len(self.destinations) > 1
             and self.default is None
-            and not all(isinstance(k, bool) for k in self.destinations)
+            and (not all((isinstance(k, bool) for k in self.destinations)))
         ):
             self.default = END
         return self
@@ -187,27 +170,18 @@ class Branch(BaseModel, Generic[T, C, O]):
             Routing result (node name, Send object, Command, etc.)
         """
         try:
-            # Regular branch evaluation
             result = self.evaluate(state)
-
-            # Handle None results
             if result is None:
-                # If we have a default destination, use it
                 if self.default is not None:
                     return self.default
-                # Otherwise use False route
                 if False in self.destinations:
                     return self.destinations[False]
-                # Last resort - return first destination
                 if self.destinations:
                     return next(iter(self.destinations.values()))
-                return END  # Final fallback
-
+                return END
             return result
-
         except Exception as e:
             logger.exception(f"Error in branch evaluation: {e}")
-            # Same fallback logic as None
             if self.default is not None:
                 return self.default
             if False in self.destinations:
@@ -229,35 +203,22 @@ class Branch(BaseModel, Generic[T, C, O]):
             Routing result based on the evaluation
         """
         try:
-            # Handle different branch modes
             if self.mode == BranchMode.FUNCTION and self.function:
                 return self._process_result(self.function(state), state)
-
-            # Default direct mode
-            # Handle existence checks
             if self.comparison in [ComparisonType.EXISTS, ComparisonType.NOT_EXISTS]:
                 result = self._check_exists(state)
                 if self.comparison == ComparisonType.NOT_EXISTS:
                     result = not result
                 return self._get_destination(result)
-
-            # Handle special message comparisons
             if self.comparison == ComparisonType.MESSAGE_CONTAINS:
                 result = self._check_message_contains(state)
                 return self._get_destination(result)
-
-            # Regular field comparison
             field_value = extract_field(state, self.key)
-
-            # Handle None values
-            if field_value is None and not self.allow_none:
+            if field_value is None and (not self.allow_none):
                 logger.warning(f"Field '{self.key}' is None and allow_none is False")
                 return self.default
-
-            # Perform comparison
             result = self._compare(field_value)
             return self._get_destination(result)
-
         except Exception as e:
             logger.exception(f"Error evaluating branch: {e}")
             return self.default
@@ -274,23 +235,16 @@ class Branch(BaseModel, Generic[T, C, O]):
         Returns:
             Processed routing result
         """
-        # Handle Send objects
         if isinstance(result, Send):
             return BranchResult(send_objects=[result])
-
-        # Handle lists of Send objects
-        if isinstance(result, list) and all(isinstance(item, Send) for item in result):
+        if isinstance(result, list) and all(
+            (isinstance(item, Send) for item in result)
+        ):
             return BranchResult(send_objects=result)
-
-        # Handle Command objects
         if isinstance(result, Command):
             return BranchResult(command_object=result)
-
-        # Handle regular destination lookup
         if isinstance(result, bool | str):
             return self._get_destination(result)
-
-        # Fallback
         return self.default
 
     def _get_destination(self, result: bool | str) -> str:
@@ -319,16 +273,11 @@ class Branch(BaseModel, Generic[T, C, O]):
         """
         comparison = self.comparison
         target = self.value
-
-        # Convert string comparison to enum if needed
         if isinstance(comparison, str):
             try:
                 comparison = ComparisonType(comparison)
             except ValueError:
-                # Use as string if not an enum value
                 pass
-
-        # Perform comparison
         if comparison == ComparisonType.EQUALS:
             return value == target
         if comparison == ComparisonType.NOT_EQUALS:
@@ -363,7 +312,6 @@ class Branch(BaseModel, Generic[T, C, O]):
             return value.startswith(target) if isinstance(value, str) else False
         if comparison == ComparisonType.ENDS_WITH:
             return value.endswith(target) if isinstance(value, str) else False
-
         logger.warning(f"Unknown comparison type: {comparison}")
         return False
 
@@ -380,7 +328,6 @@ class Branch(BaseModel, Generic[T, C, O]):
         """
         if self.key is None:
             return False
-
         value = extract_field(state, self.key)
         return value is not None
 
@@ -399,6 +346,4 @@ class Branch(BaseModel, Generic[T, C, O]):
         content = get_last_message_content(state, self.message_key)
         if not content or not isinstance(content, str):
             return False
-
-        # Check if content contains value
         return self.value in content

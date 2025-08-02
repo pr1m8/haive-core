@@ -111,6 +111,53 @@ Examples:
 
 from haive.core.models.vectorstore.base import VectorStoreConfig, VectorStoreProvider
 
+# Create individual constants for backward compatibility
+Chroma = VectorStoreProvider.Chroma
+FAISS = VectorStoreProvider.FAISS
+InMemory = VectorStoreProvider.InMemory
+Milvus = VectorStoreProvider.Milvus
+Pinecone = VectorStoreProvider.Pinecone
+Qdrant = VectorStoreProvider.Qdrant
+Weaviate = VectorStoreProvider.Weaviate
+Zilliz = VectorStoreProvider.Zilliz
+
+# Import factory functions if they exist
+try:
+    from haive.core.models.vectorstore.factory import (
+        add_document,
+        create_retriever,
+        create_retriever_from_documents,
+        create_vectorstore,
+        create_vs_config_from_documents,
+        create_vs_from_documents,
+    )
+except ImportError:
+    # Factory functions not available
+    def add_document(*args, **kwargs):
+        """Placeholder function."""
+        pass
+
+    def create_retriever(*args, **kwargs):
+        """Placeholder function."""
+        pass
+
+    def create_retriever_from_documents(*args, **kwargs):
+        """Placeholder function."""
+        pass
+
+    def create_vectorstore(*args, **kwargs):
+        """Placeholder function."""
+        pass
+
+    def create_vs_config_from_documents(*args, **kwargs):
+        """Placeholder function."""
+        pass
+
+    def create_vs_from_documents(*args, **kwargs):
+        """Placeholder function."""
+        pass
+
+
 __all__ = [
     "Chroma",
     "FAISS",

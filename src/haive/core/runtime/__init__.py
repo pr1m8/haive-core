@@ -75,8 +75,10 @@ See Also:
 """
 
 from haive.core.runtime.base.base import RuntimeComponent
-from haive.core.runtime.base.protocols import RuntimeProtocol
-from haive.core.runtime.extension.base import ExtensionBase
+from haive.core.runtime.base.protocols import (
+    RuntimeComponentProtocol as RuntimeProtocol,
+)
+from haive.core.runtime.extension.base import Extension as ExtensionBase
 from haive.core.runtime.extension.protocols import ExtensionProtocol
 
 __all__ = [

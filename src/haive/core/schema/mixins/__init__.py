@@ -2,12 +2,11 @@
 
 This package provides mixins to break down large classes into focused,
 reusable components while maintaining backward compatibility.
+
+Note: Mixin implementations are currently consolidated in the main schema module.
 """
 
-from haive.core.schema.mixins.engine_composer_mixin import EngineComposerMixin
-from haive.core.schema.mixins.field_composer_mixin import FieldComposerMixin
+# TODO: Move mixin implementations from main schema module to separate files
+# For now, this module serves as a placeholder for future mixin organization
 
-__all__ = [
-    "EngineComposerMixin",
-    "FieldComposerMixin",
-]
+__all__ = []

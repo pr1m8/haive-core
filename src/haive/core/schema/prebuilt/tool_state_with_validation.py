@@ -28,49 +28,36 @@ class EnhancedToolState(ToolState):
     adding powerful validation and routing capabilities.
     """
 
-    # Validation and routing state
     validation_state: ValidationRoutingState = Field(
         default_factory=ValidationStateManager.create_routing_state,
         description="State for validation results and routing decisions",
     )
-
-    # Enhanced tool management
     tool_metadata: dict[str, dict[str, Any]] = Field(
         default_factory=dict,
         description="Rich metadata for each tool including categories, priorities, etc.",
     )
-
     tool_performance: dict[str, dict[str, float]] = Field(
         default_factory=dict,
         description="Performance metrics for tool execution tracking",
     )
-
     tool_execution_history: list[dict[str, Any]] = Field(
         default_factory=list, description="History of tool executions for analysis"
     )
-
-    # Tool organization (excluded from serialization due to sets)
     tool_categories: dict[str, set[str]] = Field(
         default_factory=dict,
         description="Organization of tools by category",
         exclude=True,
     )
-
     tool_dependencies: dict[str, list[str]] = Field(
         default_factory=dict, description="Tool dependency mapping"
     )
-
     tool_priorities: dict[str, int] = Field(
         default_factory=dict,
         description="Tool execution priorities (higher = more important)",
     )
-
-    # Message management
     tool_message_status: dict[str, str] = Field(
         default_factory=dict, description="Status tracking for tool messages"
     )
-
-    # Conditional branching support
     branch_conditions: dict[str, Any] = Field(
         default_factory=dict, description="Conditions for conditional branching"
     )
@@ -78,22 +65,15 @@ class EnhancedToolState(ToolState):
     @model_validator(mode="after")
     def enhanced_tool_setup(self) -> Self:
         """Enhanced setup that preserves ToolState functionality."""
-        # Call parent setup first to maintain all existing functionality
         super().sync_tools_and_update_routes()
-
-        # Setup enhanced features
         self._setup_enhanced_tool_features()
-
         return self
 
     def _setup_enhanced_tool_features(self) -> None:
         """Setup enhanced tool management features."""
-        # Auto-categorize any uncategorized tools
         for tool_name in self.tool_routes:
             if not self._tool_is_categorized(tool_name):
                 self._auto_categorize_tool(tool_name)
-
-        # Initialize performance tracking for new tools
         for tool_name in self.tool_routes:
             if tool_name not in self.tool_performance:
                 self.tool_performance[tool_name] = {
@@ -105,36 +85,33 @@ class EnhancedToolState(ToolState):
 
     def _tool_is_categorized(self, tool_name: str) -> bool:
         """Check if a tool is already categorized."""
-        return any(tool_name in tools for tools in self.tool_categories.values())
+        return any((tool_name in tools for tools in self.tool_categories.values()))
 
     def _auto_categorize_tool(self, tool_name: str) -> None:
         """Automatically categorize a tool based on its route and name."""
         route = self.tool_routes.get(tool_name, "unknown")
-
-        # Base category from route
         route_categories = {
             "langchain_tool": "execution",
             "pydantic_model": "validation",
             "function": "utility",
             "unknown": "general",
         }
-
-        # Refine based on tool name patterns
         name_lower = tool_name.lower()
-        if any(word in name_lower for word in ["search", "query", "find", "retrieve"]):
+        if any(
+            (word in name_lower for word in ["search", "query", "find", "retrieve"])
+        ):
             category = "retrieval"
-        elif any(word in name_lower for word in ["write", "create", "save", "update"]):
+        elif any(
+            (word in name_lower for word in ["write", "create", "save", "update"])
+        ):
             category = "creation"
-        elif any(word in name_lower for word in ["analyze", "process", "transform"]):
+        elif any((word in name_lower for word in ["analyze", "process", "transform"])):
             category = "processing"
-        elif any(word in name_lower for word in ["validate", "check", "verify"]):
+        elif any((word in name_lower for word in ["validate", "check", "verify"])):
             category = "validation"
         else:
             category = route_categories.get(route, "general")
-
         self.add_tool_to_category(tool_name, category)
-
-    # Enhanced tool management methods
 
     def add_tool_enhanced(
         self,
@@ -147,28 +124,18 @@ class EnhancedToolState(ToolState):
         target_engine: str | None = None,
     ) -> None:
         """Enhanced tool addition with metadata and categorization."""
-        # Use parent's proven add_tool method
         super().add_tool(tool, route, target_engine)
-
-        # Get tool name for enhancements
         tool_name = self._get_tool_name(tool, len(self.tools) - 1)
-
-        # Add enhanced features
         if category:
             self.add_tool_to_category(tool_name, category)
         else:
             self._auto_categorize_tool(tool_name)
-
         if priority != 0:
             self.tool_priorities[tool_name] = priority
-
         if dependencies:
             self.tool_dependencies[tool_name] = dependencies
-
         if metadata:
             self.tool_metadata[tool_name] = metadata
-
-        # Initialize performance tracking
         if tool_name not in self.tool_performance:
             self.tool_performance[tool_name] = {
                 "avg_execution_time": 0.0,
@@ -182,8 +149,6 @@ class EnhancedToolState(ToolState):
         if category not in self.tool_categories:
             self.tool_categories[category] = set()
         self.tool_categories[category].add(tool_name)
-
-        # Store in metadata for serialization
         if tool_name not in self.tool_metadata:
             self.tool_metadata[tool_name] = {}
         self.tool_metadata[tool_name]["category"] = category
@@ -192,15 +157,12 @@ class EnhancedToolState(ToolState):
         """Get actual tool objects for a category."""
         if category not in self.tool_categories:
             return []
-
         tool_names = self.tool_categories[category]
         return [
             self.get_tool_by_name(name)
             for name in tool_names
             if self.get_tool_by_name(name)
         ]
-
-    # Validation and routing methods
 
     def update_tool_message_status(self, tool_call_id: str, status: str) -> None:
         """Update the status of a tool message."""
@@ -215,16 +177,10 @@ class EnhancedToolState(ToolState):
         self, validation_state: ValidationRoutingState
     ) -> None:
         """Apply validation results to update tool message states."""
-        # Update our validation state
         self.validation_state = validation_state
-
-        # Update tool message statuses
         for tool_call_id, result in validation_state.tool_validations.items():
             self.update_tool_message_status(tool_call_id, result.status.value)
-
-        # Update branch conditions with routing data
         self.branch_conditions.update(validation_state.get_routing_decision())
-
         logger.info(
             f"Applied validation results: {validation_state.get_routing_summary()}"
         )
@@ -232,8 +188,6 @@ class EnhancedToolState(ToolState):
     def get_validation_routing_data(self) -> dict[str, Any]:
         """Get data for conditional branching based on validation results."""
         base_data = self.validation_state.get_routing_decision()
-
-        # Add additional routing information
         base_data.update(
             {
                 "tool_message_statuses": self.tool_message_status.copy(),
@@ -242,7 +196,6 @@ class EnhancedToolState(ToolState):
                 "has_dependencies": len(self.tool_dependencies) > 0,
             }
         )
-
         return base_data
 
     def should_continue_to_tools(self) -> bool:
@@ -270,8 +223,6 @@ class EnhancedToolState(ToolState):
         """Get tool calls that have corrections available."""
         return self.validation_state.get_correctable_tool_calls()
 
-    # Conditional branching support
-
     def set_branch_condition(self, condition_name: str, value: Any) -> None:
         """Set a condition for conditional branching."""
         self.branch_conditions[condition_name] = value
@@ -283,15 +234,12 @@ class EnhancedToolState(ToolState):
     def evaluate_branch_condition(self, condition_expr: str) -> bool:
         """Evaluate a branch condition expression."""
         try:
-            # Simple evaluation - in production would use a safer evaluator
             return eval(condition_expr, {"__builtins__": {}}, self.branch_conditions)
         except Exception as e:
             logger.warning(
                 f"Failed to evaluate branch condition '{condition_expr}': {e}"
             )
             return False
-
-    # Performance tracking (inherited and enhanced)
 
     def track_tool_execution(
         self,
@@ -301,7 +249,6 @@ class EnhancedToolState(ToolState):
         context: dict[str, Any] | None = None,
     ) -> None:
         """Track tool execution for performance monitoring."""
-        # Add to history
         execution_record = {
             "tool_name": tool_name,
             "execution_time": execution_time,
@@ -310,8 +257,6 @@ class EnhancedToolState(ToolState):
             "context": context or {},
         }
         self.tool_execution_history.append(execution_record)
-
-        # Update performance metrics
         if tool_name not in self.tool_performance:
             self.tool_performance[tool_name] = {
                 "avg_execution_time": 0.0,
@@ -319,19 +264,13 @@ class EnhancedToolState(ToolState):
                 "total_executions": 0,
                 "successful_executions": 0,
             }
-
         metrics = self.tool_performance[tool_name]
         metrics["total_executions"] += 1
-
         if success:
             metrics["successful_executions"] += 1
-
-        # Update averages
         metrics["success_rate"] = (
             metrics["successful_executions"] / metrics["total_executions"]
         )
-
-        # Update average execution time (exponential moving average)
         alpha = 0.1
         if metrics["avg_execution_time"] == 0:
             metrics["avg_execution_time"] = execution_time
@@ -339,8 +278,6 @@ class EnhancedToolState(ToolState):
             metrics["avg_execution_time"] = (
                 alpha * execution_time + (1 - alpha) * metrics["avg_execution_time"]
             )
-
-    # Summary and utility methods
 
     def get_enhanced_summary(self) -> dict[str, Any]:
         """Get comprehensive summary of enhanced tool state."""
@@ -356,8 +293,6 @@ class EnhancedToolState(ToolState):
             "tools_with_dependencies": len(self.tool_dependencies),
             "tools_with_performance_data": len(self.tool_performance),
         }
-
-        # Add validation summary
         base_summary["validation_summary"] = {
             "total_validations": self.validation_state.total_tools,
             "valid_count": len(self.validation_state.valid_tool_calls),
@@ -366,8 +301,5 @@ class EnhancedToolState(ToolState):
             "next_action": self.validation_state.next_action.value,
             "target_nodes": list(self.validation_state.target_nodes),
         }
-
-        # Add branch conditions
         base_summary["branch_conditions"] = self.branch_conditions.copy()
-
         return base_summary

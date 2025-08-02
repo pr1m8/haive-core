@@ -74,7 +74,7 @@ class OpenAIEmbeddingConfig(BaseEmbeddingConfig):
         default="openai", description="Provider name for API key resolution"
     )
 
-    @validator("model")
+    @field_validator("model")
     @classmethod
     def validate_model(cls, v) -> Any:
         """Validate the OpenAI model name."""
@@ -94,7 +94,7 @@ class OpenAIEmbeddingConfig(BaseEmbeddingConfig):
             )
         return v
 
-    @validator("dimensions")
+    @field_validator("dimensions")
     @classmethod
     def validate_dimensions(cls, v, values) -> Any:
         """Validate dimensions based on model."""
