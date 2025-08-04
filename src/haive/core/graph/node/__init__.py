@@ -102,66 +102,73 @@ from langgraph.types import Command, RetryPolicy, Send
 from pydantic import BaseModel
 
 # ===== ENGINE NODES =====
-from .engine_node import EngineNodeConfig
+from haive.core.graph.node.engine_node import EngineNodeConfig
 
 # Try to import additional engine nodes
 try:
-    from .engine_node_generic import GenericEngineNode
+    from haive.core.graph.node.engine_node_generic import GenericEngineNode
 except ImportError:
     GenericEngineNode = None
 
 # ===== AGENT NODES =====
-from .agent_node_v3 import AgentNodeV3Config as AgentNodeV3
+from haive.core.graph.node.agent_node_v3 import AgentNodeV3Config as AgentNodeV3
 
 # Try to import additional agent nodes
 try:
-    from .multi_agent_node import MultiAgentNode
+    from haive.core.graph.node.multi_agent_node import MultiAgentNode
 except ImportError:
     MultiAgentNode = None
 
 try:
-    from .intelligent_multi_agent_node import IntelligentMultiAgentNode
+    from haive.core.graph.node.intelligent_multi_agent_node import (
+        IntelligentMultiAgentNode,
+    )
 except ImportError:
     IntelligentMultiAgentNode = None
 
 # ===== VALIDATION & ROUTING NODES =====
 try:
-    from .validation_node_config import ValidationNodeConfig
+    from haive.core.graph.node.validation_node_config import ValidationNodeConfig
 except ImportError:
     ValidationNodeConfig = None
 
 try:
-    from .routing_validation_node import RoutingValidationNode
+    from haive.core.graph.node.routing_validation_node import RoutingValidationNode
 except ImportError:
     RoutingValidationNode = None
 
 try:
-    from .state_updating_validation_node import StateUpdatingValidationNode
+    from haive.core.graph.node.state_updating_validation_node import (
+        StateUpdatingValidationNode,
+    )
 except ImportError:
     StateUpdatingValidationNode = None
 
 try:
-    from .unified_validation_node import UnifiedValidationNode
+    from haive.core.graph.node.unified_validation_node import UnifiedValidationNode
 except ImportError:
     UnifiedValidationNode = None
 
 # ===== FIELD MAPPING & COMPOSITION =====
 try:
-    from .composer.field_mapping import FieldMapping, FieldMappingConfig
+    from haive.core.graph.node.composer.field_mapping import (
+        FieldMapping,
+        FieldMappingConfig,
+    )
 except ImportError:
     FieldMapping = None
     FieldMappingConfig = None
 
 try:
-    from .composer.node_schema_composer import NodeSchemaComposer
+    from haive.core.graph.node.composer.node_schema_composer import NodeSchemaComposer
 except ImportError:
     NodeSchemaComposer = None
 
 # ===== BASE CLASSES & TYPES =====
-from .config import NodeConfig
+from haive.core.graph.node.config import NodeConfig
 
 # Import decorators for compatibility
-from .decorators import (
+from haive.core.graph.node.decorators import (
     branch_node,
     register_node,
     send_node,
@@ -170,9 +177,9 @@ from .decorators import (
 )
 
 # ===== UTILITIES & FACTORIES =====
-from .factory import NodeFactory
-from .registry import NodeRegistry
-from .types import (
+from haive.core.graph.node.factory import NodeFactory
+from haive.core.graph.node.registry import NodeRegistry
+from haive.core.graph.node.types import (
     AsyncNodeFunction,
     CommandGoto,
     ConfigType,
@@ -183,7 +190,7 @@ from .types import (
 )
 
 # Import utility functions
-from .utils import create_send_node, extract_io_mapping_from_schema
+from haive.core.graph.node.utils import create_send_node, extract_io_mapping_from_schema
 
 # ===== FACTORY FUNCTIONS (Keep existing API) =====
 

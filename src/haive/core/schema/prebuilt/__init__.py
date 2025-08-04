@@ -18,6 +18,9 @@ from haive.core.schema.multi_agent_state_schema import MultiAgentStateSchema
 
 # from haive.core.schema.prebuilt.basic_agent_state import BasicAgentState
 from haive.core.schema.prebuilt.dynamic_activation_state import DynamicActivationState
+from haive.core.schema.prebuilt.enhanced_multi_agent_state import (
+    EnhancedMultiAgentState,
+)
 from haive.core.schema.prebuilt.llm_state import LLMState
 
 # Import messages module components
@@ -83,6 +86,7 @@ __all__ = [
     # Core prebuilt schemas
     # "BasicAgentState",
     "DynamicActivationState",
+    "EnhancedMultiAgentState",
     "LLMState",
     "MessagesState",
     "MessagesStateWithTokenUsage",
