@@ -30,7 +30,7 @@ class SubgraphRegistry(BaseModel):
         graph: GraphBase,
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,
-        **kwargs
+        **kwargs,
     ) -> Subgraph:
         """Register a subgraph.
 

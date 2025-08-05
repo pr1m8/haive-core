@@ -74,12 +74,10 @@ class MermaidGenerator:
 
         # Add special node classes
         lines.append(
-            f"    classDef startNode fill:{
-                cls.START_COLOR},color:white,font-weight:bold;"
+            f"    classDef startNode fill:{cls.START_COLOR},color:white,font-weight:bold;"
         )
         lines.append(
-            f"    classDef endNode fill:{
-                cls.END_COLOR},color:white,font-weight:bold;"
+            f"    classDef endNode fill:{cls.END_COLOR},color:white,font-weight:bold;"
         )
         lines.append(
             f"    classDef highlightNode fill:{highlight_color},stroke:#fff,stroke-width:2px,color:white;"
@@ -461,10 +459,7 @@ class MermaidGenerator:
 
         if highlight_list:
             lines.append("    %% Highlight specified nodes")
-            lines.append(
-                f"    class {
-                    ','.join(highlight_list)} highlightNode;"
-            )
+            lines.append(f"    class {','.join(highlight_list)} highlightNode;")
 
     @classmethod
     def _get_node_type(cls, graph: Any, node_name: str, node: Any) -> str:

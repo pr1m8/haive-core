@@ -27,7 +27,7 @@ class SubgraphMixin:
         graph: GraphBase,
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,
-        **kwargs
+        **kwargs,
     ) -> "GraphBase":
         """Add a subgraph to the graph.
 
