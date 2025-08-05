@@ -241,7 +241,6 @@ class StateSchemaValidationNode:
         """Create function that updates state with validation results."""
 
         def validation_node(state: EnhancedToolState) -> EnhancedToolState:
-
             # Get tool calls using state's computed field equivalent
             tool_calls = state.get_tool_calls()
             if not tool_calls:
@@ -272,7 +271,6 @@ class StateSchemaValidationNode:
         """Create function that routes based on state's validation results."""
 
         def validation_router(state: EnhancedToolState) -> list[MockSend] | str:
-
             # Use state's validation data for routing
             state.get_validation_routing_data()
 

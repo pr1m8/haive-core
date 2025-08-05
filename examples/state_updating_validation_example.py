@@ -135,8 +135,7 @@ def create_dual_validation_graph():
             return state
 
         ai_msg = AIMessage(
-            content=f"Iteration {
-                state.iteration_count}: Processing request...",
+            content=f"Iteration {state.iteration_count}: Processing request...",
             tool_calls=tool_calls,
         )
         state.messages.append(ai_msg)
@@ -190,10 +189,7 @@ def create_dual_validation_graph():
         if tool_name == "web_search":
             result = f"Found 10 results for query: {args.get('query', 'N/A')}"
         elif tool_name == "calculator":
-            result = f"Calculation result: {
-                args.get(
-                    'expression',
-                    'N/A')} = 50"
+            result = f"Calculation result: {args.get('expression', 'N/A')} = 50"
         else:
             result = f"Executed {tool_name} with args: {args}"
 
@@ -212,10 +208,7 @@ def create_dual_validation_graph():
         args = tool_call.get("args", {})
 
         # Simulate structured parsing
-        result = f"Generated structured output: {tool_name} with title '{
-            args.get(
-                'title',
-                'Unknown')}'"
+        result = f"Generated structured output: {tool_name} with title '{args.get('title', 'Unknown')}'"
 
         tool_msg = ToolMessage(content=result, tool_call_id=tool_id, name=tool_name)
         state.messages.append(tool_msg)
