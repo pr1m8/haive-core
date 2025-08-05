@@ -66,7 +66,7 @@ class RAGState(MessagesState):
         context_parts = []
         for i, doc in enumerate(self.documents):
             # Include metadata if available
-            source = doc.metadata.get("source", f"Document {i+1}")
+            source = doc.metadata.get("source", f"Document {i + 1}")
             context_parts.append(f"[Source: {source}]\n{doc.page_content}")
 
         self.context = separator.join(context_parts)
