@@ -12,16 +12,13 @@ unified reporting across all analysis tools.
 
 import concurrent.futures
 import json
-import os
 import re
 import subprocess
-import tempfile
-import threading
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Union
 
 try:
     import mypy.api
@@ -1014,7 +1011,7 @@ class StaticAnalysisOrchestrator:
                 lines.append(f"### {tool_name}\n")
 
                 if result.success:
-                    lines.append(f"- **Status**: ✅ Success")
+                    lines.append("- **Status**: ✅ Success")
                     lines.append(f"- **Execution time**: {result.execution_time:.3f}s")
                     lines.append(f"- **Findings**: {len(result.findings)}")
 
@@ -1039,7 +1036,7 @@ class StaticAnalysisOrchestrator:
                         for suggestion in result.suggestions:
                             lines.append(f"- {suggestion}")
                 else:
-                    lines.append(f"- **Status**: ❌ Failed")
+                    lines.append("- **Status**: ❌ Failed")
                     lines.append(f"- **Error**: {result.error_message}")
 
                 lines.append("")
