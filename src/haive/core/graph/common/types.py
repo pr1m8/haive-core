@@ -48,3 +48,13 @@ class NodeType(str, Enum):
     CUSTOM = "custom"
     SUBGRAPH = "subgraph"
     PARSER = "parser"
+
+    # Message handling nodes
+    MESSAGE_TRANSFORMER = "message_transformer"
+
+    # Coordination nodes
+    COORDINATOR = "coordinator"
+    TRANSFORM = "transform"
+
+    # Output parsing
+    OUTPUT_PARSER = "output_parser"
