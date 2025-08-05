@@ -1,445 +1,185 @@
-"""LangChain-specific type converters for documents, messages, and prompts."""
+"""Type compatibility checking system."""
 
 from __future__ import annotations
 
-import hashlib
-import json
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Set, Type, Union
 
-from langchain_core.documents import Document
-from langchain_core.messages import (
-    AIMessage,
-    BaseMessage,
-    FunctionMessage,
-    HumanMessage,
-    SystemMessage,
-    ToolMessage,
-)
-from langchain_core.prompts import (
-    BasePromptTemplate,
-    ChatPromptTemplate,
-    MessagesPlaceholder,
-    PromptTemplate,
+from haive.core.schema.compatibility.converters import get_converter_registry
+from haive.core.schema.compatibility.types import (
+    CompatibilityLevel,
+    ConversionPath,
+    TypeInfo,
 )
 
-from haive.core.schema.compatibility.converters import TypeConverter
-from haive.core.schema.compatibility.types import ConversionContext, ConversionQuality
 
+class CompatibilityChecker:
+    """Check compatibility between types and schemas."""
 
-class MessageConverter(TypeConverter):
-    """Converter for LangChain message types."""
+    def __init__(self) -> None:
+        """Initialize compatibility checker."""
+        self._converter_registry = get_converter_registry()
+        self._compatibility_cache: Dict[
+            tuple[Type[Any], Type[Any]], CompatibilityLevel
+        ] = {}
 
-    # Message type priority for lossy conversions
-    MESSAGE_HIERARCHY = {
-        BaseMessage: 0,
-        SystemMessage: 1,
-        HumanMessage: 1,
-        AIMessage: 1,
-        ToolMessage: 2,
-        FunctionMessage: 2,
-    }
+    def check_compatibility(
+        self, source_type: Type[Any], target_type: Type[Any]
+    ) -> CompatibilityLevel:
+        """Check compatibility level between two types."""
+        # Check cache first
+        cache_key = (source_type, target_type)
+        if cache_key in self._compatibility_cache:
+            return self._compatibility_cache[cache_key]
 
-    @property
-    def name(self) -> str:
-        return "langchain_message_converter"
+        level = self._determine_compatibility(source_type, target_type)
+        self._compatibility_cache[cache_key] = level
+        return level
 
-    @property
-    def priority(self) -> int:
-        return 10  # High priority for message conversions
+    def _determine_compatibility(
+        self, source_type: Type[Any], target_type: Type[Any]
+    ) -> CompatibilityLevel:
+        """Determine compatibility level between types."""
+        # Exact match
+        if source_type == target_type:
+            return CompatibilityLevel.EXACT
 
-    def can_convert(self, source_type: type, target_type: type) -> bool:
-        """Check if we can convert between message types."""
+        # Check subtype relationship
         try:
-            return issubclass(source_type, BaseMessage) and issubclass(
-                target_type, BaseMessage
-            )
+            if issubclass(source_type, target_type):
+                return CompatibilityLevel.SUBTYPE
         except TypeError:
-            return False
+            # Not class types
+            pass
 
-    def get_quality(self, source_type: type, target_type: type) -> ConversionQuality:
-        """Determine conversion quality."""
-        if source_type == target_type:
-            return ConversionQuality.LOSSLESS
+        # Check if types share a protocol
+        if self._check_protocol_compatibility(source_type, target_type):
+            return CompatibilityLevel.PROTOCOL
 
-        # Converting to base type is lossy
-        if target_type == BaseMessage:
-            return ConversionQuality.LOSSY
+        # Check if converter exists
+        if self._converter_registry.find_converter(source_type, target_type):
+            return CompatibilityLevel.CONVERTIBLE
 
-        # Check hierarchy levels
-        source_level = self.MESSAGE_HIERARCHY.get(source_type, 99)
-        target_level = self.MESSAGE_HIERARCHY.get(target_type, 99)
+        # Check if types can be coerced
+        if self._check_coercible(source_type, target_type):
+            return CompatibilityLevel.COERCIBLE
 
-        if source_level == target_level:
-            return ConversionQuality.SAFE
-        if source_level < target_level:
-            # Converting from general to specific
-            return ConversionQuality.UNSAFE
-        # Converting from specific to general
-        return ConversionQuality.LOSSY
+        # Check partial compatibility (for structured types)
+        if self._check_partial_compatibility(source_type, target_type):
+            return CompatibilityLevel.PARTIAL
 
-    def convert(self, value: BaseMessage, context: ConversionContext) -> BaseMessage:
-        """Convert between message types."""
-        target_type_name = context.target_type.split(".")[-1]
-        target_type = self._get_message_type(target_type_name)
+        return CompatibilityLevel.INCOMPATIBLE
 
-        # Same type - no conversion
-        if isinstance(value, target_type):
-            return value
+    def _check_protocol_compatibility(
+        self, source_type: Type[Any], target_type: Type[Any]
+    ) -> bool:
+        """Check if types are compatible via protocol."""
+        # Check if target is a Protocol
+        if hasattr(target_type, "_is_protocol") and target_type._is_protocol:
+            # Check if source implements the protocol
+            try:
+                # Simple check - more sophisticated implementation needed
+                source_attrs = set(dir(source_type))
+                target_attrs = {
+                    attr
+                    for attr in dir(target_type)
+                    if not attr.startswith("_") or attr == "__init__"
+                }
+                return target_attrs.issubset(source_attrs)
+            except Exception:
+                return False
+        return False
 
-        # Extract core data
-        content = value.content
-        additional_kwargs = value.additional_kwargs.copy()
+    def _check_coercible(self, source_type: Type[Any], target_type: Type[Any]) -> bool:
+        """Check if types can be coerced (with potential data loss)."""
+        # Define coercible type pairs
+        coercible_pairs = [
+            (int, float),
+            (int, str),
+            (float, str),
+            (bool, int),
+            (bool, str),
+            (list, tuple),
+            (tuple, list),
+            (set, list),
+            (list, set),
+        ]
 
-        # Special conversions
-        if isinstance(value, AIMessage) and target_type == ToolMessage:
-            return self._ai_to_tool(value, context)
-        if isinstance(value, ToolMessage) and target_type == AIMessage:
-            return self._tool_to_ai(value, context)
-        if isinstance(value, HumanMessage | AIMessage) and target_type == SystemMessage:
-            context.add_warning("Converting user/assistant message to system message")
-            return SystemMessage(content=content, additional_kwargs=additional_kwargs)
+        for src, tgt in coercible_pairs:
+            try:
+                if issubclass(source_type, src) and issubclass(target_type, tgt):
+                    return True
+            except TypeError:
+                continue
 
-        # Generic conversion
-        try:
-            if target_type == HumanMessage:
-                return HumanMessage(
-                    content=content, additional_kwargs=additional_kwargs
-                )
-            if target_type == AIMessage:
-                return AIMessage(content=content, additional_kwargs=additional_kwargs)
-            if target_type == SystemMessage:
-                return SystemMessage(
-                    content=content, additional_kwargs=additional_kwargs
-                )
-            if target_type == BaseMessage:
-                # Keep original type but track as "converted"
-                context.add_warning(f"Keeping as {type(value).__name__}")
-                return value
-            # Try direct instantiation
-            return target_type(content=content, **additional_kwargs)
-        except Exception as e:
-            context.add_error(f"Conversion failed: {e!s}")
-            return value
+        return False
 
-    def _ai_to_tool(self, ai_msg: AIMessage, context: ConversionContext) -> ToolMessage:
-        """Convert AIMessage to ToolMessage."""
-        # Check for tool calls
-        if hasattr(ai_msg, "tool_calls") and ai_msg.tool_calls:
-            tool_call = ai_msg.tool_calls[0]
-            context.track_lost_field("additional_tool_calls", ai_msg.tool_calls[1:])
+    def _check_partial_compatibility(
+        self, source_type: Type[Any], target_type: Type[Any]
+    ) -> bool:
+        """Check if types are partially compatible (share some fields)."""
+        # Check if both are Pydantic models
+        if hasattr(source_type, "__fields__") and hasattr(target_type, "__fields__"):
+            source_fields = set(source_type.__fields__.keys())
+            target_fields = set(target_type.__fields__.keys())
+            # Partial if they share at least one field
+            return bool(source_fields & target_fields)
 
-            return ToolMessage(
-                content=ai_msg.content or json.dumps(tool_call.get("args", {})),
-                tool_call_id=tool_call.get("id", self._generate_id(ai_msg.content)),
-                additional_kwargs=ai_msg.additional_kwargs,
-            )
-        # No tool calls - generate synthetic tool message
-        context.add_warning(
-            "No tool calls in AIMessage, creating synthetic ToolMessage"
-        )
-        return ToolMessage(
-            content=ai_msg.content,
-            tool_call_id=self._generate_id(ai_msg.content),
-            additional_kwargs={
-                **ai_msg.additional_kwargs,
-                "synthetic": True,
-                "original_type": "AIMessage",
-            },
-        )
-
-    def _tool_to_ai(
-        self, tool_msg: ToolMessage, context: ConversionContext
-    ) -> AIMessage:
-        """Convert ToolMessage to AIMessage."""
-        return AIMessage(
-            content=f"Tool Response [{tool_msg.tool_call_id}]: {tool_msg.content}",
-            additional_kwargs={
-                **tool_msg.additional_kwargs,
-                "was_tool_message": True,
-                "tool_call_id": tool_msg.tool_call_id,
-            },
-        )
-
-    def _get_message_type(self, type_name: str) -> type:
-        """Get message type from string name."""
-        type_map = {
-            "BaseMessage": BaseMessage,
-            "HumanMessage": HumanMessage,
-            "AIMessage": AIMessage,
-            "SystemMessage": SystemMessage,
-            "ToolMessage": ToolMessage,
-            "FunctionMessage": FunctionMessage,
-        }
-        return type_map.get(type_name, BaseMessage)
-
-    def _generate_id(self, content: str) -> str:
-        """Generate ID from content."""
-        return hashlib.md5(content.encode()).hexdigest()[:8]
-
-
-class DocumentConverter(TypeConverter):
-    """Converter for Document-related conversions."""
-
-    @property
-    def name(self) -> str:
-        return "langchain_document_converter"
-
-    @property
-    def priority(self) -> int:
-        return 10
-
-    def can_convert(self, source_type: type, target_type: type) -> bool:
-        """Check if conversion is possible."""
-        # Document to Message conversions
-        if source_type == Document and issubclass(target_type, BaseMessage):
-            return True
-
-        # Message to Document conversions
-        if issubclass(source_type, BaseMessage) and target_type == Document:
-            return True
-
-        # Document to dict/str
-        if source_type == Document and target_type in [dict, str]:
-            return True
-
-        # dict/str to Document
-        return bool(source_type in [dict, str] and target_type == Document)
-
-    def get_quality(self, source_type: type, target_type: type) -> ConversionQuality:
-        """Determine conversion quality."""
-        # Document <-> Message is lossy (metadata handling)
-        if (source_type == Document and issubclass(target_type, BaseMessage)) or (
-            issubclass(source_type, BaseMessage) and target_type == Document
+        # Check if both are TypedDicts
+        if hasattr(source_type, "__annotations__") and hasattr(
+            target_type, "__annotations__"
         ):
-            return ConversionQuality.LOSSY
+            source_fields = set(source_type.__annotations__.keys())
+            target_fields = set(target_type.__annotations__.keys())
+            return bool(source_fields & target_fields)
 
-        # Document <-> dict is safe
-        if source_type == Document and target_type == dict:
-            return ConversionQuality.SAFE
+        return False
 
-        # Document <-> str is lossy
-        if source_type == Document and target_type == str:
-            return ConversionQuality.LOSSY
+    def get_conversion_path(
+        self, source_type: Type[Any], target_type: Type[Any]
+    ) -> Optional[ConversionPath]:
+        """Get conversion path between types if available."""
+        return self._converter_registry.get_conversion_path(source_type, target_type)
 
-        return ConversionQuality.SAFE
-
-    def convert(self, value: Any, context: ConversionContext) -> Any:
-        """Perform conversion."""
-        context.source_type.split(".")[-1]
-        target_type_name = context.target_type.split(".")[-1]
-
-        # Document to Message
-        if isinstance(value, Document):
-            if target_type_name in ["HumanMessage", "BaseMessage"]:
-                return self._doc_to_human_message(value, context)
-            if target_type_name == "AIMessage":
-                return self._doc_to_ai_message(value, context)
-            if target_type_name == "dict":
-                return self._doc_to_dict(value, context)
-            if target_type_name == "str":
-                return self._doc_to_str(value, context)
-
-        # Message to Document
-        elif isinstance(value, BaseMessage):
-            return self._message_to_doc(value, context)
-
-        # Dict to Document
-        elif isinstance(value, dict):
-            return self._dict_to_doc(value, context)
-
-        # String to Document
-        elif isinstance(value, str):
-            return self._str_to_doc(value, context)
-
-        return value
-
-    def _doc_to_human_message(
-        self, doc: Document, context: ConversionContext
-    ) -> HumanMessage:
-        """Convert Document to HumanMessage."""
-        # Include metadata in message
-        metadata_str = ""
-        if doc.metadata:
-            metadata_str = f"\n[Source: {doc.metadata.get('source', 'unknown')}]"
-            context.track_lost_field("full_metadata", doc.metadata)
-
-        return HumanMessage(
-            content=doc.page_content + metadata_str,
-            additional_kwargs={
-                "source": "document",
-                "doc_metadata": doc.metadata,
-            },
-        )
-
-    def _doc_to_ai_message(
-        self, doc: Document, context: ConversionContext
-    ) -> AIMessage:
-        """Convert Document to AIMessage."""
-        return AIMessage(
-            content=f"Document content: {doc.page_content}",
-            additional_kwargs={
-                "source": "document",
-                "doc_metadata": doc.metadata,
-            },
-        )
-
-    def _doc_to_dict(self, doc: Document, context: ConversionContext) -> dict:
-        """Convert Document to dict."""
-        return {
-            "page_content": doc.page_content,
-            "metadata": doc.metadata,
-            "type": "Document",
-        }
-
-    def _doc_to_str(self, doc: Document, context: ConversionContext) -> str:
-        """Convert Document to string."""
-        if doc.metadata:
-            context.track_lost_field("metadata", doc.metadata)
-        return doc.page_content
-
-    def _message_to_doc(self, msg: BaseMessage, context: ConversionContext) -> Document:
-        """Convert Message to Document."""
-        metadata = {
-            "source": "message",
-            "message_type": type(msg).__name__,
-            **msg.additional_kwargs,
-        }
-
-        return Document(
-            page_content=msg.content,
-            metadata=metadata,
-        )
-
-    def _dict_to_doc(self, data: dict, context: ConversionContext) -> Document:
-        """Convert dict to Document."""
-        # Handle different dict formats
-        if "page_content" in data:
-            return Document(
-                page_content=data["page_content"],
-                metadata=data.get("metadata", {}),
-            )
-        if "content" in data:
-            return Document(
-                page_content=data["content"],
-                metadata={k: v for k, v in data.items() if k != "content"},
-            )
-        # Treat entire dict as metadata
-        return Document(
-            page_content=str(data),
-            metadata=data,
-        )
-
-    def _str_to_doc(self, text: str, context: ConversionContext) -> Document:
-        """Convert string to Document."""
-        return Document(
-            page_content=text,
-            metadata={"source": "string"},
-        )
+    def clear_cache(self) -> None:
+        """Clear compatibility cache."""
+        self._compatibility_cache.clear()
 
 
-class PromptConverter(TypeConverter):
-    """Converter for Prompt-related conversions."""
+# Global compatibility checker instance
+_global_checker = CompatibilityChecker()
+
+
+def check_compatibility(
+    source_type: Type[Any], target_type: Type[Any]
+) -> CompatibilityLevel:
+    """Check compatibility between two types using global checker."""
+    return _global_checker.check_compatibility(source_type, target_type)
+
+
+@dataclass
+class SchemaCompatibility:
+    """Result of schema compatibility check."""
+
+    level: CompatibilityLevel
+    compatible_fields: Dict[str, CompatibilityLevel] = field(default_factory=dict)
+    incompatible_fields: Dict[str, CompatibilityLevel] = field(default_factory=dict)
+    missing_fields: Set[str] = field(default_factory=set)
+    extra_fields: Set[str] = field(default_factory=set)
+    conversion_paths: Dict[str, ConversionPath] = field(default_factory=dict)
+    warnings: List[str] = field(default_factory=list)
+    errors: List[str] = field(default_factory=list)
 
     @property
-    def name(self) -> str:
-        return "langchain_prompt_converter"
+    def is_compatible(self) -> bool:
+        """Check if schemas are compatible."""
+        return self.level not in (CompatibilityLevel.INCOMPATIBLE,)
 
     @property
-    def priority(self) -> int:
-        return 10
-
-    def can_convert(self, source_type: type, target_type: type) -> bool:
-        """Check if conversion is possible."""
-        # String to Prompt
-        if source_type == str and issubclass(target_type, BasePromptTemplate):
-            return True
-
-        # Prompt to String
-        if issubclass(source_type, BasePromptTemplate) and target_type == str:
-            return True
-
-        # Between prompt types
-        if issubclass(source_type, BasePromptTemplate) and issubclass(
-            target_type, BasePromptTemplate
-        ):
-            return True
-
-        # Messages to ChatPrompt
-        return bool(source_type == list and target_type == ChatPromptTemplate)
-
-    def get_quality(self, source_type: type, target_type: type) -> ConversionQuality:
-        """Determine conversion quality."""
-        # Same type
-        if source_type == target_type:
-            return ConversionQuality.LOSSLESS
-
-        # String conversions are lossy (lose template info)
-        if str in (source_type, target_type):
-            return ConversionQuality.LOSSY
-
-        # PromptTemplate <-> ChatPromptTemplate
-        if (source_type == PromptTemplate and target_type == ChatPromptTemplate) or (
-            source_type == ChatPromptTemplate and target_type == PromptTemplate
-        ):
-            return ConversionQuality.SAFE
-
-        return ConversionQuality.SAFE
-
-    def convert(self, value: Any, context: ConversionContext) -> Any:
-        """Perform conversion."""
-        target_type_name = context.target_type.split(".")[-1]
-
-        # String to Prompt
-        if isinstance(value, str):
-            if target_type_name == "PromptTemplate":
-                return PromptTemplate.from_template(value)
-            if target_type_name == "ChatPromptTemplate":
-                return ChatPromptTemplate.from_template(value)
-
-        # Prompt to String
-        elif isinstance(value, BasePromptTemplate):
-            if target_type_name == "str":
-                # Try to get template string
-                if hasattr(value, "template"):
-                    return value.template
-                context.add_warning("Complex prompt converted to string representation")
-                return str(value)
-
-        # PromptTemplate to ChatPromptTemplate
-        elif isinstance(value, PromptTemplate):
-            if target_type_name == "ChatPromptTemplate":
-                return ChatPromptTemplate.from_template(value.template)
-
-        # ChatPromptTemplate to PromptTemplate
-        elif isinstance(value, ChatPromptTemplate):
-            if target_type_name == "PromptTemplate":
-                # Flatten to single template
-                context.add_warning("Flattening ChatPromptTemplate to PromptTemplate")
-                messages = value.messages
-                template_parts = []
-
-                for msg in messages:
-                    if hasattr(msg, "prompt") and hasattr(msg.prompt, "template"):
-                        template_parts.append(msg.prompt.template)
-                    elif isinstance(msg, MessagesPlaceholder):
-                        template_parts.append(f"{{{msg.variable_name}}}")
-
-                return PromptTemplate.from_template("\n".join(template_parts))
-
-        # List of messages to ChatPromptTemplate
-        elif isinstance(value, list):
-            if target_type_name == "ChatPromptTemplate":
-                return ChatPromptTemplate.from_messages(value)
-
-        return value
-
-
-def register_langchain_converters(registry: Any | None = None) -> None:
-    """Register all LangChain converters with the global registry."""
-    # Import here to avoid circular imports
-    from haive.core.schema.compatibility.converters import register_converter
-
-    # Register converters
-    register_converter(MessageConverter())
-    register_converter(DocumentConverter())
-    register_converter(PromptConverter())
+    def requires_conversion(self) -> bool:
+        """Check if conversion is required."""
+        return self.level in (
+            CompatibilityLevel.CONVERTIBLE,
+            CompatibilityLevel.COERCIBLE,
+            CompatibilityLevel.PARTIAL,
+        )
