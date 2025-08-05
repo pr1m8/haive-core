@@ -13,6 +13,8 @@ from urllib.parse import parse_qs, urlparse
 
 from pydantic import BaseModel, Field
 
+from .sources.source_types import LoaderCapability
+
 
 class PathType(str, Enum):
     """Primary path type classification."""

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Minimal working example of the Haive Document Loader System.
 
-from typing import Any
 This example demonstrates the core functionality of the document loading system
 even with the source registration issues. It shows how to use the basic
 AutoLoader functionality and path analysis.
@@ -13,6 +12,7 @@ Run this example with:
 import contextlib
 import tempfile
 from pathlib import Path
+from typing import Any
 
 from haive.core.engine.document.config import LoaderPreference
 from haive.core.engine.document.loaders import (

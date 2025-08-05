@@ -1,6 +1,5 @@
 """Ultimate Auto-Loader for Document Sources.
 
-from typing import Any, Dict
 This module provides the ultimate auto-loader functionality that can automatically
 detect, instantiate, and load documents from any source type. It integrates with
 the enhanced registry and path analyzer to provide seamless document loading.
@@ -38,7 +37,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 from langchain_core.documents import Document
 from pydantic import BaseModel, Field

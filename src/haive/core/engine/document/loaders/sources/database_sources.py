@@ -1,6 +1,5 @@
 """Database source registrations with connection string auto-detection.
 
-from typing import Any
 This module implements comprehensive database loaders from langchain_community
 including SQL, NoSQL, Graph databases, and Data Warehouses with intelligent
 connection string detection and query optimization.
@@ -10,7 +9,7 @@ from enum import Enum
 from typing import Any
 from urllib.parse import urlparse
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from .enhanced_registry import enhanced_registry, register_database_source
 from .source_types import BaseSource, LoaderCapability
@@ -203,7 +202,6 @@ class DatabaseSource(BaseSource):
     timeout: int = Field(30, ge=1, description="Query timeout in seconds")
     retry_attempts: int = Field(3, ge=1, description="Number of retry attempts")
 
-    @classmethod
     @field_validator("connection_string")
     @classmethod
     def validate_connection_string(cls, v) -> Any:
