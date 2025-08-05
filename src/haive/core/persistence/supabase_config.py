@@ -582,7 +582,6 @@ class SupabaseSaver:
                 metadata_dict = deserialize_metadata(row["metadata"])
 
                 class CheckpointTuple:
-
                     def __init__(
                         self, config, checkpoint, metadata, parent_config, writes=None
                     ):
