@@ -972,6 +972,43 @@ class DynamicGraph:
             self._log_error(f"Error adding edge {from_node} → {to_node}", e)
             raise
 
+    def remove_edge(
+        self, from_node: str, to_node: str | Literal["END"]
+    ) -> "DynamicGraph":
+        """Remove an edge between two nodes.
+
+        Args:
+            from_node: Source node name
+            to_node: Target node name
+
+        Returns:
+            Self for chaining
+        """
+        try:
+            logger.debug(f"Removing edge: {from_node} → {to_node}")
+
+            # Remove from edges list if it exists
+            original_from = from_node
+            original_to = to_node
+
+            # Find and remove the edge from our tracking
+            self.edges = [
+                edge
+                for edge in self.edges
+                if not (edge.source == original_from and edge.target == original_to)
+            ]
+
+            logger.info(f"Removed edge: {original_from} → {original_to}")
+            return self
+
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.exception(
+                f"Error removing edge {from_node} → {to_node}: {e!s}\n{tb}"
+            )
+            self._log_error(f"Error removing edge {from_node} → {to_node}", e)
+            raise
+
     def add_conditional_edges(
         self, from_node: str, condition: Callable, routes: dict[str, str]
     ) -> "DynamicGraph":

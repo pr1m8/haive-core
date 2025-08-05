@@ -1,8 +1,9 @@
-from typing import Annotated, Any, Self
+from typing import Annotated, Any, List, Self, Union, cast
 
 from langchain_core.messages import (
     AIMessage,
     AnyMessage,
+    BaseMessage,
     HumanMessage,
     SystemMessage,
     ToolMessage,
@@ -150,7 +151,9 @@ class MessagesState(StateSchema):
             if isinstance(msg, AIMessage) and msg.content:
                 try:
                     if isinstance(parser, PydanticToolsParser):
-                        parsed_tools = parser.parse(msg.content)
+                        # Handle string content for parser
+                        content_str = str(msg.content) if msg.content else ""
+                        parsed_tools = parser.parse(content_str)
                         for idx, tool_instance in enumerate(parsed_tools):
                             tool_msg = ToolMessage(
                                 content=tool_instance.json(),
@@ -180,16 +183,27 @@ class MessagesState(StateSchema):
             if hasattr(main_engine, "system_message"):
                 system_msg = self.get_system_message()
                 if system_msg and system_msg.content:
-                    main_engine.system_message = system_msg.content
+                    main_engine.system_message = system_msg.content  # type: ignore
             if hasattr(main_engine, "messages"):
-                main_engine.messages = self.messages
+                main_engine.messages = self.messages  # type: ignore
         return self
 
     def add_message(self, message: AnyMessage | dict) -> None:
         """Add a message to the conversation and track token usage."""
         if isinstance(message, dict):
-            message = messages_from_dict([message])[0]
-        self.messages.append(message)
+            converted_msgs = messages_from_dict([message])
+            if converted_msgs:
+                message = converted_msgs[0]  # type: ignore[assignment]
+
+        # Convert any BaseMessage to AnyMessage with type checking
+        if isinstance(message, BaseMessage):
+            # This should be safe as BaseMessage is parent of AnyMessage types
+            msg_to_add = cast(AnyMessage, message)
+        else:
+            # Handle dict case - should not happen after conversion above
+            msg_to_add = cast(AnyMessage, message)
+
+        self.messages.append(msg_to_add)
 
     def get_last_message(self) -> AnyMessage | None:
         """Get the last message in the conversation."""
@@ -217,7 +231,9 @@ class MessagesState(StateSchema):
     def get_system_message(self) -> SystemMessage | None:
         """Get the first system message if one exists."""
         system_msgs = self.get_filtered_messages(include_types=[SystemMessage])
-        return system_msgs[0] if system_msgs else None
+        if system_msgs and isinstance(system_msgs[0], SystemMessage):
+            return system_msgs[0]
+        return None
 
     def get_filtered_messages(self, **filter_kwargs) -> list[AnyMessage]:
         """Filter messages using LangChain's built-in filter_messages utility.
@@ -241,17 +257,23 @@ class MessagesState(StateSchema):
     def get_last_human_message(self) -> HumanMessage | None:
         """Get the last human message."""
         human_msgs = self.get_filtered_messages(include_types=[HumanMessage])
-        return human_msgs[-1] if human_msgs else None
+        if human_msgs and isinstance(human_msgs[-1], HumanMessage):
+            return human_msgs[-1]
+        return None
 
     def get_last_ai_message(self) -> AIMessage | None:
         """Get the last AI message."""
         ai_msgs = self.get_filtered_messages(include_types=[AIMessage])
-        return ai_msgs[-1] if ai_msgs else None
+        if ai_msgs and isinstance(ai_msgs[-1], AIMessage):
+            return ai_msgs[-1]
+        return None
 
     def get_last_tool_message(self) -> ToolMessage | None:
         """Get the last tool message."""
         tool_msgs = self.get_filtered_messages(include_types=[ToolMessage])
-        return tool_msgs[-1] if tool_msgs else None
+        if tool_msgs and isinstance(tool_msgs[-1], ToolMessage):
+            return tool_msgs[-1]
+        return None
 
     def is_last_message_from_ai(self) -> bool:
         """Check if the last message is from the AI."""
@@ -291,7 +313,27 @@ class MessagesState(StateSchema):
         if not msg:
             return []
         if hasattr(msg, "tool_calls") and msg.tool_calls:
-            return msg.tool_calls
+            # Convert tool calls to dicts with fallback handling
+            result = []
+            for call in msg.tool_calls:
+                try:
+                    if hasattr(call, "model_dump"):
+                        result.append(call.model_dump())  # type: ignore
+                    elif hasattr(call, "dict"):
+                        result.append(call.dict())  # type: ignore
+                    elif isinstance(call, dict):
+                        result.append(call)
+                    else:
+                        # Fallback: convert attributes to dict
+                        call_dict = {}
+                        for attr in ["name", "args", "id", "type"]:
+                            if hasattr(call, attr):
+                                call_dict[attr] = getattr(call, attr)
+                        result.append(call_dict)
+                except Exception:
+                    # Ultimate fallback
+                    result.append({"error": "Failed to serialize tool call"})
+            return result
         if hasattr(msg, "additional_kwargs") and msg.additional_kwargs.get(
             "tool_calls"
         ):
@@ -365,7 +407,11 @@ class MessagesState(StateSchema):
 
     def to_openai_format(self) -> list[dict]:
         """Convert messages to OpenAI API format."""
-        return convert_to_openai_messages(self.messages)
+        result = convert_to_openai_messages(self.messages)
+        # Ensure we return a list
+        if isinstance(result, dict):
+            return [result]
+        return result
 
     def to_langchain_prompt(self) -> str:
         """Convert message history to LangChain compatible prompt string."""
@@ -378,9 +424,14 @@ class MessagesState(StateSchema):
         """Create instance from dictionary format."""
         if isinstance(data, dict) and "messages" in data:
             messages = convert_to_messages(data["messages"])
-            return cls(messages=messages)
-        messages = convert_to_messages(data)
-        return cls(messages=messages)
+            return cls(messages=cast(List[AnyMessage], messages))
+        elif isinstance(data, list):
+            messages = convert_to_messages(data)
+            return cls(messages=cast(List[AnyMessage], messages))
+        else:
+            # Handle single dict case
+            messages = convert_to_messages([data])
+            return cls(messages=cast(List[AnyMessage], messages))
 
     @classmethod
     def with_system_message(cls, system_content: str) -> "MessagesState":
