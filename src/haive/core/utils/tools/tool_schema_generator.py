@@ -84,7 +84,7 @@ def extract_input_schema(
             schema_name = "ToolInput"
 
     # Handle different tool types
-    if LANGCHAIN_AVAILABLE and isinstance(tool_or_callable, type[BaseTool]):
+    if LANGCHAIN_AVAILABLE and BaseTool and isinstance(tool_or_callable, BaseTool):
         return _extract_from_langchain_tool(tool_or_callable, schema_name)
     if callable(tool_or_callable):
         return _extract_from_callable(
@@ -147,7 +147,8 @@ def _extract_from_callable(
             schema_name, input=(str, Field(description="Function input"))
         )
         if include_signature:
-            schema.__signature_info__ = {"error": str(e), "callable": func}
+            # Use setattr to avoid pyright complaints about unknown attributes
+            setattr(schema, "__signature_info__", {"error": str(e), "callable": func})
         return schema
 
     # Get type hints
@@ -217,11 +218,11 @@ def _extract_from_callable(
         )
         schema = create_model(schema_name)
         if include_signature:
-            schema.__signature_info__ = {
+            setattr(schema, "__signature_info__", {
                 "signature": signature,
                 "callable": func,
                 "has_parameters": False,
-            }
+            })
         return schema
 
     # Create and return the model
@@ -230,7 +231,7 @@ def _extract_from_callable(
 
         # Store signature information for dynamic invocation
         if include_signature:
-            schema.__signature_info__ = {
+            setattr(schema, "__signature_info__", {
                 "signature": signature,
                 "callable": func,
                 "parameter_count": len(signature.parameters),
@@ -246,7 +247,7 @@ def _extract_from_callable(
                 ],
                 "type_hints": type_hints,
                 "docstring": func.__doc__,
-            }
+            })
 
         return schema
     except Exception as e:
@@ -256,11 +257,11 @@ def _extract_from_callable(
             schema_name, input=(str, Field(description="Function input"))
         )
         if include_signature:
-            fallback_schema.__signature_info__ = {
+            setattr(fallback_schema, "__signature_info__", {
                 "signature": signature,
                 "callable": func,
                 "error": str(e),
-            }
+            })
         return fallback_schema
 
 
@@ -344,7 +345,7 @@ def extract_output_schema(
             schema_name = "ToolOutput"
 
     # Handle LangChain tools
-    if LANGCHAIN_AVAILABLE and isinstance(tool_or_callable, BaseTool):
+    if LANGCHAIN_AVAILABLE and BaseTool and isinstance(tool_or_callable, BaseTool):
         # Most LangChain tools return strings, but check if there's a specific
         # schema
         return create_model(schema_name, output=(str, Field(description="Tool output")))
@@ -441,7 +442,7 @@ def invoke_from_schema(schema_instance: BaseModel, **extra_kwargs) -> Any:
             "Ensure include_signature=True was used during extraction."
         )
 
-    sig_info = schema_class.__signature_info__
+    sig_info = getattr(schema_class, "__signature_info__")
     callable_func = sig_info.get("callable")
     signature = sig_info.get("signature")
 
@@ -616,6 +617,8 @@ def create_goal_tool_node(
 
         # Create StructuredTool with the schema as args_schema
         try:
+            if StructuredTool is None:
+                raise ValueError("StructuredTool not available")
             tool = StructuredTool.from_function(
                 func=goal_wrapper,
                 name=schema_name,
@@ -685,6 +688,8 @@ def create_batch_goal_tool_node(
         # Create StructuredTool that uses the schema name and calls batch
         # executor
         try:
+            if StructuredTool is None:
+                raise ValueError("StructuredTool not available")
             tool = StructuredTool.from_function(
                 func=batch_executor_function,
                 name=schema_name,
@@ -738,9 +743,11 @@ if __name__ == "__main__":
     schemas = create_tool_schemas(search_documents, include_signature=True)
 
     # Test signature info
-    sig_info = get_signature_info(schemas["input"])
-    if sig_info:
-        pass
+    input_schema = schemas.get("input")
+    if input_schema:
+        sig_info = get_signature_info(input_schema)
+        if sig_info:
+            pass
 
     # Test goal tool node creation
 
