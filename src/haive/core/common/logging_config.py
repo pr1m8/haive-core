@@ -224,7 +224,7 @@ class GameLogger:
             turn_number: Current turn number
             **kwargs: Additional turn information to log
         """
-        if RICH_AVAILABLE and self.format == LogFormat.RICH:
+        if RICH_AVAILABLE and self.format == LogFormat.RICH and console:
             console.print(
                 f"\n[bold cyan]🎲 Turn {turn_number}:[/bold cyan] [yellow]{player_name}[/yellow]"
             )
@@ -246,7 +246,7 @@ class GameLogger:
             die2: Value of the second die
             total: Sum of both dice
         """
-        if RICH_AVAILABLE and self.format == LogFormat.RICH:
+        if RICH_AVAILABLE and self.format == LogFormat.RICH and console:
             console.print(
                 f"  🎲 [blue]{player_name}[/blue] rolled: {die1} + {die2} = [bold]{total}[/bold]"
             )
@@ -264,7 +264,7 @@ class GameLogger:
             to_pos: Ending position
             passed_go: Whether the player passed GO during the move
         """
-        if RICH_AVAILABLE and self.format == LogFormat.RICH:
+        if RICH_AVAILABLE and self.format == LogFormat.RICH and console:
             move_text = (
                 f"  🚶 [blue]{player_name}[/blue] moves from {from_pos} to {to_pos}"
             )
@@ -306,7 +306,7 @@ class GameLogger:
 
         icon = icons.get(action, "📍")
 
-        if RICH_AVAILABLE and self.format == LogFormat.RICH:
+        if RICH_AVAILABLE and self.format == LogFormat.RICH and console:
             if action == "buy":
                 console.print(
                     f"  {icon} [green]{player_name} purchased {property_name} for ${amount}[/green]"
@@ -335,7 +335,7 @@ class GameLogger:
             description: Description of what happened
             **kwargs: Additional event details (logged at debug level)
         """
-        if RICH_AVAILABLE and self.format == LogFormat.RICH:
+        if RICH_AVAILABLE and self.format == LogFormat.RICH and console:
             console.print(f"  📌 [magenta]{event_type}:[/magenta] {description}")
             if kwargs and self.logger.level <= logging.DEBUG:
                 for key, value in kwargs.items():
@@ -357,7 +357,7 @@ class GameLogger:
             choice: The decision that was made
             reasoning: Optional explanation for the decision (logged at debug level)
         """
-        if RICH_AVAILABLE and self.format == LogFormat.RICH:
+        if RICH_AVAILABLE and self.format == LogFormat.RICH and console:
             console.print(
                 f"  🤔 [yellow]{player_name}[/yellow] decides to [bold]{choice}[/bold]"
             )
@@ -380,6 +380,7 @@ class GameLogger:
         if (
             RICH_AVAILABLE
             and self.format == LogFormat.RICH
+            and console
             and self.logger.level <= logging.DEBUG
         ):
             table = Table(title="Game State Summary")
@@ -437,7 +438,7 @@ class GameLogger:
             del self._operation_starts[operation]
 
             if self.logger.level <= logging.DEBUG:
-                if RICH_AVAILABLE and self.format == LogFormat.RICH:
+                if RICH_AVAILABLE and self.format == LogFormat.RICH and console:
                     console.print(f"  ⏱️  [dim]{operation} took {duration:.3f}s[/dim]")
                 else:
                     self.logger.debug(f"{operation} took {duration:.3f}s")
