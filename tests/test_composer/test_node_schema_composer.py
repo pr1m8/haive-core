@@ -68,9 +68,7 @@ class TestNodeSchemaComposer:
         """Test node composition with input mapping."""
 
         # Create node that expects specific input
-        def process_func(
-            state: dict[str, Any], config: dict[str, Any]
-        ) -> dict[str, Any]:
+        def process_func(state: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
             # Node expects 'messages' but state has 'conversation'
             messages = state.get("messages", [])
             return {"message_count": len(messages)}
@@ -103,9 +101,7 @@ class TestNodeSchemaComposer:
         # Compose with transform
         composed = composer.compose_node(
             base_node=node,
-            output_mappings=[
-                FieldMapping("value", "doubled_value", transform=["double"])
-            ],
+            output_mappings=[FieldMapping("value", "doubled_value", transform=["double"])],
         )
 
         result = composed({}, {})
@@ -175,9 +171,7 @@ class TestNodeSchemaComposer:
         )
 
         # Test adaptation
-        old_instance = OldSchema(
-            user_name="alice", message_text="Hello world", priority_level=2
-        )
+        old_instance = OldSchema(user_name="alice", message_text="Hello world", priority_level=2)
 
         new_instance = adapter.adapt(old_instance)
 
@@ -345,9 +339,7 @@ class TestNodeSchemaComposerIntegration:
         """Test adapting a retriever node output."""
 
         # Simulate retriever node behavior
-        def retriever_func(
-            state: dict[str, Any], config: dict[str, Any]
-        ) -> dict[str, Any]:
+        def retriever_func(state: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
             query = state.get("query", "")
             # Simulate document retrieval
             return {
@@ -357,14 +349,10 @@ class TestNodeSchemaComposerIntegration:
                 ]
             }
 
-        retriever_node = CallableNodeConfig(
-            name="retriever", callable_func=retriever_func
-        )
+        retriever_node = CallableNodeConfig(name="retriever", callable_func=retriever_func)
 
         # Adapt output
-        adapted_retriever = change_output_key(
-            retriever_node, "documents", "retrieved_documents"
-        )
+        adapted_retriever = change_output_key(retriever_node, "documents", "retrieved_documents")
 
         # Test
         result = adapted_retriever({"query": "AI"}, {})
@@ -435,8 +423,7 @@ class TestNodeSchemaComposerIntegration:
             query = state.get("original_query", "")
 
             if context:
-                response = f"Based on {
-                    len(context)} sources about '{query}': [generated response]"
+                response = f"Based on {len(context)} sources about '{query}': [generated response]"
             else:
                 response = f"No information found about '{query}'"
 
@@ -459,9 +446,7 @@ class TestNodeSchemaComposerIntegration:
         )
 
         generator_node = CallableNodeConfig(name="generator", callable_func=generator)
-        adapted_generator = change_output_key(
-            generator_node, "answer", "final_response"
-        )
+        adapted_generator = change_output_key(generator_node, "answer", "final_response")
 
         # Execute RAG pipeline
         state = {"user_question": "quantum computing"}

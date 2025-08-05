@@ -191,9 +191,7 @@ class TestPersistenceManager:
 
         except Exception as e:
             # This would indicate a real bug, not just a connection failure
-            raise AssertionError(
-                f"Unhandled exception in thread registration test: {e}"
-            )
+            raise AssertionError(f"Unhandled exception in thread registration test: {e}")
 
     def test_clean_test_threads(self):
         """Test cleaning test threads with actual DB connection attempt."""
@@ -336,9 +334,7 @@ class TestPersistenceManager:
             # If we get results and our thread is not in them, deletion worked
             if threads:
                 thread_ids = [t["thread_id"] for t in threads]
-                assert (
-                    test_thread_id not in thread_ids
-                ), "Thread was not properly deleted"
+                assert test_thread_id not in thread_ids, "Thread was not properly deleted"
 
         except Exception as e:
             # The method should handle errors gracefully
@@ -362,9 +358,7 @@ class TestPersistenceManager:
             # Could be PostgresSaver or fallback to MemorySaver
             assert checkpointer is not None
         except Exception as e:
-            raise AssertionError(
-                f"get_checkpointer() should handle connection error: {e}"
-            )
+            raise AssertionError(f"get_checkpointer() should handle connection error: {e}")
 
         # Setup should handle connection error gracefully
         try:
@@ -380,9 +374,7 @@ class TestPersistenceManager:
             # Should return False when registration fails
             assert isinstance(result, bool)
         except Exception as e:
-            raise AssertionError(
-                f"register_thread() should handle connection error: {e}"
-            )
+            raise AssertionError(f"register_thread() should handle connection error: {e}")
 
         # Thread listing should handle connection error gracefully
         try:
@@ -573,16 +565,13 @@ class TestPersistenceManager:
             if final_threads:
                 for thread in final_threads:
                     for thread_id in thread_ids:
-                        assert (
-                            thread["thread_id"] != thread_id
-                        ), f"Thread {thread_id} was not properly deleted"
+                        assert thread["thread_id"] != thread_id, (
+                            f"Thread {thread_id} was not properly deleted"
+                        )
 
         except Exception as e:
             # The manager should handle all database errors gracefully
-            assert (
-                True
-            ), f"Error occurred but should be handled gracefully: {
-                e!s}"
+            assert True, f"Error occurred but should be handled gracefully: {e!s}"
 
     def test_connection_parameters_with_special_chars(self):
         """Test database connection parameters with special characters.

@@ -39,7 +39,6 @@ def test_proper_conversation_flow():
 
         # Show conversation flow through messages
         if hasattr(result, "messages"):
-
             for _i, msg in enumerate(result.messages):
                 type(msg).__name__
                 speaker = getattr(msg, "name", "System")
@@ -50,11 +49,7 @@ def test_proper_conversation_flow():
                     content = msg.content
                 else:
                     # Truncate system messages
-                    content = (
-                        msg.content[:150] + "..."
-                        if len(msg.content) > 150
-                        else msg.content
-                    )
+                    content = msg.content[:150] + "..." if len(msg.content) > 150 else msg.content
 
         # Show conversation metadata
         metadata_attrs = [
@@ -70,9 +65,7 @@ def test_proper_conversation_flow():
 
         # Show contributions if available
         if hasattr(result, "contributions"):
-            for _i, (_contributor, _section, content) in enumerate(
-                result.contributions
-            ):
+            for _i, (_contributor, _section, content) in enumerate(result.contributions):
                 (content[:100] + "..." if len(content) > 100 else content)
 
         # Show final document
@@ -98,10 +91,7 @@ def test_proper_conversation_flow():
                         final_checkpoint = session.checkpointer.get(checkpoint_config)
                         if final_checkpoint and "channel_values" in final_checkpoint:
                             channel_values = final_checkpoint["channel_values"]
-                            if (
-                                isinstance(channel_values, dict)
-                                and "messages" in channel_values
-                            ):
+                            if isinstance(channel_values, dict) and "messages" in channel_values:
                                 len(channel_values["messages"])
                             else:
                                 pass

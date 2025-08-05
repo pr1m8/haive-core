@@ -34,9 +34,7 @@ def test_function(input_data):
 
 
 # Create node config
-node_config = NodeConfig(
-    name="test_node", engine=test_function, command_goto=END, debug=True
-)
+node_config = NodeConfig(name="test_node", engine=test_function, command_goto=END, debug=True)
 
 # Create node function
 node_func = NodeFactory.create_node_function(node_config)

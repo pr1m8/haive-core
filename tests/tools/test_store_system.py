@@ -98,9 +98,7 @@ class TestStoreManager:
     def test_update_memory(self, store_manager):
         """Test updating a memory."""
         # Store a memory
-        memory_id = store_manager.store_memory(
-            content="Original content", category="test"
-        )
+        memory_id = store_manager.store_memory(content="Original content", category="test")
 
         # Update the memory
         success = store_manager.update_memory(
@@ -146,9 +144,7 @@ class TestStoreManager:
         assert agent_ns == ("haive", "agents", "agent1", "memories")
 
         # User-agent namespace
-        user_agent_ns = store_manager.create_agent_namespace(
-            agent_id="agent1", user_id="user123"
-        )
+        user_agent_ns = store_manager.create_agent_namespace(agent_id="agent1", user_id="user123")
         assert user_agent_ns == (
             "haive",
             "users",
@@ -258,17 +254,13 @@ class TestStoreTools:
     def test_update_memory_tool(self, store_manager):
         """Test the update memory tool."""
         # Store a test memory
-        memory_id = store_manager.store_memory(
-            content="Original content", category="update_test"
-        )
+        memory_id = store_manager.store_memory(content="Original content", category="update_test")
 
         # Create and test update tool
         tool = create_update_memory_tool(store_manager)
 
         # Update the memory
-        result = tool.func(
-            memory_id=memory_id, content="Updated content", importance=0.9
-        )
+        result = tool.func(memory_id=memory_id, content="Updated content", importance=0.9)
 
         # Parse result
         result_data = json.loads(result)
@@ -283,9 +275,7 @@ class TestStoreTools:
     def test_delete_memory_tool(self, store_manager):
         """Test the delete memory tool."""
         # Store a test memory
-        memory_id = store_manager.store_memory(
-            content="To be deleted", category="delete_test"
-        )
+        memory_id = store_manager.store_memory(content="To be deleted", category="delete_test")
 
         # Create and test delete tool
         tool = create_delete_memory_tool(store_manager)
@@ -323,9 +313,7 @@ class TestStoreTools:
 
     def test_partial_tools_suite(self, store_manager):
         """Test creating a partial tools suite."""
-        tools = create_memory_tools_suite(
-            store_manager, include_tools=["store", "search"]
-        )
+        tools = create_memory_tools_suite(store_manager, include_tools=["store", "search"])
 
         assert len(tools) == 2
 

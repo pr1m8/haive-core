@@ -6,8 +6,7 @@ import os
 import sys
 
 # Add paths
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
 
 
 async def test_async_persistence():
@@ -85,7 +84,6 @@ def check_langgraph_modifications():
 
     for file_path in langgraph_files:
         if os.path.exists(file_path):
-
             # Check for prepare_threshold
             try:
                 with open(file_path) as f:
@@ -95,7 +93,6 @@ def check_langgraph_modifications():
                     # Find the line
                     for i, line in enumerate(content.split("\n")):
                         if "prepare_threshold" in line:
-
                             if "prepare_threshold=0" in line:
                                 pass
                             elif "prepare_threshold=None" in line:
@@ -117,7 +114,6 @@ def main():
 
     # Check LangGraph modifications
     check_langgraph_modifications()
-
 
 
 if __name__ == "__main__":

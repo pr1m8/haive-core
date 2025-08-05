@@ -80,10 +80,7 @@ class TestDynamicRegistry:
         # Verify registration
         assert "calc_001" in registry.items
         assert registry.items["calc_001"].component.name == "calculator"
-        assert (
-            registry.items["calc_001"].component.description
-            == "Mathematical calculations"
-        )
+        assert registry.items["calc_001"].component.description == "Mathematical calculations"
 
         # Verify not active yet
         assert "calc_001" not in registry.active_items
@@ -352,9 +349,7 @@ class TestDynamicActivationState:
         meta_state = state.activate_component("proc_001")
 
         # Execute through MetaStateSchema
-        result = meta_state.execute_agent(
-            input_data={"test": "data"}, update_state=True
-        )
+        result = meta_state.execute_agent(input_data={"test": "data"}, update_state=True)
 
         # Verify execution
         assert result is not None
@@ -487,9 +482,7 @@ class TestDynamicActivationPerformance:
         start_time = time.time()
 
         for i in range(num_components):
-            component = TestComponent(
-                name=f"component_{i}", version="1.0", metadata={"index": i}
-            )
+            component = TestComponent(name=f"component_{i}", version="1.0", metadata={"index": i})
             item = RegistryItem(
                 id=f"comp_{i:04d}",
                 name=f"Component {i}",
@@ -556,13 +549,9 @@ class TestDynamicActivationPerformance:
 
         # Verify final state
         assert len(state.active_components) == 0
-        assert (
-            len(state.activation_history) == 2000
-        )  # 100 cycles * 10 components * 2 actions
+        assert len(state.activation_history) == 2000  # 100 cycles * 10 components * 2 actions
 
         # Verify stats
         stats = state.get_activation_stats()
-        assert (
-            stats["total_activations"] == 1000
-        )  # 100 cycles * 5 components * 2 activations
+        assert stats["total_activations"] == 1000  # 100 cycles * 5 components * 2 activations
         assert stats["currently_active"] == 0

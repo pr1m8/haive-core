@@ -145,21 +145,15 @@ class TestAugLLMWithStateSchema:
         except Exception as e:
             pytest.fail(f"Failed to process result: {e}\nResult was: {result}")
 
-    def test_create_runnable_with_managed_schema(
-        self, aug_llm_config, managed_schema, test_input
-    ):
+    def test_create_runnable_with_managed_schema(self, aug_llm_config, managed_schema, test_input):
         """Test using create_runnable with a managed schema."""
         # Create a runnable from the AugLLMConfig
         runnable = aug_llm_config.create_runnable()
 
         # Verify the managed schema has proper I/O mapping
         assert aug_llm_config.name in managed_schema.__engine_io_mappings__
-        input_mapping = managed_schema.__engine_io_mappings__[aug_llm_config.name][
-            "inputs"
-        ]
-        output_mapping = managed_schema.__engine_io_mappings__[aug_llm_config.name][
-            "outputs"
-        ]
+        input_mapping = managed_schema.__engine_io_mappings__[aug_llm_config.name]["inputs"]
+        output_mapping = managed_schema.__engine_io_mappings__[aug_llm_config.name]["outputs"]
         assert "query" in input_mapping
         assert "messages" in input_mapping
         assert "analysis" in output_mapping
@@ -169,9 +163,7 @@ class TestAugLLMWithStateSchema:
 
         # Extract input based on schema mapping
         llm_input = {
-            field: getattr(state, field)
-            for field in input_mapping
-            if hasattr(state, field)
+            field: getattr(state, field) for field in input_mapping if hasattr(state, field)
         }
 
         # Run the runnable
@@ -185,9 +177,7 @@ class TestAugLLMWithStateSchema:
             else:
                 # Try to parse from different result formats
                 try:
-                    analysis_parser = PydanticOutputParser(
-                        pydantic_object=AnalysisResult
-                    )
+                    analysis_parser = PydanticOutputParser(pydantic_object=AnalysisResult)
                     if isinstance(result, str):
                         analysis = analysis_parser.parse(result)
                     else:
@@ -216,9 +206,7 @@ class TestAugLLMWithStateSchema:
         llm_output_schema = aug_llm_config.derive_output_schema()
 
         # Create schema with SchemaComposer
-        composed_schema = SchemaComposer.compose(
-            components=[aug_llm_config], name="ComposedSchema"
-        )
+        composed_schema = SchemaComposer.compose(components=[aug_llm_config], name="ComposedSchema")
 
         # Compare schema field names
         llm_input_fields = set(llm_input_schema.model_fields.keys())
@@ -234,18 +222,14 @@ class TestAugLLMWithStateSchema:
             and aug_llm_config.structured_output_model
         ):
             # Get field names from the structured output model
-            output_model_fields = set(
-                aug_llm_config.structured_output_model.model_fields.keys()
-            )
+            output_model_fields = set(aug_llm_config.structured_output_model.model_fields.keys())
             # These should appear in the LLM output schema
             for field in output_model_fields:
                 assert field in llm_output_schema.model_fields
 
             # The composed schema should include these too if it's including output fields
             # (depending on how SchemaComposer is configured)
-            output_in_composed = any(
-                field in composed_fields for field in output_model_fields
-            )
+            output_in_composed = any(field in composed_fields for field in output_model_fields)
             assert output_in_composed, "Output fields not found in composed schema"
 
     def test_reducer_functionality(self, aug_llm_config, composed_schema, test_input):

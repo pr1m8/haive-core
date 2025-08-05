@@ -266,9 +266,7 @@ def test_business_source_creation():
 def test_data_filtering():
     """Test data filtering and field selection options."""
 
-    def apply_data_filters(
-        data_types, custom_fields=None, filter_query=None, max_records=None
-    ):
+    def apply_data_filters(data_types, custom_fields=None, filter_query=None, max_records=None):
         """Apply data filtering logic."""
         filters = {"data_types": [dt.value for dt in data_types], "page_size": 100}
 
@@ -401,9 +399,7 @@ def test_bulk_sync_operations():
     """Test bulk synchronization and batch processing."""
 
     # Mock bulk sync operations
-    def configure_bulk_sync(
-        platform, batch_processing=True, parallel_streams=3, page_size=100
-    ):
+    def configure_bulk_sync(platform, batch_processing=True, parallel_streams=3, page_size=100):
         """Configure bulk sync operations."""
         config = {
             "platform": platform.value,

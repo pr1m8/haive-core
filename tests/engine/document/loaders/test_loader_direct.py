@@ -16,9 +16,7 @@ def import_module_from_file(module_name, file_path):
 
 
 # Import modules directly
-base_path = Path(
-    "/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core"
-)
+base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core")
 
 # Import required dependencies first
 config_module = import_module_from_file(
@@ -155,9 +153,7 @@ def test_registry():
     assert source.file_path == "/path/to/document.pdf"
 
     # Test loader selection
-    fast_loader = source_registry.get_loader_for_source(
-        source, preference=LoaderPreference.SPEED
-    )
+    fast_loader = source_registry.get_loader_for_source(source, preference=LoaderPreference.SPEED)
     quality_loader = source_registry.get_loader_for_source(
         source, preference=LoaderPreference.QUALITY
     )

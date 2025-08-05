@@ -26,8 +26,7 @@ def find_packages() -> List[Path]:
     return sorted(packages)
 
 
-def run_trunk_command(
-    package_dir: Path, command: List[str]) -> Tuple[int, str, str]:
+def run_trunk_command(package_dir: Path, command: List[str]) -> Tuple[int, str, str]:
     """Run a trunk command in the specified package directory."""
     try:
         result = subprocess.run(
@@ -76,9 +75,7 @@ def fix_package_linting(package_dir: Path) -> Dict[str, any]:
 
     # Step 2: Apply automatic fixes
     print("  🛠️  Applying automatic fixes...s...")
-    returncode, stdout, stderr = run_trunk_command(
-        package_dir, ["trunk", "fmt", "--all"]
-    )
+    returncode, stdout, stderr = run_trunk_command(package_dir, ["trunk", "fmt", "--all"])
 
     if returncode == 0:
         results["format_applied"] = True

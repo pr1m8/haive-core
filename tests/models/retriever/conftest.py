@@ -51,9 +51,7 @@ def mock_retriever(sample_documents):
 def mock_llm():
     """Mock LLM for testing."""
     mock_llm = Mock()
-    mock_llm.invoke = Mock(
-        return_value="What is Python? What is programming? What is coding?"
-    )
+    mock_llm.invoke = Mock(return_value="What is Python? What is programming? What is coding?")
     return mock_llm
 
 

@@ -52,9 +52,7 @@ class WeatherQuery(BaseModel):
     """Model for weather query."""
 
     location: str = Field(description="The location to get weather for")
-    date: str | None = Field(
-        None, description="The date to get weather for (defaults to current)"
-    )
+    date: str | None = Field(None, description="The date to get weather for (defaults to current)")
 
 
 # Test fixtures
@@ -62,7 +60,9 @@ class WeatherQuery(BaseModel):
 def azure_llm_config():
     """Create Azure LLM config for testing."""
     return AzureLLMConfig(
-        model="gpt-4o", temperature=0.0, max_tokens=1000  # Deterministic for testing
+        model="gpt-4o",
+        temperature=0.0,
+        max_tokens=1000,  # Deterministic for testing
     )
 
 
@@ -70,7 +70,9 @@ def azure_llm_config():
 def openai_llm_config():
     """Create OpenAI LLM config for testing."""
     return OpenAILLMConfig(
-        model="gpt-4o", temperature=0.0, max_tokens=1000  # Deterministic for testing
+        model="gpt-4o",
+        temperature=0.0,
+        max_tokens=1000,  # Deterministic for testing
     )
 
 

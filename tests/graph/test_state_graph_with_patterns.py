@@ -63,19 +63,11 @@ def test_basic_graph():
     # Add nodes
     graph.add_node(
         "process",
-        lambda state: {
-            "response": f"Processed: {
-                state.get(
-                    'query', '')}"
-        },
+        lambda state: {"response": f"Processed: {state.get('query', '')}"},
     )
     graph.add_node(
         "format",
-        lambda state: {
-            "response": f"Formatted: {
-                state.get(
-                    'response', '')}"
-        },
+        lambda state: {"response": f"Formatted: {state.get('response', '')}"},
     )
 
     # Add edges
@@ -119,9 +111,7 @@ def test_conditional_branching():
     def branch_condition(state):
         return "a" if state.get("route") == "a" else "b"
 
-    graph.add_conditional_edges(
-        "check", branch_condition, {"a": "process_a", "b": "process_b"}
-    )
+    graph.add_conditional_edges("check", branch_condition, {"a": "process_a", "b": "process_b"})
 
     # Print debug info
     logger.info(f"Graph nodes: {list(graph.nodes.keys())}")
@@ -202,9 +192,7 @@ def test_subgraph():
     # Create subgraph
     subgraph = BaseGraph(name="Processing Subgraph")
     subgraph.add_node("extract", lambda state: {"data": state.get("input", "")})
-    subgraph.add_node(
-        "transform", lambda state: {"data": state.get("data", "").upper()}
-    )
+    subgraph.add_node("transform", lambda state: {"data": state.get("data", "").upper()})
     subgraph.add_edge(START, "extract")
     subgraph.add_edge("extract", "transform")
     subgraph.add_edge("transform", END)
@@ -215,11 +203,7 @@ def test_subgraph():
     main_graph.add_node("processing", subgraph)
     main_graph.add_node(
         "output",
-        lambda state: {
-            "response": f"Processed: {
-                state.get(
-                    'data', '')}"
-        },
+        lambda state: {"response": f"Processed: {state.get('data', '')}"},
     )
 
     # Connect nodes
@@ -351,22 +335,14 @@ def test_node_config_graph():
     logger.info("Finding all paths in node_config_graph test")
     paths = graph.find_all_paths(START, END)
     for i, path in enumerate(paths):
-        logger.info(
-            f"Path {
-                i +
-                1}: {
-                path.nodes} (conditional={
-                path.contains_conditional})"
-        )
+        logger.info(f"Path {i + 1}: {path.nodes} (conditional={path.contains_conditional})")
 
     # There should be multiple paths (agent -> validate -> execute_plan -> END or
     # agent -> validate -> tools -> agent -> validate -> ...)
     # Assert multiple paths conditionally, allowing a minimum of 1 to not block other tests
     # but logging a message when the expected condition fails
     if len(paths) <= 1:
-        logger.warning(
-            "Expected multiple paths but only found 1 in test_node_config_graph"
-        )
+        logger.warning("Expected multiple paths but only found 1 in test_node_config_graph")
 
     # Check for conditional paths
     conditional_paths = [p for p in paths if p.contains_conditional]
@@ -425,9 +401,7 @@ class AdvancedQAPattern(GraphPattern):
             if node_name in self.implementations:
                 self.add_node(node_name, self.implementations[node_name])
             elif node_name not in self.nodes:
-                logger.warning(
-                    f"Missing implementation for {node_name} in AdvancedQAPattern"
-                )
+                logger.warning(f"Missing implementation for {node_name} in AdvancedQAPattern")
 
 
 # Test pattern-based graph building
@@ -438,16 +412,15 @@ def test_react_pattern():
         from haive.core.graph.state_graph.pattern.implementations import ReactPattern
 
         # Create a test prompt template
-        prompt = ChatPromptTemplate.from_messages(
-            [("system", "You are a helpful AI assistant.")]
-        )
+        prompt = ChatPromptTemplate.from_messages([("system", "You are a helpful AI assistant.")])
 
         # Create an AugLLMConfig
         llm_config = AugLLMConfig(name="react_agent", prompt_template=prompt)
 
         # Create tools config
         tools_config = ToolNodeConfig(
-            name="tool_executor", tools=[]  # Empty tools list for testing
+            name="tool_executor",
+            tools=[],  # Empty tools list for testing
         )
 
         # Create a ReactPattern
@@ -469,11 +442,7 @@ def test_react_pattern():
         paths = graph.find_all_paths(START, END)
         for i, path in enumerate(paths):
             logger.info(
-                f"React path {
-                    i +
-                    1}: {
-                    path.nodes} (conditional={
-                    path.contains_conditional})"
+                f"React path {i + 1}: {path.nodes} (conditional={path.contains_conditional})"
             )
 
         assert len(paths) > 0

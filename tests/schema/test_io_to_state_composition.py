@@ -11,9 +11,7 @@ console = Console()
 
 def test_schema_composer_diagnostics():
     """Diagnostic test to see what's happening with field extraction."""
-    console.print(
-        "\n[bold cyan]Diagnosing Schema Composer Field Extraction...[/bold cyan]"
-    )
+    console.print("\n[bold cyan]Diagnosing Schema Composer Field Extraction...[/bold cyan]")
 
     # Create engines
     llm_engine = AugLLMConfig(name="test_llm", model="gpt-4")
@@ -53,9 +51,7 @@ def test_schema_composer_diagnostics():
             console.print(f"    {field_name}: {field_type}")
 
     # Step 2: Create composer and extract fields
-    console.print(
-        "\n[bold yellow]Step 2: Create Composer and Extract Fields[/bold yellow]"
-    )
+    console.print("\n[bold yellow]Step 2: Create Composer and Extract Fields[/bold yellow]")
 
     composer = SchemaComposer(name="SimpleState")
     composer.add_fields_from_components([llm_engine, retriever_engine])
@@ -70,9 +66,7 @@ def test_schema_composer_diagnostics():
         console.print(f"    Default factory: {field_def.default_factory}")
 
     # Step 3: Create schema and inspect fields
-    console.print(
-        "\n[bold yellow]Step 3: Create Schema and Inspect Fields[/bold yellow]"
-    )
+    console.print("\n[bold yellow]Step 3: Create Schema and Inspect Fields[/bold yellow]")
 
     schema = composer.build(create_io_schemas=False)
 
@@ -92,29 +86,16 @@ def test_schema_composer_diagnostics():
         minimal_instance = schema(messages=[HumanMessage(content="Test")])
         console.print("[green]✓ Minimal instance created![/green]")
         console.print(f"  Has 'query': {hasattr(minimal_instance, 'query')}")
-        console.print(
-            f"  Has 'content': {
-                hasattr(
-                    minimal_instance,
-                    'content')}"
-        )
+        console.print(f"  Has 'content': {hasattr(minimal_instance, 'content')}")
     except Exception as e:
         console.print(f"[red]✗ Minimal instance failed: {e}[/red]")
 
     # Try with query field
     try:
-        full_instance = schema(
-            messages=[HumanMessage(content="Test")], query="Test query"
-        )
+        full_instance = schema(messages=[HumanMessage(content="Test")], query="Test query")
         console.print("[green]✓ Full instance created![/green]")
         console.print(f"  Has 'query': {hasattr(full_instance, 'query')}")
-        console.print(
-            f"  Query value: {
-                getattr(
-                    full_instance,
-                    'query',
-                    'N/A')}"
-        )
+        console.print(f"  Query value: {getattr(full_instance, 'query', 'N/A')}")
         console.print(f"  Has 'content': {hasattr(full_instance, 'content')}")
     except Exception as e:
         console.print(f"[red]✗ Full instance failed: {e}[/red]")

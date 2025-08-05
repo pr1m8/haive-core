@@ -38,9 +38,7 @@ def test_exact_reproduction():
         graph = agent.build_graph()
         console.print("✅ Graph built")
 
-        console.print(
-            "[bold blue]Step 4: Try to compile graph (LIKELY ERROR POINT)[/bold blue]"
-        )
+        console.print("[bold blue]Step 4: Try to compile graph (LIKELY ERROR POINT)[/bold blue]")
         # This is where "Failed to convert BaseGraph to LangGraph" likely
         # happens
         graph.compile()
@@ -78,8 +76,7 @@ def test_exact_reproduction():
                 function = frame.f_code.co_name
 
                 if any(
-                    keyword in filename
-                    for keyword in ["state_schema", "agent", "schema_composer"]
+                    keyword in filename for keyword in ["state_schema", "agent", "schema_composer"]
                 ):
                     console.print(
                         f"[yellow]Frame in suspect file: {filename}:{lineno} in {function}[/yellow]"

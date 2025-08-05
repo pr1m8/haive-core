@@ -61,9 +61,7 @@ class TestDirectFieldUpdates:
             "selected_modules": agent_output.selected_modules,
             "selection_rationale": agent_output.rationale,  # Optional mapping
             # Messages if any
-            "messages": [
-                AIMessage(content="Selected modules based on task requirements")
-            ],
+            "messages": [AIMessage(content="Selected modules based on task requirements")],
             # Agent state tracking (but not the primary output mechanism)
             "agent_states": {
                 "selector": {
@@ -120,9 +118,7 @@ class TestDirectFieldUpdates:
             return updates
 
         # Test the mapping
-        output = SelectedModules(
-            selected_modules=["A", "B"], rationale="Test rationale"
-        )
+        output = SelectedModules(selected_modules=["A", "B"], rationale="Test rationale")
 
         updates = get_field_updates(output, {"rationale": "selection_rationale"})
 
@@ -200,18 +196,14 @@ class TestDirectFieldUpdates:
         # Agent 1: Message-only output (no schema)
         {
             "messages": [AIMessage(content="Starting process")],
-            "agent_outputs": {
-                "starter": {"messages": [AIMessage(content="Starting process")]}
-            },
+            "agent_outputs": {"starter": {"messages": [AIMessage(content="Starting process")]}},
         }
 
         # Agent 2: Structured output (with schema)
         {
             "selected_modules": ["X", "Y"],
             "messages": [AIMessage(content="Selected modules")],
-            "agent_states": {
-                "selector": {"selected_modules": ["X", "Y"], "execution_time": 1.23}
-            },
+            "agent_states": {"selector": {"selected_modules": ["X", "Y"], "execution_time": 1.23}},
         }
 
         # Agent 3: Complex structured output

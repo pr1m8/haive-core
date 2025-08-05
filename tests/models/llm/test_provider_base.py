@@ -200,9 +200,7 @@ class TestBaseLLMProvider:
 
         # Mock the apply_rate_limiting method
         mock_llm = Mock()
-        with patch.object(
-            provider, "apply_rate_limiting", return_value=mock_llm
-        ) as mock_apply:
+        with patch.object(provider, "apply_rate_limiting", return_value=mock_llm) as mock_apply:
             result = provider.instantiate()
 
             # Should have called apply_rate_limiting
@@ -223,9 +221,7 @@ class TestProviderImportError:
 
     def test_custom_message(self):
         """Test custom error message."""
-        error = ProviderImportError(
-            "OpenAI", "langchain-openai", "Custom error message"
-        )
+        error = ProviderImportError("OpenAI", "langchain-openai", "Custom error message")
         assert str(error) == "Custom error message"
 
     def test_attributes(self):

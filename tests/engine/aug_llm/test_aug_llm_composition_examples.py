@@ -47,9 +47,7 @@ def analyze_prompt_template(prompt_template):
     # Check for messages with placeholders
     if hasattr(prompt_template, "messages"):
         for message in prompt_template.messages:
-            if hasattr(message, "prompt") and hasattr(
-                message.prompt, "input_variables"
-            ):
+            if hasattr(message, "prompt") and hasattr(message.prompt, "input_variables"):
                 required_vars.extend(message.prompt.input_variables)
             elif hasattr(message, "variable_name"):
                 required_vars.append(message.variable_name)
@@ -97,10 +95,7 @@ def auto_detect_state_schema(aug_llm_configs, name="AutoDetectedStateSchema"):
                 logger.warning(f"Error deriving output schema: {e}")
 
         # Add structured output model fields if available
-        if (
-            hasattr(config, "structured_output_model")
-            and config.structured_output_model
-        ):
+        if hasattr(config, "structured_output_model") and config.structured_output_model:
             model = config.structured_output_model
             composer.add_fields_from_model(model)
 
@@ -188,7 +183,6 @@ def print_schema_info(schema_cls):
 
     # Print StateSchema specific attributes
     if issubclass(schema_cls, StateSchema):
-
         # Show reducer implementations
         if schema_cls.__reducer_fields__:
             for _field, reducer in schema_cls.__reducer_fields__.items():
@@ -233,9 +227,7 @@ class WeatherQuery(BaseModel):
     """Model for weather query."""
 
     location: str = Field(description="The location to get weather for")
-    date: str | None = Field(
-        None, description="The date to get weather for (defaults to current)"
-    )
+    date: str | None = Field(None, description="The date to get weather for (defaults to current)")
 
 
 class TaskInfo(BaseModel):
@@ -254,7 +246,9 @@ class TaskInfo(BaseModel):
 def azure_llm_config():
     """Create Azure LLM config for testing."""
     return AzureLLMConfig(
-        model="gpt-4o", temperature=0.0, max_tokens=1000  # Deterministic for testing
+        model="gpt-4o",
+        temperature=0.0,
+        max_tokens=1000,  # Deterministic for testing
     )
 
 
@@ -455,10 +449,7 @@ def test_auto_detect_schema_from_configs(
                     input_data[var] = f"Test value for {var}"
 
         # Show structured output model if available
-        if (
-            hasattr(config, "structured_output_model")
-            and config.structured_output_model
-        ):
+        if hasattr(config, "structured_output_model") and config.structured_output_model:
             pass
 
     # Step 2: Auto-detect a state schema from all configs
@@ -473,9 +464,7 @@ def test_auto_detect_schema_from_configs(
 
     # Create an instance
     state = detected_schema(
-        messages=[
-            HumanMessage(content="Hello, I need information about machine learning.")
-        ],
+        messages=[HumanMessage(content="Hello, I need information about machine learning.")],
         content=sample_article,
         question="What are the key areas of progress in ML?",
         context=[SystemMessage(content="Focus on recent developments.")],

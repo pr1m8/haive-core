@@ -64,9 +64,7 @@ class TestOpenAIProvider:
         except ImportError:
             pytest.skip("OpenAI provider not implemented yet")
 
-        provider = OpenAIProvider(
-            model="gpt-4", api_key=SecretStr("test-key"), temperature=0.5
-        )
+        provider = OpenAIProvider(model="gpt-4", api_key=SecretStr("test-key"), temperature=0.5)
 
         # Mock the ChatOpenAI class
         with patch.object(provider, "_get_chat_class") as mock_get_class:

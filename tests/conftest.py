@@ -146,9 +146,7 @@ class MockEngine(Engine):
     name: str = Field(default_factory=lambda: f"mock_engine_{uuid.uuid4().hex[:4]}")
 
     def create_runnable(self, runnable_config: RunnableConfig | None = None) -> Any:
-        conftest_logger.debug(
-            f"[blue]MockEngine[/blue] '{self.name}' create_runnable called"
-        )
+        conftest_logger.debug(f"[blue]MockEngine[/blue] '{self.name}' create_runnable called")
         return lambda x: x
 
 
@@ -157,33 +155,22 @@ class MockInvokableEngine(InvokableEngine):
 
     engine_type: EngineType = EngineType.LLM
     id: str = Field(default_factory=lambda: generate_test_id("mock-invokable"))
-    name: str = Field(
-        default_factory=lambda: f"mock_invokable_engine_{uuid.uuid4().hex[:4]}"
-    )
+    name: str = Field(default_factory=lambda: f"mock_invokable_engine_{uuid.uuid4().hex[:4]}")
 
     def create_runnable(self, runnable_config: RunnableConfig | None = None) -> Any:
         conftest_logger.debug(
-            f"[green]MockInvokableEngine[/green] '{
-                self.name}' create_runnable called"
+            f"[green]MockInvokableEngine[/green] '{self.name}' create_runnable called"
         )
         return self
 
-    def invoke(
-        self, input_data: Any, runnable_config: RunnableConfig | None = None
-    ) -> Any:
-        conftest_logger.debug(
-            f"[green]MockInvokableEngine[/green] '{self.name}' invoke called"
-        )
+    def invoke(self, input_data: Any, runnable_config: RunnableConfig | None = None) -> Any:
+        conftest_logger.debug(f"[green]MockInvokableEngine[/green] '{self.name}' invoke called")
         if isinstance(input_data, dict):
             return {**input_data, "invoked_by": self.name}
         return {"result": input_data, "invoked_by": self.name}
 
-    async def ainvoke(
-        self, input_data: Any, runnable_config: RunnableConfig | None = None
-    ) -> Any:
-        conftest_logger.debug(
-            f"[green]MockInvokableEngine[/green] '{self.name}' ainvoke called"
-        )
+    async def ainvoke(self, input_data: Any, runnable_config: RunnableConfig | None = None) -> Any:
+        conftest_logger.debug(f"[green]MockInvokableEngine[/green] '{self.name}' ainvoke called")
         return self.invoke(input_data, runnable_config)
 
 
@@ -192,14 +179,11 @@ class MockNonInvokableEngine(NonInvokableEngine):
 
     engine_type: EngineType = EngineType.EMBEDDINGS
     id: str = Field(default_factory=lambda: generate_test_id("mock-non-invokable"))
-    name: str = Field(
-        default_factory=lambda: f"mock_non_invokable_engine_{uuid.uuid4().hex[:4]}"
-    )
+    name: str = Field(default_factory=lambda: f"mock_non_invokable_engine_{uuid.uuid4().hex[:4]}")
 
     def create_runnable(self, runnable_config: RunnableConfig | None = None) -> Any:
         conftest_logger.debug(
-            f"[yellow]MockNonInvokableEngine[/yellow] '{
-                self.name}' create_runnable called"
+            f"[yellow]MockNonInvokableEngine[/yellow] '{self.name}' create_runnable called"
         )
         return {"instance_created_by": self.name}
 
@@ -221,9 +205,7 @@ def mock_engine() -> MockEngine:
 def mock_invokable_engine() -> MockInvokableEngine:
     """Provide a mock invokable engine instance."""
     instance = MockInvokableEngine()
-    conftest_logger.debug(
-        f"Created [green]mock_invokable_engine[/green]: {instance.id}"
-    )
+    conftest_logger.debug(f"Created [green]mock_invokable_engine[/green]: {instance.id}")
     return instance
 
 
@@ -231,9 +213,7 @@ def mock_invokable_engine() -> MockInvokableEngine:
 def mock_non_invokable_engine() -> MockNonInvokableEngine:
     """Provide a mock non-invokable engine instance."""
     instance = MockNonInvokableEngine()
-    conftest_logger.debug(
-        f"Created [yellow]mock_non_invokable_engine[/yellow]: {instance.id}"
-    )
+    conftest_logger.debug(f"Created [yellow]mock_non_invokable_engine[/yellow]: {instance.id}")
     return instance
 
 

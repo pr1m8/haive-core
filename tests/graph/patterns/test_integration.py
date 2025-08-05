@@ -63,8 +63,7 @@ class TestAgentPatternIntegration:
         self.test_id = uuid.uuid4().hex[:8]
         rprint(
             Panel.fit(
-                f"Running test with ID: {
-                    self.test_id}",
+                f"Running test with ID: {self.test_id}",
                 style="green",
             )
         )
@@ -188,9 +187,7 @@ class TestAgentPatternIntegration:
         assert "integration_node" in graph.nodes, "Node should be added to graph"
 
         # Check that nodes have engine/function
-        assert (
-            graph.nodes["integration_node"] is not None
-        ), "Node should have engine/function"
+        assert graph.nodes["integration_node"] is not None, "Node should have engine/function"
 
         # Build the graph
         with console.status("[bold green]Building graph..."):
@@ -213,9 +210,7 @@ class TestAgentPatternIntegration:
         # Verify the result
         assert "test_applied" in result, "Expected 'test_applied' in result"
         assert result["test_applied"] is True, "Expected test_applied to be True"
-        assert (
-            result["pattern_name"] == "test_integration_pattern"
-        ), "Pattern name mismatch"
+        assert result["pattern_name"] == "test_integration_pattern", "Pattern name mismatch"
 
     def test_agent_config_pattern_integration(self):
         """Test integrating patterns with agent configs."""
@@ -245,10 +240,7 @@ class TestAgentPatternIntegration:
 
             def apply(self, agent_config, **kwargs):
                 """Apply the test pattern to an agent config."""
-                logger.info(
-                    f"Applying pattern to agent config: {
-                        agent_config.name}"
-                )
+                logger.info(f"Applying pattern to agent config: {agent_config.name}")
 
                 # Modify the agent config
                 if agent_config.node_configs is None:
@@ -279,16 +271,10 @@ class TestAgentPatternIntegration:
 
         # Verify pattern was applied
         assert result is True, "Pattern application should succeed"
-        assert (
-            "integration_node" in agent_config.node_configs
-        ), "Node config should be added"
+        assert "integration_node" in agent_config.node_configs, "Node config should be added"
 
         # Display the updated agent config
-        rprint(
-            Panel.fit(
-                f"Updated node configs: {agent_config.node_configs}", style="blue"
-            )
-        )
+        rprint(Panel.fit(f"Updated node configs: {agent_config.node_configs}", style="blue"))
 
     def test_dynamic_graph_integration_with_agent(self):
         """Test integrating patterns with dynamic graph and agent config."""
@@ -329,8 +315,7 @@ class TestAgentPatternIntegration:
             def apply(self, graph, agent_config=None, **kwargs):
                 """Apply the pattern to a graph and optionally agent config."""
                 logger.info(
-                    f"Applying pattern to graph with agent config: {
-                        agent_config is not None}"
+                    f"Applying pattern to graph with agent config: {agent_config is not None}"
                 )
 
                 # Extract parameters with defaults
@@ -362,17 +347,15 @@ class TestAgentPatternIntegration:
         pattern = TestPattern()
 
         # Apply the pattern
-        with console.status(
-            "[bold green]Applying pattern to graph and agent config..."
-        ):
+        with console.status("[bold green]Applying pattern to graph and agent config..."):
             result = pattern.apply(graph, agent_config=pattern_agent_config)
 
         # Verify pattern was applied
         assert result is True, "Pattern application should succeed"
         assert "test_node" in graph.nodes, "Node should be added to graph"
-        assert (
-            "test_node" in pattern_agent_config.node_configs
-        ), "Node config should be added to agent"
+        assert "test_node" in pattern_agent_config.node_configs, (
+            "Node config should be added to agent"
+        )
 
         # Build the graph
         with console.status("[bold green]Building graph..."):
@@ -382,16 +365,13 @@ class TestAgentPatternIntegration:
         # Display the updated structures
         rprint(
             Panel.fit(
-                f"Updated graph nodes: {
-                    list(
-                        graph.nodes.keys())}",
+                f"Updated graph nodes: {list(graph.nodes.keys())}",
                 style="blue",
             )
         )
         rprint(
             Panel.fit(
-                f"Updated agent node configs: {
-                    pattern_agent_config.node_configs}",
+                f"Updated agent node configs: {pattern_agent_config.node_configs}",
                 style="blue",
             )
         )
@@ -445,15 +425,10 @@ class TestAgentPatternIntegration:
                 try:
                     # Get existing schema
                     existing_schema = graph.state_schema
-                    logger.info(
-                        f"Found existing schema: {
-                            existing_schema.__name__}"
-                    )
+                    logger.info(f"Found existing schema: {existing_schema.__name__}")
 
                     # Create composer with existing schema
-                    composer = SchemaComposer(
-                        name=f"Enhanced{existing_schema.__name__}"
-                    )
+                    composer = SchemaComposer(name=f"Enhanced{existing_schema.__name__}")
 
                     # Add fields from existing schema
                     composer.add_fields_from_model(existing_schema)
@@ -476,10 +451,7 @@ class TestAgentPatternIntegration:
 
                     # Build new schema
                     enhanced_schema = composer.build()
-                    logger.info(
-                        f"Built enhanced schema: {
-                            enhanced_schema.__name__}"
-                    )
+                    logger.info(f"Built enhanced schema: {enhanced_schema.__name__}")
 
                     # Add a node that uses the enhanced schema
                     def schema_node(state):
@@ -500,10 +472,7 @@ class TestAgentPatternIntegration:
 
                     # Update graph's schema
                     graph.state_schema = enhanced_schema
-                    logger.info(
-                        f"Updated graph schema to {
-                            enhanced_schema.__name__}"
-                    )
+                    logger.info(f"Updated graph schema to {enhanced_schema.__name__}")
 
                     return True
                 except Exception as e:
@@ -520,19 +489,15 @@ class TestAgentPatternIntegration:
         # Verify pattern was applied
         assert result is True, "Pattern application should succeed"
         assert "schema_node" in graph.nodes, "Node should be added to graph"
-        assert hasattr(
-            graph.state_schema, "model_fields"
-        ), "Schema should be a Pydantic model"
-        assert (
-            "enhanced" in graph.state_schema.model_fields
-        ), "Enhanced field should be added to schema"
+        assert hasattr(graph.state_schema, "model_fields"), "Schema should be a Pydantic model"
+        assert "enhanced" in graph.state_schema.model_fields, (
+            "Enhanced field should be added to schema"
+        )
 
         # Display the enhanced schema
         rprint(
             Panel.fit(
-                f"Enhanced schema fields: {
-                    list(
-                        graph.state_schema.model_fields.keys())}",
+                f"Enhanced schema fields: {list(graph.state_schema.model_fields.keys())}",
                 style="blue",
             )
         )

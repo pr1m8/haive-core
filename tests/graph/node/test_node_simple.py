@@ -135,9 +135,7 @@ def create_test_components():
     # Define the structured output model
     class AnalysisOutput(BaseModel):
         topic: str = Field(description="Main topic of the documents")
-        key_points: list[str] = Field(
-            description="Key points extracted from the documents"
-        )
+        key_points: list[str] = Field(description="Key points extracted from the documents")
         sentiment: str = Field(description="Overall sentiment analysis")
         questions: list[str] = Field(description="Questions for further research")
 
@@ -425,12 +423,7 @@ def examine_retrieval_result(retrieval_result):
         console.print(f"[dim]Command goto: {retrieval_result.goto}[/dim]")
 
         # Check update attribute
-        console.print(
-            f"[dim]Command has update: {
-                hasattr(
-                    retrieval_result,
-                    'update')}[/dim]"
-        )
+        console.print(f"[dim]Command has update: {hasattr(retrieval_result, 'update')}[/dim]")
 
         # Handle update as attribute or method
         if hasattr(retrieval_result, "update"):
@@ -441,10 +434,7 @@ def examine_retrieval_result(retrieval_result):
                 # Try to call update() method
                 try:
                     update_data = retrieval_result.update()
-                    console.print(
-                        f"[dim]Update() returned type: {
-                            type(update_data)}[/dim]"
-                    )
+                    console.print(f"[dim]Update() returned type: {type(update_data)}[/dim]")
                 except Exception as e:
                     console.print(f"[red]Error calling update(): {e}[/red]")
                     update_data = {}
@@ -481,12 +471,7 @@ def examine_analysis_result(analysis_result):
         console.print(f"[dim]Command goto: {analysis_result.goto}[/dim]")
 
         # Check update attribute
-        console.print(
-            f"[dim]Command has update: {
-                hasattr(
-                    analysis_result,
-                    'update')}[/dim]"
-        )
+        console.print(f"[dim]Command has update: {hasattr(analysis_result, 'update')}[/dim]")
 
         # Handle update as attribute or method
         if hasattr(analysis_result, "update"):
@@ -497,10 +482,7 @@ def examine_analysis_result(analysis_result):
                 # Try to call update() method
                 try:
                     update_data = analysis_result.update()
-                    console.print(
-                        f"[dim]Update() returned type: {
-                            type(update_data)}[/dim]"
-                    )
+                    console.print(f"[dim]Update() returned type: {type(update_data)}[/dim]")
                 except Exception as e:
                     console.print(f"[red]Error calling update(): {e}[/red]")
                     update_data = {}
@@ -513,25 +495,19 @@ def examine_analysis_result(analysis_result):
                 console.print("[bold]Analysis Results:[/bold]")
                 for key, value in update_data.items():
                     if isinstance(value, str):
-                        display_value = (
-                            value[:100] + "..." if len(value) > 100 else value
-                        )
+                        display_value = value[:100] + "..." if len(value) > 100 else value
                         console.print(f"  [italic]{key}[/italic]: {display_value}")
                     elif isinstance(value, list):
                         console.print(f"  [italic]{key}[/italic]:")
                         for item in value[:3]:  # Show first 3 items
                             display_item = (
-                                str(item)[:80] + "..."
-                                if len(str(item)) > 80
-                                else str(item)
+                                str(item)[:80] + "..." if len(str(item)) > 80 else str(item)
                             )
                             console.print(f"    • {display_item}")
                         if len(value) > 3:
                             console.print(f"    • ... ({len(value) - 3} more)")
                     else:
-                        console.print(
-                            f"  [italic]{key}[/italic]: {str(value)[:100]}..."
-                        )
+                        console.print(f"  [italic]{key}[/italic]: {str(value)[:100]}...")
     else:
         # Not a Command object
         console.print("[dim]Result is not a Command object[/dim]")
@@ -549,12 +525,7 @@ def examine_summary_result(summary_result):
         console.print(f"[dim]Command goto: {summary_result.goto}[/dim]")
 
         # Check update attribute
-        console.print(
-            f"[dim]Command has update: {
-                hasattr(
-                    summary_result,
-                    'update')}[/dim]"
-        )
+        console.print(f"[dim]Command has update: {hasattr(summary_result, 'update')}[/dim]")
 
         # Handle update as attribute or method
         if hasattr(summary_result, "update"):
@@ -565,10 +536,7 @@ def examine_summary_result(summary_result):
                 # Try to call update() method
                 try:
                     update_data = summary_result.update()
-                    console.print(
-                        f"[dim]Update() returned type: {
-                            type(update_data)}[/dim]"
-                    )
+                    console.print(f"[dim]Update() returned type: {type(update_data)}[/dim]")
                 except Exception as e:
                     console.print(f"[red]Error calling update(): {e}[/red]")
                     update_data = {}
@@ -581,14 +549,10 @@ def examine_summary_result(summary_result):
                 console.print("[bold]Summary Results:[/bold]")
                 for key, value in update_data.items():
                     if isinstance(value, str):
-                        display_value = (
-                            value[:150] + "..." if len(value) > 150 else value
-                        )
+                        display_value = value[:150] + "..." if len(value) > 150 else value
                         console.print(f"  [italic]{key}[/italic]: {display_value}")
                     else:
-                        console.print(
-                            f"  [italic]{key}[/italic]: {str(value)[:100]}..."
-                        )
+                        console.print(f"  [italic]{key}[/italic]: {str(value)[:100]}...")
     else:
         # Not a Command object
         console.print("[dim]Result is not a Command object[/dim]")

@@ -31,9 +31,7 @@ logging.basicConfig(
 def create_sample_graph():
     """Create a sample graph for testing visualization."""
     # Create sample engines
-    llm_engine = AugLLMConfig(
-        name="gpt4_engine", id="llm-" + uuid.uuid4().hex[:8], model="gpt-4o"
-    )
+    llm_engine = AugLLMConfig(name="gpt4_engine", id="llm-" + uuid.uuid4().hex[:8], model="gpt-4o")
 
     retriever_engine = BaseRetrieverConfig(
         name="retriever_engine", id="retriever-" + uuid.uuid4().hex[:8]

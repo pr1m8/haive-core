@@ -228,10 +228,7 @@ class TestStressTester:
             assert "successful_requests" in phase_results
 
         # Spike phase should have higher concurrency
-        assert (
-            results["spike_load"]["concurrent_users"]
-            > results["base_load"]["concurrent_users"]
-        )
+        assert results["spike_load"]["concurrent_users"] > results["base_load"]["concurrent_users"]
 
         output = f.getvalue()
         assert "Spike Testing" in output
@@ -300,9 +297,7 @@ class TestAsyncBenchmark:
             return x + y
 
         with redirect_stdout(io.StringIO()):
-            stats = await self.benchmark.time_async(
-                async_func_with_args, 5, y=3, iterations=2
-            )
+            stats = await self.benchmark.time_async(async_func_with_args, 5, y=3, iterations=2)
 
         assert stats["iterations"] == 2
         assert stats["mean"] > 0
@@ -414,12 +409,8 @@ class TestBenchmarkSuite:
             return sum(range(10))
 
         with redirect_stdout(io.StringIO()):
-            self.suite.add_benchmark(
-                "fast", fast_func, iterations=3, benchmark_type="timing"
-            )
-            self.suite.add_benchmark(
-                "slow", slow_func, iterations=3, benchmark_type="timing"
-            )
+            self.suite.add_benchmark("fast", fast_func, iterations=3, benchmark_type="timing")
+            self.suite.add_benchmark("slow", slow_func, iterations=3, benchmark_type="timing")
 
         with redirect_stdout(io.StringIO()) as f:
             results = self.suite.run_suite(save_results=False)
@@ -462,9 +453,7 @@ class TestBenchmarkSuite:
             return "test"
 
         with redirect_stdout(io.StringIO()):
-            self.suite.add_benchmark(
-                "unknown", test_func, benchmark_type="unknown_type"
-            )
+            self.suite.add_benchmark("unknown", test_func, benchmark_type="unknown_type")
 
         with redirect_stdout(io.StringIO()):
             results = self.suite.run_suite(save_results=False)

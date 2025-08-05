@@ -28,9 +28,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 def test_basic_registry():
     """Test basic registry operations."""
     # Create a new registry
-    registry = AbstractRegistry[str, Any](
-        name="test_registry", description="Registry for testing"
-    )
+    registry = AbstractRegistry[str, Any](name="test_registry", description="Registry for testing")
 
     # Register some items
     registry.register("item1", "Value 1", tags=["test", "example"])

@@ -10,12 +10,8 @@ def test_postgres_connection_settings():
     """Test PostgreSQL connection settings with prepared statements disabled."""
     try:
         # Add the packages to path
-        sys.path.insert(
-            0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src"
-        )
-        sys.path.insert(
-            0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src"
-        )
+        sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+        sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
 
         from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
         from haive.core.persistence.types import CheckpointerMode, CheckpointStorageMode
@@ -47,9 +43,7 @@ def test_postgres_connection_settings():
 
         # Create a test config
         test_config = {
-            "configurable": {
-                "thread_id": f"test_fix_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            }
+            "configurable": {"thread_id": f"test_fix_{datetime.now().strftime('%Y%m%d_%H%M%S')}"}
         }
 
         # Try to use the checkpointer without prepared statements
@@ -58,8 +52,7 @@ def test_postgres_connection_settings():
             from langgraph.checkpoint.base import empty_checkpoint
 
             test_checkpoint = empty_checkpoint()
-            test_checkpoint["channel_values"] = {
-                "test": "no_prepared_statements"}
+            test_checkpoint["channel_values"] = {"test": "no_prepared_statements"}
 
             # This tests the actual save operation
             result = checkpointer.put(test_config, test_checkpoint, {}, {})
@@ -81,14 +74,9 @@ def test_postgres_connection_settings():
 def test_conversation_agent_persistence():
     """Test conversation agent with the fixed persistence configuration."""
     try:
-
         # Add the packages to path
-        sys.path.insert(
-            0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src"
-        )
-        sys.path.insert(
-            0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src"
-        )
+        sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+        sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
 
         from haive.agents.conversation.collaberative.agent import CollaborativeAgent
         from haive.core.engine.aug_llm import AugLLMConfig
@@ -110,7 +98,6 @@ def test_conversation_agent_persistence():
             persistence=True,  # This should use our fixed PostgreSQL config
         )
 
-
         # Compile the agent
         agent.compile()
 
@@ -119,7 +106,6 @@ def test_conversation_agent_persistence():
 
         thread_id = f"test_persist_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         config = {"configurable": {"thread_id": thread_id}}
-
 
         # This should work without prepared statement conflicts
         try:
@@ -143,13 +129,11 @@ def test_conversation_agent_persistence():
 
 
 if __name__ == "__main__":
-
     # Test 1: Basic PostgreSQL configuration
     test1_passed = test_postgres_connection_settings()
 
     # Test 2: Conversation agent with persistence
     test2_passed = test_conversation_agent_persistence()
-
 
     if test1_passed and test2_passed:
         pass

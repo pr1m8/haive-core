@@ -104,9 +104,7 @@ class TestPatternManager:
     def test_set_pattern_parameters(self, pattern_manager):
         """Test setting global pattern parameters."""
         # Add a pattern
-        pattern_manager.add_pattern(
-            pattern_name="test_pattern", parameters={"specific": "value"}
-        )
+        pattern_manager.add_pattern(pattern_name="test_pattern", parameters={"specific": "value"})
 
         # Set global parameters
         pattern_manager.set_pattern_parameters(
@@ -125,14 +123,8 @@ class TestPatternManager:
         )
 
         # Check global parameters
-        assert (
-            pattern_manager.pattern_parameters["test_pattern"]["global_param"]
-            == "global_value"
-        )
-        assert (
-            pattern_manager.pattern_parameters["test_pattern"]["override"]
-            == "global_override"
-        )
+        assert pattern_manager.pattern_parameters["test_pattern"]["global_param"] == "global_value"
+        assert pattern_manager.pattern_parameters["test_pattern"]["override"] == "global_override"
 
         # Check combined parameters
         params1 = pattern_manager.get_pattern_parameters("test_pattern")
@@ -210,17 +202,11 @@ class TestPatternManager:
     def test_serialization(self, pattern_manager):
         """Test serialization to/from dictionary."""
         # Add patterns
-        pattern_manager.add_pattern(
-            "test_pattern", parameters={"param1": "value1"}, order=1
-        )
-        pattern_manager.add_pattern(
-            "second_pattern", parameters={"param2": "value2"}, order=2
-        )
+        pattern_manager.add_pattern("test_pattern", parameters={"param1": "value1"}, order=1)
+        pattern_manager.add_pattern("second_pattern", parameters={"param2": "value2"}, order=2)
 
         # Set global parameters
-        pattern_manager.set_pattern_parameters(
-            "test_pattern", global_param="global_value"
-        )
+        pattern_manager.set_pattern_parameters("test_pattern", global_param="global_value")
 
         # Mark applied
         pattern_manager.mark_pattern_applied("test_pattern")
@@ -241,10 +227,7 @@ class TestPatternManager:
         # Verify contents
         assert len(new_manager.patterns) == 2
         assert new_manager.patterns[0].name == "test_pattern"
-        assert (
-            new_manager.pattern_parameters["test_pattern"]["global_param"]
-            == "global_value"
-        )
+        assert new_manager.pattern_parameters["test_pattern"]["global_param"] == "global_value"
         assert new_manager.is_pattern_applied("test_pattern")
 
     @patch("haive.core.graph.patterns.registry.GraphPatternRegistry")

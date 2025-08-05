@@ -45,9 +45,7 @@ class TestStateSchema(StateSchema):
         "items": lambda old, new: (old or []) + (new or []),
     }
 
-    __engine_io_mappings__ = {
-        "test_engine": {"inputs": ["query"], "outputs": ["items", "count"]}
-    }
+    __engine_io_mappings__ = {"test_engine": {"inputs": ["query"], "outputs": ["items", "count"]}}
 
 
 class TestIntegratedNodeComposer:
@@ -296,9 +294,7 @@ class TestFactoryFunctions:
     def test_with_state_schema_decorator(self):
         """Test with_state_schema decorator."""
 
-        @with_state_schema(
-            TestStateSchema, output_mappings=[FieldMapping("result", "processed")]
-        )
+        @with_state_schema(TestStateSchema, output_mappings=[FieldMapping("result", "processed")])
         def process(state: TestStateSchema) -> dict[str, Any]:
             return {"result": f"Query: {state.query}"}
 
@@ -350,9 +346,7 @@ class TestBackwardsCompatibility:
         """Test mixing old and new patterns."""
 
         # Old style node
-        def old_process(
-            state: dict[str, Any], config: dict[str, Any]
-        ) -> dict[str, Any]:
+        def old_process(state: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
             return {"old_result": "old"}
 
         old_node = CallableNodeConfig(name="old", callable_func=old_process)
@@ -420,9 +414,7 @@ class TestPerformanceCharacteristics:
         nodes = []
         for i in range(10):
 
-            def process(
-                state: dict[str, Any], config: dict[str, Any]
-            ) -> dict[str, Any]:
+            def process(state: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
                 return {"result": f"processed_{i}"}
 
             node = CallableNodeConfig(name=f"node_{i}", callable_func=process)

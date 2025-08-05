@@ -352,9 +352,7 @@ class TestUpdateFunctions:
         expected_agent = {"status": "new", "last_action": "wait"}
         assert updates8 == {"current_agent": expected_agent}
 
-    def test_update_functions_with_real_components_integration(
-        self, real_messages_state
-    ):
+    def test_update_functions_with_real_components_integration(self, real_messages_state):
         """Test update functions with real Haive components."""
         # Test with actual MessagesState and LangChain messages
 
@@ -375,9 +373,7 @@ class TestUpdateFunctions:
         # Test multi-field update with real message data
         message_result = {"content": "How can I help you?", "type": "ai", "tokens": 6}
 
-        update_multi = update_multi_field(
-            {"content": "last_response", "tokens": "response_tokens"}
-        )
+        update_multi = update_multi_field({"content": "last_response", "tokens": "response_tokens"})
 
         updates = update_multi(message_result, real_messages_state, {})
         assert updates == {"last_response": "How can I help you?", "response_tokens": 6}

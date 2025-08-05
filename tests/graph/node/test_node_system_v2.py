@@ -47,38 +47,18 @@ def test_node_creation_with_schema_composer():
     output_schema = schema_composer.create_output_schema()
     state_schema = schema_composer  # .build()
 
-    logger.debug(
-        f"Input schema fields: {
-            getattr(
-                input_schema,
-                'model_fields',
-                {})}"
-    )
-    logger.debug(
-        f"Output schema fields: {
-            getattr(
-                output_schema,
-                'model_fields',
-                {})}"
-    )
-    logger.debug(
-        f"State schema fields: {
-            getattr(
-                state_schema,
-                'model_fields',
-                {})}"
-    )
+    logger.debug(f"Input schema fields: {getattr(input_schema, 'model_fields', {})}")
+    logger.debug(f"Output schema fields: {getattr(output_schema, 'model_fields', {})}")
+    logger.debug(f"State schema fields: {getattr(state_schema, 'model_fields', {})}")
 
     # Verify engine I/O mappings were detected
-    assert hasattr(
-        state_schema, "__engine_io_mappings__"
-    ), "Schema missing engine I/O mappings"
+    assert hasattr(state_schema, "__engine_io_mappings__"), "Schema missing engine I/O mappings"
     logger.debug(f"Engine I/O mappings: {state_schema.__engine_io_mappings__}")
 
     # Check for structured model tracking
-    assert hasattr(
-        state_schema, "__structured_models__"
-    ), "Schema missing structured model tracking"
+    assert hasattr(state_schema, "__structured_models__"), (
+        "Schema missing structured model tracking"
+    )
     logger.debug(f"Structured models: {state_schema.__structured_models__}")
 
     # Create a NodeConfig with explicit schema settings for clarity
@@ -94,9 +74,9 @@ def test_node_creation_with_schema_composer():
     )
 
     # Verify that node configuration is correct
-    assert (
-        node_config.node_type == NodeType.ENGINE
-    ), f"Expected ENGINE node type but got {node_config.node_type}"
+    assert node_config.node_type == NodeType.ENGINE, (
+        f"Expected ENGINE node type but got {node_config.node_type}"
+    )
     assert node_config.engine == aug_llm, "Engine not correctly assigned"
     assert node_config.command_goto == "END", "command_goto not correctly assigned"
 
@@ -106,24 +86,20 @@ def test_node_creation_with_schema_composer():
 
     # Create a test state using the state schema directly
     logger.debug("Creating test state using the state schema")
-    test_messages = [
-        HumanMessage(content="Help me plan a birthday party for my daughter")
-    ]
+    test_messages = [HumanMessage(content="Help me plan a birthday party for my daughter")]
     test_state = state_schema(messages=test_messages)
 
     logger.debug(f"Test state created: {test_state}")
 
     # Test the node function configuration - we won't actually invoke it
     # since we don't want to make real API calls in tests
-    assert hasattr(
-        node_function, "__node_config__"
-    ), "Node function missing __node_config__ attribute"
-    assert hasattr(
-        node_function, "__engine_id__"
-    ), "Node function missing __engine_id__ attribute"
-    assert (
-        node_function.__engine_id__ == "llm_12345"
-    ), f"Expected engine_id=llm_12345 but got {node_function.__engine_id__}"
+    assert hasattr(node_function, "__node_config__"), (
+        "Node function missing __node_config__ attribute"
+    )
+    assert hasattr(node_function, "__engine_id__"), "Node function missing __engine_id__ attribute"
+    assert node_function.__engine_id__ == "llm_12345", (
+        f"Expected engine_id=llm_12345 but got {node_function.__engine_id__}"
+    )
 
     logger.info("Test node creation completed successfully")
 
@@ -164,12 +140,12 @@ def test_node_with_engine_specific_config():
     NodeFactory().create_node_function(node_config)
 
     # Verify that config overrides were properly set
-    assert (
-        "temperature" in node_config.config_overrides
-    ), "Temperature not found in config_overrides"
-    assert (
-        node_config.config_overrides["temperature"] == 0.0
-    ), "Temperature override not set correctly"
+    assert "temperature" in node_config.config_overrides, (
+        "Temperature not found in config_overrides"
+    )
+    assert node_config.config_overrides["temperature"] == 0.0, (
+        "Temperature override not set correctly"
+    )
 
     # Create test state
     state_schema(messages=[HumanMessage(content="What is the capital of France?")])
@@ -217,21 +193,13 @@ def test_node_schema_integration():
     assert "plan" in state_schema.model_fields, "Schema missing plan field"
 
     # Verify engine I/O mappings were detected
-    assert hasattr(
-        state_schema, "__engine_io_mappings__"
-    ), "Schema missing engine I/O mappings"
+    assert hasattr(state_schema, "__engine_io_mappings__"), "Schema missing engine I/O mappings"
     engine_mappings = state_schema.__engine_io_mappings__
 
     logger.debug(f"Engine I/O mappings: {engine_mappings}")
-    assert (
-        "llm_integration" in engine_mappings
-    ), "Engine mapping missing for llm_integration"
-    assert (
-        "inputs" in engine_mappings["llm_integration"]
-    ), "Engine mapping missing inputs"
-    assert (
-        "outputs" in engine_mappings["llm_integration"]
-    ), "Engine mapping missing outputs"
+    assert "llm_integration" in engine_mappings, "Engine mapping missing for llm_integration"
+    assert "inputs" in engine_mappings["llm_integration"], "Engine mapping missing inputs"
+    assert "outputs" in engine_mappings["llm_integration"], "Engine mapping missing outputs"
 
     # Create a NodeConfig with auto-extracted I/O mappings
     logger.debug("Creating NodeConfig with auto-extracted mappings")
@@ -265,11 +233,7 @@ def test_node_schema_integration():
     NodeFactory.create_node_function(node_config)
 
     # Verify mappings are correct
-    assert (
-        "messages" in node_config.get_input_mapping()
-    ), "Input mapping missing messages field"
-    assert (
-        "plan" in node_config.get_output_mapping()
-    ), "Output mapping missing plan field"
+    assert "messages" in node_config.get_input_mapping(), "Input mapping missing messages field"
+    assert "plan" in node_config.get_output_mapping(), "Output mapping missing plan field"
 
     logger.info("Schema integration test completed successfully")

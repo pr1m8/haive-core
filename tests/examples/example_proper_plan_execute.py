@@ -15,9 +15,7 @@ from haive.tools import duckduckgo_search_tool
 def example_basic_usage():
     """Example of basic Plan & Execute usage."""
     # Create the agent
-    agent = create_proper_plan_execute(
-        name="ExamplePlanExecute", tools=[duckduckgo_search_tool]
-    )
+    agent = create_proper_plan_execute(name="ExamplePlanExecute", tools=[duckduckgo_search_tool])
 
     # Simple math problem (doesn't need tools)
     agent.run("What is 25 * 4 + 12?")
@@ -28,9 +26,7 @@ def example_basic_usage():
 def example_with_research():
     """Example that requires research and planning."""
     # Create agent with search capabilities
-    agent = create_proper_plan_execute(
-        name="ResearchPlanExecute", tools=[duckduckgo_search_tool]
-    )
+    agent = create_proper_plan_execute(name="ResearchPlanExecute", tools=[duckduckgo_search_tool])
 
     # Complex research task
     research_query = """Research the latest developments in artificial intelligence in 2024 and 2025.
@@ -44,9 +40,7 @@ def example_with_research():
 
 def example_step_by_step_analysis():
     """Example showing the agent's step-by-step approach."""
-    agent = create_proper_plan_execute(
-        name="AnalysisPlanExecute", tools=[duckduckgo_search_tool]
-    )
+    agent = create_proper_plan_execute(name="AnalysisPlanExecute", tools=[duckduckgo_search_tool])
 
     # Multi-step analysis task
     analysis_query = """Analyze the impact of remote work on productivity.
@@ -69,10 +63,7 @@ def show_agent_structure():
         pass
 
     for _i, sub_agent in enumerate(agent.agents):
-        if (
-            hasattr(sub_agent, "structured_output_model")
-            and sub_agent.structured_output_model
-        ):
+        if hasattr(sub_agent, "structured_output_model") and sub_agent.structured_output_model:
             pass
 
         if hasattr(sub_agent, "tools") and sub_agent.tools:

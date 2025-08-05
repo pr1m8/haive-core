@@ -71,8 +71,7 @@ def move_file_with_git(source, destination_dir, filename):
     try:
         # Use git mv to preserve history
         cmd = ["git", "mv", str(source), str(destination)]
-        result = subprocess.run(
-            cmd, check=False, capture_output=True, text=True, cwd=ROOT_DIR)
+        result = subprocess.run(cmd, check=False, capture_output=True, text=True, cwd=ROOT_DIR)
 
         if result.returncode == 0:
             return True

@@ -27,14 +27,10 @@ def make_retriever_config(docs=None) -> VectorStoreRetrieverConfig:
         name="vs_test",
         documents=docs,
         vector_store_provider=VectorStoreProvider.IN_MEMORY,
-        embedding_model=HuggingFaceEmbeddingConfig(
-            model="sentence-transformers/all-MiniLM-L6-v2"
-        ),
+        embedding_model=HuggingFaceEmbeddingConfig(model="sentence-transformers/all-MiniLM-L6-v2"),
     )
 
-    return VectorStoreRetrieverConfig(
-        name="retriever_test", vector_store_config=vectorstore
-    )
+    return VectorStoreRetrieverConfig(name="retriever_test", vector_store_config=vectorstore)
 
 
 # Define state classes at the top level
@@ -91,7 +87,6 @@ def test_retriever_with_different_input_mappings():
 
     # Add preprocessing node that explicitly sets the query
     def log_input(state):
-
         # Access state fields correctly based on type
         if isinstance(state, dict):
             search_text = state.get("search_text", "")
@@ -101,7 +96,6 @@ def test_retriever_with_different_input_mappings():
 
     # Add post-processing node to handle documents
     def process_results(state):
-
         # Create a Command to handle the response
         from langgraph.types import Command
 

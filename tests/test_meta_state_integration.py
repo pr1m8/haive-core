@@ -399,9 +399,7 @@ class TestMetaStateIntegration:
             agent=parent_agent, messages=[HumanMessage(content="Parent message")]
         )
 
-        MetaStateSchema(
-            agent=child_agent, messages=[HumanMessage(content="Child message")]
-        )
+        MetaStateSchema(agent=child_agent, messages=[HumanMessage(content="Child message")])
 
         # Test field sharing behavior
         # This would typically be handled by the graph framework

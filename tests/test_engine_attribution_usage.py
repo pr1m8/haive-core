@@ -25,9 +25,7 @@ class ConversationState(StateSchema):
     engine_usage: dict[str, int] = Field(
         default_factory=dict, description="Track engine usage counts"
     )
-    last_engine: str | None = Field(
-        default=None, description="Last engine that responded"
-    )
+    last_engine: str | None = Field(default=None, description="Last engine that responded")
 
 
 def track_engine_usage(state: ConversationState) -> dict[str, Any]:
@@ -64,9 +62,7 @@ def track_engine_usage(state: ConversationState) -> dict[str, Any]:
             if "token_count" in msg.additional_kwargs:
                 if engine_name not in engine_stats["token_usage"]:
                     engine_stats["token_usage"][engine_name] = 0
-                engine_stats["token_usage"][engine_name] += msg.additional_kwargs[
-                    "token_count"
-                ]
+                engine_stats["token_usage"][engine_name] += msg.additional_kwargs["token_count"]
 
     for _engine, _count in engine_stats["messages_by_engine"].items():
         pass
@@ -121,9 +117,7 @@ def create_audit_log(state: ConversationState) -> list[dict[str, Any]]:
             "index": i,
             "timestamp": datetime.now().isoformat(),
             "message_type": type(msg).__name__,
-            "content_preview": (
-                msg.content[:50] + "..." if len(msg.content) > 50 else msg.content
-            ),
+            "content_preview": (msg.content[:50] + "..." if len(msg.content) > 50 else msg.content),
         }
 
         if isinstance(msg, AIMessage):
@@ -152,9 +146,7 @@ def create_audit_log(state: ConversationState) -> list[dict[str, Any]]:
     return audit_entries
 
 
-def filter_messages_by_engine(
-    messages: list[BaseMessage], engine_name: str
-) -> list[BaseMessage]:
+def filter_messages_by_engine(messages: list[BaseMessage], engine_name: str) -> list[BaseMessage]:
     """Filter messages to only show those from a specific engine."""
 
     filtered = []
@@ -184,7 +176,6 @@ def debug_engine_behavior(state: ConversationState):
             engines_data[engine].append(msg)
 
     for engine, messages in engines_data.items():
-
         # Analyze response patterns
         response_lengths = [len(msg.content) for msg in messages]
         (sum(response_lengths) / len(response_lengths) if response_lengths else 0)

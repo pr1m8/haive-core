@@ -71,9 +71,9 @@ class TestPostgresCheckpointerConfig:
         checkpointer = test_config.create_checkpointer()
 
         # Verify checkpointer type
-        assert (
-            checkpointer.__class__.__name__ == "PostgresSaver"
-        ), "Should create a PostgresSaver instance"
+        assert checkpointer.__class__.__name__ == "PostgresSaver", (
+            "Should create a PostgresSaver instance"
+        )
 
         # Verify pool was created
         assert test_config._pool is not None, "Connection pool should be created"
@@ -81,9 +81,7 @@ class TestPostgresCheckpointerConfig:
         # Check available methods on checkpointer
         expected_methods = ["get", "list", "put", "setup"]
         for method in expected_methods:
-            assert hasattr(
-                checkpointer, method
-            ), f"Checkpointer should have {method} method"
+            assert hasattr(checkpointer, method), f"Checkpointer should have {method} method"
 
     def test_connection_parameters(self):
         """Test that connection parameters are properly used."""
@@ -108,13 +106,9 @@ class TestPostgresCheckpointerConfig:
 
             # Verify thread exists - using direct pool access to test
             with config._pool.connection() as conn, conn.cursor() as cursor:
-                cursor.execute(
-                    "SELECT 1 FROM threads WHERE thread_id = %s", (thread_id,)
-                )
+                cursor.execute("SELECT 1 FROM threads WHERE thread_id = %s", (thread_id,))
                 result = cursor.fetchone()
-                assert (
-                    result is not None
-                ), "Thread registration should work with custom parameters"
+                assert result is not None, "Thread registration should work with custom parameters"
         finally:
             config.close()
 
@@ -147,9 +141,7 @@ class TestPostgresCheckpointerConfig:
 
         # Verify thread exists in database by querying directly
         with test_config._pool.connection() as conn, conn.cursor() as cursor:
-            cursor.execute(
-                "SELECT metadata FROM threads WHERE thread_id = %s", (thread_id,)
-            )
+            cursor.execute("SELECT metadata FROM threads WHERE thread_id = %s", (thread_id,))
             result = cursor.fetchone()
 
             # Thread should be found
@@ -162,12 +154,8 @@ class TestPostgresCheckpointerConfig:
                 db_metadata = json.loads(db_metadata)
 
             # Verify key metadata elements match
-            assert (
-                db_metadata.get("test") == "integration"
-            ), "Metadata test field should match"
-            assert (
-                db_metadata.get("complex", {}).get("value") == 42
-            ), "Nested metadata should match"
+            assert db_metadata.get("test") == "integration", "Metadata test field should match"
+            assert db_metadata.get("complex", {}).get("value") == 42, "Nested metadata should match"
 
     def test_updating_existing_thread(self, test_config):
         """Test registering an already existing thread."""
@@ -189,9 +177,7 @@ class TestPostgresCheckpointerConfig:
 
         # Verify thread exists with original metadata (ON CONFLICT DO NOTHING)
         with test_config._pool.connection() as conn, conn.cursor() as cursor:
-            cursor.execute(
-                "SELECT metadata FROM threads WHERE thread_id = %s", (thread_id,)
-            )
+            cursor.execute("SELECT metadata FROM threads WHERE thread_id = %s", (thread_id,))
             result = cursor.fetchone()
 
             # Thread should be found
@@ -220,9 +206,7 @@ class TestPostgresCheckpointerConfig:
 
         # Verify thread exists with default metadata
         with test_config._pool.connection() as conn, conn.cursor() as cursor:
-            cursor.execute(
-                "SELECT metadata FROM threads WHERE thread_id = %s", (thread_id,)
-            )
+            cursor.execute("SELECT metadata FROM threads WHERE thread_id = %s", (thread_id,))
             result = cursor.fetchone()
 
             # Thread should be found
@@ -391,9 +375,7 @@ class TestPostgresCheckpointerConfig:
                         (thread_id_no_autocommit,),
                     )
                     result = cursor.fetchone()
-                    assert (
-                        result is not None
-                    ), "Thread should be visible within transaction"
+                    assert result is not None, "Thread should be visible within transaction"
 
                     # Now check visibility in separate connection without
                     # commit
@@ -406,9 +388,7 @@ class TestPostgresCheckpointerConfig:
                             result = cursor2.fetchone()
                             # Should not be visible yet in a different
                             # connection
-                            assert (
-                                result is None
-                            ), "Thread should not be visible before commit"
+                            assert result is None, "Thread should not be visible before commit"
 
                     # Now commit and test again
                     conn.commit()
@@ -422,9 +402,7 @@ class TestPostgresCheckpointerConfig:
                                 (thread_id_no_autocommit,),
                             )
                             result = cursor2.fetchone()
-                            assert (
-                                result is not None
-                            ), "Thread should be visible after commit"
+                            assert result is not None, "Thread should be visible after commit"
                 finally:
                     cursor.close()
                     if not explicit_committed:
@@ -468,9 +446,7 @@ class TestPostgresCheckpointerConfig:
         # Verify data was stored and retrieved correctly
         assert retrieved_data is not None, "Should retrieve data"
         assert "test_key" in retrieved_data, "Retrieved data should contain test_key"
-        assert (
-            retrieved_data["test_key"] == "test_value"
-        ), "Retrieved test_key should match"
+        assert retrieved_data["test_key"] == "test_value", "Retrieved test_key should match"
         assert "numbers" in retrieved_data, "Retrieved data should contain numbers"
         assert retrieved_data["numbers"] == [1, 2, 3], "Retrieved numbers should match"
 
@@ -504,9 +480,7 @@ class TestPostgresCheckpointerConfig:
         checkpointer.put(config2, test_data_2)
 
         # List checkpoints
-        checkpoints = list(
-            checkpointer.list({"configurable": {"thread_id": thread_id}})
-        )
+        checkpoints = list(checkpointer.list({"configurable": {"thread_id": thread_id}}))
 
         # Verify we can find checkpoints
         assert len(checkpoints) >= 1, "Should find at least one checkpoint"

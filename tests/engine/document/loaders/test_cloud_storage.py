@@ -14,8 +14,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 # Add the source path to sys.path
-base_path = Path(
-    "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src")
 sys.path.insert(0, str(base_path))
 
 
@@ -201,7 +200,6 @@ def test_s3_sources():
         try:
             source = test["source_class"](**test["config"])
 
-
             if hasattr(source, "scrape_all"):
                 scrape_config = source.scrape_all()
             else:
@@ -211,7 +209,6 @@ def test_s3_sources():
 
         except Exception as e:
             pass
-
 
     return s3_tests_passed >= 2
 
@@ -275,7 +272,6 @@ def test_file_sharing_services():
 
         except Exception as e:
             pass
-
 
     return sharing_tests_passed >= 2
 
@@ -341,7 +337,6 @@ def test_data_lake_sources():
                 source = MockDeltaLakeSource(**config)
                 loader_kwargs = source.get_loader_kwargs()
 
-
                 if "version" in loader_kwargs:
                     pass
                 elif "timestamp" in loader_kwargs:
@@ -351,7 +346,6 @@ def test_data_lake_sources():
 
         except Exception as e:
             pass
-
 
     return lake_tests_passed >= 2
 
@@ -398,12 +392,10 @@ def test_enterprise_storage():
             source = MockSharePointSource(**config)
             scrape_config = source.scrape_all()
 
-
             enterprise_tests_passed += 1
 
         except Exception as e:
             pass
-
 
     return enterprise_tests_passed >= 1
 
@@ -442,25 +434,16 @@ def test_authentication_types():
 
     for config in auth_configs:
         try:
-
             auth_tests_passed += 1
 
         except Exception as e:
             pass
-
 
     return auth_tests_passed >= 4
 
 
 def display_cloud_storage_summary():
     """Display summary of the cloud storage implementation."""
-
-
-
-
-
-
-
 
 
 def main():

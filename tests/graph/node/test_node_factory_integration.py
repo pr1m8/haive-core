@@ -50,9 +50,7 @@ class DocumentSection(BaseModel):
 
     title: str = Field(description="Section title")
     content: str = Field(description="Section content")
-    subsections: list["DocumentSection"] = Field(
-        default_factory=list, description="Subsections"
-    )
+    subsections: list["DocumentSection"] = Field(default_factory=list, description="Subsections")
 
 
 # Recursive model reference
@@ -63,9 +61,7 @@ class DocumentHierarchy(BaseModel):
     """Hierarchical document structure."""
 
     title: str = Field(description="Document title")
-    sections: list[DocumentSection] = Field(
-        default_factory=list, description="Document sections"
-    )
+    sections: list[DocumentSection] = Field(default_factory=list, description="Document sections")
 
 
 class DocumentAnalysis(BaseModel):
@@ -100,8 +96,7 @@ def sample_documents():
     ]
 
     return [
-        Document(page_content=text, metadata={"source": f"doc{i}"})
-        for i, text in enumerate(texts)
+        Document(page_content=text, metadata={"source": f"doc{i}"}) for i, text in enumerate(texts)
     ]
 
 
@@ -132,9 +127,7 @@ def vector_store(sample_documents, embedding_model):
 @pytest.fixture
 def retriever(vector_store):
     """Create a retriever from the vector store."""
-    return VectorStoreRetrieverConfig(
-        name="test_retriever", vector_store_config=vector_store, k=2
-    )
+    return VectorStoreRetrieverConfig(name="test_retriever", vector_store_config=vector_store, k=2)
 
 
 # --- Tests ---
@@ -419,9 +412,7 @@ def test_schema_composer_includes_all_fields(azure_llm_config, retriever):
     )
 
     # Use SchemaComposer to generate a schema from multiple components
-    schema = SchemaComposer.compose_schema(
-        components=[retriever, doc_llm], name="CombinedSchema"
-    )
+    schema = SchemaComposer.compose_schema(components=[retriever, doc_llm], name="CombinedSchema")
 
     # Verify schema includes fields from all components
     assert hasattr(schema, "model_fields")

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Test BaseGraph integration with intelligent routing."""
 
-
 from haive.agents.multi.clean import MultiAgent
 from haive.agents.simple.agent import SimpleAgent
 from haive.core.engine.aug_llm import AugLLMConfig
@@ -11,17 +10,11 @@ from haive.core.graph.state_graph.base_graph2 import BaseGraph
 def test_basegraph_intelligent_routing():
     """Test BaseGraph's intelligent routing capabilities."""
     # Create agents
-    planner = SimpleAgent(
-        name="planner", engine=AugLLMConfig(prompt_template="Plan: {input}")
-    )
+    planner = SimpleAgent(name="planner", engine=AugLLMConfig(prompt_template="Plan: {input}"))
 
-    executor = SimpleAgent(
-        name="executor", engine=AugLLMConfig(prompt_template="Execute: {input}")
-    )
+    executor = SimpleAgent(name="executor", engine=AugLLMConfig(prompt_template="Execute: {input}"))
 
-    reviewer = SimpleAgent(
-        name="reviewer", engine=AugLLMConfig(prompt_template="Review: {input}")
-    )
+    reviewer = SimpleAgent(name="reviewer", engine=AugLLMConfig(prompt_template="Review: {input}"))
 
     # Test direct BaseGraph usage
     graph = BaseGraph(name="test_graph")
@@ -29,9 +22,7 @@ def test_basegraph_intelligent_routing():
     # Add intelligent routing
     agents = {"executor": executor, "reviewer": reviewer, "planner": planner}
 
-    graph.add_intelligent_agent_routing(
-        agents=agents, execution_mode="infer", prefix="agent_"
-    )
+    graph.add_intelligent_agent_routing(agents=agents, execution_mode="infer", prefix="agent_")
 
     # Should have inferred sequence: planner → executor → reviewer
     expected_edges = [
@@ -53,17 +44,11 @@ def test_basegraph_intelligent_routing():
 def test_multiagent_basegraph_integration():
     """Test MultiAgent using BaseGraph intelligent routing."""
     # Create agents
-    planner = SimpleAgent(
-        name="planner", engine=AugLLMConfig(prompt_template="Plan: {input}")
-    )
+    planner = SimpleAgent(name="planner", engine=AugLLMConfig(prompt_template="Plan: {input}"))
 
-    executor = SimpleAgent(
-        name="executor", engine=AugLLMConfig(prompt_template="Execute: {input}")
-    )
+    executor = SimpleAgent(name="executor", engine=AugLLMConfig(prompt_template="Execute: {input}"))
 
-    reviewer = SimpleAgent(
-        name="reviewer", engine=AugLLMConfig(prompt_template="Review: {input}")
-    )
+    reviewer = SimpleAgent(name="reviewer", engine=AugLLMConfig(prompt_template="Review: {input}"))
 
     # Create MultiAgent (should use BaseGraph intelligent routing)
     multi_agent = MultiAgent.create(
@@ -95,9 +80,7 @@ def test_multiagent_basegraph_integration():
 def test_branch_routing():
     """Test branch routing with BaseGraph."""
     # Create agents
-    analyzer = SimpleAgent(
-        name="analyzer", engine=AugLLMConfig(prompt_template="Analyze: {input}")
-    )
+    analyzer = SimpleAgent(name="analyzer", engine=AugLLMConfig(prompt_template="Analyze: {input}"))
 
     success_handler = SimpleAgent(
         name="success_handler",

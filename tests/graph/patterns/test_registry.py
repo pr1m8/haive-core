@@ -278,9 +278,7 @@ class TestGraphPatternRegistry:
         registry = GraphPatternRegistry.get_instance()
 
         # Create a parameter definition
-        param_def = ParameterDefinition(
-            type="str", description="A parameter", default="default"
-        )
+        param_def = ParameterDefinition(type="str", description="A parameter", default="default")
 
         # Create a requirement
         requirement = {"type": "llm", "count": 1, "optional": False}
@@ -317,9 +315,7 @@ class TestGraphPatternRegistry:
         registry = GraphPatternRegistry.get_instance()
 
         # Create a parameter definition
-        param_def = ParameterDefinition(
-            type="str", description="A parameter", default="default"
-        )
+        param_def = ParameterDefinition(type="str", description="A parameter", default="default")
 
         # Create branch
         branch = BranchDefinition(

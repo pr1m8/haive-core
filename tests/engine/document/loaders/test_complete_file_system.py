@@ -26,9 +26,7 @@ def import_module_from_file(module_name, file_path):
 
 
 # Set up module paths
-base_path = Path(
-    "/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core"
-)
+base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core")
 
 
 try:
@@ -37,12 +35,7 @@ try:
     # Import essential sources first (this registers basic sources)
     essential_sources_module = import_module_from_file(
         "haive.core.engine.document.loaders.sources.essential_sources",
-        base_path
-        / "engine"
-        / "document"
-        / "loaders"
-        / "sources"
-        / "essential_sources.py",
+        base_path / "engine" / "document" / "loaders" / "sources" / "essential_sources.py",
     )
 
     # Import file sources (this registers all file-based sources)
@@ -60,12 +53,7 @@ try:
     # Import registry for testing
     registry_module = import_module_from_file(
         "haive.core.engine.document.loaders.sources.enhanced_registry",
-        base_path
-        / "engine"
-        / "document"
-        / "loaders"
-        / "sources"
-        / "enhanced_registry.py",
+        base_path / "engine" / "document" / "loaders" / "sources" / "enhanced_registry.py",
     )
 
     # Import source types for testing
@@ -93,24 +81,22 @@ def test_complete_file_system():
     stats = enhanced_registry.get_statistics()
 
     # Should have significantly more sources now
-    assert (
-        stats["total_sources"] >= 30
-    ), f"Expected at least 30 sources, got {stats['total_sources']}"
-    assert (
-        stats["bulk_loaders"] >= 8
-    ), f"Expected at least 8 bulk loaders, got {stats['bulk_loaders']}"
-    assert (
-        stats["extensions_covered"] >= 25
-    ), f"Expected at least 25 extensions, got {stats['extensions_covered']}"
+    assert stats["total_sources"] >= 30, (
+        f"Expected at least 30 sources, got {stats['total_sources']}"
+    )
+    assert stats["bulk_loaders"] >= 8, (
+        f"Expected at least 8 bulk loaders, got {stats['bulk_loaders']}"
+    )
+    assert stats["extensions_covered"] >= 25, (
+        f"Expected at least 25 extensions, got {stats['extensions_covered']}"
+    )
 
     # Test 2: File Source Validation
     file_stats = file_sources_module.get_file_sources_statistics()
     file_validation = file_sources_module.validate_file_sources()
 
     assert file_validation, "File source validation failed"
-    assert (
-        file_stats["unstructured_loaders"] >= 5
-    ), "Expected at least 5 unstructured loaders"
+    assert file_stats["unstructured_loaders"] >= 5, "Expected at least 5 unstructured loaders"
 
     # Test 3: Bulk Loading System
     bulk_stats = bulk_sources_module.get_bulk_sources_statistics()
@@ -118,12 +104,10 @@ def test_complete_file_system():
     scrape_all_sources = bulk_sources_module.get_scrape_all_sources()
 
     assert bulk_validation, "Bulk source validation failed"
-    assert (
-        len(scrape_all_sources) >= 6
-    ), f"Expected at least 6 'scrape all' sources, got {len(scrape_all_sources)}"
-    assert (
-        bulk_stats["max_concurrency_available"] >= 8
-    ), "Expected high concurrency support"
+    assert len(scrape_all_sources) >= 6, (
+        f"Expected at least 6 'scrape all' sources, got {len(scrape_all_sources)}"
+    )
+    assert bulk_stats["max_concurrency_available"] >= 8, "Expected high concurrency support"
 
     # Test 4: Unstructured File Processing
 
@@ -142,8 +126,7 @@ def test_complete_file_system():
         if registration:
             # Check for unstructured capabilities
             has_unstructured = any(
-                "unstructured" in loader.name.lower()
-                for loader in registration.loaders.values()
+                "unstructured" in loader.name.lower() for loader in registration.loaders.values()
             )
             if has_unstructured:
                 pass
@@ -227,9 +210,7 @@ def test_complete_file_system():
     )
 
     # Check streaming capabilities
-    streaming_sources = enhanced_registry.find_sources_with_capability(
-        LoaderCapability.STREAMING
-    )
+    streaming_sources = enhanced_registry.find_sources_with_capability(LoaderCapability.STREAMING)
 
     # Check async processing
     async_sources = enhanced_registry.find_sources_with_capability(
@@ -245,9 +226,9 @@ def test_complete_file_system():
             category_coverage[category.value] = len(sources)
 
     # Should have good coverage across categories
-    assert (
-        len(category_coverage) >= 8
-    ), f"Expected coverage of at least 8 categories, got {len(category_coverage)}"
+    assert len(category_coverage) >= 8, (
+        f"Expected coverage of at least 8 categories, got {len(category_coverage)}"
+    )
 
     # Test 10: Performance and Concurrency
 
@@ -268,11 +249,7 @@ def test_complete_file_system():
                 if loader.quality == "high":
                     quality_sources.append(name)
 
-
-    assert (
-        max_concurrency >= 8
-    ), f"Expected high concurrency support, got {max_concurrency}"
-
+    assert max_concurrency >= 8, f"Expected high concurrency support, got {max_concurrency}"
 
     return True
 
@@ -288,15 +265,9 @@ def display_comprehensive_summary():
     bulk_stats = bulk_sources_module.get_bulk_sources_statistics()
     scrape_all_sources = bulk_sources_module.get_scrape_all_sources()
 
-
-
-
-
-
     for source in scrape_all_sources:
         registration = enhanced_registry._sources[source]
         concurrency = registration.bulk_info.max_concurrent
-
 
 
 def main():

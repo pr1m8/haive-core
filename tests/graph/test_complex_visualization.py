@@ -161,9 +161,7 @@ def hierarchical_graph(mock_engines, validation_tools):
     prompt_construction.add_node(
         "template_selection",
         lambda state: {
-            "selected_template": (
-                "default" if not state.get("context_data") else "context"
-            )
+            "selected_template": ("default" if not state.get("context_data") else "context")
         },
     )
 
@@ -520,9 +518,7 @@ def test_complex_branching_visualization(complex_branching_graph, tmp_path):
 def test_cycle_detection_visualization(mock_engines):
     """Test visualization of a graph with cycles."""
     # Create graph with cycles
-    graph = StateGraph(
-        name="CycleGraph", state_schema=ComplexWorkflowState, allow_cycles=True
-    )
+    graph = StateGraph(name="CycleGraph", state_schema=ComplexWorkflowState, allow_cycles=True)
 
     # Add nodes
     graph.add_node(

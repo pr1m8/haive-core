@@ -26,9 +26,7 @@ def sample_documents():
             page_content="Machine learning is transforming industries",
             metadata={"id": 2},
         ),
-        Document(
-            page_content="Vector databases enable semantic search", metadata={"id": 3}
-        ),
+        Document(page_content="Vector databases enable semantic search", metadata={"id": 3}),
     ]
 
 
@@ -157,9 +155,7 @@ def test_invalid_distance_metrics():
         ChromaVectorStoreConfig,
     )
 
-    embedding_config = HuggingFaceEmbeddingConfig(
-        model="sentence-transformers/all-MiniLM-L6-v2"
-    )
+    embedding_config = HuggingFaceEmbeddingConfig(model="sentence-transformers/all-MiniLM-L6-v2")
 
     with pytest.raises(ValueError, match="distance_metric must be one of"):
         ChromaVectorStoreConfig(
@@ -170,9 +166,7 @@ def test_invalid_distance_metrics():
 if __name__ == "__main__":
     # Run basic tests
 
-    embedding_config = HuggingFaceEmbeddingConfig(
-        model="sentence-transformers/all-MiniLM-L6-v2"
-    )
+    embedding_config = HuggingFaceEmbeddingConfig(model="sentence-transformers/all-MiniLM-L6-v2")
 
     # Test each vector store config
     test_chroma_config(embedding_config)

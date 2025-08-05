@@ -120,9 +120,7 @@ def test_registry():
     assert source.file_path == "/path/to/document.pdf"
 
     # Test loader selection
-    fast_loader = source_registry.get_loader_for_source(
-        source, preference=LoaderPreference.SPEED
-    )
+    fast_loader = source_registry.get_loader_for_source(source, preference=LoaderPreference.SPEED)
     quality_loader = source_registry.get_loader_for_source(
         source, preference=LoaderPreference.QUALITY
     )

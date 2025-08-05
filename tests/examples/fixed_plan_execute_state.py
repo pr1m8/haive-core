@@ -61,9 +61,7 @@ class FixedPlanExecuteState(MessagesState):
     )
 
     # Replanning tracking
-    replan_count: int = Field(
-        default=0, description="Number of times the plan has been revised"
-    )
+    replan_count: int = Field(default=0, description="Number of times the plan has been revised")
 
     replan_history: list[dict[str, Any]] = Field(
         default_factory=list, description="History of replanning decisions and reasons"
@@ -84,9 +82,7 @@ class FixedPlanExecuteState(MessagesState):
         default_factory=datetime.now, description="When the execution started"
     )
 
-    completed_at: datetime | None = Field(
-        default=None, description="When the execution completed"
-    )
+    completed_at: datetime | None = Field(default=None, description="When the execution completed")
 
     @computed_field
     @property

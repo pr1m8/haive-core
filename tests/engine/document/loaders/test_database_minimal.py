@@ -8,8 +8,7 @@ import sys
 from pathlib import Path
 
 # Add the source path to sys.path to enable imports
-base_path = Path(
-    "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src")
 sys.path.insert(0, str(base_path))
 
 
@@ -125,7 +124,6 @@ def test_loading_strategies():
         except Exception as e:
             pass
 
-
     return strategy_tests_passed >= 4
 
 
@@ -155,7 +153,6 @@ def test_text_splitter_config():
         try:
             config = get_text_splitter_config(splitter_type, 500, 50)
 
-
             assert config["chunk_size"] == 500
             assert config["chunk_overlap"] == 50
 
@@ -163,7 +160,6 @@ def test_text_splitter_config():
 
         except Exception as e:
             pass
-
 
     return splitter_tests_passed >= 5
 
@@ -198,7 +194,6 @@ def test_fetch_all_config():
             max_tables=50,
         )
 
-
         assert config["fetch_all_tables"]
         assert "user_temp" in config["exclude_tables"]
         assert config["max_tables"] == 50
@@ -214,9 +209,7 @@ def test_database_source_creation():
 
     # Mock database source class
     class MockDatabaseSource:
-        def __init__(
-            self, connection_string, loading_strategy=LoadingStrategy.LOAD, **kwargs
-        ):
+        def __init__(self, connection_string, loading_strategy=LoadingStrategy.LOAD, **kwargs):
             self.connection_string = connection_string
             self.loading_strategy = loading_strategy
             self.chunk_size = kwargs.get("chunk_size", 1000)
@@ -287,34 +280,22 @@ def test_database_source_creation():
             source = MockDatabaseSource(
                 connection_string=config["connection"],
                 loading_strategy=config["strategy"],
-                **{
-                    k: v
-                    for k, v in config.items()
-                    if k not in ["connection", "strategy", "name"]
-                },
+                **{k: v for k, v in config.items() if k not in ["connection", "strategy", "name"]},
             )
 
             source.get_loader_kwargs()
             loading_method = source.get_loading_method()
-
 
             source_tests_passed += 1
 
         except Exception as e:
             pass
 
-
     return source_tests_passed >= 2
 
 
 def display_implementation_summary():
     """Display summary of what we've implemented."""
-
-
-
-
-
-
 
 
 def main():

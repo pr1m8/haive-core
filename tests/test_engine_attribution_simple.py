@@ -19,9 +19,7 @@ logger = logging.getLogger(__name__)
 class TestState(StateSchema):
     """Test state with messages field."""
 
-    messages: list[BaseMessage] = Field(
-        default_factory=list, description="Conversation messages"
-    )
+    messages: list[BaseMessage] = Field(default_factory=list, description="Conversation messages")
     transformed_messages: list[BaseMessage] = Field(
         default_factory=list, description="Transformed messages"
     )
@@ -210,7 +208,6 @@ def test_multiple_engine_attribution():
 
 
 if __name__ == "__main__":
-
     try:
         test_engine_attribution_mechanism()
         test_message_transformation_preservation()

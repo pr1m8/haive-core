@@ -191,9 +191,7 @@ class TestFieldMapper:
     def test_transformation_mapping(self):
         """Test field transformation."""
         mapper = FieldMapper()
-        mapper.add_mapping(
-            "price", "formatted_price", transformer=lambda x: f"${x:.2f}"
-        )
+        mapper.add_mapping("price", "formatted_price", transformer=lambda x: f"${x:.2f}")
 
         result = mapper.map_data({"price": 10.5})
         assert result == {"formatted_price": "$10.50"}

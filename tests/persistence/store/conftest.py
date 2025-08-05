@@ -19,9 +19,7 @@ def postgres_connection_string() -> str | None:
 def skip_postgres_if_unavailable(postgres_connection_string):
     """Skip PostgreSQL tests if connection string not available."""
     if not postgres_connection_string:
-        pytest.skip(
-            "PostgreSQL tests require POSTGRES_CONNECTION_STRING environment variable"
-        )
+        pytest.skip("PostgreSQL tests require POSTGRES_CONNECTION_STRING environment variable")
 
 
 @pytest.fixture

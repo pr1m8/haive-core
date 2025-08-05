@@ -24,9 +24,9 @@ def test_auto_detection_uses_token_aware_state():
     composer._detect_base_class_requirements([MockLLMEngine()])
 
     # Should detect MessagesStateWithTokenUsage
-    assert (
-        composer.detected_base_class == MessagesStateWithTokenUsage
-    ), f"Expected MessagesStateWithTokenUsage, got {composer.detected_base_class}"
+    assert composer.detected_base_class == MessagesStateWithTokenUsage, (
+        f"Expected MessagesStateWithTokenUsage, got {composer.detected_base_class}"
+    )
 
 
 def test_custom_base_schema_override():
@@ -42,9 +42,9 @@ def test_custom_base_schema_override():
     composer._detect_base_class_requirements([MockLLMEngine()])
 
     # Should keep the custom base
-    assert (
-        composer.detected_base_class == MessagesState
-    ), f"Expected MessagesState (custom), got {composer.detected_base_class}"
+    assert composer.detected_base_class == MessagesState, (
+        f"Expected MessagesState (custom), got {composer.detected_base_class}"
+    )
 
 
 def test_from_components_with_custom_base():
@@ -75,16 +75,14 @@ def test_build_creates_correct_schema():
     schema_class = composer.build()
 
     # Should be based on MessagesStateWithTokenUsage
-    assert issubclass(
-        schema_class, MessagesStateWithTokenUsage
-    ), f"Expected subclass of MessagesStateWithTokenUsage, got {schema_class.__bases__}"
+    assert issubclass(schema_class, MessagesStateWithTokenUsage), (
+        f"Expected subclass of MessagesStateWithTokenUsage, got {schema_class.__bases__}"
+    )
 
     # Should have token tracking capabilities
     instance = schema_class()
     assert hasattr(instance, "token_usage"), "Schema should have token_usage field"
-    assert hasattr(
-        instance, "get_token_usage_summary"
-    ), "Schema should have token usage methods"
+    assert hasattr(instance, "get_token_usage_summary"), "Schema should have token usage methods"
 
 
 def main():

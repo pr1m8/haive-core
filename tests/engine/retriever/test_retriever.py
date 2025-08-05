@@ -34,9 +34,7 @@ def make_retriever_config(docs=None) -> VectorStoreRetrieverConfig:
         ),
     )
 
-    return VectorStoreRetrieverConfig(
-        name="retriever_test", vector_store_config=vectorstore
-    )
+    return VectorStoreRetrieverConfig(name="retriever_test", vector_store_config=vectorstore)
 
 
 def test_instantiate_returns_base_retriever():

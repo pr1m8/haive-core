@@ -21,9 +21,7 @@ def import_module_from_file(module_name, file_path):
 
 
 # Set up module paths
-base_path = Path(
-    "/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core"
-)
+base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core")
 
 
 try:
@@ -38,23 +36,13 @@ try:
     # Import enhanced registry
     registry_module = import_module_from_file(
         "enhanced_registry",
-        base_path
-        / "engine"
-        / "document"
-        / "loaders"
-        / "sources"
-        / "enhanced_registry.py",
+        base_path / "engine" / "document" / "loaders" / "sources" / "enhanced_registry.py",
     )
 
     # Import database sources
     database_sources_module = import_module_from_file(
         "database_sources",
-        base_path
-        / "engine"
-        / "document"
-        / "loaders"
-        / "sources"
-        / "database_sources.py",
+        base_path / "engine" / "document" / "loaders" / "sources" / "database_sources.py",
     )
 
     # Import document schema
@@ -145,7 +133,6 @@ def test_database_system():
             except Exception as e:
                 pass
 
-
     except Exception as e:
         pass
 
@@ -169,7 +156,6 @@ def test_database_system():
 
                 splitter_config = source.get_text_splitter_config()
 
-
                 assert splitter_config["chunk_size"] == 500
                 assert splitter_config["chunk_overlap"] == 50
 
@@ -177,7 +163,6 @@ def test_database_system():
 
             except Exception as e:
                 pass
-
 
     except Exception as e:
         pass
@@ -200,7 +185,6 @@ def test_database_system():
         )
 
         fetch_config = source.get_fetch_all_config()
-
 
         assert fetch_config["fetch_all_tables"]
         assert "user_temp" in fetch_config["exclude_tables"]
@@ -232,7 +216,6 @@ def test_database_system():
             chunks_created=45,
             metadata={"database_type": "postgresql", "tables_processed": 3},
         )
-
 
         assert source_info.source_type == "postgresql"
         assert source_info.chunks_created == 45
@@ -292,12 +275,10 @@ def test_database_system():
             # Test getting loader kwargs
             loader_kwargs = source.get_loader_kwargs()
 
-
             class_tests_passed += 1
 
         except Exception as e:
             pass
-
 
     # Summary
 
@@ -339,7 +320,6 @@ def test_database_system():
     else:
         pass
 
-
     if passed_tests >= 6:
         return True
     if passed_tests >= 4:
@@ -357,18 +337,11 @@ def display_current_progress():
         overall_stats = enhanced_registry.get_statistics()
         db_stats = database_sources_module.get_database_sources_statistics()
 
-
-
-
-
-
         estimated_total = 13 + 25 + 12 + 11 + 9  # Current phases
         progress_percentage = (estimated_total / 231) * 100
 
-
     except Exception as e:
         pass
-
 
 
 def main():

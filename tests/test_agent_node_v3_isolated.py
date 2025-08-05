@@ -73,9 +73,7 @@ def test_agent_node_v3_isolated():
             "summarizer": summary_agent,
         }
     )
-    state.messages = [
-        HumanMessage(content="Research AI safety and provide an analysis")
-    ]
+    state.messages = [HumanMessage(content="Research AI safety and provide an analysis")]
 
     # Test 1: Research Agent with Structured Output
 
@@ -195,7 +193,6 @@ def test_state_projection_details():
 
 
 if __name__ == "__main__":
-
     # Run synchronous test
     test_agent_node_v3_isolated()
 

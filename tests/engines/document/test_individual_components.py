@@ -173,7 +173,6 @@ def test_auto_factory_direct():
 
 
 if __name__ == "__main__":
-
     test_path_analyzer_direct()
 
     test_source_base_direct()

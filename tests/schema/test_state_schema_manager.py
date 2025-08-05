@@ -59,9 +59,7 @@ def state_schema_class():
         text: str = "default"
         count: int = 0
         flag: bool = False
-        messages: Annotated[Sequence[BaseMessage], add_messages] = Field(
-            default_factory=list
-        )
+        messages: Annotated[Sequence[BaseMessage], add_messages] = Field(default_factory=list)
 
     TestState.__shared_fields__ = ["count"]
     TestState.__reducer_fields__ = {"messages": add_messages}
@@ -98,7 +96,6 @@ def test_schema_manager():
 
 # Tests for StateSchemaManager initialization
 class TestStateSchemaManagerInit:
-
     def test_init_empty(self):
         """Test initializing an empty manager."""
         logger.info("Testing empty initialization")
@@ -125,11 +122,7 @@ class TestStateSchemaManagerInit:
 
         try:
             manager = StateSchemaManager(sample_dict, name="DictSchema")
-            logger.debug(
-                f"Created manager with fields: {
-                    list(
-                        manager.fields.keys())}"
-            )
+            logger.debug(f"Created manager with fields: {list(manager.fields.keys())}")
 
             assert "text" in manager.fields
             assert "number" in manager.fields
@@ -162,11 +155,7 @@ class TestStateSchemaManagerInit:
         logger.info("Testing initialization from BaseModel class")
 
         manager = StateSchemaManager(simple_model_class)
-        logger.debug(
-            f"Created manager with fields: {
-                list(
-                    manager.fields.keys())}"
-        )
+        logger.debug(f"Created manager with fields: {list(manager.fields.keys())}")
 
         assert manager.name == "SimpleModel"
         assert "name" in manager.fields
@@ -182,11 +171,7 @@ class TestStateSchemaManagerInit:
         logger.info("Testing initialization from StateSchema class")
 
         manager = StateSchemaManager(state_schema_class)
-        logger.debug(
-            f"Created manager with fields: {
-                list(
-                    manager.fields.keys())}"
-        )
+        logger.debug(f"Created manager with fields: {list(manager.fields.keys())}")
 
         assert "text" in manager.fields
         assert "count" in manager.fields
@@ -196,7 +181,6 @@ class TestStateSchemaManagerInit:
 
 # Tests for StateSchemaManager field operations
 class TestStateSchemaManagerFields:
-
     def test_add_field_basic(self):
         """Test adding a basic field."""
         logger.info("Testing basic field addition")
@@ -218,10 +202,7 @@ class TestStateSchemaManagerFields:
         manager = StateSchemaManager(name="TestSchema")
         manager.add_field("count", int, default=0, description="A counter field")
 
-        logger.debug(
-            f"Added field with description: {
-                manager.field_descriptions.get('count')}"
-        )
+        logger.debug(f"Added field with description: {manager.field_descriptions.get('count')}")
         assert "count" in manager.fields
         assert "count" in manager.field_descriptions
         assert manager.field_descriptions["count"] == "A counter field"
@@ -280,10 +261,7 @@ class TestStateSchemaManagerFields:
         manager = StateSchemaManager(name="TestSchema")
         manager.add_field("maybe", str, optional=True)
 
-        logger.debug(
-            f"Added optional field with type: {
-                manager.fields['maybe'][0]}"
-        )
+        logger.debug(f"Added optional field with type: {manager.fields['maybe'][0]}")
         assert "maybe" in manager.fields
 
         field_type, _ = manager.fields["maybe"]
@@ -321,23 +299,14 @@ class TestStateSchemaManagerFields:
         manager = StateSchemaManager(name="TestSchema")
         manager.add_field("count", int, default=0)
 
-        logger.debug(
-            f"Initial field default: {
-                manager.fields['count'][1].default}"
-        )
+        logger.debug(f"Initial field default: {manager.fields['count'][1].default}")
         assert manager.fields["count"][1].default == 0
 
         # Modify the field
         manager.modify_field("count", new_default=10, new_description="Modified count")
 
-        logger.debug(
-            f"Modified field default: {
-                manager.fields['count'][1].default}"
-        )
-        logger.debug(
-            f"Modified field description: {
-                manager.field_descriptions.get('count')}"
-        )
+        logger.debug(f"Modified field default: {manager.fields['count'][1].default}")
+        logger.debug(f"Modified field description: {manager.field_descriptions.get('count')}")
 
         assert manager.fields["count"][1].default == 10
         assert manager.field_descriptions["count"] == "Modified count"
@@ -349,14 +318,8 @@ class TestStateSchemaManagerFields:
         manager = StateSchemaManager(name="TestSchema")
         manager.add_field("existing", str)
 
-        logger.debug(
-            f"Checking existing field: {
-                manager.has_field('existing')}"
-        )
-        logger.debug(
-            f"Checking nonexistent field: {
-                manager.has_field('nonexistent')}"
-        )
+        logger.debug(f"Checking existing field: {manager.has_field('existing')}")
+        logger.debug(f"Checking nonexistent field: {manager.has_field('nonexistent')}")
 
         assert manager.has_field("existing") is True
         assert manager.has_field("nonexistent") is False
@@ -364,7 +327,6 @@ class TestStateSchemaManagerFields:
 
 # Tests for StateSchemaManager merging
 class TestStateSchemaManagerMerge:
-
     def test_merge_with_manager(self):
         """Test merging with another manager."""
         logger.info("Testing merge with another manager")
@@ -445,7 +407,6 @@ class TestStateSchemaManagerMerge:
 
 # Tests for StateSchemaManager model creation
 class TestStateSchemaManagerModel:
-
     def test_get_model_basic(self):
         """Test basic model creation."""
         logger.info("Testing basic model creation")
@@ -454,11 +415,7 @@ class TestStateSchemaManagerModel:
         manager.add_field("name", str, default="test")
         manager.add_field("value", int, default=42)
 
-        logger.debug(
-            f"Creating model from fields: {
-                list(
-                    manager.fields.keys())}"
-        )
+        logger.debug(f"Creating model from fields: {list(manager.fields.keys())}")
         model_cls = manager.get_model()
 
         logger.debug(f"Created model class: {model_cls.__name__}")
@@ -569,9 +526,7 @@ class TestStateSchemaManagerModel:
                         self.last_name = " ".join(parts[1:])
 
                 # Add computed property using the method
-                manager.add_computed_property(
-                    "full_name", full_name.fget, full_name.fset
-                )
+                manager.add_computed_property("full_name", full_name.fget, full_name.fset)
                 logger.debug("Added computed property using add_computed_property")
 
                 # Create the model
@@ -597,11 +552,7 @@ class TestStateSchemaManagerModel:
                 logger.debug("Added property directly to model class")
 
             logger.debug(f"Created model: {model_cls.__name__}")
-            logger.debug(
-                f"Model fields: {
-                    list(
-                        model_cls.model_fields.keys())}"
-            )
+            logger.debug(f"Model fields: {list(model_cls.model_fields.keys())}")
 
             logger.debug("Creating model with dynamically added property")
 
@@ -619,9 +570,9 @@ class TestStateSchemaManagerModel:
             # Test modifying first name
             instance.first_name = "Jane"
             logger.debug(
-                f"After modification - first_name: {
-                    instance.first_name}, last_name: {
-                    instance.last_name}"
+                f"After modification - first_name: {instance.first_name}, last_name: {
+                    instance.last_name
+                }"
             )
             assert instance.first_name == "Jane"
             assert instance.last_name == "Doe"
@@ -629,19 +580,16 @@ class TestStateSchemaManagerModel:
             # Verify we can create another instance with different values
             instance2 = model_cls(first_name="Bob", last_name="Smith")
             logger.debug(
-                f"instance2 values - first_name: {
-                    instance2.first_name}, last_name: {
-                    instance2.last_name}"
+                f"instance2 values - first_name: {instance2.first_name}, last_name: {
+                    instance2.last_name
+                }"
             )
             assert instance2.first_name == "Bob"
             assert instance2.last_name == "Smith"
 
             # Only test the computed property if it exists
             if hasattr(instance, "full_name"):
-                logger.debug(
-                    f"Testing full_name property: {
-                        instance.full_name}"
-                )
+                logger.debug(f"Testing full_name property: {instance.full_name}")
                 assert instance.full_name == "Jane Doe"
 
                 # Test setting through property if it has a setter
@@ -658,7 +606,6 @@ class TestStateSchemaManagerModel:
 
 # Tests for node creation and command helpers
 class TestNodeAndCommand:
-
     def test_create_command(self):
         """Test creating a Command object."""
         logger.info("Testing create_command")
@@ -696,14 +643,10 @@ class TestNodeAndCommand:
         def my_node(state):
             # Access state values directly
             input_val = (
-                state.get("input", "")
-                if isinstance(state, dict)
-                else getattr(state, "input", "")
+                state.get("input", "") if isinstance(state, dict) else getattr(state, "input", "")
             )
             count_val = (
-                state.get("count", 0)
-                if isinstance(state, dict)
-                else getattr(state, "count", 0)
+                state.get("count", 0) if isinstance(state, dict) else getattr(state, "count", 0)
             )
             return {"input": f"processed: {input_val}", "count": count_val + 1}
 
@@ -755,7 +698,6 @@ class TestNodeAndCommand:
 
 # New tests for current implementation
 class TestNewFeatures:
-
     def test_add_dynamic_field(self):
         """Test adding a dynamic field using annotation-based reducers."""
         logger.info("Testing dynamic field with annotations")
@@ -768,9 +710,7 @@ class TestNewFeatures:
                 return f"{a}+{b}"
 
             # Add field with annotation-based reducer
-            manager.add_field(
-                "dynamic_text", Annotated[str, combine_strings], default="start"
-            )
+            manager.add_field("dynamic_text", Annotated[str, combine_strings], default="start")
 
             logger.debug("Added annotated field")
 
@@ -785,18 +725,12 @@ class TestNewFeatures:
 
             # Create an instance and check the default
             instance = model_cls()
-            logger.debug(
-                f"Instance dynamic_text value: {
-                    instance.dynamic_text}"
-            )
+            logger.debug(f"Instance dynamic_text value: {instance.dynamic_text}")
             assert instance.dynamic_text == "start"
 
             # Create a new instance with updated value
             instance2 = model_cls(dynamic_text="new")
-            logger.debug(
-                f"Instance2 dynamic_text value: {
-                    instance2.dynamic_text}"
-            )
+            logger.debug(f"Instance2 dynamic_text value: {instance2.dynamic_text}")
             assert instance2.dynamic_text == "new"
         except Exception as e:
             log_exception(e)
@@ -808,9 +742,7 @@ class TestNewFeatures:
 
         manager = StateSchemaManager(name="MetadataModel")
         # Pass metadata directly as kwargs to add_field
-        manager.add_field(
-            "meta_field", str, default="test", source="user", importance="high"
-        )
+        manager.add_field("meta_field", str, default="test", source="user", importance="high")
 
         logger.debug("Added field with metadata")
 
@@ -830,9 +762,7 @@ class TestNewFeatures:
     def test_runnable_config_field(self, field_type, test_schema_manager):
         """Test adding a field to runnable_config."""
         logger.info("Testing runnable_config field")
-        logger.warning(
-            "Note: runnable_config is deprecated, but test is kept for compatibility"
-        )
+        logger.warning("Note: runnable_config is deprecated, but test is kept for compatibility")
 
         manager = test_schema_manager
 

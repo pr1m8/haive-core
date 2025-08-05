@@ -93,6 +93,5 @@ def test_persistence_fix():
         pass
 
 
-
 if __name__ == "__main__":
     test_persistence_fix()

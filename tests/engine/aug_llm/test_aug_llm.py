@@ -25,10 +25,7 @@ def log_test_result(test_name, result):
     # Pretty format the result based on type
     if hasattr(result, "model_dump"):
         try:
-            log_msg += f"RESULT:\n{
-                json.dumps(
-                    result.model_dump(),
-                    indent=2)}\n"
+            log_msg += f"RESULT:\n{json.dumps(result.model_dump(), indent=2)}\n"
         except BaseException:
             log_msg += f"RESULT:\n{result}\n"
     elif isinstance(result, dict):
@@ -115,9 +112,7 @@ def test_invoke_runs(monkeypatch):
             MessagesPlaceholder(variable_name="messages"),
         ]
     )
-    config = AugLLMConfig(
-        llm_config=AzureLLMConfig(model="gpt-4o"), prompt_template=prompt
-    )
+    config = AugLLMConfig(llm_config=AzureLLMConfig(model="gpt-4o"), prompt_template=prompt)
 
     result = config.invoke("What's the weather like?")
     log_result = {
@@ -171,9 +166,7 @@ def test_invoke_runs_real_llm():
         ]
     )
 
-    config = AugLLMConfig(
-        llm_config=AzureLLMConfig(model="gpt-4o"), prompt_template=prompt
-    )
+    config = AugLLMConfig(llm_config=AzureLLMConfig(model="gpt-4o"), prompt_template=prompt)
 
     # Actually invoke the real LLM
     result = config.invoke("What is the capital of France?")

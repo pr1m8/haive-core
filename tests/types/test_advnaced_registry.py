@@ -35,16 +35,12 @@ def test_component_spec_type_and_params():
 
 def test_component_spec_invalid_both_type_and_inline():
     inline = Lowercaser(text="Oops")
-    with pytest.raises(
-        ValueError, match="Must provide exactly one of 'type' or 'inline'"
-    ):
+    with pytest.raises(ValueError, match="Must provide exactly one of 'type' or 'inline'"):
         ComponentSpec[str](type="lowercaser", params={}, inline=inline)
 
 
 def test_component_spec_invalid_neither_type_nor_inline():
-    with pytest.raises(
-        ValueError, match="Must provide exactly one of 'type' or 'inline'"
-    ):
+    with pytest.raises(ValueError, match="Must provide exactly one of 'type' or 'inline'"):
         ComponentSpec[str]()  # should raise error
 
 

@@ -119,9 +119,7 @@ class TestExtractFunctions:
         assert result == "test"
 
         # Test missing path with default
-        extract_missing = extract_lib.extract_with_path(
-            "config.missing.field", "default"
-        )
+        extract_missing = extract_lib.extract_with_path("config.missing.field", "default")
         result = extract_missing(complex_state, {})
         assert result == "default"
 
@@ -157,9 +155,7 @@ class TestExtractFunctions:
     def test_extract_with_projection(self, extract_lib, complex_state):
         """Test extraction with field projection."""
         # Project specific fields from first agent
-        extract_projected = extract_lib.extract_with_projection(
-            "agents[0]", ["name", "status"]
-        )
+        extract_projected = extract_lib.extract_with_projection("agents[0]", ["name", "status"])
         result = extract_projected(complex_state, {})
 
         assert result == {"name": "agent1", "status": "active"}
@@ -167,15 +163,11 @@ class TestExtractFunctions:
         assert "priority" not in result
 
         # Test with missing source
-        extract_missing = extract_lib.extract_with_projection(
-            "missing_agents", ["name"]
-        )
+        extract_missing = extract_lib.extract_with_projection("missing_agents", ["name"])
         result = extract_missing(complex_state, {})
         assert result == {}
 
-    def test_extract_messages_content_real_state(
-        self, extract_lib, real_messages_state
-    ):
+    def test_extract_messages_content_real_state(self, extract_lib, real_messages_state):
         """Test message content extraction with real MessagesState."""
         # Extract content from real LangChain messages
         extract_content = extract_lib.extract_messages_content()
@@ -327,9 +319,9 @@ class TestExtractFunctions:
         result4 = extract_messages_content()(real_messages_state, {})
         assert len(result4) == 4
 
-        result5 = extract_conditional(
-            "config.use_history", "full_conversation", "current_message"
-        )(complex_state, {})
+        result5 = extract_conditional("config.use_history", "full_conversation", "current_message")(
+            complex_state, {}
+        )
         assert result5 == "Hello. How are you? What is the weather?"
 
         result6 = extract_multi_field({"query": "current_query"})(complex_state, {})
@@ -338,9 +330,7 @@ class TestExtractFunctions:
         result7 = extract_typed("iteration_count", int, 0)(complex_state, {})
         assert result7 == 5
 
-    def test_extract_functions_with_real_components_integration(
-        self, real_messages_state
-    ):
+    def test_extract_functions_with_real_components_integration(self, real_messages_state):
         """Test extract functions with real Haive components."""
         # Test with actual MessagesState and LangChain messages
 

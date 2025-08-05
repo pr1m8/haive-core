@@ -72,9 +72,7 @@ class QueryRefinementSuggestion(BaseModel):
         description="Type of improvement made (clarity, specificity, scope, etc.)"
     )
     rationale: str = Field(description="Why this refinement improves the query")
-    expected_benefit: str = Field(
-        description="Expected improvement in retrieval or answering"
-    )
+    expected_benefit: str = Field(description="Expected improvement in retrieval or answering")
 
 
 class QueryRefinementResponse(BaseModel):

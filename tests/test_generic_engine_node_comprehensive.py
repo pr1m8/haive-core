@@ -297,9 +297,7 @@ async def test_no_tools():
         ]
     )
 
-    chat_config = AugLLMConfig(
-        name="chat_engine", prompt_template=chat_template, temperature=0.7
-    )
+    chat_config = AugLLMConfig(name="chat_engine", prompt_template=chat_template, temperature=0.7)
 
     chat_node = GenericEngineNodeConfig(
         name="chat_node", engine=chat_config, auto_add_engine_attribution=True

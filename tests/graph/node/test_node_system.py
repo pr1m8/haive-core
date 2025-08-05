@@ -116,9 +116,7 @@ def vector_store(sample_documents, embedding_model):
 @pytest.fixture
 def retriever(vector_store):
     """Create a real retriever from vector store."""
-    return VectorStoreRetrieverConfig(
-        name="test_retriever", vector_store_config=vector_store, k=2
-    )
+    return VectorStoreRetrieverConfig(name="test_retriever", vector_store_config=vector_store, k=2)
 
 
 @pytest.fixture
@@ -297,9 +295,7 @@ def test_mapping_node(node_registry):
         return [Send("process_item", {"item": item}) for item in items]
 
     # Create node config
-    node_config = NodeConfig(
-        name="map_items", engine=map_items, node_type="mapping", debug=True
-    )
+    node_config = NodeConfig(name="map_items", engine=map_items, node_type="mapping", debug=True)
 
     # Create node function
     NodeFactory.set_registry(node_registry)
@@ -384,10 +380,9 @@ def test_factory_conditional_node_creation(node_registry):
     assert low_result.goto == "low_priority"
 
     logger.info(
-        f"Conditional Node Results - High: {
-            high_result.goto}, Medium: {
-            medium_result.goto}, Low: {
-            low_result.goto}"
+        f"Conditional Node Results - High: {high_result.goto}, Medium: {medium_result.goto}, Low: {
+            low_result.goto
+        }"
     )
 
 
@@ -398,9 +393,7 @@ def test_llm_with_direct_messages(azure_llm_config, node_registry):
         [("system", "You are a friendly assistant."), ("human", "{input}")]
     )
 
-    llm = AugLLMConfig(
-        name="chat_llm", prompt_template=chat_prompt, llm_config=azure_llm_config
-    )
+    llm = AugLLMConfig(name="chat_llm", prompt_template=chat_prompt, llm_config=azure_llm_config)
 
     # Create node config with direct message handling
     node_config = NodeConfig(
@@ -428,9 +421,7 @@ def test_llm_with_direct_messages(azure_llm_config, node_registry):
     assert "aimessage" in result.update
     assert isinstance(result.update["aimessage"], AIMessage)
 
-    logger.info(
-        f"Direct Messages Node Response: {result.update['aimessage'].content[:100]}..."
-    )
+    logger.info(f"Direct Messages Node Response: {result.update['aimessage'].content[:100]}...")
 
 
 def test_retriever_node(retriever, node_registry):
@@ -440,9 +431,7 @@ def test_retriever_node(retriever, node_registry):
         name="retrieve",
         engine=retriever,
         input_mapping={"question": "query"},
-        output_mapping={
-            "documents": "context"
-        },  # This mapping isn't being applied correctly
+        output_mapping={"documents": "context"},  # This mapping isn't being applied correctly
         command_goto="generate",
         debug=True,
     )
@@ -524,14 +513,8 @@ def test_structured_output_model(azure_llm_config, node_registry):
     assert isinstance(result.update["analysisresult"], AnalysisResult)
     assert hasattr(result.update["analysisresult"], "recommendations")
 
-    logger.info(
-        f"Structured Output Node Result - Sentiment: {
-            result.update['overall_sentiment']}"
-    )
-    logger.info(
-        f"Structured Output Node Result - Key Points: {
-            result.update['key_points']}"
-    )
+    logger.info(f"Structured Output Node Result - Sentiment: {result.update['overall_sentiment']}")
+    logger.info(f"Structured Output Node Result - Key Points: {result.update['key_points']}")
 
 
 def test_error_handling(node_registry):
@@ -566,9 +549,7 @@ def test_error_handling(node_registry):
     logger.info(f"Error Handling Result: {result.update['error']}")
 
     # Test with error handler node
-    error_node = NodeFactory.create_error_handler_node(
-        fallback_node=END, name="handle_error"
-    )
+    error_node = NodeFactory.create_error_handler_node(fallback_node=END, name="handle_error")
 
     error_result = error_node(result.update)
 
@@ -665,9 +646,7 @@ def test_complex_node_chain(azure_llm_config, retriever, node_registry):
     assert "content" in final_result.update
     assert len(final_result.update["content"]) > 0
 
-    logger.info(
-        f"Complex Chain Final Result: {final_result.update['content'][:100]}..."
-    )
+    logger.info(f"Complex Chain Final Result: {final_result.update['content'][:100]}...")
 
 
 def test_integration_with_dynamic_graph(azure_llm_config, retriever, node_registry):
@@ -739,9 +718,7 @@ def test_integration_with_dynamic_graph(azure_llm_config, retriever, node_regist
         # Create a proper state schema class first
         from pydantic import create_model
 
-        StateSchema = create_model(
-            "DynamicGraphState", query=(str, None), context=(list, None)
-        )
+        StateSchema = create_model("DynamicGraphState", query=(str, None), context=(list, None))
 
         # Create state and run nodes manually
         state = StateSchema(query="What is deep learning?")
@@ -753,11 +730,7 @@ def test_integration_with_dynamic_graph(azure_llm_config, retriever, node_regist
         assert graph.edges
 
         logger.info(
-            f"Graph structure verified with {
-                len(
-                    graph.nodes)} nodes and {
-                len(
-                    graph.edges)} edges"
+            f"Graph structure verified with {len(graph.nodes)} nodes and {len(graph.edges)} edges"
         )
 
 
@@ -924,6 +897,4 @@ def test_complex_node_chain(azure_llm_config, retriever, node_registry):
     assert "aimessage" in final_result.update
     assert isinstance(final_result.update["aimessage"], AIMessage)
 
-    logger.info(
-        f"Complex Chain Final Result: {final_result.update['aimessage'].content[:100]}..."
-    )
+    logger.info(f"Complex Chain Final Result: {final_result.update['aimessage'].content[:100]}...")

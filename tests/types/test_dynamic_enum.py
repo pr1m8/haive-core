@@ -39,8 +39,7 @@ def test_json_schema():
 
 
 def test_dynamic_enum_factory():
-    PlanetType = create_dynamic_enum(
-        "PlanetType", ["earth", "mars", "venus"])
+    PlanetType = create_dynamic_enum("PlanetType", ["earth", "mars", "venus"])
 
     class Mission(BaseModel):
         destination: PlanetType
@@ -50,7 +49,6 @@ def test_dynamic_enum_factory():
     PlanetType.register("pluto")
     m2 = Mission(destination="pluto")
     assert m2.destination == "pluto"
-
 
 
 if __name__ == "__main__":

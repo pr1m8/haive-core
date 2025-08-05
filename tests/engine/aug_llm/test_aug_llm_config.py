@@ -47,9 +47,7 @@ class AgentAction(BaseModel):
 
     action: str = Field(description="Action to take")
     thought: str = Field(description="Reasoning behind the action")
-    parameters: dict[str, Any] = Field(
-        default_factory=dict, description="Action parameters"
-    )
+    parameters: dict[str, Any] = Field(default_factory=dict, description="Action parameters")
 
 
 # Test StateSchema with messages field
@@ -221,10 +219,7 @@ def test_get_input_variables():
     # Log available values for debugging
     logger.info(f"Chat prompt attributes: {dir(chat_prompt)}")
     if hasattr(chat_prompt, "input_variables"):
-        logger.info(
-            f"Chat prompt input_variables: {
-                chat_prompt.input_variables}"
-        )
+        logger.info(f"Chat prompt input_variables: {chat_prompt.input_variables}")
 
     # Test with regular PromptTemplate
     text_prompt = PromptTemplate(
@@ -325,11 +320,7 @@ def test_pydantic_output_parser():
     assert hasattr(output_schema, "model_fields")
 
     # Log the available fields for debugging
-    logger.info(
-        f"Output schema fields: {
-            list(
-                output_schema.model_fields.keys())}"
-    )
+    logger.info(f"Output schema fields: {list(output_schema.model_fields.keys())}")
 
     # Check fields that should always be present
     assert "content" in output_schema.model_fields
@@ -338,19 +329,12 @@ def test_pydantic_output_parser():
     # If SearchResult fields are extracted properly, they should be in the schema
     # Just log whether they're present for debugging
     for field in ["answer", "sources", "confidence"]:
-        logger.info(
-            f"Field '{field}' present: {
-                field in output_schema.model_fields}"
-        )
+        logger.info(f"Field '{field}' present: {field in output_schema.model_fields}")
 
     # Also log the structured_output_model to confirm it's being set correctly
     logger.info(f"Structured output model: {aug_llm.structured_output_model}")
     if aug_llm.structured_output_model:
-        logger.info(
-            f"Model fields: {
-                list(
-                    aug_llm.structured_output_model.model_fields.keys())}"
-        )
+        logger.info(f"Model fields: {list(aug_llm.structured_output_model.model_fields.keys())}")
 
 
 def test_structured_output_model():
@@ -425,17 +409,11 @@ def test_schema_composer_with_aug_llm():
     # present
     if hasattr(SearchResult, "model_fields"):
         for field in SearchResult.model_fields:
-            logger.info(
-                f"Output model field '{field}' present: {
-                    field in schema.model_fields}"
-            )
+            logger.info(f"Output model field '{field}' present: {field in schema.model_fields}")
 
     # Log whether input variables were included
     for var in input_vars:
-        logger.info(
-            f"Input variable '{var}' present: {
-                var in schema.model_fields}"
-        )
+        logger.info(f"Input variable '{var}' present: {var in schema.model_fields}")
 
     # Log what's in the engine I/O mappings
     if hasattr(schema, "__engine_io_mappings__"):
@@ -489,9 +467,7 @@ def test_multiple_engines_schema():
     logger.info(f"Agent engine schema fields: {list(agent_fields.keys())}")
 
     # Combine them with SchemaComposer
-    schema = SchemaComposer.from_components(
-        [qa_engine, agent_engine], name="CombinedState"
-    )
+    schema = SchemaComposer.from_components([qa_engine, agent_engine], name="CombinedState")
     logger.info(f"Created combined schema: {schema.__name__}")
 
     # Display schema with rich UI
@@ -508,31 +484,19 @@ def test_multiple_engines_schema():
 
     # Log which input variables from each engine were included
     for var in qa_vars:
-        logger.info(
-            f"QA input var '{var}' present: {
-                var in schema.model_fields}"
-        )
+        logger.info(f"QA input var '{var}' present: {var in schema.model_fields}")
 
     for var in agent_vars:
-        logger.info(
-            f"Agent input var '{var}' present: {
-                var in schema.model_fields}"
-        )
+        logger.info(f"Agent input var '{var}' present: {var in schema.model_fields}")
 
     # Log which output model fields were included
     if hasattr(SearchResult, "model_fields"):
         for field in SearchResult.model_fields:
-            logger.info(
-                f"SearchResult field '{field}' present: {
-                    field in schema.model_fields}"
-            )
+            logger.info(f"SearchResult field '{field}' present: {field in schema.model_fields}")
 
     if hasattr(AgentAction, "model_fields"):
         for field in AgentAction.model_fields:
-            logger.info(
-                f"AgentAction field '{field}' present: {
-                    field in schema.model_fields}"
-            )
+            logger.info(f"AgentAction field '{field}' present: {field in schema.model_fields}")
 
     # Log metadata about engine I/O mappings
     if hasattr(schema, "__engine_io_mappings__"):

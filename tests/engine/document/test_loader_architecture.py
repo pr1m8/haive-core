@@ -128,15 +128,11 @@ def test_loader_selection():
     source = TestMultiSource(file_path="/test.multi", source_type="test_multi")
 
     # Test speed preference
-    loader = source_registry.get_loader_for_source(
-        source, preference=LoaderPreference.SPEED
-    )
+    loader = source_registry.get_loader_for_source(source, preference=LoaderPreference.SPEED)
     assert loader.name == "FastLoader"
 
     # Test quality preference
-    loader = source_registry.get_loader_for_source(
-        source, preference=LoaderPreference.QUALITY
-    )
+    loader = source_registry.get_loader_for_source(source, preference=LoaderPreference.QUALITY)
     assert loader.name == "QualityLoader"
 
 
@@ -147,9 +143,7 @@ def test_auto_factory_analysis():
     from haive.core.engine.document.loaders.sources.registry import register_source
 
     # Register a test source
-    @register_source(
-        name="test_json", file_extensions=[".json"], loaders={"json": "JSONLoader"}
-    )
+    @register_source(name="test_json", file_extensions=[".json"], loaders={"json": "JSONLoader"})
     class TestJSONSource(LocalSource):
         pass
 

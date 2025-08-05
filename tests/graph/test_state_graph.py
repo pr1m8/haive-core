@@ -31,9 +31,7 @@ class Plan(BaseModel):
 class PlanState(StateSchema):
     """State schema for plan generation"""
 
-    messages: Sequence[Annotated[BaseMessage, add_messages]] = Field(
-        default_factory=list
-    )
+    messages: Sequence[Annotated[BaseMessage, add_messages]] = Field(default_factory=list)
     query: str = Field(default="")
     plan: Plan | None = Field(default=None)
     validated: bool = Field(default=False)
@@ -349,21 +347,21 @@ def test_node_config_graph():
     # STEP 8: Validate graph structure
 
     # STEP 9: Test nodes have correct type
-    assert (
-        graph.node_types["agent"] == NodeType.ENGINE
-    ), f"Expected ENGINE, got {graph.node_types['agent']}"
+    assert graph.node_types["agent"] == NodeType.ENGINE, (
+        f"Expected ENGINE, got {graph.node_types['agent']}"
+    )
 
-    assert (
-        graph.node_types["validate"] == NodeType.VALIDATION
-    ), f"Expected VALIDATION, got {graph.node_types['validate']}"
+    assert graph.node_types["validate"] == NodeType.VALIDATION, (
+        f"Expected VALIDATION, got {graph.node_types['validate']}"
+    )
 
-    assert (
-        graph.node_types["tools"] == NodeType.TOOL
-    ), f"Expected TOOL, got {graph.node_types['tools']}"
+    assert graph.node_types["tools"] == NodeType.TOOL, (
+        f"Expected TOOL, got {graph.node_types['tools']}"
+    )
 
-    assert (
-        graph.node_types["execute_plan"] == NodeType.CALLABLE
-    ), f"Expected CALLABLE, got {graph.node_types['execute_plan']}"
+    assert graph.node_types["execute_plan"] == NodeType.CALLABLE, (
+        f"Expected CALLABLE, got {graph.node_types['execute_plan']}"
+    )
 
     # STEP 10: Test segment by segment
 
@@ -462,7 +460,6 @@ def test_node_config_graph():
         )
         and any(e for e in graph.edges if e[0] == "tools" and e[1] == "agent")
     ):
-
         loop_exists = True
     else:
         pass
@@ -475,9 +472,7 @@ def test_node_config_graph():
     # We expect at least 2 paths to agent:
     # 1. Direct: START → agent
     # 2. Loop: START → agent → validate → tools → agent
-    assert (
-        len(agent_paths) >= 2
-    ), f"Expected at least 2 paths to agent, found {len(agent_paths)}"
+    assert len(agent_paths) >= 2, f"Expected at least 2 paths to agent, found {len(agent_paths)}"
 
 
 # Test React pattern
@@ -493,7 +488,8 @@ def test_react_pattern():
 
     # Create tool configuration
     tool_node = ToolNodeConfig(
-        name="react_tools", tools=[Plan]  # Using Plan as a sample tool
+        name="react_tools",
+        tools=[Plan],  # Using Plan as a sample tool
     )
 
     # Create the base graph
@@ -531,9 +527,7 @@ def test_react_pattern():
         return "end"
 
     # Create Branch
-    react_branch = Branch(
-        function=react_router, destinations={"tools": "tools", "end": END}
-    )
+    react_branch = Branch(function=react_router, destinations={"tools": "tools", "end": END})
 
     # Add conditional edge
     graph.add_conditional_edges("agent", react_branch, {"tools": "tools", "end": END})

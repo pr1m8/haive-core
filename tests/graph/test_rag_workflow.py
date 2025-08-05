@@ -27,9 +27,7 @@ class Document(BaseModel):
 
     id: str = Field(..., description="Unique identifier for the document")
     content: str = Field(..., description="Document content")
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, description="Document metadata"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Document metadata")
     embedding: list[float] | None = Field(default=None, description="Vector embedding")
     relevance_score: float | None = Field(default=None, description="Relevance score")
 
@@ -38,13 +36,9 @@ class RetrievalResult(BaseModel):
     """Result schema for document retrieval."""
 
     query: str = Field(..., description="Original or rewritten query")
-    documents: list[Document] = Field(
-        default_factory=list, description="Retrieved documents"
-    )
+    documents: list[Document] = Field(default_factory=list, description="Retrieved documents")
     total_found: int = Field(..., description="Total number of documents found")
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, description="Retrieval metadata"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Retrieval metadata")
 
     @validator("documents")
     def validate_documents(self, v):
@@ -60,15 +54,9 @@ class RetrievalResult(BaseModel):
 class GenerationParameters(BaseModel):
     """Parameters for text generation."""
 
-    max_length: int = Field(
-        default=1000, description="Maximum length of generated text"
-    )
-    temperature: float = Field(
-        default=0.7, ge=0.0, le=1.0, description="Sampling temperature"
-    )
-    top_p: float = Field(
-        default=0.9, ge=0.0, le=1.0, description="Top-p sampling parameter"
-    )
+    max_length: int = Field(default=1000, description="Maximum length of generated text")
+    temperature: float = Field(default=0.7, ge=0.0, le=1.0, description="Sampling temperature")
+    top_p: float = Field(default=0.9, ge=0.0, le=1.0, description="Top-p sampling parameter")
     model: str = Field(default="default", description="Model identifier")
 
 
@@ -86,9 +74,7 @@ class RAGState(ToolState):
     )
 
     # Validation tracking
-    query_validated: bool = Field(
-        default=False, description="Whether query validation passed"
-    )
+    query_validated: bool = Field(default=False, description="Whether query validation passed")
     retrieval_validated: bool = Field(
         default=False, description="Whether retrieval validation passed"
     )
@@ -101,20 +87,14 @@ class RAGState(ToolState):
 
     # Workflow state
     workflow_stage: str = Field(default="init", description="Current workflow stage")
-    workflow_complete: bool = Field(
-        default=False, description="Whether workflow is complete"
-    )
-    generated_at: datetime | None = Field(
-        default=None, description="Timestamp of generation"
-    )
+    workflow_complete: bool = Field(default=False, description="Whether workflow is complete")
+    generated_at: datetime | None = Field(default=None, description="Timestamp of generation")
 
     # Metrics
     processing_time: dict[str, float] = Field(
         default_factory=dict, description="Processing time by stage"
     )
-    token_usage: dict[str, int] = Field(
-        default_factory=dict, description="Token usage by stage"
-    )
+    token_usage: dict[str, int] = Field(default_factory=dict, description="Token usage by stage")
 
 
 # Mock engines for testing
@@ -125,16 +105,12 @@ class QueryAnalysisEngine(Engine):
         self.name = name
         self.id = f"engine_{name}"
 
-    def invoke(
-        self, inputs: Any, config: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    def invoke(self, inputs: Any, config: dict[str, Any] | None = None) -> dict[str, Any]:
         """Analyze query and return rewritten version."""
         # Extract query from different input types
         query = inputs
         if isinstance(inputs, dict):
-            query = inputs.get("query") or inputs.get("messages", [{}])[-1].get(
-                "content", ""
-            )
+            query = inputs.get("query") or inputs.get("messages", [{}])[-1].get("content", "")
 
         # Simple mock implementation - prepend "improved: "
         return {
@@ -154,16 +130,12 @@ class DocumentRetrievalEngine(Engine):
         self.name = name
         self.id = f"engine_{name}"
 
-    def invoke(
-        self, inputs: Any, config: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    def invoke(self, inputs: Any, config: dict[str, Any] | None = None) -> dict[str, Any]:
         """Retrieve documents based on query."""
         # Extract query
         query = inputs
         if isinstance(inputs, dict):
-            query = inputs.get("rewritten_query") or inputs.get(
-                "query", "default query"
-            )
+            query = inputs.get("rewritten_query") or inputs.get("query", "default query")
 
         # Mock implementation - generate fake documents
         return {
@@ -191,9 +163,7 @@ class ContentGenerationEngine(Engine):
         self.name = name
         self.id = f"engine_{name}"
 
-    def invoke(
-        self, inputs: Any, config: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    def invoke(self, inputs: Any, config: dict[str, Any] | None = None) -> dict[str, Any]:
         """Generate content based on documents and query."""
         if isinstance(inputs, dict):
             query = inputs.get("query", "")
@@ -255,9 +225,7 @@ def rag_workflow(rag_engines):
         name="query_validator",
         schemas=[
             # Schema for validating query
-            type(
-                "QuerySchema", (BaseModel,), {"query": (str, Field(..., min_length=3))}
-            )
+            type("QuerySchema", (BaseModel,), {"query": (str, Field(..., min_length=3))})
         ],
         messages_field="query",
         validation_status_key="query_validated",
@@ -348,9 +316,7 @@ def rag_workflow(rag_engines):
     generation.add_edge(START, "validate_params")
     generation.add_conditional_edges(
         "validate_params",
-        lambda state: state.get(
-            "params_validated", True
-        ),  # Default to True if no params
+        lambda state: state.get("params_validated", True),  # Default to True if no params
         {True: "generate_content", False: END},
     )
     generation.add_edge("generate_content", END)
@@ -514,8 +480,7 @@ def test_rag_workflow_validation_error(rag_workflow, invalid_query_input):
 
     # Check that error message was added
     assert any(
-        isinstance(msg, SystemMessage) and "Error" in msg.content
-        for msg in result["messages"]
+        isinstance(msg, SystemMessage) and "Error" in msg.content for msg in result["messages"]
     )
 
     # Validation should have failed

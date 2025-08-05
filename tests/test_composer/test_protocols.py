@@ -32,9 +32,7 @@ class TestProtocols:
             return getattr(state, field_name, [])
 
         # Test protocol compliance
-        def use_extract_function(
-            func: ExtractFunction, state: SampleState
-        ) -> list[str]:
+        def use_extract_function(func: ExtractFunction, state: SampleState) -> list[str]:
             return func(state, {"field_name": "messages"})
 
         # Create test state
@@ -176,9 +174,7 @@ class TestProtocols:
             return "extracted"
 
         # Valid update function
-        def valid_update(
-            result: str, state: SampleState, config: dict[str, Any]
-        ) -> dict[str, Any]:
+        def valid_update(result: str, state: SampleState, config: dict[str, Any]) -> dict[str, Any]:
             return {"field": result}
 
         # Valid transform function

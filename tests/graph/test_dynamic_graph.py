@@ -45,9 +45,7 @@ def test_graph(test_engines):
     registry.register_default_processors()
     NodeFactory.set_registry(registry)
 
-    return DynamicGraph(
-        name="test_graph", components=test_engines, state_schema=GraphState
-    )
+    return DynamicGraph(name="test_graph", components=test_engines, state_schema=GraphState)
 
 
 # Test DynamicGraph initialization
@@ -58,9 +56,7 @@ def test_dynamic_graph_init(test_engines):
     registry.register_default_processors()
     NodeFactory.set_registry(registry)
 
-    graph = DynamicGraph(
-        name="test_graph", components=test_engines, state_schema=GraphState
-    )
+    graph = DynamicGraph(name="test_graph", components=test_engines, state_schema=GraphState)
 
     # Verify components were registered
     assert len(graph.engines) == 2
@@ -117,9 +113,7 @@ def test_add_edge(test_graph):
     test_graph.add_edge("node1", "node2")
 
     # Check if edge exists
-    edge_exists = any(
-        e.source == "node1" and e.target == "node2" for e in test_graph.edges
-    )
+    edge_exists = any(e.source == "node1" and e.target == "node2" for e in test_graph.edges)
     assert edge_exists
 
     # Add a second edge
@@ -152,9 +146,7 @@ def test_insert_node(test_graph):
 
     # Get current edges
     initial_edges = [{"from": e.source, "to": e.target} for e in test_graph.edges]
-    print_test_result(
-        "test_insert_node (initial setup)", {"initial_edges": initial_edges}
-    )
+    print_test_result("test_insert_node (initial setup)", {"initial_edges": initial_edges})
 
     # Add middle node and edges
     test_graph.add_node("middle_node", middle_node_func)
@@ -163,9 +155,7 @@ def test_insert_node(test_graph):
 
     # Check final edges
     final_edges = [{"from": e.source, "to": e.target} for e in test_graph.edges]
-    print_test_result(
-        "test_insert_node (after insertion)", {"final_edges": final_edges}
-    )
+    print_test_result("test_insert_node (after insertion)", {"final_edges": final_edges})
 
     # Verify middle node exists
     assert "middle_node" in test_graph.nodes
@@ -188,9 +178,7 @@ def test_with_runnable_config(test_graph):
         "original_graph_name": test_graph.name,
         "new_graph_name": new_graph.name,
         "has_config": new_graph.default_runnable_config is not None,
-        "thread_id": new_graph.default_runnable_config.get("configurable", {}).get(
-            "thread_id"
-        ),
+        "thread_id": new_graph.default_runnable_config.get("configurable", {}).get("thread_id"),
     }
 
     print_test_result("test_with_runnable_config", result)
@@ -210,9 +198,7 @@ def test_set_default_runnable_config(test_graph):
 
     result = {
         "has_config": test_graph.default_runnable_config is not None,
-        "thread_id": test_graph.default_runnable_config.get("configurable", {}).get(
-            "thread_id"
-        ),
+        "thread_id": test_graph.default_runnable_config.get("configurable", {}).get("thread_id"),
     }
 
     print_test_result("test_set_default_runnable_config", result)
@@ -229,12 +215,8 @@ def test_update_default_runnable_config(test_graph):
 
     result = {
         "has_config": test_graph.default_runnable_config is not None,
-        "thread_id": test_graph.default_runnable_config.get("configurable", {}).get(
-            "thread_id"
-        ),
-        "user_id": test_graph.default_runnable_config.get("configurable", {}).get(
-            "user_id"
-        ),
+        "thread_id": test_graph.default_runnable_config.get("configurable", {}).get("thread_id"),
+        "user_id": test_graph.default_runnable_config.get("configurable", {}).get("user_id"),
     }
 
     print_test_result("test_update_default_runnable_config (initial)", result)
@@ -247,12 +229,8 @@ def test_update_default_runnable_config(test_graph):
 
     result = {
         "has_config": test_graph.default_runnable_config is not None,
-        "thread_id": test_graph.default_runnable_config.get("configurable", {}).get(
-            "thread_id"
-        ),
-        "user_id": test_graph.default_runnable_config.get("configurable", {}).get(
-            "user_id"
-        ),
+        "thread_id": test_graph.default_runnable_config.get("configurable", {}).get("thread_id"),
+        "user_id": test_graph.default_runnable_config.get("configurable", {}).get("user_id"),
     }
 
     print_test_result("test_update_default_runnable_config (after update)", result)
@@ -373,9 +351,7 @@ def test_add_conditional_edges(test_graph):
     test_graph.add_node("path_b", path_b_func)
 
     # Add conditional edges
-    test_graph.add_conditional_edges(
-        "router", condition, {"a": "path_a", "b": "path_b"}
-    )
+    test_graph.add_conditional_edges("router", condition, {"a": "path_a", "b": "path_b"})
 
     # Verify branches were added
     assert len(test_graph.branches) == 1

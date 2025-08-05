@@ -76,14 +76,11 @@ class TestMetaAgentStateWithSimpleV2:
 
             # Mix in recompilation capability for testing
             class RecompilableSimpleAgentV2(SimpleAgentV2, RecompileMixin):
-
                 def add_tool_with_recompile(self, tool, route="langchain_tool"):
                     """Add tool and mark for recompilation."""
                     # Manually add tool - simplified approach without using
                     # _get_tool_name
-                    tool_name = getattr(
-                        tool, "name", getattr(tool, "__name__", str(tool))
-                    )
+                    tool_name = getattr(tool, "name", getattr(tool, "__name__", str(tool)))
                     if self.tools is None:
                         self.tools = []
                     if tool not in self.tools:
@@ -112,9 +109,7 @@ class TestMetaAgentStateWithSimpleV2:
         meta_state = MetaStateSchema(
             agent=simple_agent_v2,
             agent_input={
-                "messages": [
-                    HumanMessage(content="Analyze the number 42 and its significance")
-                ]
+                "messages": [HumanMessage(content="Analyze the number 42 and its significance")]
             },
             meta_context={
                 "purpose": "testing",
@@ -164,9 +159,7 @@ class TestMetaAgentStateWithSimpleV2:
 
             # For now, wrap in async
             loop = asyncio.get_event_loop()
-            return await loop.run_in_executor(
-                None, meta_state.execute_agent, input_data
-            )
+            return await loop.run_in_executor(None, meta_state.execute_agent, input_data)
 
         # Execute asynchronously
         result = await execute_agent_async(meta_state_with_agent)
@@ -274,8 +267,7 @@ class TestMetaAgentStateWithSimpleV2:
 
         # Both executions should be successful
         assert all(
-            record["status"] == "success"
-            for record in meta_state_with_agent.execution_history
+            record["status"] == "success" for record in meta_state_with_agent.execution_history
         )
 
     def test_structured_output_with_meta_state(self, meta_state_with_agent):
@@ -283,9 +275,7 @@ class TestMetaAgentStateWithSimpleV2:
         # Execute with request for structured output
         input_data = {
             "messages": [
-                HumanMessage(
-                    content="Analyze the importance of testing in software development"
-                )
+                HumanMessage(content="Analyze the importance of testing in software development")
             ]
         }
 
@@ -316,14 +306,7 @@ class TestMetaAgentStateWithSimpleV2:
         """Test execution summary functionality."""
         # Execute multiple times
         for i in range(3):
-            input_data = {
-                "messages": [
-                    HumanMessage(
-                        content=f"Test execution {
-                            i + 1}"
-                    )
-                ]
-            }
+            input_data = {"messages": [HumanMessage(content=f"Test execution {i + 1}")]}
             try:
                 meta_state_with_agent.execute_agent(input_data=input_data)
             except BaseException:
@@ -372,14 +355,10 @@ class TestAsyncMetaAgentState:
             # Execute the agent asynchronously
             if hasattr(meta_state.agent, "arun"):
                 # Agent has async run method
-                result = await meta_state.agent.arun(
-                    execution_input, **execution_config
-                )
+                result = await meta_state.agent.arun(execution_input, **execution_config)
             elif hasattr(meta_state.agent, "ainvoke"):
                 # Agent has async invoke method
-                result = await meta_state.agent.ainvoke(
-                    execution_input, execution_config
-                )
+                result = await meta_state.agent.ainvoke(execution_input, execution_config)
             else:
                 # Fall back to sync in executor
                 loop = asyncio.get_event_loop()
@@ -402,9 +381,7 @@ class TestAsyncMetaAgentState:
 
             if update_state:
                 # Update meta state with results
-                meta_state.agent_output = (
-                    result if isinstance(result, dict) else {"result": result}
-                )
+                meta_state.agent_output = result if isinstance(result, dict) else {"result": result}
                 meta_state.last_execution_result = execution_record
                 meta_state.execution_status = "completed"
                 meta_state.execution_history.append(execution_record)

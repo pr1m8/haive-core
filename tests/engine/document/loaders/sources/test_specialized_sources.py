@@ -102,9 +102,7 @@ class TestSpecializedPlatformDetection:
 
     def test_detect_github_from_url(self):
         """Test detecting GitHub from URL."""
-        result = detect_specialized_platform(
-            "https://github.com/langchain-ai/langchain"
-        )
+        result = detect_specialized_platform("https://github.com/langchain-ai/langchain")
         assert result == SpecializedPlatform.GITHUB
 
     def test_detect_unknown_platform(self):
@@ -332,9 +330,7 @@ class TestDevelopmentSources:
             (DevelopmentDataType.WIKI, "wiki"),
         ],
     )
-    def test_development_data_type_values(
-        self, data_type: DevelopmentDataType, expected: str
-    ):
+    def test_development_data_type_values(self, data_type: DevelopmentDataType, expected: str):
         """Test development data type enum values."""
         assert data_type.value == expected
 
@@ -390,9 +386,7 @@ class TestKnowledgeSources:
 class TestSpecializedUtilityFunctions:
     """Test suite for specialized source utility functions."""
 
-    @patch(
-        "haive.core.engine.document.loaders.sources.specialized_sources.enhanced_registry"
-    )
+    @patch("haive.core.engine.document.loaders.sources.specialized_sources.enhanced_registry")
     def test_get_specialized_sources_statistics(self, mock_registry):
         """Test specialized sources statistics calculation."""
         # Mock registry responses
@@ -417,9 +411,7 @@ class TestSpecializedUtilityFunctions:
         assert "development_sources" in stats
         assert "platform_breakdown" in stats
 
-    @patch(
-        "haive.core.engine.document.loaders.sources.specialized_sources.enhanced_registry"
-    )
+    @patch("haive.core.engine.document.loaders.sources.specialized_sources.enhanced_registry")
     def test_validate_specialized_sources_success(self, mock_registry):
         """Test successful validation of specialized sources."""
         # Mock all required sources as present
@@ -435,9 +427,7 @@ class TestSpecializedUtilityFunctions:
         result = validate_specialized_sources()
         assert result is True
 
-    @patch(
-        "haive.core.engine.document.loaders.sources.specialized_sources.enhanced_registry"
-    )
+    @patch("haive.core.engine.document.loaders.sources.specialized_sources.enhanced_registry")
     def test_validate_specialized_sources_missing(self, mock_registry):
         """Test validation failure when sources are missing."""
         # Mock only some sources as present
@@ -483,14 +473,11 @@ class TestSpecializedSourceIntegration:
             (SpecializedPlatform.WIKIPEDIA, "WikipediaLoader"),
         ],
     )
-    def test_platform_loader_mapping(
-        self, platform: SpecializedPlatform, loader_class: str
-    ):
+    def test_platform_loader_mapping(self, platform: SpecializedPlatform, loader_class: str):
         """Test that each platform maps to the correct loader class."""
         # This test verifies the loader class names match expected conventions
-        assert (
-            platform.value in loader_class.lower()
-            or loader_class.lower().startswith(platform.value[:3])
+        assert platform.value in loader_class.lower() or loader_class.lower().startswith(
+            platform.value[:3]
         )
 
 

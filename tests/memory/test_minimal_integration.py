@@ -13,7 +13,6 @@ def print_status(message: str, success: bool = True):
 def test_basic_imports():
     """Test basic imports without heavy dependencies."""
     try:
-
         print_status("StoreManager import")
 
         print_status("StoreType import")

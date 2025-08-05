@@ -226,9 +226,7 @@ class TestAgentNodeFieldMapping:
             # Check if agent has output_schema
             if hasattr(agent, "output_schema") and agent.output_schema:
                 # Agent has typed output - map to state fields
-                output_dict = (
-                    output.model_dump() if isinstance(output, BaseModel) else output
-                )
+                output_dict = output.model_dump() if isinstance(output, BaseModel) else output
 
                 # Get state fields
                 state_fields = set()

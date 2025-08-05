@@ -87,9 +87,7 @@ class TestPathResolverPhase2:
         assert result == "3.0"
 
         # Test non-existent path
-        result = resolver.extract_value(
-            nested_dict, "config.missing.field", default="not_found"
-        )
+        result = resolver.extract_value(nested_dict, "config.missing.field", default="not_found")
         assert result == "not_found"
 
     def test_dot_notation_with_pydantic(self, resolver, nested_pydantic):
@@ -105,9 +103,7 @@ class TestPathResolverPhase2:
         assert result == 1000
 
         # Test non-existent path
-        result = resolver.extract_value(
-            nested_pydantic, "config.missing", default="default"
-        )
+        result = resolver.extract_value(nested_pydantic, "config.missing", default="default")
         assert result == "default"
 
     def test_array_access_with_dict(self, resolver, nested_dict):
@@ -165,9 +161,7 @@ class TestPathResolverPhase2:
         assert result == "agent2"
 
         # Test non-existent combined paths
-        result = resolver.extract_value(
-            nested_dict, "agents[0].missing", default="none"
-        )
+        result = resolver.extract_value(nested_dict, "agents[0].missing", default="none")
         assert result == "none"
 
         result = resolver.extract_value(nested_dict, "agents[99].name", default="none")
@@ -232,14 +226,10 @@ class TestPathResolverPhase2:
         assert result == "c"
 
         # Test invalid cases
-        result = resolver._extract_array_access(
-            test_obj, "items[abc]", default="invalid"
-        )
+        result = resolver._extract_array_access(test_obj, "items[abc]", default="invalid")
         assert result == "invalid"
 
-        result = resolver._extract_array_access(
-            test_obj, "missing[0]", default="missing"
-        )
+        result = resolver._extract_array_access(test_obj, "missing[0]", default="missing")
         assert result == "missing"
 
     def test_backward_compatibility_with_phase1(self, resolver):
@@ -305,7 +295,5 @@ class TestPathResolverPhase2:
         result = resolver.extract_value(test_data, "null_value.field", default="null")
         assert result == "null"
 
-        result = resolver.extract_value(
-            test_data, "nested.null.field", default="nested_null"
-        )
+        result = resolver.extract_value(test_data, "nested.null.field", default="nested_null")
         assert result == "nested_null"

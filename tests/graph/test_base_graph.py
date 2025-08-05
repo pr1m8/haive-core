@@ -67,9 +67,7 @@ class TestBaseGraph(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         # Create a simple test graph
-        self.graph = BaseGraph(
-            name="test_graph", description="Test graph for unit tests"
-        )
+        self.graph = BaseGraph(name="test_graph", description="Test graph for unit tests")
 
         # Add test nodes with defined functions
         self.graph.add_node("node1", node1_func, node_type=NodeType.CALLABLE)
@@ -105,15 +103,11 @@ class TestBaseGraph(unittest.TestCase):
         new_node = Node(
             name="new_node",
             node_type=NodeType.CALLABLE,
-            metadata={
-                "callable": node1_func
-            },  # Use predefined function for serialization
+            metadata={"callable": node1_func},  # Use predefined function for serialization
         )
         self.graph.replace_node("test_node", new_node)
         assert "test_node" in self.graph.nodes  # Name stays the same
-        assert (
-            self.graph.nodes["test_node"].id == new_node.id
-        )  # But content is from new_node
+        assert self.graph.nodes["test_node"].id == new_node.id  # But content is from new_node
 
         # Test remove_node
         self.graph.remove_node("test_node")
@@ -665,9 +659,7 @@ class TestSerializableGraph(unittest.TestCase):
     def test_to_json_from_json(self):
         """Test to_json and from_json methods."""
         # Create a new clean serializable graph with module-level functions
-        clean_graph = BaseGraph(
-            name="json_graph", description="Test JSON serialization"
-        )
+        clean_graph = BaseGraph(name="json_graph", description="Test JSON serialization")
 
         # Add nodes with top-level functions, not lambdas
         clean_graph.add_node("node1", node1_func)
@@ -703,9 +695,7 @@ class TestSerializableGraph(unittest.TestCase):
             # Verify reconstructed serializable
             assert reconstructed.name == clean_serializable.name
             assert len(reconstructed.nodes) == len(clean_serializable.nodes)
-            assert len(reconstructed.direct_edges) == len(
-                clean_serializable.direct_edges
-            )
+            assert len(reconstructed.direct_edges) == len(clean_serializable.direct_edges)
 
             # Verify specific branch data
             assert "json_branch" in [b.name for b in reconstructed.branches.values()]
@@ -715,9 +705,7 @@ class TestSerializableGraph(unittest.TestCase):
     def test_round_trip_serialization(self):
         """Test complete round-trip serialization."""
         # Create a graph with proper module-level functions
-        original = BaseGraph(
-            name="round_trip", description="Test round-trip serialization"
-        )
+        original = BaseGraph(name="round_trip", description="Test round-trip serialization")
 
         # Add nodes with top-level functions
         original.add_node("node1", node1_func)

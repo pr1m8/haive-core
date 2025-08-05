@@ -63,7 +63,6 @@ def test_conversation_persistence_detailed():
                     thread_info = cursor.fetchone()
 
                     if thread_info:
-
                         # Try to parse metadata if it exists
                         with contextlib.suppress(Exception):
                             (json.loads(thread_info[3]) if thread_info[3] else {})
@@ -75,9 +74,7 @@ def test_conversation_persistence_detailed():
                     )
                     checkpoints = cursor.fetchall()
 
-                    for _i, (_cp_id, _created_at) in enumerate(
-                        checkpoints[:5]
-                    ):  # Show first 5
+                    for _i, (_cp_id, _created_at) in enumerate(checkpoints[:5]):  # Show first 5
                         pass
                     if len(checkpoints) > 5:
                         pass
@@ -94,7 +91,6 @@ def test_conversation_persistence_detailed():
         retrieved_checkpoint = session.checkpointer.get(checkpoint_config)
 
         if retrieved_checkpoint:
-
             # Look at channel_values which contains the actual state
             if "channel_values" in retrieved_checkpoint:
                 channel_values = retrieved_checkpoint["channel_values"]
@@ -130,14 +126,11 @@ def test_conversation_persistence_detailed():
         )
 
         # Try to run with the same thread_id to see if it resumes
-        resume_config = {
-            "configurable": {"thread_id": thread_id, "recursion_limit": 100}
-        }
+        resume_config = {"configurable": {"thread_id": thread_id, "recursion_limit": 100}}
 
         resume_result = resume_session.run({}, config=resume_config)
 
         if hasattr(resume_result, "messages"):
-
             # Show the last few messages to see continuation
             for msg in resume_result.messages[-3:]:
                 type(msg).__name__

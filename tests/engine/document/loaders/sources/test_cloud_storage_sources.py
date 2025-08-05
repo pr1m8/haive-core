@@ -366,10 +366,7 @@ class TestEnterpriseStorage:
     def test_sharepoint_source_initialization(self, sharepoint_source):
         """Test SharePoint source initialization."""
         assert sharepoint_source.platform == CloudPlatform.SHAREPOINT
-        assert (
-            sharepoint_source.site_url
-            == "https://company.sharepoint.com/sites/documents"
-        )
+        assert sharepoint_source.site_url == "https://company.sharepoint.com/sites/documents"
         assert sharepoint_source.document_library == "Shared Documents"
         assert sharepoint_source.folder_path == "/Projects/2024"
 
@@ -486,9 +483,7 @@ class TestObjectStorage:
 class TestCloudStorageUtilities:
     """Test suite for cloud storage utility functions."""
 
-    @patch(
-        "haive.core.engine.document.loaders.sources.cloud_storage_sources.enhanced_registry"
-    )
+    @patch("haive.core.engine.document.loaders.sources.cloud_storage_sources.enhanced_registry")
     def test_get_cloud_storage_statistics(self, mock_registry):
         """Test cloud storage statistics calculation."""
         # Mock registry responses
@@ -520,9 +515,7 @@ class TestCloudStorageUtilities:
         assert "s3_compatible_sources" in stats
         assert "bulk_loading_sources" in stats
 
-    @patch(
-        "haive.core.engine.document.loaders.sources.cloud_storage_sources.enhanced_registry"
-    )
+    @patch("haive.core.engine.document.loaders.sources.cloud_storage_sources.enhanced_registry")
     def test_validate_cloud_sources_success(self, mock_registry):
         """Test successful validation of cloud sources."""
         # Mock all required sources as present

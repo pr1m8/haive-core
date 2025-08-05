@@ -32,9 +32,7 @@ sys.path.insert(0, str(Path(__file__).parent / "packages" / "haive-agents" / "sr
 
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -99,9 +97,7 @@ class ExampleDiscoverer:
                 # Analyze the example file
                 analysis = self.analyze_example_file(example_file)
 
-                key = (
-                    f"{category}_{agent_type}" if agent_type else f"{category}_unknown"
-                )
+                key = f"{category}_{agent_type}" if agent_type else f"{category}_unknown"
                 self.examples[key] = {
                     "file_path": example_file,
                     "category": category,
@@ -189,9 +185,7 @@ class AgentGraphVisualizer:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
 
-    def run_example_and_visualize(
-        self, example_key: str, discoverer: ExampleDiscoverer
-    ):
+    def run_example_and_visualize(self, example_key: str, discoverer: ExampleDiscoverer):
         """Run an example and visualize its agent graph."""
         example_info = discoverer.get_example_info(example_key)
         if not example_info:
@@ -245,8 +239,7 @@ class AgentGraphVisualizer:
 
                         # Only call functions with no required parameters
                         if len(sig.parameters) == 0 or all(
-                            p.default != inspect.Parameter.empty
-                            for p in sig.parameters.values()
+                            p.default != inspect.Parameter.empty for p in sig.parameters.values()
                         ):
                             result = obj()
 
@@ -275,9 +268,7 @@ class AgentGraphVisualizer:
                                             }
                                         )
                                 except Exception as e:
-                                    logger.warning(
-                                        f"Failed to build graph for {name}: {e}"
-                                    )
+                                    logger.warning(f"Failed to build graph for {name}: {e}")
 
                             # Check if result can be compiled
                             elif hasattr(result, "compile"):
@@ -293,9 +284,7 @@ class AgentGraphVisualizer:
                                             }
                                         )
                                 except Exception as e:
-                                    logger.warning(
-                                        f"Failed to compile graph for {name}: {e}"
-                                    )
+                                    logger.warning(f"Failed to compile graph for {name}: {e}")
 
                 except Exception as e:
                     logger.warning(f"Failed to call function {name}: {e}")
@@ -424,31 +413,21 @@ class AgentGraphVisualizer:
 
 def main():
     """Main CLI interface."""
-    parser = argparse.ArgumentParser(
-        description="Visualize agent graphs from example.py files"
-    )
+    parser = argparse.ArgumentParser(description="Visualize agent graphs from example.py files")
     parser.add_argument(
         "example",
         nargs="?",
         help="Example key to run (e.g., 'simple', 'multi', 'agents_simple')",
     )
-    parser.add_argument(
-        "--list", action="store_true", help="List all available examples"
-    )
-    parser.add_argument(
-        "--discover", metavar="PATTERN", help="Discover examples matching pattern"
-    )
-    parser.add_argument(
-        "--category", help="Filter examples by category (agents, games, prebuilt)"
-    )
+    parser.add_argument("--list", action="store_true", help="List all available examples")
+    parser.add_argument("--discover", metavar="PATTERN", help="Discover examples matching pattern")
+    parser.add_argument("--category", help="Filter examples by category (agents, games, prebuilt)")
     parser.add_argument(
         "--output-dir",
         default="./graph_visualizations",
         help="Output directory for visualizations",
     )
-    parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Enable verbose logging"
-    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging")
 
     args = parser.parse_args()
 

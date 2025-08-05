@@ -122,9 +122,7 @@ def test_load_project_env_files(monkeypatch, tmp_path):
         f.write("COMMON_VAR=local_value\n")  # Highest priority
 
     # Mock __file__ path to point to our temp directory
-    monkeypatch.setattr(
-        "haive.core.utils.env_utils.__file__", str(utils_dir / "env_utils.py")
-    )
+    monkeypatch.setattr("haive.core.utils.env_utils.__file__", str(utils_dir / "env_utils.py"))
 
     # Save original environment
     original_env = os.environ.copy()
@@ -142,9 +140,7 @@ def test_load_project_env_files(monkeypatch, tmp_path):
         assert os.environ.get("ROOT_VAR") == "root_value"
         assert os.environ.get("PACKAGE_VAR") == "package_value"
         assert os.environ.get("LOCAL_VAR") == "local_value"
-        assert (
-            os.environ.get("COMMON_VAR") == "local_value"
-        )  # Should be overridden by local
+        assert os.environ.get("COMMON_VAR") == "local_value"  # Should be overridden by local
 
     finally:
         # Restore original environment

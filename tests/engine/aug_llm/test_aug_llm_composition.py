@@ -56,12 +56,8 @@ class UserProfile(BaseModel):
     age: int | None = Field(None, description="User's age")
     interests: list[str] = Field(default_factory=list, description="User's interests")
     bio: str | None = Field(None, description="User's biography")
-    contact_info: dict[str, str] | None = Field(
-        None, description="User's contact information"
-    )
-    preferences: dict[str, Any] = Field(
-        default_factory=dict, description="User's preferences"
-    )
+    contact_info: dict[str, str] | None = Field(None, description="User's contact information")
+    preferences: dict[str, Any] = Field(default_factory=dict, description="User's preferences")
 
 
 class RecipeIngredient(BaseModel):
@@ -78,9 +74,7 @@ class RecipeStep(BaseModel):
 
     number: int = Field(description="Step number")
     instruction: str = Field(description="Step instruction")
-    time_minutes: int | None = Field(
-        None, description="Time needed for this step in minutes"
-    )
+    time_minutes: int | None = Field(None, description="Time needed for this step in minutes")
 
 
 class Recipe(BaseModel):
@@ -88,9 +82,7 @@ class Recipe(BaseModel):
 
     title: str = Field(description="Recipe title")
     description: str | None = Field(None, description="Recipe description")
-    prep_time_minutes: int | None = Field(
-        None, description="Preparation time in minutes"
-    )
+    prep_time_minutes: int | None = Field(None, description="Preparation time in minutes")
     cook_time_minutes: int | None = Field(None, description="Cooking time in minutes")
     servings: int | None = Field(None, description="Number of servings")
     ingredients: list[RecipeIngredient] = Field(description="List of ingredients")
@@ -137,9 +129,7 @@ def complex_chat_prompt():
             MessagesPlaceholder(variable_name="context", optional=True),
             MessagesPlaceholder(variable_name="examples", optional=True),
             MessagesPlaceholder(variable_name="messages"),
-            HumanMessagePromptTemplate.from_template(
-                "Additional instructions: {instructions}"
-            ),
+            HumanMessagePromptTemplate.from_template("Additional instructions: {instructions}"),
         ]
     )
 
@@ -225,9 +215,7 @@ def advanced_weather_tool():
                     hourly.append(
                         {
                             "time": f"{hour:02d}:00",
-                            "temp": base_temp
-                            + temp_adjustment
-                            + (5 if 10 <= hour <= 16 else 0),
+                            "temp": base_temp + temp_adjustment + (5 if 10 <= hour <= 16 else 0),
                             "conditions": ["Sunny", "Cloudy", "Rainy", "Partly Cloudy"][
                                 (i + hour // 6) % 4
                             ],
@@ -337,9 +325,7 @@ def recipe_search_tool():
                         # Check that recipe doesn't have this tag
                         # Remove "no_" prefix
                         restricted_item = restriction[3:]
-                        if any(
-                            tag.endswith(restricted_item) for tag in recipe["diet_tags"]
-                        ):
+                        if any(tag.endswith(restricted_item) for tag in recipe["diet_tags"]):
                             diet_match = False
                             break
                     # Check that recipe has this tag
@@ -388,13 +374,9 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
     )
 
     # Create schemas for these engines
-    user_schema = SchemaComposer.create_model(
-        [person_extractor], name="UserProfileSchema"
-    )
+    user_schema = SchemaComposer.create_model([person_extractor], name="UserProfileSchema")
     recipe_schema = SchemaComposer.create_model([recipe_analyzer], name="RecipeSchema")
-    movie_schema = SchemaComposer.create_model(
-        [movie_reviewer], name="MovieReviewSchema"
-    )
+    movie_schema = SchemaComposer.create_model([movie_reviewer], name="MovieReviewSchema")
 
     # Pretty print the schemas and their fields
     for schema_name, schema in [
@@ -402,7 +384,6 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
         ("Recipe", recipe_schema),
         ("MovieReview", movie_schema),
     ]:
-
         # Print model fields
         for _field_name, field_info in schema.model_fields.items():
             field_default = field_info.default
@@ -520,18 +501,14 @@ def test_various_input_formats(
 
     # Test 3: Complex input with all template variables
     complex_input = {
-        "context": [
-            SystemMessage(content="Azure is Microsoft's cloud computing platform.")
-        ],
+        "context": [SystemMessage(content="Azure is Microsoft's cloud computing platform.")],
         "examples": [
             HumanMessage(content="What services does Azure offer?"),
             AIMessage(
                 content="Azure offers compute, storage, database, AI, analytics, and many other services."
             ),
         ],
-        "messages": [
-            HumanMessage(content="How do Azure Functions compare to AWS Lambda?")
-        ],
+        "messages": [HumanMessage(content="How do Azure Functions compare to AWS Lambda?")],
         "instructions": "Compare pricing, features, and integration capabilities",
     }
 
@@ -571,9 +548,7 @@ def test_various_input_formats(
 
 
 @skip_if_no_api_keys
-def test_different_output_parsers(
-    azure_llm_config, structured_chat_prompt, json_parser
-):
+def test_different_output_parsers(azure_llm_config, structured_chat_prompt, json_parser):
     """Test AugLLMConfig with different output parsers."""
     # Test 1: String output parser
     str_parser = StrOutputParser()
@@ -607,9 +582,7 @@ def test_different_output_parsers(
         output_parser=json_parser,
     )
 
-    json_result = json_llm.invoke(
-        "Generate a list of 3 users with name, age, and email fields"
-    )
+    json_result = json_llm.invoke("Generate a list of 3 users with name, age, and email fields")
     assert isinstance(json_result, dict | list)
 
     # Test 3: Pydantic output parser
@@ -723,9 +696,7 @@ def test_advanced_tools_with_structured_output(
     )
 
     # Test weather forecast query
-    weather_query = (
-        "What's the weather forecast for Tokyo for the next 3 days in celsius?"
-    )
+    weather_query = "What's the weather forecast for Tokyo for the next 3 days in celsius?"
     weather_result = weather_llm.invoke(weather_query)
 
     # 2. Recipe search tool with full Recipe output model
@@ -814,10 +785,7 @@ def test_advanced_tools_with_structured_output(
 
         # Case-insensitive lookup
         for key, info in products.items():
-            if (
-                product_name.lower() in key.lower()
-                or key.lower() in product_name.lower()
-            ):
+            if product_name.lower() in key.lower() or key.lower() in product_name.lower():
                 return info
 
         return {"error": f"Product '{product_name}' not found"}

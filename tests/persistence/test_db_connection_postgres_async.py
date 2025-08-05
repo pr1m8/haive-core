@@ -53,9 +53,7 @@ async def test_postgres_with_augllm():
         azure_config = AzureLLMConfig(
             api_key=os.environ.get("AZURE_OPENAI_API_KEY", "demo-key"),
             api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2023-05-15"),
-            api_base=os.environ.get(
-                "AZURE_OPENAI_API_BASE", "https://example.azure.openai.com/"
-            ),
+            api_base=os.environ.get("AZURE_OPENAI_API_BASE", "https://example.azure.openai.com/"),
             model="gpt-4o",
         )
 
@@ -91,9 +89,7 @@ async def test_postgres_with_augllm():
         }
 
         # Store data
-        updated_config = await postgres_config.aput_checkpoint(
-            config=config, data=test_data
-        )
+        updated_config = await postgres_config.aput_checkpoint(config=config, data=test_data)
 
         updated_config["configurable"].get("checkpoint_id")
 

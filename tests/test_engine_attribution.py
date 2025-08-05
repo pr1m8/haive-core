@@ -48,9 +48,7 @@ logging.Logger.log_exception = log_exception_noop
 class TestState(StateSchema):
     """Test state with messages field."""
 
-    messages: list[BaseMessage] = Field(
-        default_factory=list, description="Conversation messages"
-    )
+    messages: list[BaseMessage] = Field(default_factory=list, description="Conversation messages")
     transformed_messages: list[BaseMessage] = Field(
         default_factory=list, description="Transformed messages"
     )
@@ -71,14 +69,10 @@ class TestEngineAttribution:
         )
 
         # Create an EngineNode with the engine
-        engine_node = EngineNodeConfig(
-            name="test_engine_node", engine=engine, command_goto="next"
-        )
+        engine_node = EngineNodeConfig(name="test_engine_node", engine=engine, command_goto="next")
 
         # Create test state with a user message
-        state = TestState(
-            messages=[HumanMessage(content="Hello, please respond with a greeting.")]
-        )
+        state = TestState(messages=[HumanMessage(content="Hello, please respond with a greeting.")])
 
         # Execute the engine node
         result = engine_node(state)
@@ -89,28 +83,22 @@ class TestEngineAttribution:
 
         # Get the updated messages
         updated_messages = result.update["messages"]
-        assert len(updated_messages) > len(
-            state.messages
-        ), "Expected new message to be added"
+        assert len(updated_messages) > len(state.messages), "Expected new message to be added"
 
         # Get the last message (should be the AI response)
         last_message = updated_messages[-1]
 
         # Verify it's an AIMessage with engine attribution
-        assert isinstance(
-            last_message, AIMessage
-        ), f"Expected AIMessage, got {type(last_message)}"
+        assert isinstance(last_message, AIMessage), f"Expected AIMessage, got {type(last_message)}"
 
         # Check for engine_name in additional_kwargs
-        assert hasattr(
-            last_message, "additional_kwargs"
-        ), "AIMessage should have additional_kwargs"
-        assert (
-            "engine_name" in last_message.additional_kwargs
-        ), "Expected 'engine_name' in additional_kwargs"
-        assert (
-            last_message.additional_kwargs["engine_name"] == engine_name
-        ), f"Expected engine_name to be '{engine_name}', got '{last_message.additional_kwargs['engine_name']}'"
+        assert hasattr(last_message, "additional_kwargs"), "AIMessage should have additional_kwargs"
+        assert "engine_name" in last_message.additional_kwargs, (
+            "Expected 'engine_name' in additional_kwargs"
+        )
+        assert last_message.additional_kwargs["engine_name"] == engine_name, (
+            f"Expected engine_name to be '{engine_name}', got '{last_message.additional_kwargs['engine_name']}'"
+        )
 
     def test_message_transformation_preserves_attribution(self):
         """Test that MessageTransformationNode preserves engine attribution."""
@@ -125,9 +113,7 @@ class TestEngineAttribution:
             },
         )
 
-        state = TestState(
-            messages=[HumanMessage(content="Initial request"), ai_message]
-        )
+        state = TestState(messages=[HumanMessage(content="Initial request"), ai_message])
 
         # Create a message transformation node (AI to Human)
         transformer = MessageTransformationNodeConfig(
@@ -144,35 +130,33 @@ class TestEngineAttribution:
 
         # Verify the result
         assert isinstance(result, Command), f"Expected Command, got {type(result)}"
-        assert (
-            "transformed_messages" in result.update
-        ), "Expected 'transformed_messages' in update"
+        assert "transformed_messages" in result.update, "Expected 'transformed_messages' in update"
 
         # Get the transformed messages
         transformed_messages = result.update["transformed_messages"]
-        assert (
-            len(transformed_messages) == 2
-        ), f"Expected 2 messages, got {len(transformed_messages)}"
+        assert len(transformed_messages) == 2, (
+            f"Expected 2 messages, got {len(transformed_messages)}"
+        )
 
         # Check the transformed message (should be the second one)
         transformed_msg = transformed_messages[1]
 
         # Verify it's now a HumanMessage but retains attribution
-        assert isinstance(
-            transformed_msg, HumanMessage
-        ), f"Expected HumanMessage, got {type(transformed_msg)}"
-        assert hasattr(
-            transformed_msg, "additional_kwargs"
-        ), "Transformed message should have additional_kwargs"
-        assert (
-            "engine_name" in transformed_msg.additional_kwargs
-        ), "Engine attribution should be preserved"
-        assert (
-            transformed_msg.additional_kwargs["engine_name"] == engine_name
-        ), f"Engine name should be '{engine_name}', got '{transformed_msg.additional_kwargs['engine_name']}'"
-        assert (
-            transformed_msg.additional_kwargs["custom_field"] == "test_value"
-        ), "Other metadata should also be preserved"
+        assert isinstance(transformed_msg, HumanMessage), (
+            f"Expected HumanMessage, got {type(transformed_msg)}"
+        )
+        assert hasattr(transformed_msg, "additional_kwargs"), (
+            "Transformed message should have additional_kwargs"
+        )
+        assert "engine_name" in transformed_msg.additional_kwargs, (
+            "Engine attribution should be preserved"
+        )
+        assert transformed_msg.additional_kwargs["engine_name"] == engine_name, (
+            f"Engine name should be '{engine_name}', got '{transformed_msg.additional_kwargs['engine_name']}'"
+        )
+        assert transformed_msg.additional_kwargs["custom_field"] == "test_value", (
+            "Other metadata should also be preserved"
+        )
 
     def test_complete_flow_with_attribution(self):
         """Test complete flow: Engine → Transformation with attribution."""
@@ -241,9 +225,9 @@ class TestEngineAttribution:
         # Check that the AI message became Human but kept attribution
         # (First message is preserved, so AI message should be at index -1 after transformation)
         reflected_msg = reflected_messages[-1]
-        assert isinstance(
-            reflected_msg, HumanMessage
-        ), "AI should be transformed to Human in reflection"
+        assert isinstance(reflected_msg, HumanMessage), (
+            "AI should be transformed to Human in reflection"
+        )
         assert reflected_msg.additional_kwargs.get("engine_name") == engine_name
         assert reflected_msg.additional_kwargs.get("engine_id") == engine_id
 
@@ -270,9 +254,7 @@ class TestEngineAttribution:
 
         # Initial state
         state = TestState(
-            messages=[
-                HumanMessage(content="Explain quantum computing in simple terms.")
-            ]
+            messages=[HumanMessage(content="Explain quantum computing in simple terms.")]
         )
 
         # Process through first engine
@@ -291,9 +273,7 @@ class TestEngineAttribution:
         # Verify second attribution
         summarizer_msg = state.messages[-1]
         assert isinstance(summarizer_msg, AIMessage)
-        assert (
-            summarizer_msg.additional_kwargs.get("engine_name") == "summarizer_engine"
-        )
+        assert summarizer_msg.additional_kwargs.get("engine_name") == "summarizer_engine"
 
         # Verify we can distinguish messages by engine
         for _i, msg in enumerate(state.messages):

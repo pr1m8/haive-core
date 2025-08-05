@@ -196,9 +196,7 @@ class TestAdvancedNodeComposer:
                 "status": "has_data" if extracted["has_data"] else "empty",
             }
 
-        node = composer.from_callable_advanced(
-            func=process, extract_logic=custom_extract
-        )
+        node = composer.from_callable_advanced(func=process, extract_logic=custom_extract)
 
         result = node({"messages": ["a", "b", "c", "d", "e"]}, {})
 
@@ -421,9 +419,7 @@ class TestRealWorldScenarios:
             docs = state.get("documents", [])
             min_length = config.get("min_length", 50)
 
-            valid_docs = [
-                doc for doc in docs if len(doc.get("content", "")) >= min_length
-            ]
+            valid_docs = [doc for doc in docs if len(doc.get("content", "")) >= min_length]
 
             return {
                 "docs": valid_docs,

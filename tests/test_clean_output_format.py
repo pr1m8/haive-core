@@ -16,9 +16,7 @@ class QueryRefinementSuggestion(BaseModel):
 
     refined_query: str = Field(description="The refined version of the query")
     improvement_type: str = Field(description="Type of improvement")
-    rationale: str = Field(
-        description="Explanation of why this refinement is beneficial"
-    )
+    rationale: str = Field(description="Explanation of why this refinement is beneficial")
     expected_benefit: str = Field(description="Expected benefit of this refinement")
 
 
@@ -26,28 +24,20 @@ class QueryRefinementResponse(BaseModel):
     """Response for query refinement analysis."""
 
     original_query: str = Field(description="The original user query")
-    query_analysis: str = Field(
-        description="Analysis of the query's strengths and weaknesses"
-    )
+    query_analysis: str = Field(description="Analysis of the query's strengths and weaknesses")
     query_type: str = Field(description="Type of query")
     complexity_level: str = Field(description="Complexity level")
     refinement_suggestions: list[QueryRefinementSuggestion] = Field(
         description="List of refinement suggestions"
     )
-    best_refined_query: str = Field(
-        description="The best refined query from the suggestions"
-    )
-    search_strategy_recommendations: list[str] = Field(
-        description="Recommended search strategies"
-    )
+    best_refined_query: str = Field(description="The best refined query from the suggestions")
+    search_strategy_recommendations: list[str] = Field(description="Recommended search strategies")
 
 
 def test_clean_output_format():
     """Test that structured output is formatted cleanly."""
     # Create agent with structured output
-    engine = AugLLMConfig(
-        temperature=0.3, structured_output_model=QueryRefinementResponse
-    )
+    engine = AugLLMConfig(temperature=0.3, structured_output_model=QueryRefinementResponse)
 
     agent = SimpleAgentV2(
         name="query_refiner",
@@ -61,7 +51,8 @@ def test_clean_output_format():
 
     try:
         result = agent.run(
-            "what is the tallest tower in north america", debug=False  # Clean output
+            "what is the tallest tower in north america",
+            debug=False,  # Clean output
         )
 
         # Verify we can still access the original data

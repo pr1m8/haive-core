@@ -127,9 +127,7 @@ class TestComputedProperties:
         state = MessagesState(
             [
                 "Real human message",
-                HumanMessage(
-                    content="Transformed", additional_kwargs={"engine_id": "llm-123"}
-                ),
+                HumanMessage(content="Transformed", additional_kwargs={"engine_id": "llm-123"}),
                 HumanMessage(content="Another transformed", name="agent"),
                 "Another real message",
             ]
@@ -342,16 +340,12 @@ class TestAdvancedFiltering:
         state = MessagesState(
             [
                 HumanMessage(content="No metadata"),
-                AIMessage(
-                    content="With engine", additional_kwargs={"engine_id": "llm-123"}
-                ),
+                AIMessage(content="With engine", additional_kwargs={"engine_id": "llm-123"}),
                 AIMessage(
                     content="Different engine",
                     additional_kwargs={"engine_id": "llm-456"},
                 ),
-                HumanMessage(
-                    content="With agent", additional_kwargs={"source_agent": "agent1"}
-                ),
+                HumanMessage(content="With agent", additional_kwargs={"source_agent": "agent1"}),
             ]
         )
 
@@ -367,15 +361,9 @@ class TestAdvancedFiltering:
         """Test filtering by engine ID/name."""
         state = MessagesState(
             [
-                AIMessage(
-                    content="Engine 1", additional_kwargs={"engine_id": "llm-123"}
-                ),
-                AIMessage(
-                    content="Engine 2", additional_kwargs={"engine_id": "llm-456"}
-                ),
-                AIMessage(
-                    content="Named engine", additional_kwargs={"engine_name": "gpt4"}
-                ),
+                AIMessage(content="Engine 1", additional_kwargs={"engine_id": "llm-123"}),
+                AIMessage(content="Engine 2", additional_kwargs={"engine_id": "llm-456"}),
+                AIMessage(content="Named engine", additional_kwargs={"engine_name": "gpt4"}),
             ]
         )
 
@@ -713,9 +701,7 @@ class TestEdgeCases:
     def test_system_message_ordering(self):
         """Test system message ordering validation."""
         # System message after human should be reordered
-        state = MessagesState(
-            ["Human message", SystemMessage(content="System message")]
-        )
+        state = MessagesState(["Human message", SystemMessage(content="System message")])
 
         # System should be moved to front
         assert isinstance(state[0], SystemMessage)

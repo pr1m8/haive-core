@@ -183,7 +183,6 @@ def test_proposed_solution():
 
 
 if __name__ == "__main__":
-
     test_schema_composition_issues()
     test_state_projection_issues()
     test_proposed_solution()

@@ -117,13 +117,9 @@ class TestMultiAgentStateTypedIO:
             "planning",
             "critical_thinking",
         ]
+        assert state.agent_outputs["adapt_modules"]["adapted_modules"][0]["module"] == "reasoning"
         assert (
-            state.agent_outputs["adapt_modules"]["adapted_modules"][0]["module"]
-            == "reasoning"
-        )
-        assert (
-            state.agent_outputs["create_structure"]["reasoning_structure"]["phase1"]
-            == "analysis"
+            state.agent_outputs["create_structure"]["reasoning_structure"]["phase1"] == "analysis"
         )
 
         # No messages in structured outputs
@@ -216,9 +212,7 @@ class TestMultiAgentStateTypedIO:
 
         # Set up state with various fields
         state.messages = [HumanMessage(content="Solve this problem")]
-        state.agent_outputs["select_modules"] = {
-            "selected_modules": ["reasoning", "planning"]
-        }
+        state.agent_outputs["select_modules"] = {"selected_modules": ["reasoning", "planning"]}
         state.agent_states["shared"] = {
             "task_description": "Complex reasoning problem",
             "available_modules": ["reasoning", "planning", "analysis", "synthesis"],
@@ -238,9 +232,7 @@ class TestMultiAgentStateTypedIO:
         # Based on AdapterInput schema
         adapter_inputs = {
             "task_description": state.agent_states["shared"]["task_description"],
-            "selected_modules": state.agent_outputs["select_modules"][
-                "selected_modules"
-            ],
+            "selected_modules": state.agent_outputs["select_modules"]["selected_modules"],
         }
         adapter_input = AdapterInput(**adapter_inputs)
         assert adapter_input.selected_modules == ["reasoning", "planning"]

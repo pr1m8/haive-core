@@ -16,9 +16,7 @@ async def test_simple_agent_v2():
         [("system", "You are a helpful assistant."), ("human", "{query}")]
     )
 
-    engine = AugLLMConfig(
-        name="test_engine", prompt_template=prompt, model="gpt-4o-mini"
-    )
+    engine = AugLLMConfig(name="test_engine", prompt_template=prompt, model="gpt-4o-mini")
 
     # Create agent
     agent = SimpleAgentV2(name="test_agent", engine=engine)

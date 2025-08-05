@@ -189,8 +189,7 @@ class Test_PostgresCheckpointer:
     def test_register_thread(self, postgres_config, test_thread_id):
         """Test registering a thread."""
         # Register a thread
-        postgres_config.register_thread(
-            test_thread_id, metadata={"test": True})
+        postgres_config.register_thread(test_thread_id, metadata={"test": True})
 
         # Create checkpointer to verify
         checkpointer = postgres_config.create_checkpointer()
@@ -201,20 +200,14 @@ class Test_PostgresCheckpointer:
         # Verify thread exists in database
         with pool.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute(
-                    "SELECT 1 FROM threads WHERE thread_id = %s", (
-                        test_thread_id,)
-                )
+                cursor.execute("SELECT 1 FROM threads WHERE thread_id = %s", (test_thread_id,))
                 result = cursor.fetchone()
 
-                assert (
-                    result is not None
-                ), f"Thread {test_thread_id} not found in database"
+                assert result is not None, f"Thread {test_thread_id} not found in database"
 
         logger.info(f"✅ Thread {test_thread_id} registered successfully")
 
-    def test_put_and_get_checkpoint(
-        self, postgres_config, test_thread_id, test_data):
+    def test_put_and_get_checkpoint(self, postgres_config, test_thread_id, test_data):
         """Test storing and retrieving a checkpoint."""
         # Register the thread first
         postgres_config.register_thread(test_thread_id)
@@ -241,11 +234,9 @@ class Test_PostgresCheckpointer:
         assert "_counter" in checkpoint["state"]
         assert checkpoint["state"]["_counter"] == 1
 
-        logger.info(
-            f"✅ Retrieved checkpoint data: {json.dumps(checkpoint, indent=2)}")
+        logger.info(f"✅ Retrieved checkpoint data: {json.dumps(checkpoint, indent=2)}")
 
-    def test_get_checkpoint_tuple(
-        self, postgres_config, test_thread_id, test_data):
+    def test_get_checkpoint_tuple(self, postgres_config, test_thread_id, test_data):
         """Test retrieving a complete checkpoint tuple."""
         # Register thread
         postgres_config.register_thread(test_thread_id)
@@ -266,13 +257,9 @@ class Test_PostgresCheckpointer:
         assert "channel_values" in tuple_result.checkpoint
         assert tuple_result.metadata is not None
 
-        logger.info(
-            f"✅ Retrieved checkpoint tuple with metadata: {
-    tuple_result.metadata}"
-        )
+        logger.info(f"✅ Retrieved checkpoint tuple with metadata: {tuple_result.metadata}")
 
-    def test_list_checkpoints(self, postgres_config,
-                              test_thread_id, test_data):
+    def test_list_checkpoints(self, postgres_config, test_thread_id, test_data):
         """Test listing checkpoints for a thread."""
         # Register thread
         postgres_config.register_thread(test_thread_id)
@@ -302,14 +289,12 @@ class Test_PostgresCheckpointer:
 
         # Verify order (newest first)
         for i, checkpoint in enumerate(checkpoints):
-            state = checkpoint.checkpoint.get(
-                "channel_values", {}).get("state", {})
+            state = checkpoint.checkpoint.get("channel_values", {}).get("state", {})
             counter = state.get("_counter", None)
             expected = 3 - i  # 3, 2, 1
             assert counter == expected, f"Expected counter {expected}, got {counter}"
 
-        logger.info(
-            f"✅ Listed {len(checkpoints)} checkpoints in correct order")
+        logger.info(f"✅ Listed {len(checkpoints)} checkpoints in correct order")
 
     def test_delete_thread(self, postgres_config, test_thread_id, test_data):
         """Test deleting a thread and all its checkpoints."""
@@ -338,30 +323,20 @@ class Test_PostgresCheckpointer:
         # Verify thread was deleted
         with pool.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute(
-                    "SELECT 1 FROM threads WHERE thread_id = %s", (
-                        test_thread_id,)
-                )
+                cursor.execute("SELECT 1 FROM threads WHERE thread_id = %s", (test_thread_id,))
                 result = cursor.fetchone()
 
-                assert (
-                    result is None
-                ), f"Thread {test_thread_id} still exists in database"
+                assert result is None, f"Thread {test_thread_id} still exists in database"
 
                 # Verify checkpoints were deleted
-                cursor.execute(
-                    "SELECT 1 FROM checkpoints WHERE thread_id = %s", (
-                        test_thread_id,)
-                )
+                cursor.execute("SELECT 1 FROM checkpoints WHERE thread_id = %s", (test_thread_id,))
                 result = cursor.fetchone()
 
-                assert (
-                    result is None
-                ), f"Checkpoints for thread {test_thread_id} still exist in database"
+                assert result is None, (
+                    f"Checkpoints for thread {test_thread_id} still exist in database"
+                )
 
-        logger.info(
-            f"✅ Thread {test_thread_id} and its checkpoints were deleted successfully"
-        )
+        logger.info(f"✅ Thread {test_thread_id} and its checkpoints were deleted successfully")
 
 
 class Test_PostgresShallowCheckpointer:
@@ -376,12 +351,9 @@ class Test_PostgresShallowCheckpointer:
         assert checkpointer is not None
         assert "ShallowPostgresSaver" in str(type(checkpointer))
 
-        logger.info(
-            f"✅ Created shallow PostgreSQL checkpointer: {type(checkpointer)}")
+        logger.info(f"✅ Created shallow PostgreSQL checkpointer: {type(checkpointer)}")
 
-    def test_shallow_list_checkpoints(
-        self, postgres_shallow_config, test_thread_id, test_data
-    ):
+    def test_shallow_list_checkpoints(self, postgres_shallow_config, test_thread_id, test_data):
         """Test that shallow mode only keeps the latest checkpoint."""
         # Register thread
         postgres_shallow_config.register_thread(test_thread_id)
@@ -393,9 +365,7 @@ class Test_PostgresShallowCheckpointer:
         for i in range(3):
             test_data_copy = test_data.copy()
             test_data_copy["state"]["_counter"] = i + 1
-            postgres_shallow_config.put_checkpoint(
-                config, test_data_copy
-            )
+            postgres_shallow_config.put_checkpoint(config, test_data_copy)
 
             # Brief pause to ensure distinct timestamps
             import time
@@ -412,8 +382,7 @@ class Test_PostgresShallowCheckpointer:
         assert len(checkpoints) == 1, "Expected only 1 checkpoint in shallow mode"
 
         # Verify it's the latest one
-        state = checkpoints[0].checkpoint.get(
-            "channel_values", {}).get("state", {})
+        state = checkpoints[0].checkpoint.get("channel_values", {}).get("state", {})
         counter = state.get("_counter", None)
         assert counter == 3, f"Expected counter 3, got {counter}"
 
@@ -434,9 +403,7 @@ class Test_PostgresAsyncCheckpointer:
             assert checkpointer is not None
             assert "AsyncPostgresSaver" in str(type(checkpointer))
 
-            logger.info(
-                f"✅ Created async PostgreSQL checkpointer: {type(checkpointer)}"
-            )
+            logger.info(f"✅ Created async PostgreSQL checkpointer: {type(checkpointer)}")
 
             # Clean up
             await postgres_async_config.aclose()
@@ -451,9 +418,7 @@ class Test_PostgresAsyncCheckpointer:
             checkpointer = await postgres_async_config.initialize_async_checkpointer()
 
             # Register thread
-            await postgres_async_config.aregister_thread(
-                test_thread_id, metadata={"test": True}
-            )
+            await postgres_async_config.aregister_thread(test_thread_id, metadata={"test": True})
 
             # Verify thread exists (need to use async connection)
             pool = getattr(checkpointer, "conn", None)
@@ -466,9 +431,7 @@ class Test_PostgresAsyncCheckpointer:
                         )
                         result = await cursor.fetchone()
 
-                        assert (
-                            result is not None
-                        ), f"Thread {test_thread_id} not found in database"
+                        assert result is not None, f"Thread {test_thread_id} not found in database"
 
             logger.info(f"✅ Thread {test_thread_id} registered asynchronously")
 
@@ -493,16 +456,12 @@ class Test_PostgresAsyncCheckpointer:
             config = {"configurable": {"thread_id": test_thread_id}}
 
             # Put a checkpoint
-            updated_config = await postgres_async_config.aput_checkpoint(
-                config, test_data
-            )
+            updated_config = await postgres_async_config.aput_checkpoint(config, test_data)
 
             # Verify the config was updated
             assert "checkpoint_id" in updated_config["configurable"]
             checkpoint_id = updated_config["configurable"]["checkpoint_id"]
-            logger.info(
-                f"✅ Created checkpoint asynchronously with ID: {checkpoint_id}"
-            )
+            logger.info(f"✅ Created checkpoint asynchronously with ID: {checkpoint_id}")
 
             # Get the checkpoint data
             checkpoint = await postgres_async_config.aget_checkpoint(updated_config)

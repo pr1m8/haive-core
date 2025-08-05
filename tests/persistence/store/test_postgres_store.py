@@ -32,9 +32,7 @@ def test_namespace():
 class TestPostgresStoreSync:
     """Test synchronous PostgreSQL store functionality."""
 
-    def test_postgres_store_creation_with_valid_connection(
-        self, postgres_connection_string
-    ):
+    def test_postgres_store_creation_with_valid_connection(self, postgres_connection_string):
         """Test PostgreSQL store creation with valid connection."""
         if not postgres_connection_string:
             pytest.skip("No POSTGRES_CONNECTION_STRING environment variable")
@@ -55,9 +53,7 @@ class TestPostgresStoreSync:
         assert hasattr(actual_store, "supports_pipeline")
         assert actual_store.supports_pipeline is False
 
-    def test_postgres_store_basic_operations(
-        self, postgres_connection_string, test_namespace
-    ):
+    def test_postgres_store_basic_operations(self, postgres_connection_string, test_namespace):
         """Test basic store operations with PostgreSQL."""
         if not postgres_connection_string:
             pytest.skip("No POSTGRES_CONNECTION_STRING environment variable")
@@ -204,14 +200,12 @@ class TestPostgresStorePipelineFix:
 
         # Verify the critical fix is applied
         assert hasattr(store, "supports_pipeline")
-        assert (
-            store.supports_pipeline is False
-        ), "Pipeline mode should be disabled to prevent prepared statement conflicts"
+        assert store.supports_pipeline is False, (
+            "Pipeline mode should be disabled to prevent prepared statement conflicts"
+        )
 
     @pytest.mark.asyncio
-    async def test_async_pipeline_mode_disabled_on_creation(
-        self, postgres_connection_string
-    ):
+    async def test_async_pipeline_mode_disabled_on_creation(self, postgres_connection_string):
         """Test that async pipeline mode is explicitly disabled."""
         if not postgres_connection_string:
             pytest.skip("No POSTGRES_CONNECTION_STRING environment variable")
@@ -229,9 +223,9 @@ class TestPostgresStorePipelineFix:
 
         # Verify the critical fix is applied
         assert hasattr(store, "supports_pipeline")
-        assert (
-            store.supports_pipeline is False
-        ), "Async pipeline mode should be disabled to prevent prepared statement conflicts"
+        assert store.supports_pipeline is False, (
+            "Async pipeline mode should be disabled to prevent prepared statement conflicts"
+        )
 
     def test_no_prepared_statement_conflicts_with_multiple_operations(
         self, postgres_connection_string, test_namespace

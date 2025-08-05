@@ -50,9 +50,7 @@ def test_duplication_debug():
         if hasattr(agent, "_app") and agent._app:
             try:
                 # Get the final state
-                final_state = agent._app.get_state(
-                    {"configurable": {"thread_id": "test"}}
-                )
+                final_state = agent._app.get_state({"configurable": {"thread_id": "test"}})
                 if final_state and hasattr(final_state, "values"):
                     messages = final_state.values.get("messages", [])
 
@@ -75,9 +73,7 @@ def test_duplication_debug():
 
                     # Check for duplicates
                     duplicate_tool_calls = len(tool_call_ids) != len(set(tool_call_ids))
-                    duplicate_tool_messages = len(tool_message_ids) != len(
-                        set(tool_message_ids)
-                    )
+                    duplicate_tool_messages = len(tool_message_ids) != len(set(tool_message_ids))
 
                     if duplicate_tool_calls or duplicate_tool_messages:
                         pass

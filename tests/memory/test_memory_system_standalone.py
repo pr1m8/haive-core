@@ -23,9 +23,7 @@ class MockStoreManager:
         self.memories = {}
         self.next_id = 1
 
-    async def store_memory(
-        self, content: str, metadata: dict[str, Any] | None = None
-    ) -> str:
+    async def store_memory(self, content: str, metadata: dict[str, Any] | None = None) -> str:
         """Store a memory and return its ID."""
         memory_id = f"mem_{self.next_id}"
         self.next_id += 1
@@ -39,9 +37,7 @@ class MockStoreManager:
 
         return memory_id
 
-    async def search_memories(
-        self, query: str, limit: int = 10
-    ) -> list[dict[str, Any]]:
+    async def search_memories(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
         """Search memories by content."""
         results = []
         query_lower = query.lower()
@@ -98,10 +94,7 @@ class MockLLMRunnable:
                 "expected_latency_ms": 1200,
                 "confidence_in_selection": 0.85
             }"""
-        elif (
-            "classification" in user_message.lower()
-            or "classify" in user_message.lower()
-        ):
+        elif "classification" in user_message.lower() or "classify" in user_message.lower():
             response = """{
                 "memory_types": ["semantic", "episodic"],
                 "importance": "high",
@@ -126,9 +119,7 @@ class MockLLMRunnable:
 class MockMemoryEntry:
     """Mock memory entry for testing."""
 
-    def __init__(
-        self, content: str, memory_type: str = "semantic", importance: float = 0.7
-    ):
+    def __init__(self, content: str, memory_type: str = "semantic", importance: float = 0.7):
         self.content = content
         self.memory_type = memory_type
         self.importance = importance
@@ -375,9 +366,7 @@ async def test_unified_memory_api():
                 self.stats["failed_operations"] += 1
                 return {"success": False, "operation": "store_memory", "error": str(e)}
 
-        async def retrieve_memories(
-            self, query: str, limit: int = 10
-        ) -> dict[str, Any]:
+        async def retrieve_memories(self, query: str, limit: int = 10) -> dict[str, Any]:
             """Retrieve memories."""
             try:
                 memories = await self.store_manager.search_memories(query, limit)

@@ -76,15 +76,11 @@ class TestEngineIntegration(unittest.TestCase):
 
         # Test composing schemas from multiple engines
         components = [self.llm_config, self.retriever_config]
-        composed_schema = SchemaComposer.compose_schema(
-            components, name="TestComposedSchema"
-        )
+        composed_schema = SchemaComposer.compose_schema(components, name="TestComposedSchema")
 
         # Check if the composed schema has expected fields - for Pydantic
         # models, we check their fields
-        assert hasattr(composed_schema, "model_fields") or hasattr(
-            composed_schema, "__fields__"
-        )
+        assert hasattr(composed_schema, "model_fields") or hasattr(composed_schema, "__fields__")
 
         # Get the field names based on Pydantic version
         if hasattr(composed_schema, "model_fields"):  # Pydantic v2
@@ -104,9 +100,7 @@ class TestEngineIntegration(unittest.TestCase):
         )
 
         # Add retriever node
-        graph.add_node(
-            name="retrieve", config=self.retriever_config, command_goto="generate"
-        )
+        graph.add_node(name="retrieve", config=self.retriever_config, command_goto="generate")
 
         # Add LLM node
         graph.add_node(name="generate", config=self.llm_config, command_goto="END")
@@ -143,9 +137,7 @@ class TestEngineIntegration(unittest.TestCase):
 
         # Verify the config is set
         assert graph.default_runnable_config is not None
-        assert (
-            graph.default_runnable_config["configurable"]["thread_id"] == "test_thread"
-        )
+        assert graph.default_runnable_config["configurable"]["thread_id"] == "test_thread"
 
     def test_agent_construction(self):
         """Test creating an agent with the actual SimpleAgent implementation."""

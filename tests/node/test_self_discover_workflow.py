@@ -107,9 +107,7 @@ def test_self_discover_workflow():
     state.agents["module_selector"] = selector_agent
 
     # Create and execute node
-    selector_node = create_agent_node_v3(
-        agent_name="module_selector", name="selector_node"
-    )
+    selector_node = create_agent_node_v3(agent_name="module_selector", name="selector_node")
 
     # Mock the agent's response for testing
     class MockSelectorAgent:
@@ -169,9 +167,7 @@ def test_self_discover_workflow():
 
     state.agents["module_adapter"] = MockAdapterAgent()
 
-    adapter_node = create_agent_node_v3(
-        agent_name="module_adapter", name="adapter_node"
-    )
+    adapter_node = create_agent_node_v3(agent_name="module_adapter", name="adapter_node")
 
     result2 = adapter_node(state, {"debug": False})
 
@@ -204,9 +200,7 @@ def test_self_discover_workflow():
 
     state.agents["reasoning_builder"] = MockReasoningAgent()
 
-    reasoning_node = create_agent_node_v3(
-        agent_name="reasoning_builder", name="reasoning_node"
-    )
+    reasoning_node = create_agent_node_v3(agent_name="reasoning_builder", name="reasoning_node")
 
     result3 = reasoning_node(state, {"debug": False})
 

@@ -36,25 +36,17 @@ def test_simple_agent_persistence():
 
     # First interaction
 
-    result1 = agent.invoke(
-        {"messages": [HumanMessage(content="Hello, what's your name?")]}, config
-    )
+    result1 = agent.invoke({"messages": [HumanMessage(content="Hello, what's your name?")]}, config)
 
     # Handle result format
     (result1.messages if hasattr(result1, "messages") else result1.get("messages", []))
 
     # Second interaction - test memory
 
-    result2 = agent.invoke(
-        {"messages": [HumanMessage(content="What did I just ask you?")]}, config
-    )
+    result2 = agent.invoke({"messages": [HumanMessage(content="What did I just ask you?")]}, config)
 
     # Handle result format
-    messages2 = (
-        result2.messages
-        if hasattr(result2, "messages")
-        else result2.get("messages", [])
-    )
+    messages2 = result2.messages if hasattr(result2, "messages") else result2.get("messages", [])
 
     response = messages2[-1].content if messages2 else ""
 
@@ -102,10 +94,7 @@ def verify_checkpoint_content(thread_id: str, expected_messages: int):
                 )
 
                 # Check channel values
-                if (
-                    "channel_values" in cp_dict
-                    and "messages" in cp_dict["channel_values"]
-                ):
+                if "channel_values" in cp_dict and "messages" in cp_dict["channel_values"]:
                     messages = cp_dict["channel_values"]["messages"]
 
                     if len(messages) == expected_messages:
@@ -123,9 +112,7 @@ def verify_checkpoint_content(thread_id: str, expected_messages: int):
                 pass
 
             # Check prepared statements
-            cur.execute(
-                "SELECT COUNT(*) FROM pg_prepared_statements WHERE name LIKE '%pg%'"
-            )
+            cur.execute("SELECT COUNT(*) FROM pg_prepared_statements WHERE name LIKE '%pg%'")
             cur.fetchone()[0]
 
     except Exception:

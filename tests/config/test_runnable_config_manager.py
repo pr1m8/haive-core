@@ -98,13 +98,10 @@ class TestRunnableConfigManager:
 
         # Check engine configs by ID
         assert engine.id in config["configurable"]["engine_configs"]
-        assert (
-            config["configurable"]["engine_configs"][engine.id]["model_name"] == "gpt-4"
-        )
+        assert config["configurable"]["engine_configs"][engine.id]["model_name"] == "gpt-4"
         assert config["configurable"]["engine_configs"][engine.id]["temperature"] == 0.5
         assert (
-            config["configurable"]["engine_configs"][engine.id]["special_param"]
-            == "special-value"
+            config["configurable"]["engine_configs"][engine.id]["special_param"] == "special-value"
         )
 
         # Check engine configs by name
@@ -125,20 +122,15 @@ class TestRunnableConfigManager:
         )
 
         # Create config with engine
-        config = RunnableConfigManager.create_with_engine(
-            engine=engine, thread_id="test-thread"
-        )
+        config = RunnableConfigManager.create_with_engine(engine=engine, thread_id="test-thread")
 
         # Check engine configs by ID
         assert engine.id in config["configurable"]["engine_configs"]
         assert config["configurable"]["engine_configs"][engine.id]["top_k"] == 5
-        assert (
-            config["configurable"]["engine_configs"][engine.id]["similarity_threshold"]
-            == 0.75
-        )
-        assert config["configurable"]["engine_configs"][engine.id][
-            "filter_criteria"
-        ] == {"category": "science"}
+        assert config["configurable"]["engine_configs"][engine.id]["similarity_threshold"] == 0.75
+        assert config["configurable"]["engine_configs"][engine.id]["filter_criteria"] == {
+            "category": "science"
+        }
 
         # Check engine configs by type
         assert "retriever_config" in config["configurable"]["engine_configs"]
@@ -179,15 +171,9 @@ class TestRunnableConfigManager:
         merged_config = RunnableConfigManager.merge(base_config, override_config)
 
         # Check merged values
-        assert (
-            merged_config["configurable"]["thread_id"] == "override-thread"
-        )  # Override wins
-        assert (
-            merged_config["configurable"]["user_id"] == "base-user"
-        )  # Preserved from base
-        assert (
-            merged_config["configurable"]["base_param"] == "base-value"
-        )  # Preserved from base
+        assert merged_config["configurable"]["thread_id"] == "override-thread"  # Override wins
+        assert merged_config["configurable"]["user_id"] == "base-user"  # Preserved from base
+        assert merged_config["configurable"]["base_param"] == "base-value"  # Preserved from base
         assert (
             merged_config["configurable"]["override_param"] == "override-value"
         )  # Added from override
@@ -229,12 +215,8 @@ class TestRunnableConfigManager:
         assert "engine1" in engine_configs
         # Override wins
         assert engine_configs["engine1"]["param1"] == "override-value1"
-        assert (
-            engine_configs["engine1"]["param2"] == "base-value2"
-        )  # Preserved from base
-        assert (
-            engine_configs["engine1"]["param3"] == "override-value3"
-        )  # Added from override
+        assert engine_configs["engine1"]["param2"] == "base-value2"  # Preserved from base
+        assert engine_configs["engine1"]["param3"] == "override-value3"  # Added from override
 
         # engine2 should be preserved
         assert "engine2" in engine_configs
@@ -253,15 +235,9 @@ class TestRunnableConfigManager:
         # Extract values
         assert RunnableConfigManager.extract_value(config, "thread_id") == "test-thread"
         assert RunnableConfigManager.extract_value(config, "user_id") == "test-user"
-        assert (
-            RunnableConfigManager.extract_value(config, "custom_param")
-            == "custom-value"
-        )
+        assert RunnableConfigManager.extract_value(config, "custom_param") == "custom-value"
         assert RunnableConfigManager.extract_value(config, "non_existent") is None
-        assert (
-            RunnableConfigManager.extract_value(config, "non_existent", "default")
-            == "default"
-        )
+        assert RunnableConfigManager.extract_value(config, "non_existent", "default") == "default"
 
     def test_get_thread_id(self):
         """Test getting thread_id from a config."""
@@ -316,16 +292,11 @@ class TestRunnableConfigManager:
         llm_config = RunnableConfigManager.extract_engine_type_config(config, "llm")
         assert llm_config == {"model": "gpt-4", "temperature": 0.7}
 
-        retriever_config = RunnableConfigManager.extract_engine_type_config(
-            config, "retriever"
-        )
+        retriever_config = RunnableConfigManager.extract_engine_type_config(config, "retriever")
         assert retriever_config == {"top_k": 5}
 
         # Non-existent engine type
-        assert (
-            RunnableConfigManager.extract_engine_type_config(config, "non_existent")
-            == {}
-        )
+        assert RunnableConfigManager.extract_engine_type_config(config, "non_existent") == {}
 
     def test_add_engine_config(self):
         """Test adding engine-specific configuration."""
@@ -343,20 +314,10 @@ class TestRunnableConfigManager:
 
         # Check updated config
         assert "test-engine" in updated_config["configurable"]["engine_configs"]
+        assert updated_config["configurable"]["engine_configs"]["test-engine"]["model"] == "gpt-4"
+        assert updated_config["configurable"]["engine_configs"]["test-engine"]["temperature"] == 0.7
         assert (
-            updated_config["configurable"]["engine_configs"]["test-engine"]["model"]
-            == "gpt-4"
-        )
-        assert (
-            updated_config["configurable"]["engine_configs"]["test-engine"][
-                "temperature"
-            ]
-            == 0.7
-        )
-        assert (
-            updated_config["configurable"]["engine_configs"]["test-engine"][
-                "custom_param"
-            ]
+            updated_config["configurable"]["engine_configs"]["test-engine"]["custom_param"]
             == "custom-value"
         )
 
@@ -387,17 +348,11 @@ class TestRunnableConfigManager:
 
         # Check parameters
         assert (
-            updated_config["configurable"]["engine_configs"]["engine-id"]["model_name"]
-            == "gpt-4"
+            updated_config["configurable"]["engine_configs"]["engine-id"]["model_name"] == "gpt-4"
         )
+        assert updated_config["configurable"]["engine_configs"]["engine-id"]["temperature"] == 0.7
         assert (
-            updated_config["configurable"]["engine_configs"]["engine-id"]["temperature"]
-            == 0.7
-        )
-        assert (
-            updated_config["configurable"]["engine_configs"]["engine-id"][
-                "special_param"
-            ]
+            updated_config["configurable"]["engine_configs"]["engine-id"]["special_param"]
             == "special-value"
         )
 
@@ -428,9 +383,7 @@ class TestRunnableConfigManager:
     def test_from_model(self):
         """Test creating a RunnableConfig from a Pydantic model."""
         # Create a Pydantic model instance
-        model = TestConfig(
-            user_id="test-user", temperature=0.8, custom_setting="test-setting"
-        )
+        model = TestConfig(user_id="test-user", temperature=0.8, custom_setting="test-setting")
 
         # Convert to RunnableConfig
         config = RunnableConfigManager.from_model(model)

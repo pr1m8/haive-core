@@ -25,9 +25,7 @@ def import_module_from_file(module_name, file_path):
 
 
 # Set up module paths
-base_path = Path(
-    "/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core"
-)
+base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core")
 
 
 try:
@@ -36,12 +34,7 @@ try:
     # Import essential sources first
     essential_sources_module = import_module_from_file(
         "haive.core.engine.document.loaders.sources.essential_sources",
-        base_path
-        / "engine"
-        / "document"
-        / "loaders"
-        / "sources"
-        / "essential_sources.py",
+        base_path / "engine" / "document" / "loaders" / "sources" / "essential_sources.py",
     )
 
     # Import web sources (this registers all web-based sources)
@@ -53,12 +46,7 @@ try:
     # Import registry for testing
     registry_module = import_module_from_file(
         "haive.core.engine.document.loaders.sources.enhanced_registry",
-        base_path
-        / "engine"
-        / "document"
-        / "loaders"
-        / "sources"
-        / "enhanced_registry.py",
+        base_path / "engine" / "document" / "loaders" / "sources" / "enhanced_registry.py",
     )
 
     # Import source types for testing
@@ -87,12 +75,12 @@ def test_web_loaders_system():
     web_validation = web_sources_module.validate_web_sources()
 
     assert web_validation, "Web source validation failed"
-    assert (
-        web_stats["total_web_sources"] >= 8
-    ), f"Expected at least 8 web sources, got {web_stats['total_web_sources']}"
-    assert (
-        web_stats["capabilities"]["browser_automation"] >= 3
-    ), "Expected browser automation support"
+    assert web_stats["total_web_sources"] >= 8, (
+        f"Expected at least 8 web sources, got {web_stats['total_web_sources']}"
+    )
+    assert web_stats["capabilities"]["browser_automation"] >= 3, (
+        "Expected browser automation support"
+    )
 
     # Test 2: Sitemap Detection (Legacy Integration)
 
@@ -118,7 +106,6 @@ def test_web_loaders_system():
         except Exception as e:
             pass
 
-
     # Test 3: Web Source Auto-Classification
 
     web_test_urls = {
@@ -140,7 +127,6 @@ def test_web_loaders_system():
                 pass
         except Exception as e:
             pass
-
 
     # Test 4: Browser Automation Sources
 
@@ -165,7 +151,6 @@ def test_web_loaders_system():
     try:
         recursive_source = enhanced_registry.create_source("https://example.com")
         if recursive_source and hasattr(recursive_source, "source_type"):
-
             # Test with different configuration
             recursive_registration = enhanced_registry._sources.get("recursive_web")
             if recursive_registration:
@@ -219,16 +204,14 @@ def test_web_loaders_system():
     web_bulk_sources = []
     for name, registration in enhanced_registry._sources.items():
         if (
-            registration.category
-            in [SourceCategory.WEB_SCRAPING, SourceCategory.WEB_DOCUMENTATION]
+            registration.category in [SourceCategory.WEB_SCRAPING, SourceCategory.WEB_DOCUMENTATION]
             and registration.bulk_info.supports_bulk
         ):
             web_bulk_sources.append(name)
 
-
-    assert (
-        len(web_bulk_sources) >= 3
-    ), f"Expected at least 3 bulk web sources, got {len(web_bulk_sources)}"
+    assert len(web_bulk_sources) >= 3, (
+        f"Expected at least 3 bulk web sources, got {len(web_bulk_sources)}"
+    )
 
     # Test 9: Advanced Web Features
 
@@ -247,20 +230,15 @@ def test_web_loaders_system():
             if LoaderCapability.FILTERING in capabilities:
                 filtering_web_sources.append(name)
 
-
     # Test 10: Integration with Overall System
 
     # Check overall statistics
     overall_stats = enhanced_registry.get_statistics()
-    web_percentage = (
-        web_stats["total_web_sources"] / overall_stats["total_sources"]
-    ) * 100
+    web_percentage = (web_stats["total_web_sources"] / overall_stats["total_sources"]) * 100
 
-
-    assert (
-        web_percentage >= 15
-    ), f"Web sources should be at least 15% of total, got {web_percentage:.1f}%"
-
+    assert web_percentage >= 15, (
+        f"Web sources should be at least 15% of total, got {web_percentage:.1f}%"
+    )
 
     return True
 
@@ -269,12 +247,6 @@ def display_web_system_summary():
     """Display comprehensive summary of the web loader system."""
 
     web_stats = web_sources_module.get_web_sources_statistics()
-
-
-
-
-
-
 
 
 def main():

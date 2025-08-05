@@ -33,13 +33,8 @@ def view_ps_errors():
                 results = cur.fetchall()
 
                 for thread_id, checkpoint_id, metadata in results:
-
                     try:
-                        meta_dict = (
-                            json.loads(metadata)
-                            if isinstance(metadata, str)
-                            else metadata
-                        )
+                        meta_dict = json.loads(metadata) if isinstance(metadata, str) else metadata
 
                         # Show step
                         if "step" in meta_dict:
@@ -47,30 +42,18 @@ def view_ps_errors():
 
                         # Extract prepared statement errors
                         if "writes" in meta_dict:
-                            for node_name, node_data in meta_dict["writes"].items(
-                            ):
+                            for node_name, node_data in meta_dict["writes"].items():
                                 if isinstance(node_data, dict):
                                     # Check process_response
                                     if "process_response" in node_data:
                                         pr = node_data["process_response"]
-                                        if (
-                                            isinstance(pr, dict)
-                                            and "contributions" in pr
-                                        ):
-                                            for i, contrib in enumerate(
-                                                pr["contributions"]
-                                            ):
-                                                if (
-                                                    isinstance(contrib, list)
-                                                    and len(contrib) >= 3
-                                                ):
+                                        if isinstance(pr, dict) and "contributions" in pr:
+                                            for i, contrib in enumerate(pr["contributions"]):
+                                                if isinstance(contrib, list) and len(contrib) >= 3:
                                                     agent = contrib[0]
                                                     section = contrib[1]
                                                     content = str(contrib[2])
-                                                    if (
-                                                        "prepared statement"
-                                                        in content.lower()
-                                                    ):
+                                                    if "prepared statement" in content.lower():
                                                         pass
 
                                     # Check error field
@@ -82,10 +65,7 @@ def view_ps_errors():
                                         messages = node_data["messages"]
                                         if isinstance(messages, list):
                                             for msg in messages:
-                                                if (
-                                                    isinstance(msg, dict)
-                                                    and "content" in msg
-                                                ):
+                                                if isinstance(msg, dict) and "content" in msg:
                                                     if (
                                                         "prepared statement"
                                                         in str(msg["content"]).lower()
@@ -98,7 +78,6 @@ def view_ps_errors():
 
                     except Exception as e:
                         pass
-
 
                 # Get stats on which agents have errors
                 cur.execute(

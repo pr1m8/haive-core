@@ -8,9 +8,7 @@ from datetime import datetime
 
 # Disable heavy import logging to speed up tests
 logging.getLogger("haive.core.engine.document.loaders").setLevel(logging.WARNING)
-logging.getLogger("haive.core.engine.document.loaders.sources").setLevel(
-    logging.WARNING
-)
+logging.getLogger("haive.core.engine.document.loaders.sources").setLevel(logging.WARNING)
 
 
 def print_status(message: str, success: bool = True):
@@ -51,7 +49,8 @@ def test_core_memory_components():
         )
 
         config = MemoryStoreConfig(
-            store_manager=store_manager, auto_classify=False  # Disable to avoid LLM
+            store_manager=store_manager,
+            auto_classify=False,  # Disable to avoid LLM
         )
 
         MemoryStoreManager(config)
@@ -112,7 +111,8 @@ def test_memory_classifier_without_llm():
 
         # Test config creation
         MemoryClassifierConfig(
-            confidence_threshold=0.7, enable_llm_classification=False  # Disable LLM
+            confidence_threshold=0.7,
+            enable_llm_classification=False,  # Disable LLM
         )
         print_status("MemoryClassifierConfig: Created without LLM")
 
@@ -226,10 +226,7 @@ def test_store_integration():
 
         # Test search integration
         results = asyncio.run(memory_store.retrieve_memories("password", limit=5))
-        print_status(
-            f"Integration: Search found {
-                len(results)} password-related memories"
-        )
+        print_status(f"Integration: Search found {len(results)} password-related memories")
 
         return True
 
@@ -247,12 +244,8 @@ def main():
 
     try:
         results.append(("Core Memory Components", test_core_memory_components()))
-        results.append(
-            ("Async Memory Operations", asyncio.run(test_async_memory_operations()))
-        )
-        results.append(
-            ("Memory Classifier (No LLM)", test_memory_classifier_without_llm())
-        )
+        results.append(("Async Memory Operations", asyncio.run(test_async_memory_operations())))
+        results.append(("Memory Classifier (No LLM)", test_memory_classifier_without_llm()))
         results.append(("Unified Memory Config", test_unified_memory_config()))
         results.append(("Memory Types", test_memory_types()))
         results.append(("Store Integration", test_store_integration()))

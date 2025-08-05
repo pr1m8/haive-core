@@ -41,9 +41,7 @@ def test_validation_node_basic():
                             "TestModel": "pydantic_model",
                             "calculator": "langchain_tool",
                         },
-                        "structured_output_model": type(
-                            "TestModel", (), {"__name__": "TestModel"}
-                        ),
+                        "structured_output_model": type("TestModel", (), {"__name__": "TestModel"}),
                     },
                 )()
             },

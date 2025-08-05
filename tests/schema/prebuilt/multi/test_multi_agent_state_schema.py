@@ -124,9 +124,7 @@ class TestMultiAgentStateSchema:
         # Should have messages field
         assert "messages" in state.agent_outputs["simple_agent"]
         assert len(state.agent_outputs["simple_agent"]["messages"]) == 2
-        assert isinstance(
-            state.agent_outputs["simple_agent"]["messages"][0], HumanMessage
-        )
+        assert isinstance(state.agent_outputs["simple_agent"]["messages"][0], HumanMessage)
         assert isinstance(state.agent_outputs["simple_agent"]["messages"][1], AIMessage)
 
     def test_structured_agent_output_no_messages(self):
@@ -177,9 +175,7 @@ class TestMultiAgentStateSchema:
         ]
 
         # Add simple agent with messages
-        state.agent_outputs["chat_agent"] = {
-            "messages": [AIMessage(content="I'll help with that")]
-        }
+        state.agent_outputs["chat_agent"] = {"messages": [AIMessage(content="I'll help with that")]}
 
         # Add structured agent without messages
         state.agent_outputs["analyzer_agent"] = {

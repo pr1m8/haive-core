@@ -44,9 +44,7 @@ def test_sync_saver():
 
         # Clear cache and try again
         saver._thread_creation_cache.clear()
-        logger.info(
-            f"Third call (cache cleared) to ensure thread {thread_id} exists..."
-        )
+        logger.info(f"Third call (cache cleared) to ensure thread {thread_id} exists...")
         saver._ensure_thread_exists(thread_id)
         logger.info("Third call succeeded!")
 
@@ -78,9 +76,7 @@ async def test_async_saver():
 
         # Clear cache and try again
         saver._thread_creation_cache.clear()
-        logger.info(
-            f"Third call (cache cleared) to ensure thread {thread_id} exists..."
-        )
+        logger.info(f"Third call (cache cleared) to ensure thread {thread_id} exists...")
         await saver._ensure_thread_exists(thread_id)
         logger.info("Third call succeeded!")
 

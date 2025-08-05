@@ -8,10 +8,8 @@ import sys
 from datetime import datetime
 
 # Add paths
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
 
 
 def test_sync_conversation():
@@ -53,10 +51,7 @@ def test_sync_conversation():
 
     result1 = agent.invoke(
         {
-            "messages": [
-                HumanMessage(
-                    content="Hello agents, please introduce yourselves")
-            ],
+            "messages": [HumanMessage(content="Hello agents, please introduce yourselves")],
             "topic": "Testing message persistence",
             "format": "markdown",
         },
@@ -78,7 +73,6 @@ def test_sync_conversation():
     )
 
     if hasattr(result2, "messages") and result2.messages:
-
         # Check if agents remember previous discussion
         last_msg = result2.messages[-1].content if result2.messages else ""
         if (
@@ -111,7 +105,6 @@ async def test_async_persistence():
 
         # Create async checkpointer
         checkpointer = await acreate_postgres_checkpointer(config)
-
 
         # Test basic async operations
         from uuid import uuid4
@@ -182,7 +175,6 @@ def verify_database_content(thread_id: str):
                 checkpoints = cur.fetchall()
 
                 for cp_id, parent_id, _cp_type, checkpoint_data, metadata in checkpoints:
-
                     # Parse checkpoint data
                     if checkpoint_data:
                         try:
@@ -206,9 +198,7 @@ def verify_database_content(thread_id: str):
                     if metadata:
                         try:
                             meta_dict = (
-                                json.loads(metadata)
-                                if isinstance(metadata, str)
-                                else metadata
+                                json.loads(metadata) if isinstance(metadata, str) else metadata
                             )
                             if "step" in meta_dict:
                                 pass
@@ -242,7 +232,6 @@ def main():
 
     # Test async support
     asyncio.run(test_async_persistence())
-
 
 
 if __name__ == "__main__":

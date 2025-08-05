@@ -145,10 +145,7 @@ class TestPostgresCheckpointer:
         assert saved_state is not None
 
         # Handle different possible structures
-        if (
-            "channel_values" in saved_state
-            and "messages" in saved_state["channel_values"]
-        ):
+        if "channel_values" in saved_state and "messages" in saved_state["channel_values"]:
             assert len(saved_state["channel_values"]["messages"]) > 0
         elif "messages" in saved_state:
             assert len(saved_state["messages"]) > 0
@@ -169,9 +166,7 @@ class TestPostgresCheckpointer:
         """Test asynchronous thread registration."""
         thread_id = f"test-async-thread-{uuid.uuid4()}"
         # Use the sync method until async is implemented
-        async_persistence.register_thread(
-            thread_id, metadata={"test": True, "async": True}
-        )
+        async_persistence.register_thread(thread_id, metadata={"test": True, "async": True})
         assert True
 
     # Skip the async tests since your implementation doesn't have async

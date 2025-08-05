@@ -197,10 +197,7 @@ def mock_document_loader():
             self.kwargs = kwargs
             self._documents = [
                 Document(
-                    page_content=f"Mock content from {
-                        kwargs.get(
-                            'file_path',
-                            'unknown')}",
+                    page_content=f"Mock content from {kwargs.get('file_path', 'unknown')}",
                     metadata={"loader": "mock", **kwargs},
                 )
             ]
@@ -277,9 +274,7 @@ def mock_enhanced_registry():
         ),
     }
 
-    def mock_get_loader_for_source(
-        source_type: str, preference=LoaderPreference.BALANCED
-    ):
+    def mock_get_loader_for_source(source_type: str, preference=LoaderPreference.BALANCED):
         if source_type == "pdf":
             if preference == LoaderPreference.SPEED:
                 return "pypdf"
@@ -569,14 +564,10 @@ def assert_documents_equal():
     """Utility function to assert that two document lists are equal."""
 
     def _assert_equal(docs1: list[Document], docs2: list[Document]):
-        assert len(docs1) == len(
-            docs2
-        ), f"Document count mismatch: {len(docs1)} vs {len(docs2)}"
+        assert len(docs1) == len(docs2), f"Document count mismatch: {len(docs1)} vs {len(docs2)}"
 
         for i, (doc1, doc2) in enumerate(zip(docs1, docs2, strict=False)):
-            assert (
-                doc1.page_content == doc2.page_content
-            ), f"Content mismatch at index {i}"
+            assert doc1.page_content == doc2.page_content, f"Content mismatch at index {i}"
             assert doc1.metadata == doc2.metadata, f"Metadata mismatch at index {i}"
 
     return _assert_equal

@@ -12,9 +12,7 @@ import sys
 from haive.core.persistence.store.types import StoreType
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Import StoreType at module level to avoid repeated imports
@@ -62,10 +60,9 @@ async def test_memory_classifier():
             print_result(
                 f"Classify: '{memory[:40]}...'",
                 True,
-                f"Types: {
-                    [
-                        str(mt) for mt in result.memory_types]}, Importance: {
-                    result.importance_score:.2f}",
+                f"Types: {[str(mt) for mt in result.memory_types]}, Importance: {
+                    result.importance_score:.2f
+                }",
             )
 
         # Test 2: Query intent classification
@@ -81,10 +78,9 @@ async def test_memory_classifier():
             print_result(
                 f"Query intent: '{query[:40]}...'",
                 True,
-                f"Types: {
-                    [
-                        str(mt) for mt in intent.memory_types]}, Strategy: {
-                    intent.preferred_retrieval_strategy}",
+                f"Types: {[str(mt) for mt in intent.memory_types]}, Strategy: {
+                    intent.preferred_retrieval_strategy
+                }",
             )
 
         return True
@@ -132,8 +128,7 @@ async def test_memory_store_manager():
         print_result(
             "Retrieve by ID",
             memory is not None,
-            f"Found: {
-                memory is not None}",
+            f"Found: {memory is not None}",
         )
 
         # Test 3: Search memories
@@ -143,8 +138,7 @@ async def test_memory_store_manager():
         print_result(
             "Search memories",
             True,
-            f"Found {
-                len(memories)} memories",
+            f"Found {len(memories)} memories",
         )
 
         # Test 4: Update memory (access is updated automatically in
@@ -159,9 +153,7 @@ async def test_memory_store_manager():
         print_result(
             "Get statistics",
             True,
-            f"Total memories: {
-                stats.get(
-                    'total_memories', 0)}",
+            f"Total memories: {stats.get('total_memories', 0)}",
         )
 
         return True
@@ -196,9 +188,7 @@ async def test_kg_generator_agent():
         store_manager = StoreManager(
             store_config={"type": StoreType.MEMORY}, default_namespace=("test", "kg")
         )
-        memory_store = MemoryStoreManager(
-            MemoryStoreConfig(store_manager=store_manager)
-        )
+        memory_store = MemoryStoreManager(MemoryStoreConfig(store_manager=store_manager))
         classifier = MemoryClassifier(MemoryClassifierConfig())
 
         # Store some test memories
@@ -224,9 +214,7 @@ async def test_kg_generator_agent():
 
         # Test 1: Extract entities from memories
         entities = await kg_agent.extract_entities_from_memories(limit=5)
-        print_result(
-            "Extract entities", len(entities) > 0, f"Found {len(entities)} entities"
-        )
+        print_result("Extract entities", len(entities) > 0, f"Found {len(entities)} entities")
 
         # Test 2: Extract relationships
         relationships = await kg_agent.extract_relationships_from_memories(limit=5)
@@ -248,17 +236,14 @@ async def test_kg_generator_agent():
         if entities:
             entity_name = entities[0].name
             context = await kg_agent.get_entity_context(entity_name)
-            print_result(
-                "Get entity context", "entity" in context, f"Context for: {entity_name}"
-            )
+            print_result("Get entity context", "entity" in context, f"Context for: {entity_name}")
 
         # Test 5: Run agent
         result = await kg_agent.run("Extract knowledge from the stored memories")
         print_result(
             "Run KG agent",
             len(result) > 0,
-            f"Response length: {
-                len(result)}",
+            f"Response length: {len(result)}",
         )
 
         return True
@@ -298,9 +283,7 @@ async def test_graph_rag_retriever():
             store_config={"type": StoreType.MEMORY},
             default_namespace=("test", "graph_rag"),
         )
-        memory_store = MemoryStoreManager(
-            MemoryStoreConfig(store_manager=store_manager)
-        )
+        memory_store = MemoryStoreManager(MemoryStoreConfig(store_manager=store_manager))
         classifier = MemoryClassifier(MemoryClassifierConfig())
 
         # Store test memories
@@ -336,9 +319,7 @@ async def test_graph_rag_retriever():
         graph_rag = GraphRAGRetriever(config)
 
         # Test 1: Basic retrieval
-        result = await graph_rag.retrieve_memories(
-            query="What does Alice know?", limit=5
-        )
+        result = await graph_rag.retrieve_memories(query="What does Alice know?", limit=5)
         print_result(
             "Basic retrieval",
             len(result.memories) > 0,
@@ -402,9 +383,7 @@ async def test_agentic_rag_coordinator():
             store_config={"type": StoreType.MEMORY},
             default_namespace=("test", "agentic_rag"),
         )
-        memory_store = MemoryStoreManager(
-            MemoryStoreConfig(store_manager=store_manager)
-        )
+        memory_store = MemoryStoreManager(MemoryStoreConfig(store_manager=store_manager))
         classifier = MemoryClassifier(MemoryClassifierConfig())
 
         # Store diverse test memories
@@ -445,10 +424,7 @@ async def test_agentic_rag_coordinator():
         print_result(
             "Simple retrieval",
             len(result.final_memories) > 0,
-            f"Strategies: {
-                result.selected_strategies}, Memories: {
-                len(
-                    result.final_memories)}",
+            f"Strategies: {result.selected_strategies}, Memories: {len(result.final_memories)}",
         )
 
         # Test 2: Procedural query
@@ -478,17 +454,14 @@ async def test_agentic_rag_coordinator():
         print_result(
             "Multi-strategy",
             len(result.selected_strategies) > 1,
-            f"Strategies: {
-                len(
-                    result.selected_strategies)}, Diversity: {
-                result.diversity_score:.2f}",
+            f"Strategies: {len(result.selected_strategies)}, Diversity: {
+                result.diversity_score:.2f
+            }",
         )
 
         # Test 5: Run agent
         response = await rag_coordinator.run("What have I learned recently?")
-        print_result(
-            "Run RAG agent", len(response) > 0, f"Response length: {len(response)}"
-        )
+        print_result("Run RAG agent", len(response) > 0, f"Response length: {len(response)}")
 
         return True
 
@@ -528,9 +501,7 @@ async def test_multi_agent_coordinator():
             store_config={"type": StoreType.MEMORY},
             default_namespace=("test", "multi_agent"),
         )
-        memory_store = MemoryStoreManager(
-            MemoryStoreConfig(store_manager=store_manager)
-        )
+        memory_store = MemoryStoreManager(MemoryStoreConfig(store_manager=store_manager))
         classifier = MemoryClassifier(MemoryClassifierConfig())
 
         # Create configurations with in-memory persistence
@@ -594,9 +565,7 @@ async def test_multi_agent_coordinator():
         print_result(
             "Execute task",
             executed_task.status == "completed",
-            f"Status: {
-                executed_task.status}, Agent: {
-                executed_task.assigned_agent}",
+            f"Status: {executed_task.status}, Agent: {executed_task.assigned_agent}",
         )
 
         # Test 6: Get system status
@@ -655,8 +624,7 @@ async def test_unified_memory_system():
         print_result(
             "Store memory",
             result.success,
-            f"Time: {
-                result.execution_time_ms:.1f}ms",
+            f"Time: {result.execution_time_ms:.1f}ms",
         )
 
         # Test 2: Retrieve memories
@@ -684,8 +652,7 @@ async def test_unified_memory_system():
         print_result(
             "Generate KG",
             result.success,
-            f"Time: {
-                result.execution_time_ms:.1f}ms",
+            f"Time: {result.execution_time_ms:.1f}ms",
         )
 
         # Test 5: Consolidate memories
@@ -701,8 +668,7 @@ async def test_unified_memory_system():
         print_result(
             "Search entities",
             result.success,
-            f"Time: {
-                result.execution_time_ms:.1f}ms",
+            f"Time: {result.execution_time_ms:.1f}ms",
         )
 
         # Test 8: Run diagnostic
@@ -718,18 +684,16 @@ async def test_unified_memory_system():
         print_result(
             "System info",
             info["initialized"],
-            f"Version: {
-                info['system_version']}, Stats: {
-                info['statistics']['total_operations']} ops",
+            f"Version: {info['system_version']}, Stats: {
+                info['statistics']['total_operations']
+            } ops",
         )
 
         # Test 10: Create with factory function
         quick_system = await create_memory_system(
             store_type="memory", collection_name="test_factory"
         )
-        print_result(
-            "Factory creation", quick_system is not None, "System created via factory"
-        )
+        print_result("Factory creation", quick_system is not None, "System created via factory")
 
         return True
 

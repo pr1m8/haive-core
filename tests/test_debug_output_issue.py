@@ -19,9 +19,7 @@ class QueryRefinementSuggestion(BaseModel):
     improvement_type: str = Field(
         description="Type of improvement (e.g., 'Add Specificity', 'Clarify Intent')"
     )
-    rationale: str = Field(
-        description="Explanation of why this refinement is beneficial"
-    )
+    rationale: str = Field(description="Explanation of why this refinement is beneficial")
     expected_benefit: str = Field(description="Expected benefit of this refinement")
 
 
@@ -29,32 +27,22 @@ class QueryRefinementResponse(BaseModel):
     """Response for query refinement analysis."""
 
     original_query: str = Field(description="The original user query")
-    query_analysis: str = Field(
-        description="Analysis of the query's strengths and weaknesses"
-    )
+    query_analysis: str = Field(description="Analysis of the query's strengths and weaknesses")
     query_type: str = Field(
         description="Type of query (e.g., 'Factual', 'Comparative', 'Exploratory')"
     )
-    complexity_level: str = Field(
-        description="Complexity level (simple, moderate, complex)"
-    )
+    complexity_level: str = Field(description="Complexity level (simple, moderate, complex)")
     refinement_suggestions: list[QueryRefinementSuggestion] = Field(
         description="List of refinement suggestions"
     )
-    best_refined_query: str = Field(
-        description="The best refined query from the suggestions"
-    )
-    search_strategy_recommendations: list[str] = Field(
-        description="Recommended search strategies"
-    )
+    best_refined_query: str = Field(description="The best refined query from the suggestions")
+    search_strategy_recommendations: list[str] = Field(description="Recommended search strategies")
 
 
 def test_debug_output_issue():
     """Test the debug output issue with structured output."""
     # Create agent with structured output
-    engine = AugLLMConfig(
-        temperature=0.3, structured_output_model=QueryRefinementResponse
-    )
+    engine = AugLLMConfig(temperature=0.3, structured_output_model=QueryRefinementResponse)
 
     agent = SimpleAgentV2(
         name="query_refiner",

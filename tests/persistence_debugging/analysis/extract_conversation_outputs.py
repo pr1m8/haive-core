@@ -95,12 +95,8 @@ def extract_key_content(file_path: str) -> dict:
             return {
                 "type": "json_data",
                 "file": str(file_path),
-                "content_keys": (
-                    list(data.keys()) if isinstance(data, dict) else "list_format"
-                ),
-                "last_modified": datetime.fromtimestamp(
-                    file_path.stat().st_mtime
-                ).isoformat(),
+                "content_keys": (list(data.keys()) if isinstance(data, dict) else "list_format"),
+                "last_modified": datetime.fromtimestamp(file_path.stat().st_mtime).isoformat(),
             }
 
         except Exception as e:
@@ -119,9 +115,7 @@ def extract_key_content(file_path: str) -> dict:
                 "line_count": len(lines),
                 "title": lines[0] if lines else "No title",
                 "preview": "\n".join(lines[:10]),
-                "last_modified": datetime.fromtimestamp(
-                    file_path.stat().st_mtime
-                ).isoformat(),
+                "last_modified": datetime.fromtimestamp(file_path.stat().st_mtime).isoformat(),
             }
 
         except Exception as e:
@@ -132,10 +126,7 @@ def extract_key_content(file_path: str) -> dict:
 
 def create_conversation_summary(conv_type: str, files: list[str], base_path: str):
     """Create a summary file for each conversation type."""
-    conv_dir = (
-        Path(base_path)
-        / f"packages/haive-agents/src/haive/agents/conversation/{conv_type}"
-    )
+    conv_dir = Path(base_path) / f"packages/haive-agents/src/haive/agents/conversation/{conv_type}"
     summary_file = conv_dir / "CONVERSATION_OUTPUTS.md"
 
     # Extract content from all files
@@ -163,10 +154,7 @@ This file provides easy access to all outputs from {conv_type} conversation agen
         summary += f"\n### {i}. {Path(content['file']).name}\n"
         summary += f"**Type:** {content['type']}\n"
         summary += f"**File:** `{content['file']}`\n"
-        summary += f"**Last Modified:** {
-    content.get(
-        'last_modified',
-         'Unknown')}\n"
+        summary += f"**Last Modified:** {content.get('last_modified', 'Unknown')}\n"
 
         if content["type"] == "state_history":
             summary += f"**Messages:** {content.get('message_count', 0)}\n"
@@ -185,8 +173,7 @@ This file provides easy access to all outputs from {conv_type} conversation agen
                 summary += content["preview"][:200] + "...\n```\n"
 
         elif content["type"] == "json_data":
-            summary += f"**Content:** {content.get('content_keys',
-     'Unknown structure')}\n"
+            summary += f"**Content:** {content.get('content_keys', 'Unknown structure')}\n"
 
         elif content["type"] == "error":
             summary += f"**Error:** {content.get('error', 'Unknown error')}\n"

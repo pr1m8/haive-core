@@ -51,9 +51,7 @@ def display_schema(schema, title="Schema"):
 
         # Get reducer info if available
         reducer_info = ""
-        if issubclass(schema, StateSchema) and hasattr(
-            schema, "__serializable_reducers__"
-        ):
+        if issubclass(schema, StateSchema) and hasattr(schema, "__serializable_reducers__"):
             reducer_info = "\n\nReducers:\n"
             for field, reducer in schema.__serializable_reducers__.items():
                 reducer_info += f"  - {field}: {reducer}\n"
@@ -67,9 +65,7 @@ def display_schema(schema, title="Schema"):
 
         # Get engine IO mappings if available
         io_info = ""
-        if issubclass(schema, StateSchema) and hasattr(
-            schema, "__engine_io_mappings__"
-        ):
+        if issubclass(schema, StateSchema) and hasattr(schema, "__engine_io_mappings__"):
             io_info = "\n\nEngine I/O Mappings:\n"
             for engine, mapping in schema.__engine_io_mappings__.items():
                 io_info += f"  - {engine}:\n"
@@ -90,9 +86,7 @@ def display_schema(schema, title="Schema"):
         # For instances
         try:
             # Convert to dict and format as JSON
-            data = (
-                schema.model_dump() if hasattr(schema, "model_dump") else schema.dict()
-            )
+            data = schema.model_dump() if hasattr(schema, "model_dump") else schema.dict()
             console.print(
                 Panel(
                     Syntax(json.dumps(data, indent=2, default=str), "json"),
@@ -111,9 +105,7 @@ def create_test_llm_engine():
     """Create a test LLM engine."""
     logger.info("Creating test LLM engine")
 
-    engine = AugLLMConfig(
-        name="test_llm", id="llm-test-123", model="gpt-4o", temperature=0.7
-    )
+    engine = AugLLMConfig(name="test_llm", id="llm-test-123", model="gpt-4o", temperature=0.7)
 
     logger.debug(f"Created LLM engine: {engine.name} (ID: {engine.id})")
     return engine
@@ -152,9 +144,7 @@ def create_test_embeddings_engine():
     # Create an embedding config first
     from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
 
-    embedding_config = HuggingFaceEmbeddingConfig(
-        model="sentence-transformers/all-mpnet-base-v2"
-    )
+    embedding_config = HuggingFaceEmbeddingConfig(model="sentence-transformers/all-mpnet-base-v2")
 
     engine = EmbeddingsEngineConfig(
         name="test_embeddings",
@@ -209,15 +199,13 @@ def test_state_schema_with_reducers():
     display_schema(state1, "State 1 (After Reducer)")
 
     # Verify reducer application
-    assert (
-        state1.count == 15
-    ), f"Expected count to be 15 after adding 5+10, got {state1.count}"
-    assert (
-        len(state1.messages) == 1
-    ), f"Expected 1 message after applying reducer, got {len(state1.messages)}"
-    assert (
-        state1.messages[0].content == "Test"
-    ), f"Expected message content to be 'Test', got '{state1.messages[0].content}'"
+    assert state1.count == 15, f"Expected count to be 15 after adding 5+10, got {state1.count}"
+    assert len(state1.messages) == 1, (
+        f"Expected 1 message after applying reducer, got {len(state1.messages)}"
+    )
+    assert state1.messages[0].content == "Test", (
+        f"Expected message content to be 'Test', got '{state1.messages[0].content}'"
+    )
 
     logger.info("✅ StateSchema reducer test passed")
 
@@ -249,15 +237,11 @@ def test_state_schema_to_manager():
 
     # Skip attribute check since this is a Pydantic v2 model behavior change
     # Instead, check the field exists in annotations
-    assert (
-        "value" in enhanced_schema.__annotations__
-    ), "Field 'value' missing from enhanced schema"
-    assert (
-        "count" in enhanced_schema.__annotations__
-    ), "Field 'count' missing from enhanced schema"
-    assert (
-        "new_field" in enhanced_schema.__annotations__
-    ), "Field 'new_field' missing from enhanced schema"
+    assert "value" in enhanced_schema.__annotations__, "Field 'value' missing from enhanced schema"
+    assert "count" in enhanced_schema.__annotations__, "Field 'count' missing from enhanced schema"
+    assert "new_field" in enhanced_schema.__annotations__, (
+        "Field 'new_field' missing from enhanced schema"
+    )
 
     # Verify instance creation
     logger.info("Creating instance from enhanced schema")
@@ -266,13 +250,11 @@ def test_state_schema_to_manager():
     # Display the instance
     display_schema(instance, "Enhanced Schema Instance")
 
-    assert (
-        instance.value == "test"
-    ), f"Expected value to be 'test', got '{instance.value}'"
+    assert instance.value == "test", f"Expected value to be 'test', got '{instance.value}'"
     assert instance.count == 0, f"Expected count to be 0, got {instance.count}"
-    assert (
-        instance.new_field == "new"
-    ), f"Expected new_field to be 'new', got '{instance.new_field}'"
+    assert instance.new_field == "new", (
+        f"Expected new_field to be 'new', got '{instance.new_field}'"
+    )
 
     logger.info("✅ StateSchema to manager test passed")
 
@@ -318,12 +300,8 @@ def test_schema_composer_from_engines():
     logger.info(f"Input fields for LLM: {input_fields}")
 
     # Verify fields and engine mappings
-    assert (
-        "messages" in schema_cls.__annotations__
-    ), "Messages field missing from schema"
-    assert hasattr(
-        schema_cls, "__engine_io_mappings__"
-    ), "Engine I/O mappings missing from schema"
+    assert "messages" in schema_cls.__annotations__, "Messages field missing from schema"
+    assert hasattr(schema_cls, "__engine_io_mappings__"), "Engine I/O mappings missing from schema"
 
     logger.info("✅ SchemaComposer with engines test passed")
 
@@ -384,17 +362,13 @@ def test_schema_composer_create_model():
     instance2 = schema_cls(items=["item3", "item4"])
 
     # Check list before applying reducers
-    assert (
-        len(instance1.items) == 2
-    ), f"Expected 2 items initially, got {len(instance1.items)}"
+    assert len(instance1.items) == 2, f"Expected 2 items initially, got {len(instance1.items)}"
 
     # Apply reducers - should auto-concatenate lists
     instance1.apply_reducers(instance2.to_dict())
 
     # Check that list concatenation happened automatically
-    assert (
-        len(instance1.items) == 4
-    ), f"Expected 4 items after reducer, got {len(instance1.items)}"
+    assert len(instance1.items) == 4, f"Expected 4 items after reducer, got {len(instance1.items)}"
     assert instance1.items == [
         "item1",
         "item2",
@@ -416,18 +390,16 @@ def test_schema_composer_create_model():
     display_schema(new_instance, "Restored Schema Instance")
 
     # Verify restored state
-    assert (
-        len(new_instance.messages) == 2
-    ), f"Expected 2 messages, got {len(new_instance.messages)}"
-    assert (
-        new_instance.messages[0].content == "Hello"
-    ), "Expected first message content to be 'Hello'"
-    assert (
-        new_instance.messages[1].content == "Hi there"
-    ), "Expected second message content to be 'Hi there'"
-    assert (
-        len(new_instance.items) == 4
-    ), f"Expected 4 items after deserialization, got {len(new_instance.items)}"
+    assert len(new_instance.messages) == 2, f"Expected 2 messages, got {len(new_instance.messages)}"
+    assert new_instance.messages[0].content == "Hello", (
+        "Expected first message content to be 'Hello'"
+    )
+    assert new_instance.messages[1].content == "Hi there", (
+        "Expected second message content to be 'Hi there'"
+    )
+    assert len(new_instance.items) == 4, (
+        f"Expected 4 items after deserialization, got {len(new_instance.items)}"
+    )
 
     logger.info("✅ SchemaComposer direct model creation test passed")
 
@@ -483,14 +455,14 @@ def test_state_schema_manager_with_engines():
     display_schema(enhanced_schema, "Enhanced Engine Schema")
 
     # Verify reducers
-    assert (
-        "iterations" in enhanced_schema.__serializable_reducers__
-    ), "Reducer for 'iterations' not found"
+    assert "iterations" in enhanced_schema.__serializable_reducers__, (
+        "Reducer for 'iterations' not found"
+    )
     reducer_name = enhanced_schema.__serializable_reducers__["iterations"]
     logger.info(f"Reducer for iterations: {reducer_name}")
-    assert (
-        reducer_name == "operator.add"
-    ), f"Expected reducer name to be 'operator.add', got '{reducer_name}'"
+    assert reducer_name == "operator.add", (
+        f"Expected reducer name to be 'operator.add', got '{reducer_name}'"
+    )
 
     # Create instances and test
     logger.info("Creating and testing instances")
@@ -509,12 +481,10 @@ def test_state_schema_manager_with_engines():
     display_schema(state1, "State 1 (After Reducer)")
 
     # Verify reducer application
-    assert (
-        state1.iterations == 5
-    ), f"Expected iterations to be 5 after adding 2+3, got {state1.iterations}"
-    assert (
-        len(state1.context) == 2
-    ), f"Expected 2 context items, got {len(state1.context)}"
+    assert state1.iterations == 5, (
+        f"Expected iterations to be 5 after adding 2+3, got {state1.iterations}"
+    )
+    assert len(state1.context) == 2, f"Expected 2 context items, got {len(state1.context)}"
 
     # Verify engine I/O tracking is preserved
     logger.info("Verifying engine I/O tracking")
@@ -572,16 +542,12 @@ def test_combined_workflows():
     assert hasattr(state, "metadata"), "Metadata field missing from combined schema"
 
     # Verify data
-    assert (
-        state.query == "test query"
-    ), f"Expected query to be 'test query', got '{state.query}'"
+    assert state.query == "test query", f"Expected query to be 'test query', got '{state.query}'"
     assert len(state.results) == 1, f"Expected 1 result, got {len(state.results)}"
-    assert (
-        state.results[0]["id"] == 1
-    ), f"Expected result ID to be 1, got {state.results[0]['id']}"
-    assert (
-        state.metadata["total_time"] == 0.5
-    ), f"Expected total_time to be 0.5, got {state.metadata['total_time']}"
+    assert state.results[0]["id"] == 1, f"Expected result ID to be 1, got {state.results[0]['id']}"
+    assert state.metadata["total_time"] == 0.5, (
+        f"Expected total_time to be 0.5, got {state.metadata['total_time']}"
+    )
 
     logger.info("✅ Combined workflows test passed")
 
@@ -623,9 +589,7 @@ def test_complex_schema_with_multiple_reducers():
         description="Trace log entries",
     )
 
-    manager.add_field(
-        "stats", dict[str, int], default_factory=dict, description="Statistics"
-    )
+    manager.add_field("stats", dict[str, int], default_factory=dict, description="Statistics")
 
     # Create enhanced schema
     logger.info("Building enhanced schema")
@@ -654,28 +618,26 @@ def test_complex_schema_with_multiple_reducers():
     display_schema(state1, "State 1 (After Reducer)")
 
     # Verify reducer applications
-    assert (
-        state1.token_count == 35
-    ), f"Expected token_count to be 35 after adding 10+25, got {state1.token_count}"
-    assert (
-        len(state1.trace_log) == 3
-    ), f"Expected 3 trace log entries, got {len(state1.trace_log)}"
-    assert (
-        state1.trace_log[0] == "start"
-    ), f"Expected first log entry to be 'start', got '{state1.trace_log[0]}'"
-    assert (
-        state1.trace_log[1] == "processing"
-    ), f"Expected second log entry to be 'processing', got '{state1.trace_log[1]}'"
+    assert state1.token_count == 35, (
+        f"Expected token_count to be 35 after adding 10+25, got {state1.token_count}"
+    )
+    assert len(state1.trace_log) == 3, f"Expected 3 trace log entries, got {len(state1.trace_log)}"
+    assert state1.trace_log[0] == "start", (
+        f"Expected first log entry to be 'start', got '{state1.trace_log[0]}'"
+    )
+    assert state1.trace_log[1] == "processing", (
+        f"Expected second log entry to be 'processing', got '{state1.trace_log[1]}'"
+    )
 
     # Verify that stats dictionary is updated but not reduced
     assert "queries" in state1.stats, "Stats missing 'queries' key"
     assert "tokens" in state1.stats, "Stats missing 'tokens' key"
-    assert (
-        state1.stats["queries"] == 1
-    ), f"Expected queries stat to be 1, got {state1.stats['queries']}"
-    assert (
-        state1.stats["tokens"] == 100
-    ), f"Expected tokens stat to be 100, got {state1.stats['tokens']}"
+    assert state1.stats["queries"] == 1, (
+        f"Expected queries stat to be 1, got {state1.stats['queries']}"
+    )
+    assert state1.stats["tokens"] == 100, (
+        f"Expected tokens stat to be 100, got {state1.stats['tokens']}"
+    )
 
     # Verify I/O tracking still works
     logger.info("Verifying I/O tracking")
@@ -743,21 +705,17 @@ def test_operator_reducers_comprehensive():
     display_schema(state1, "State 1 (After Reducer)")
 
     # Verify reducer applications
-    assert (
-        state1.sum_field == 12
-    ), f"Expected sum_field to be 12 (5+7), got {state1.sum_field}"
-    assert (
-        state1.mult_field == 6
-    ), f"Expected mult_field to be 6 (2*3), got {state1.mult_field}"
-    assert (
-        state1.concat_field == "Hello World"
-    ), f"Expected concat_field to be 'Hello World', got '{state1.concat_field}'"
-    assert (
-        state1.max_field == 20
-    ), f"Expected max_field to be 20 (max(10,20)), got {state1.max_field}"
-    assert (
-        state1.min_field == 30
-    ), f"Expected min_field to be 30 (min(50,30)), got {state1.min_field}"
+    assert state1.sum_field == 12, f"Expected sum_field to be 12 (5+7), got {state1.sum_field}"
+    assert state1.mult_field == 6, f"Expected mult_field to be 6 (2*3), got {state1.mult_field}"
+    assert state1.concat_field == "Hello World", (
+        f"Expected concat_field to be 'Hello World', got '{state1.concat_field}'"
+    )
+    assert state1.max_field == 20, (
+        f"Expected max_field to be 20 (max(10,20)), got {state1.max_field}"
+    )
+    assert state1.min_field == 30, (
+        f"Expected min_field to be 30 (min(50,30)), got {state1.min_field}"
+    )
 
     # Check serializable reducer names
     logger.info("Verifying serializable reducer names")
@@ -768,9 +726,9 @@ def test_operator_reducers_comprehensive():
         ("min_field", "min"),
     ]:
         actual_name = OperatorSchema.__serializable_reducers__[field]
-        assert (
-            actual_name == expected_name
-        ), f"Expected reducer name for {field} to be '{expected_name}', got '{actual_name}'"
+        assert actual_name == expected_name, (
+            f"Expected reducer name for {field} to be '{expected_name}', got '{actual_name}'"
+        )
 
     logger.info("✅ Operator reducers test passed")
 
@@ -819,19 +777,19 @@ def test_schema_with_message_reducer():
 
     # Verify message combining
     assert len(state.messages) == 2, f"Expected 2 messages, got {len(state.messages)}"
-    assert (
-        state.messages[0].content == "What is AI?"
-    ), f"Expected first message to be 'What is AI?', got '{state.messages[0].content}'"
+    assert state.messages[0].content == "What is AI?", (
+        f"Expected first message to be 'What is AI?', got '{state.messages[0].content}'"
+    )
     assert (
         state.messages[1].content
         == "AI is a field of computer science focused on creating intelligent machines."
     ), "Expected second message content to match"
-    assert (
-        state.messages[0].type == "human"
-    ), f"Expected first message type to be 'human', got '{state.messages[0].type}'"
-    assert (
-        state.messages[1].type == "ai"
-    ), f"Expected second message type to be 'ai', got '{state.messages[1].type}'"
+    assert state.messages[0].type == "human", (
+        f"Expected first message type to be 'human', got '{state.messages[0].type}'"
+    )
+    assert state.messages[1].type == "ai", (
+        f"Expected second message type to be 'ai', got '{state.messages[1].type}'"
+    )
 
     # Verify proper serialization
     logger.info("Testing serialization")
@@ -845,9 +803,9 @@ def test_schema_with_message_reducer():
     )
 
     assert "messages" in serialized, "Messages missing from serialized state"
-    assert (
-        len(serialized["messages"]) == 2
-    ), f"Expected 2 serialized messages, got {len(serialized['messages'])}"
+    assert len(serialized["messages"]) == 2, (
+        f"Expected 2 serialized messages, got {len(serialized['messages'])}"
+    )
 
     # Recreate from serialized
     logger.info("Recreating from serialized state")
@@ -856,12 +814,12 @@ def test_schema_with_message_reducer():
     # Display restored state
     display_schema(restored, "Restored State")
 
-    assert (
-        len(restored.messages) == 2
-    ), f"Expected 2 messages in restored state, got {len(restored.messages)}"
-    assert (
-        restored.messages[0].content == "What is AI?"
-    ), f"Expected first message to be 'What is AI?', got '{restored.messages[0].content}'"
+    assert len(restored.messages) == 2, (
+        f"Expected 2 messages in restored state, got {len(restored.messages)}"
+    )
+    assert restored.messages[0].content == "What is AI?", (
+        f"Expected first message to be 'What is AI?', got '{restored.messages[0].content}'"
+    )
 
     logger.info("✅ Message reducer test passed")
 
@@ -910,25 +868,17 @@ def test_node_function_creation():
     )
 
     # Verify Command structure
-    assert hasattr(
-        result, "update"
-    ), "Result should be a Command object with 'update' attribute"
-    assert hasattr(
-        result, "goto"
-    ), "Result should be a Command object with 'goto' attribute"
-    assert (
-        result.goto == "next_node"
-    ), f"Expected goto to be 'next_node', got '{result.goto}'"
+    assert hasattr(result, "update"), "Result should be a Command object with 'update' attribute"
+    assert hasattr(result, "goto"), "Result should be a Command object with 'goto' attribute"
+    assert result.goto == "next_node", f"Expected goto to be 'next_node', got '{result.goto}'"
 
     # Verify update content
     assert "results" in result.update, "Results missing from update"
     assert "count" in result.update, "Count missing from update"
-    assert (
-        result.update["count"] == 6
-    ), f"Expected count to be 6, got {result.update['count']}"
-    assert (
-        len(result.update["results"]) == 2
-    ), f"Expected 2 results, got {len(result.update['results'])}"
+    assert result.update["count"] == 6, f"Expected count to be 6, got {result.update['count']}"
+    assert len(result.update["results"]) == 2, (
+        f"Expected 2 results, got {len(result.update['results'])}"
+    )
 
     logger.info("✅ Node function creation test passed")
 
@@ -952,9 +902,7 @@ def test_schema_manager_field_operations():
 
     # Modify field
     logger.info("Modifying 'count' field")
-    manager.modify_field(
-        "count", new_default=10, new_description="Modified count field"
-    )
+    manager.modify_field("count", new_default=10, new_description="Modified count field")
 
     # Add a computed property
     logger.info("Adding computed property")
@@ -998,15 +946,10 @@ def test_schema_manager_field_operations():
 
     # Test computed property
     assert hasattr(instance, "text_length"), "Missing computed property 'text_length'"
-    assert (
-        instance.text_length == 5
-    ), f"Expected text_length to be 5, got {instance.text_length}"
+    assert instance.text_length == 5, f"Expected text_length to be 5, got {instance.text_length}"
 
     # Test default value modification
-    assert (
-        instance.count == 10
-    ), f"Expected count to be 10, got {
-        instance.count}"
+    assert instance.count == 10, f"Expected count to be 10, got {instance.count}"
 
     logger.info("✅ Schema manager field operations test passed")
 
@@ -1067,9 +1010,7 @@ def test_schema_manager_engine_io_tracking():
     assert "response" in llm_outputs, "Response missing from LLM outputs"
 
     assert "query" in embeddings_inputs, "Query missing from embeddings inputs"
-    assert (
-        "embeddings" in embeddings_outputs
-    ), "Embeddings missing from embeddings outputs"
+    assert "embeddings" in embeddings_outputs, "Embeddings missing from embeddings outputs"
 
     # Test global mapping retrieval
     mappings = schema_cls.get_engine_io_mappings()
@@ -1097,17 +1038,13 @@ def test_command_and_send_helpers():
 
     # Create Command
     logger.info("Creating Command")
-    command = manager.create_command(
-        update={"message": "Hello", "count": 1}, goto="next_node"
-    )
+    command = manager.create_command(update={"message": "Hello", "count": 1}, goto="next_node")
 
     # Display Command
     console.print(
         Panel(
             Syntax(
-                f"Command(update={
-                    command.update}, goto={
-                    command.goto})",
+                f"Command(update={command.update}, goto={command.goto})",
                 "python",
             ),
             title="[bold cyan]Created Command[/bold cyan]",
@@ -1129,23 +1066,17 @@ def test_command_and_send_helpers():
     )
 
     # Verify Command
-    assert (
-        command.update["message"] == "Hello"
-    ), f"Expected message to be 'Hello', got '{command.update['message']}'"
-    assert (
-        command.update["count"] == 1
-    ), f"Expected count to be 1, got {command.update['count']}"
-    assert (
-        command.goto == "next_node"
-    ), f"Expected goto to be 'next_node', got '{command.goto}'"
+    assert command.update["message"] == "Hello", (
+        f"Expected message to be 'Hello', got '{command.update['message']}'"
+    )
+    assert command.update["count"] == 1, f"Expected count to be 1, got {command.update['count']}"
+    assert command.goto == "next_node", f"Expected goto to be 'next_node', got '{command.goto}'"
 
     # Verify Send
-    assert (
-        send.node == "target_node"
-    ), f"Expected node to be 'target_node', got '{send.node}'"
-    assert (
-        send.arg["message"] == "Routed message"
-    ), f"Expected message to be 'Routed message', got '{send.arg['message']}'"
+    assert send.node == "target_node", f"Expected node to be 'target_node', got '{send.node}'"
+    assert send.arg["message"] == "Routed message", (
+        f"Expected message to be 'Routed message', got '{send.arg['message']}'"
+    )
 
     logger.info("✅ Command and Send helpers test passed")
 
@@ -1167,9 +1098,7 @@ def test_various_reducer_types():
 
     # Create schema with different reducer types
     logger.info("Creating schema with different reducer types")
-    schema_cls = StateSchema.create(
-        text=(str, ""), count=(int, 0), items=(list[str], [])
-    )
+    schema_cls = StateSchema.create(text=(str, ""), count=(int, 0), items=(list[str], []))
 
     # Add different reducer types
     schema_cls.__reducer_fields__ = {
@@ -1189,10 +1118,7 @@ def test_various_reducer_types():
 
     # Display reducer info
     logger.info(f"Reducer functions: {schema_cls.__reducer_fields__}")
-    logger.info(
-        f"Serializable reducers: {
-            schema_cls.__serializable_reducers__}"
-    )
+    logger.info(f"Serializable reducers: {schema_cls.__serializable_reducers__}")
 
     # Test the reducers
     logger.info("Testing reducers")
@@ -1210,9 +1136,7 @@ def test_various_reducer_types():
     display_schema(state1, "State 1 (After Reducer)")
 
     # Verify results
-    assert (
-        state1.text == "Hello World"
-    ), f"Expected text to be 'Hello World', got '{state1.text}'"
+    assert state1.text == "Hello World", f"Expected text to be 'Hello World', got '{state1.text}'"
     assert state1.count == 15, f"Expected count to be 15, got {state1.count}"
     assert state1.items == [
         "a",

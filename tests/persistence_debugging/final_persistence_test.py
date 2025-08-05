@@ -99,7 +99,6 @@ def test_persistence_fixes():
 
     # Check ConnectionManager
     try:
-
         with open(
             "/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core/persistence/store/connection.py",
         ) as f:
@@ -114,7 +113,6 @@ def test_persistence_fixes():
 
     # Check persistence mixin
     try:
-
         with open(
             "/home/will/Projects/haive/backend/haive/packages/haive-agents/src/haive/agents/base/mixins/persistence_mixin.py",
         ) as f:

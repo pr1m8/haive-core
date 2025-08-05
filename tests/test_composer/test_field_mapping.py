@@ -30,9 +30,7 @@ class TestFieldMapping:
 
     def test_field_mapping_with_default(self):
         """Test field mapping with default value."""
-        mapping = FieldMapping(
-            source_path="temperature", target_path="temp", default=0.7
-        )
+        mapping = FieldMapping(source_path="temperature", target_path="temp", default=0.7)
 
         assert mapping.source_path == "temperature"
         assert mapping.target_path == "temp"
@@ -42,9 +40,7 @@ class TestFieldMapping:
 
     def test_field_mapping_required(self):
         """Test required field mapping."""
-        mapping = FieldMapping(
-            source_path="messages", target_path="conversation", required=True
-        )
+        mapping = FieldMapping(source_path="messages", target_path="conversation", required=True)
 
         assert mapping.source_path == "messages"
         assert mapping.target_path == "conversation"

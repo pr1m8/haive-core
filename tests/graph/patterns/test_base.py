@@ -83,9 +83,7 @@ class TestParameterDefinition:
 
     def test_validation_with_required_parameter(self):
         """Test validation of a required parameter."""
-        param = ParameterDefinition(
-            type="str", description="A required parameter", required=True
-        )
+        param = ParameterDefinition(type="str", description="A required parameter", required=True)
 
         # Missing required parameter
         is_valid, error = param.validate_value(None)
@@ -213,9 +211,7 @@ class TestPatternMetadata:
 
     def test_validate_parameters_with_valid_params(self):
         """Test validating parameters with valid values."""
-        param_def = ParameterDefinition(
-            type="str", description="A string parameter", required=True
-        )
+        param_def = ParameterDefinition(type="str", description="A string parameter", required=True)
 
         metadata = PatternMetadata(
             name="test_pattern",
@@ -230,9 +226,7 @@ class TestPatternMetadata:
 
     def test_validate_parameters_with_invalid_params(self):
         """Test validating parameters with invalid values."""
-        param_def = ParameterDefinition(
-            type="str", description="A string parameter", required=True
-        )
+        param_def = ParameterDefinition(type="str", description="A string parameter", required=True)
 
         metadata = PatternMetadata(
             name="test_pattern",
@@ -310,9 +304,7 @@ class TestGraphPattern:
 
     def test_validate_for_application_with_invalid_parameters(self):
         """Test validation for application with invalid parameters."""
-        param_def = ParameterDefinition(
-            type="str", description="A string parameter", required=True
-        )
+        param_def = ParameterDefinition(type="str", description="A string parameter", required=True)
 
         metadata = PatternMetadata(
             name="test_pattern",
@@ -476,9 +468,7 @@ class TestBranchDefinition:
 
     def test_validate_parameters(self):
         """Test parameter validation."""
-        param_def = ParameterDefinition(
-            type="str", description="A string parameter", required=True
-        )
+        param_def = ParameterDefinition(type="str", description="A string parameter", required=True)
 
         branch = BranchDefinition(
             name="test_branch",

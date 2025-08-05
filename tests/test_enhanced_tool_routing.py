@@ -5,7 +5,6 @@ Following [MEM-008] Testing Philosophy - Real components only, no mocks.
 Memory Reference: [MEM-004-CORE-G-002] Enhanced Tool Management Session.
 """
 
-
 from langchain_core.tools import BaseTool, StructuredTool
 from pydantic import BaseModel, Field
 
@@ -84,12 +83,8 @@ class TestEnhancedToolRouting:
 
         # Assert - Verify correct routing
         routes = config.tool_routes
-        assert (
-            routes.get("SamplePydanticModel") == "pydantic_model"
-        )  # No explicit __call__
-        assert (
-            routes.get("SampleExecutableModel") == "pydantic_tool"
-        )  # Has explicit __call__
+        assert routes.get("SamplePydanticModel") == "pydantic_model"  # No explicit __call__
+        assert routes.get("SampleExecutableModel") == "pydantic_tool"  # Has explicit __call__
         assert routes.get("sample_calculator") == "function"  # Function tool
 
     def test_tool_management_operations(self):
@@ -125,9 +120,7 @@ class TestEnhancedToolRouting:
         regular_route, regular_metadata = config._analyze_tool(SamplePydanticModel)
 
         # Act - Analyze executable model (explicit __call__)
-        executable_route, executable_metadata = config._analyze_tool(
-            SampleExecutableModel
-        )
+        executable_route, executable_metadata = config._analyze_tool(SampleExecutableModel)
 
         # Assert - Verify routing differences
         assert regular_route == "pydantic_model"

@@ -44,9 +44,7 @@ class TestMessagesStateWithTokenUsage:
         assert token_state.token_usage_history == []
         assert len(token_state.get_token_usage_summary()["rounds"]) == 0
 
-    def test_manual_message_addition_tracks_tokens(
-        self, token_state: MessagesStateWithTokenUsage
-    ):
+    def test_manual_message_addition_tracks_tokens(self, token_state: MessagesStateWithTokenUsage):
         """Test that manually adding messages with token usage works."""
         # Create AI message with mock token usage data
         ai_message = AIMessage(
@@ -69,9 +67,7 @@ class TestMessagesStateWithTokenUsage:
         assert token_state.token_usage.input_tokens == 10
         assert token_state.token_usage.output_tokens == 8
 
-    async def test_simple_agent_integration_with_token_tracking(
-        self, simple_agent: SimpleAgent
-    ):
+    async def test_simple_agent_integration_with_token_tracking(self, simple_agent: SimpleAgent):
         """Test real SimpleAgent interaction with automatic token tracking."""
         # Send a simple query to the agent
         response = await simple_agent.arun("What is 2 + 2?")
@@ -88,9 +84,7 @@ class TestMessagesStateWithTokenUsage:
         # For now, let's test that the response contains expected content
         assert "4" in response or "four" in response.lower()
 
-    async def test_conversation_round_token_accumulation(
-        self, simple_agent: SimpleAgent
-    ):
+    async def test_conversation_round_token_accumulation(self, simple_agent: SimpleAgent):
         """Test that token usage accumulates across multiple conversation rounds."""
         conversation_id = "test-token-conversation"
         config = {"configurable": {"thread_id": conversation_id}}
@@ -108,9 +102,7 @@ class TestMessagesStateWithTokenUsage:
         response3 = await simple_agent.arun("Tell me a short joke.", config=config)
         assert response3 is not None
 
-    def test_token_usage_summary_calculation(
-        self, token_state: MessagesStateWithTokenUsage
-    ):
+    def test_token_usage_summary_calculation(self, token_state: MessagesStateWithTokenUsage):
         """Test token usage summary calculation with multiple messages."""
         # Add multiple AI messages with different token counts
         messages_data = [
@@ -134,9 +126,7 @@ class TestMessagesStateWithTokenUsage:
         assert summary["output_tokens"] == 60  # 15 + 20 + 25
         assert summary["rounds"] == 3
 
-    def test_cost_calculation_with_provider_pricing(
-        self, token_state: MessagesStateWithTokenUsage
-    ):
+    def test_cost_calculation_with_provider_pricing(self, token_state: MessagesStateWithTokenUsage):
         """Test cost calculation with provider-specific pricing."""
         # Add a message with token usage
         ai_message = AIMessage(
@@ -161,9 +151,7 @@ class TestMessagesStateWithTokenUsage:
 
         # Expected cost: (1000/1000 * 0.03) + (500/1000 * 0.06) = 0.03 + 0.03 =
         # 0.06
-        assert (
-            abs(summary["total_cost"] - 0.06) < 0.001
-        )  # Allow for floating point precision
+        assert abs(summary["total_cost"] - 0.06) < 0.001  # Allow for floating point precision
 
     def test_conversation_cost_analysis(self, token_state: MessagesStateWithTokenUsage):
         """Test the comprehensive conversation cost analysis."""
@@ -194,9 +182,7 @@ class TestMessagesStateWithTokenUsage:
         assert analysis["rounds"] == 3
         assert analysis["avg_tokens_per_round"] > 0
 
-    async def test_agent_state_access_for_token_inspection(
-        self, simple_agent: SimpleAgent
-    ):
+    async def test_agent_state_access_for_token_inspection(self, simple_agent: SimpleAgent):
         """Test accessing agent state to inspect token usage after interactions."""
         # This test explores how to access SimpleAgent's internal state
         # to verify token tracking is working in real agent scenarios
@@ -205,9 +191,7 @@ class TestMessagesStateWithTokenUsage:
         config = {"configurable": {"thread_id": conversation_id}}
 
         # Perform interaction
-        response = await simple_agent.arun(
-            "Explain quantum computing briefly.", config=config
-        )
+        response = await simple_agent.arun("Explain quantum computing briefly.", config=config)
         assert response is not None
 
         # Try to access agent's state/memory for token inspection
@@ -223,9 +207,7 @@ class TestMessagesStateWithTokenUsage:
             # Test agent state retrieval methods if they exist
             pass
 
-    def test_token_usage_with_system_message(
-        self, token_state: MessagesStateWithTokenUsage
-    ):
+    def test_token_usage_with_system_message(self, token_state: MessagesStateWithTokenUsage):
         """Test token tracking with system message in conversation."""
         # Add system message
         token_state.add_system_message("You are a helpful assistant.")

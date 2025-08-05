@@ -177,12 +177,8 @@ class TestCallTracker:
         assert len(self.tracker.calls) == 2
 
         # Check call stack depths
-        outer_call = next(
-            c for c in self.tracker.calls if c["function"] == "outer_func"
-        )
-        inner_call = next(
-            c for c in self.tracker.calls if c["function"] == "inner_func"
-        )
+        outer_call = next(c for c in self.tracker.calls if c["function"] == "outer_func")
+        inner_call = next(c for c in self.tracker.calls if c["function"] == "inner_func")
 
         assert outer_call["depth"] == 0
         assert inner_call["depth"] == 1
@@ -569,9 +565,7 @@ class TestTracingUtilities:
 
     def test_trace_context_manager(self):
         """Test trace context manager."""
-        with redirect_stdout(io.StringIO()) as f, self.tracer.trace_context(
-            "test_trace"
-        ):
+        with redirect_stdout(io.StringIO()) as f, self.tracer.trace_context("test_trace"):
             time.sleep(0.001)
 
         output = f.getvalue()

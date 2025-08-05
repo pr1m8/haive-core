@@ -47,9 +47,7 @@ def test_duplication_fix_clean():
     assert result is not None
 
     # Verify structured output
-    if hasattr(result, "original_data") and hasattr(
-        result.original_data, "sample_test_model"
-    ):
+    if hasattr(result, "original_data") and hasattr(result.original_data, "sample_test_model"):
         structured_data = result.original_data.sample_test_model
         assert isinstance(structured_data.score, float)
         assert isinstance(structured_data.analysis, str)

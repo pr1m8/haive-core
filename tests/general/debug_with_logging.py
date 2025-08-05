@@ -8,9 +8,7 @@ from haive.core.engine.aug_llm.config import AugLLMConfig
 from haive.core.schema.composer import SchemaComposer
 
 # Set up logging to see debug messages
-logging.basicConfig(
-    level=logging.DEBUG, format="%(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.DEBUG, format="%(name)s - %(levelname)s - %(message)s")
 
 
 # Create AugLLMConfig

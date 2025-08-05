@@ -39,7 +39,9 @@ skip_if_no_api_keys = pytest.mark.skipif(
 def azure_llm_config():
     """Create Azure LLM config for testing."""
     return AzureLLMConfig(
-        model="gpt-4o", temperature=0.0, max_tokens=1000  # Deterministic for testing
+        model="gpt-4o",
+        temperature=0.0,
+        max_tokens=1000,  # Deterministic for testing
     )
 
 
@@ -457,9 +459,7 @@ def test_qa_example(azure_llm_config, qa_prompt, sample_article):
 
 
 @skip_if_no_api_keys
-def test_data_extraction_example(
-    azure_llm_config, extraction_prompt, sample_business_data
-):
+def test_data_extraction_example(azure_llm_config, extraction_prompt, sample_business_data):
     """Test AugLLMConfig for data extraction from specific content."""
     # Create AugLLM for data extraction
     extractor = AugLLMConfig(
@@ -499,9 +499,7 @@ def test_data_extraction_example(
 
 
 @skip_if_no_api_keys
-def test_comparison_example(
-    azure_llm_config, comparison_prompt, sample_product_comparison
-):
+def test_comparison_example(azure_llm_config, comparison_prompt, sample_product_comparison):
     """Test AugLLMConfig for product comparison."""
     # Create AugLLM for comparison
     comparator = AugLLMConfig(
@@ -525,9 +523,7 @@ def test_comparison_example(
     lang_comparison = comparator.invoke(custom_comparison)
 
     lang_content = (
-        lang_comparison.content
-        if hasattr(lang_comparison, "content")
-        else lang_comparison
+        lang_comparison.content if hasattr(lang_comparison, "content") else lang_comparison
     )
 
     # Basic validation
@@ -552,9 +548,7 @@ def test_code_generation_example(
     # Generate code based on requirements
     generated_code = code_generator.invoke(sample_code_requirements)
 
-    content = (
-        generated_code.content if hasattr(generated_code, "content") else generated_code
-    )
+    content = generated_code.content if hasattr(generated_code, "content") else generated_code
 
     # Try a simpler code generation task
     simple_task = {
@@ -565,9 +559,7 @@ def test_code_generation_example(
 
     simple_code = code_generator.invoke(simple_task)
 
-    simple_content = (
-        simple_code.content if hasattr(simple_code, "content") else simple_code
-    )
+    simple_content = simple_code.content if hasattr(simple_code, "content") else simple_code
 
     # Basic validation
     assert "def" in content
@@ -616,9 +608,7 @@ def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
     )
 
     html_content = (
-        html_conversion.content
-        if hasattr(html_conversion, "content")
-        else html_conversion
+        html_conversion.content if hasattr(html_conversion, "content") else html_conversion
     )
 
     # Convert JSON to YAML
@@ -649,9 +639,7 @@ def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
     )
 
     yaml_content = (
-        yaml_conversion.content
-        if hasattr(yaml_conversion, "content")
-        else yaml_conversion
+        yaml_conversion.content if hasattr(yaml_conversion, "content") else yaml_conversion
     )
 
     # Basic validation
@@ -696,9 +684,7 @@ def test_translation_example(azure_llm_config, translation_prompt):
     )
 
     french_content = (
-        french_translation.content
-        if hasattr(french_translation, "content")
-        else french_translation
+        french_translation.content if hasattr(french_translation, "content") else french_translation
     )
 
     # Translate with tone guidance
@@ -716,9 +702,7 @@ def test_translation_example(azure_llm_config, translation_prompt):
     )
 
     formal_content = (
-        formal_translation.content
-        if hasattr(formal_translation, "content")
-        else formal_translation
+        formal_translation.content if hasattr(formal_translation, "content") else formal_translation
     )
 
     # Basic validation
@@ -791,9 +775,7 @@ def test_analysis_example(azure_llm_config, analysis_prompt, sample_article):
     # Perform SWOT analysis
     swot_analysis = swot_analyzer.invoke({"business_info": business_info})
 
-    swot_content = (
-        swot_analysis.content if hasattr(swot_analysis, "content") else swot_analysis
-    )
+    swot_content = swot_analysis.content if hasattr(swot_analysis, "content") else swot_analysis
 
     # Basic validation
     assert "Strengths" in swot_content

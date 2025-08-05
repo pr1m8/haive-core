@@ -40,9 +40,7 @@ class TestPathAnalyzer:
 
     def test_github_url_analysis(self):
         """Test analysis of GitHub URL."""
-        result = PathAnalyzer.analyze(
-            "https://github.com/user/repo/blob/main/README.md"
-        )
+        result = PathAnalyzer.analyze("https://github.com/user/repo/blob/main/README.md")
 
         assert result.path_type == PathType.URL_HTTPS
         assert result.is_remote is True
@@ -145,9 +143,7 @@ class TestSourceRegistration:
             pass
 
         # Test finding by URL pattern
-        registration = source_registry.find_source_for_path(
-            "https://github.com/user/repo"
-        )
+        registration = source_registry.find_source_for_path("https://github.com/user/repo")
         assert registration is not None
         assert registration.name == "github"
 
@@ -181,9 +177,7 @@ class TestDocumentLoaderFactory:
         class PDFSource(LocalSource):
             pass
 
-        @register_source(
-            name="text", file_extensions=[".txt"], loaders={"simple": "TextLoader"}
-        )
+        @register_source(name="text", file_extensions=[".txt"], loaders={"simple": "TextLoader"})
         class TextSource(LocalSource):
             pass
 
@@ -222,9 +216,7 @@ class TestDocumentLoaderFactory:
         assert source is not None
 
         # Create loader
-        loader = factory.create_loader_from_source(
-            source, preference=LoaderPreference.SPEED
-        )
+        loader = factory.create_loader_from_source(source, preference=LoaderPreference.SPEED)
 
         # Verify loader creation
         mock_import.assert_called_with(

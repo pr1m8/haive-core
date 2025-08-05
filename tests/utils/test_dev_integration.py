@@ -209,7 +209,7 @@ class TestIntegratedWorkflows:
                     item * 2
 
                     if i % 2 == 0:
-                        self.log.progress(f"Processed {i+1}/{len(data)} items")
+                        self.log.progress(f"Processed {i + 1}/{len(data)} items")
 
             self.log.success("Complex operation completed")
             return [item * 2 for item in data]
@@ -295,7 +295,7 @@ class TestIntegratedWorkflows:
 
                 for i in range(0, len(dataset), batch_size):
                     batch = dataset[i : i + batch_size]
-                    self.log.progress(f"Processing batch {i//batch_size + 1}")
+                    self.log.progress(f"Processing batch {i // batch_size + 1}")
 
                     batch_result = process_batch(batch)
                     results.extend(batch_result)
@@ -385,9 +385,7 @@ class TestErrorHandlingIntegration:
 
         # Check that error was recorded in tracing
         failed_calls = [
-            call
-            for call in self.trace.call_tracker.calls
-            if call.get("status") == "error"
+            call for call in self.trace.call_tracker.calls if call.get("status") == "error"
         ]
         assert len(failed_calls) == 1
 

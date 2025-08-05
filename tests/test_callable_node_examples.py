@@ -26,9 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 # Example 1: Simple threshold check function
-def check_summarization_needed(
-    messages: list[BaseMessage], threshold: int = 1000
-) -> bool:
+def check_summarization_needed(messages: list[BaseMessage], threshold: int = 1000) -> bool:
     """Check if total message length exceeds threshold."""
     total_length = sum(len(msg.content) for msg in messages)
     logger.info(f"Total message length: {total_length}, threshold: {threshold}")
@@ -39,10 +37,7 @@ def check_summarization_needed(
 def check_token_limit(token_count: int, max_tokens: int = 4000) -> bool:
     """Check if token count is approaching limit."""
     utilization = token_count / max_tokens
-    logger.info(
-        f"Token utilization: {
-            utilization:.1%} ({token_count}/{max_tokens})"
-    )
+    logger.info(f"Token utilization: {utilization:.1%} ({token_count}/{max_tokens})")
     return utilization > 0.8  # 80% threshold
 
 
@@ -67,19 +62,15 @@ def needs_summarization(state: MessagesWithTokenTracking) -> bool:
 
     result = any(conditions)
     logger.info(
-        f"Summarization check: tokens={
-            state.token_count}, messages={
-            len(
-                state.messages)}, cost=${
-                state.total_cost:.2f} -> {result}"
+        f"Summarization check: tokens={state.token_count}, messages={len(state.messages)}, cost=${
+            state.total_cost:.2f
+        } -> {result}"
     )
     return result
 
 
 # Example 4: Generic field extractor
-def check_field_threshold(
-    value: float, threshold: float, field_name: str = "unknown"
-) -> bool:
+def check_field_threshold(value: float, threshold: float, field_name: str = "unknown") -> bool:
     """Generic threshold checker for any numeric field."""
     result = value > threshold
     logger.info(f"Field '{field_name}' check: {value} > {threshold} = {result}")
@@ -111,9 +102,7 @@ def categorize_conversation(messages: list[BaseMessage]) -> str:
     goto_on_false="continue_conversation",
     result_key="needs_summary",
 )
-def smart_summary_check(
-    messages: list[BaseMessage], token_count: int | None = None
-) -> bool:
+def smart_summary_check(messages: list[BaseMessage], token_count: int | None = None) -> bool:
     """Smart check combining multiple factors."""
     # Length-based check
     total_length = sum(len(msg.content) for msg in messages)
@@ -202,9 +191,7 @@ def demonstrate_callable_nodes():
         cost_limit: float = Field(default=5.0)
         metadata: dict[str, Any] = Field(default_factory=dict)
 
-    state4 = CostState(
-        total_cost=6.5, cost_limit=5.0, metadata={"cost_field_name": "api_costs"}
-    )
+    state4 = CostState(total_cost=6.5, cost_limit=5.0, metadata={"cost_field_name": "api_costs"})
 
     cost_check_node(state4)
 
@@ -287,9 +274,7 @@ def demonstrate_schema_composition():
         "cost_limit": (float, Field(default=5.0)),
     }
 
-    CompositeState = create_model(
-        "CompositeState", __base__=StateSchema, **field_definitions
-    )
+    CompositeState = create_model("CompositeState", __base__=StateSchema, **field_definitions)
 
     for _name, field in CompositeState.model_fields.items():
         pass
@@ -343,7 +328,6 @@ def create_example_graph():
 
 
 if __name__ == "__main__":
-
     # Run demonstrations
     demonstrate_callable_nodes()
     demonstrate_schema_composition()

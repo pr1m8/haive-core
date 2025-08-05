@@ -173,9 +173,7 @@ def test_simple_llm_parser_chain(mock_llm):
 
 def test_prompt_llm_parser_chain(mock_llm):
     """Test a Prompt -> LLM -> Parser chain."""
-    list_parser = create_output_parser_engine(
-        parser_type=OutputParserType.NUMBERED_LIST
-    )
+    list_parser = create_output_parser_engine(parser_type=OutputParserType.NUMBERED_LIST)
 
     # Create a prompt
     prompt = PromptTemplate.from_template("List some {item}:")
@@ -316,9 +314,7 @@ async def test_parser_with_streaming_llm():
     # Create a streaming mock LLM
     from langchain_core.language_models.fake import FakeStreamingLLM
 
-    streaming_llm = FakeStreamingLLM(
-        responses=["""{"name": "Streaming", "data": "Test"}"""]
-    )
+    streaming_llm = FakeStreamingLLM(responses=["""{"name": "Streaming", "data": "Test"}"""])
 
     # Create parser
     json_parser = create_output_parser_engine(parser_type=OutputParserType.JSON)
@@ -341,9 +337,7 @@ def test_parser_with_runnable_map():
 
     # Create two parsers
     json_parser = create_output_parser_engine(parser_type=OutputParserType.JSON)
-    list_parser = create_output_parser_engine(
-        parser_type=OutputParserType.MARKDOWN_LIST
-    )
+    list_parser = create_output_parser_engine(parser_type=OutputParserType.MARKDOWN_LIST)
 
     # Create a map that applies different parsers to different inputs
     parallel_parser = RunnableMap(
@@ -439,9 +433,7 @@ def test_parser_with_runnable_config():
 
     # Create a runnable config
     runnable_config = {
-        "configurable": {
-            "schema": {"type": "object", "properties": {"name": {"type": "string"}}}
-        }
+        "configurable": {"schema": {"type": "object", "properties": {"name": {"type": "string"}}}}
     }
 
     # Test direct invocation with config

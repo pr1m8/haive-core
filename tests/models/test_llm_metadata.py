@@ -204,9 +204,7 @@ def display_metadata_tree(model_name: str, metadata: dict[str, Any]) -> None:
                     branch = tree_node.add(f"[yellow]{key}[/yellow]")
                     _add_dict_to_tree(branch, value)
                 elif isinstance(value, list):
-                    branch = tree_node.add(
-                        f"[yellow]{key}[/yellow] (list, {len(value)} items)"
-                    )
+                    branch = tree_node.add(f"[yellow]{key}[/yellow] (list, {len(value)} items)")
                     for i, item in enumerate(value):
                         if isinstance(item, dict | list):
                             sub_branch = branch.add(f"[blue]Item {i}[/blue]")
@@ -236,9 +234,7 @@ def available_models():
 
 
 # Tests
-@pytest.mark.parametrize(
-    "model_config", MODEL_CONFIGS, ids=[m["name"] for m in MODEL_CONFIGS]
-)
+@pytest.mark.parametrize("model_config", MODEL_CONFIGS, ids=[m["name"] for m in MODEL_CONFIGS])
 def test_model_metadata_access(model_config):
     """Test metadata access for each model."""
     env_var = model_config["env_var"]
@@ -276,12 +272,7 @@ def test_model_metadata_access(model_config):
     display_metadata_tree(model_config["name"], raw_metadata)
 
     # Assert basic data is present
-    console.print(
-        Panel(
-            f"[bold]Basic Metadata for {
-                model_config['name']}[/bold]"
-        )
-    )
+    console.print(Panel(f"[bold]Basic Metadata for {model_config['name']}[/bold]"))
 
     context_window = config.get_context_window()
     console.print(f"Context Window: [cyan]{context_window}[/cyan] tokens")
@@ -297,13 +288,8 @@ def test_model_metadata_access(model_config):
 
     # Check pricing
     input_cost, output_cost = config.get_token_pricing()
-    console.print(
-        f"Input cost per token: [green]{
-            format_pricing(input_cost)}[/green]"
-    )
-    console.print(
-        f"Output cost per token: [green]{format_pricing(output_cost)}[/green]"
-    )
+    console.print(f"Input cost per token: [green]{format_pricing(input_cost)}[/green]")
+    console.print(f"Output cost per token: [green]{format_pricing(output_cost)}[/green]")
 
     # Check capabilities using property access
     console.print("\n[bold]Capabilities:[/bold]")
@@ -327,17 +313,13 @@ def test_model_metadata_access(model_config):
         icon = "✓" if supported else "✗"
         color = "green" if supported else "red"
         console.print(
-            f"  {icon} [bold {color}]{
-                capability.replace(
-                    '_', ' ').title()}[/bold {color}]"
+            f"  {icon} [bold {color}]{capability.replace('_', ' ').title()}[/bold {color}]"
         )
 
     # Check for deprecation
     deprecation_date = config.get_deprecation_date()
     if deprecation_date:
-        console.print(
-            f"\n[bold red]⚠️ Model will be deprecated on: {deprecation_date}[/bold red]"
-        )
+        console.print(f"\n[bold red]⚠️ Model will be deprecated on: {deprecation_date}[/bold red]")
 
     # Check additional data if available
     if config.supports_web_search:
@@ -345,10 +327,7 @@ def test_model_metadata_access(model_config):
         if search_costs:
             console.print("\n[bold]Web Search Context Costs:[/bold]")
             for size, cost in search_costs.items():
-                console.print(
-                    f"  {size}: [yellow]{
-                        format_pricing(cost)}[/yellow]"
-                )
+                console.print(f"  {size}: [yellow]{format_pricing(cost)}[/yellow]")
 
     # Instead of returning, collect data for the comparison and assert it's
     # valid
@@ -364,9 +343,7 @@ def test_model_metadata_access(model_config):
     assert metadata["input_cost"] == input_cost, "Input cost should match"
     assert metadata["output_cost"] == output_cost, "Output cost should match"
     assert metadata["capabilities"] == capabilities, "Capabilities should match"
-    assert (
-        metadata["deprecation_date"] == deprecation_date
-    ), "Deprecation date should match"
+    assert metadata["deprecation_date"] == deprecation_date, "Deprecation date should match"
 
 
 def test_compare_models(available_models):
@@ -399,40 +376,28 @@ def test_compare_models(available_models):
             progress.update(task, advance=1)
 
     # Display comparison tables
-    console.print(
-        Panel(Text("Model Metadata Comparison", style="bold cyan", justify="center"))
-    )
+    console.print(Panel(Text("Model Metadata Comparison", style="bold cyan", justify="center")))
     display_model_metadata_table(models_data)
 
     console.print("\n")
-    console.print(
-        Panel(
-            Text("Model Capabilities Comparison", style="bold cyan", justify="center")
-        )
-    )
+    console.print(Panel(Text("Model Capabilities Comparison", style="bold cyan", justify="center")))
     display_model_capabilities(models_data)
 
     # Export comparison to JSON
     try:
         with open("model_comparison.json", "w") as f:
             json.dump(models_data, f, indent=2, default=str)
-        console.print(
-            "\n[green]Exported comparison data to model_comparison.json[/green]"
-        )
+        console.print("\n[green]Exported comparison data to model_comparison.json[/green]")
     except Exception as e:
         console.print(f"\n[red]Failed to export comparison data: {e}[/red]")
 
     # Assert we have data from all models
-    assert len(models_data) == len(
-        available_models
-    ), "Should have data for all available models"
+    assert len(models_data) == len(available_models), "Should have data for all available models"
 
 
 if __name__ == "__main__":
     # When run directly, execute specific tests
-    console.print(
-        Panel(Text("LLM Metadata Test Suite", style="bold cyan", justify="center"))
-    )
+    console.print(Panel(Text("LLM Metadata Test Suite", style="bold cyan", justify="center")))
 
     # Get available models
     available = []
@@ -441,9 +406,7 @@ if __name__ == "__main__":
             available.append(config)
         else:
             console.print(
-                f"[yellow]Skipping {
-                    config['name']} - {
-                    config['env_var']} not set[/yellow]"
+                f"[yellow]Skipping {config['name']} - {config['env_var']} not set[/yellow]"
             )
 
     if not available:
@@ -459,10 +422,7 @@ if __name__ == "__main__":
             test_model_metadata_access(model)  # Just call, don't store result
             console.print("\n" + "-" * 80 + "\n")
         except Exception as e:
-            console.print(
-                f"[bold red]Error testing {
-                    model['name']}: {e}[/bold red]"
-            )
+            console.print(f"[bold red]Error testing {model['name']}: {e}[/bold red]")
 
     # Run comparison if we have multiple models
     if len(available) >= 2:

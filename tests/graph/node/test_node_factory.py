@@ -32,15 +32,13 @@ def test_create_node_function_with_real_engine(real_llm_engine):
     assert node_function.__node_config__.engine is real_llm_engine
     logger.debug(
         f"Asserted __node_config__.engine is the original engine: {
-            node_function.__node_config__.engine}"
+            node_function.__node_config__.engine
+        }"
     )
     assert hasattr(node_function, "__engine_id__")
     logger.debug("Asserted node function has __engine_id__ attribute.")
     assert node_function.__engine_id__ == real_llm_engine.id
-    logger.debug(
-        f"Asserted __engine_id__ matches engine.id: {
-            node_function.__engine_id__}"
-    )
+    logger.debug(f"Asserted __engine_id__ matches engine.id: {node_function.__engine_id__}")
     logger.debug("--- Finished test_create_node_function_with_real_engine ---")
 
 
@@ -51,9 +49,7 @@ def test_node_config_with_engine_id(real_llm_engine):
 
     # Create a config
     logger.debug("Creating NodeConfig instance")
-    node_config = NodeConfig(
-        name="test_node_engine_id", engine=real_llm_engine, command_goto=END
-    )
+    node_config = NodeConfig(name="test_node_engine_id", engine=real_llm_engine, command_goto=END)
     logger.debug(f"Created NodeConfig: {node_config}")
 
     # Check engine and engine_id
@@ -92,19 +88,14 @@ def test_node_function_with_mappings(real_llm_engine):
 
     # Check the mappings in node_config attached to the function
     assert hasattr(node_function, "__node_config__")
-    logger.debug(
-        f"Checking mappings on attached __node_config__: {
-            node_function.__node_config__}"
-    )
+    logger.debug(f"Checking mappings on attached __node_config__: {node_function.__node_config__}")
     assert node_function.__node_config__.input_mapping == input_mapping
     logger.debug(
-        f"Asserted input_mapping on node_config: {
-            node_function.__node_config__.input_mapping}"
+        f"Asserted input_mapping on node_config: {node_function.__node_config__.input_mapping}"
     )
     assert node_function.__node_config__.output_mapping == output_mapping
     logger.debug(
-        f"Asserted output_mapping on node_config: {
-            node_function.__node_config__.output_mapping}"
+        f"Asserted output_mapping on node_config: {node_function.__node_config__.output_mapping}"
     )
     logger.debug("--- Finished test_node_function_with_mappings ---")
 
@@ -127,24 +118,19 @@ def test_config_overrides_in_node_config(real_llm_engine):
 
     # Check config overrides on NodeConfig object
     assert node_config.config_overrides == config_overrides
-    logger.debug(
-        f"Asserted config_overrides on NodeConfig object: {
-            node_config.config_overrides}"
-    )
+    logger.debug(f"Asserted config_overrides on NodeConfig object: {node_config.config_overrides}")
 
     # Create node function and check the overrides are passed through
     logger.debug("Creating node function from NodeConfig")
     node_function = NodeFactory.create_node_function(node_config)
     logger.debug(f"Created node function: {node_function}")
     assert hasattr(node_function, "__node_config__")
-    logger.debug(
-        f"Checking overrides on attached __node_config__: {
-            node_function.__node_config__}"
-    )
+    logger.debug(f"Checking overrides on attached __node_config__: {node_function.__node_config__}")
     assert node_function.__node_config__.config_overrides == config_overrides
     logger.debug(
         f"Asserted config_overrides on attached node_config: {
-            node_function.__node_config__.config_overrides}"
+            node_function.__node_config__.config_overrides
+        }"
     )
     logger.debug("--- Finished test_config_overrides_in_node_config ---")
 
@@ -179,12 +165,7 @@ def test_node_function_with_callable():
 
     # Verify result is a Command with the right structure
     assert isinstance(result_cmd, Command)
-    logger.debug(
-        f"Asserted result type is Command: {
-            isinstance(
-                result_cmd,
-                Command)}"
-    )
+    logger.debug(f"Asserted result type is Command: {isinstance(result_cmd, Command)}")
     assert result_cmd.goto is END
     logger.debug(f"Asserted result.goto is END: {result_cmd.goto is END}")
     assert "processed" in result_cmd.update
@@ -289,9 +270,7 @@ def test_process_output():
     # Test with mapping
     # key3 doesn't exist in output
     mapping = {"key1": "state1", "key3": "state3"}
-    logger.debug(
-        f"Testing _process_output with dict and mapping: {output_dict}, {mapping}"
-    )
+    logger.debug(f"Testing _process_output with dict and mapping: {output_dict}, {mapping}")
     result_map = NodeFactory._process_output(output_dict, mapping)
     logger.debug(f"Result (mapping): {result_map}")
     assert result_map == {"state1": "value1"}  # Only key1 mapped
@@ -304,9 +283,7 @@ def test_process_output():
     assert result_non_dict == {"result": output_str}
 
     # Test with non-dict output and mapping (mapping should be ignored)
-    logger.debug(
-        f"Testing _process_output with non-dict and mapping: {output_str}, {mapping}"
-    )
+    logger.debug(f"Testing _process_output with non-dict and mapping: {output_str}, {mapping}")
     result_non_dict_map = NodeFactory._process_output(output_str, mapping)
     logger.debug(f"Result (non-dict, mapping): {result_non_dict_map}")
     # Mapping ignored for non-dict

@@ -120,11 +120,7 @@ def print_state_deeply(state: Any, level: int = 0):
             logger.info(f"{indent}  .values ({type(state.values).__name__}):")
             print_state_deeply(state.values, level + 2)
         elif hasattr(state, "channel_values") and state.channel_values:
-            logger.info(
-                f"{indent}  .channel_values ({
-                    type(
-                        state.channel_values).__name__}):"
-            )
+            logger.info(f"{indent}  .channel_values ({type(state.channel_values).__name__}):")
             print_state_deeply(state.channel_values, level + 2)
         elif hasattr(state, "state") and state.state:
             logger.info(f"{indent}  .state ({type(state.state).__name__}):")

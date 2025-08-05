@@ -26,9 +26,7 @@ def import_module_from_file(module_name, file_path):
 
 
 # Set up module paths
-base_path = Path(
-    "/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core"
-)
+base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core")
 
 # Import required modules
 try:
@@ -59,23 +57,13 @@ try:
     # Import enhanced registry
     registry_module = import_module_from_file(
         "haive.core.engine.document.loaders.sources.enhanced_registry",
-        base_path
-        / "engine"
-        / "document"
-        / "loaders"
-        / "sources"
-        / "enhanced_registry.py",
+        base_path / "engine" / "document" / "loaders" / "sources" / "enhanced_registry.py",
     )
 
     # Import essential sources (this will register them)
     essential_sources_module = import_module_from_file(
         "haive.core.engine.document.loaders.sources.essential_sources",
-        base_path
-        / "engine"
-        / "document"
-        / "loaders"
-        / "sources"
-        / "essential_sources.py",
+        base_path / "engine" / "document" / "loaders" / "sources" / "essential_sources.py",
     )
 
 
@@ -90,12 +78,12 @@ def test_comprehensive_system():
     enhanced_registry = registry_module.enhanced_registry
     stats = enhanced_registry.get_statistics()
 
-    assert (
-        stats["total_sources"] >= 13
-    ), f"Expected at least 13 sources, got {stats['total_sources']}"
-    assert (
-        stats["bulk_loaders"] >= 2
-    ), f"Expected at least 2 bulk loaders, got {stats['bulk_loaders']}"
+    assert stats["total_sources"] >= 13, (
+        f"Expected at least 13 sources, got {stats['total_sources']}"
+    )
+    assert stats["bulk_loaders"] >= 2, (
+        f"Expected at least 2 bulk loaders, got {stats['bulk_loaders']}"
+    )
 
     # Test 2: Source Type System
     SourceCategory = source_types_module.SourceCategory
@@ -103,9 +91,7 @@ def test_comprehensive_system():
     CredentialType = source_types_module.CredentialType
 
     # Test category coverage
-    categories_with_sources = [
-        cat for cat, sources in stats["categories"].items() if sources > 0
-    ]
+    categories_with_sources = [cat for cat, sources in stats["categories"].items() if sources > 0]
 
     # Test 3: Path Analysis Integration
     PathAnalyzer = path_analyzer_module.PathAnalyzer
@@ -138,8 +124,7 @@ def test_comprehensive_system():
     assert csv_source is not None, "Failed to create CSV source"
 
     # Test web source creation
-    web_source = enhanced_registry.create_source(
-        "https://example.com/page.html")
+    web_source = enhanced_registry.create_source("https://example.com/page.html")
     assert web_source is not None, "Failed to create web source"
 
     # Test 5: Loader Selection and Preferences
@@ -163,9 +148,7 @@ def test_comprehensive_system():
     bulk_loaders = enhanced_registry.find_bulk_loaders()
     recursive_loaders = enhanced_registry.find_recursive_loaders()
 
-    assert (
-        len(bulk_loaders) >= 2
-    ), f"Expected at least 2 bulk loaders, got {len(bulk_loaders)}"
+    assert len(bulk_loaders) >= 2, f"Expected at least 2 bulk loaders, got {len(bulk_loaders)}"
 
     # Test 7: Document State Schema
 
@@ -192,24 +175,14 @@ def test_comprehensive_system():
 
     # Test 8: Category-based Source Discovery
 
-    file_document_sources = enhanced_registry.find_sources_by_category(
-        SourceCategory.FILE_DOCUMENT
-    )
-    web_scraping_sources = enhanced_registry.find_sources_by_category(
-        SourceCategory.WEB_SCRAPING
-    )
-    database_sources = enhanced_registry.find_sources_by_category(
-        SourceCategory.DATABASE_SQL
-    )
+    file_document_sources = enhanced_registry.find_sources_by_category(SourceCategory.FILE_DOCUMENT)
+    web_scraping_sources = enhanced_registry.find_sources_by_category(SourceCategory.WEB_SCRAPING)
+    database_sources = enhanced_registry.find_sources_by_category(SourceCategory.DATABASE_SQL)
 
     # Test 9: Capability-based Discovery
 
-    bulk_capable = enhanced_registry.find_sources_with_capability(
-        LoaderCapability.BULK_LOADING
-    )
-    recursive_capable = enhanced_registry.find_sources_with_capability(
-        LoaderCapability.RECURSIVE
-    )
+    bulk_capable = enhanced_registry.find_sources_with_capability(LoaderCapability.BULK_LOADING)
+    recursive_capable = enhanced_registry.find_sources_with_capability(LoaderCapability.RECURSIVE)
 
     # Test 10: Essential Sources Validation
 

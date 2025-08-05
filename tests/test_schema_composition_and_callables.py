@@ -43,15 +43,10 @@ class AdvancedState(TokenTrackingState):
 
 
 # Example threshold check functions
-def check_summarization_threshold(
-    messages: list[BaseMessage], threshold: int = 1000
-) -> bool:
+def check_summarization_threshold(messages: list[BaseMessage], threshold: int = 1000) -> bool:
     """Check if messages exceed length threshold."""
     total_length = sum(len(msg.content) for msg in messages)
-    logger.info(
-        f"Message length check: {total_length} > {threshold} = {
-            total_length > threshold}"
-    )
+    logger.info(f"Message length check: {total_length} > {threshold} = {total_length > threshold}")
     return total_length > threshold
 
 
@@ -64,12 +59,7 @@ def check_token_threshold(token_count: int, max_tokens: int) -> bool:
 
 def check_cost_threshold(total_cost: float, cost_limit: float = 5.0) -> bool:
     """Check if cost exceeds limit."""
-    logger.info(
-        f"Cost check: ${
-            total_cost:.2f} > ${
-            cost_limit:.2f} = {
-            total_cost > cost_limit}"
-    )
+    logger.info(f"Cost check: ${total_cost:.2f} > ${cost_limit:.2f} = {total_cost > cost_limit}")
     return total_cost > cost_limit
 
 
@@ -149,9 +139,7 @@ def demonstrate_generic_extraction():
     """Show generic parameter extraction from different state types."""
 
     # Generic function that works with any state having messages
-    def message_density_check(
-        messages: list[BaseMessage], message_threshold: int = 10
-    ) -> str:
+    def message_density_check(messages: list[BaseMessage], message_threshold: int = 10) -> str:
         """Categorize based on message density."""
         if not messages:
             return "empty"
@@ -177,9 +165,7 @@ def demonstrate_generic_extraction():
     )
 
     # Test with different state types
-    state1 = MessagesState(
-        messages=[HumanMessage(content="Hi"), AIMessage(content="Hello!")]
-    )
+    state1 = MessagesState(messages=[HumanMessage(content="Hi"), AIMessage(content="Hello!")])
     density_node(state1)
 
     state2 = AdvancedState(
@@ -228,27 +214,19 @@ def demonstrate_conditional_routing():
     scenarios = [
         (
             "High tokens",
-            AdvancedState(
-                token_count=4000, messages=[HumanMessage("Hi")] * 10, total_cost=2.0
-            ),
+            AdvancedState(token_count=4000, messages=[HumanMessage("Hi")] * 10, total_cost=2.0),
         ),
         (
             "High cost",
-            AdvancedState(
-                token_count=1000, messages=[HumanMessage("Hi")] * 10, total_cost=15.0
-            ),
+            AdvancedState(token_count=1000, messages=[HumanMessage("Hi")] * 10, total_cost=15.0),
         ),
         (
             "Many messages",
-            AdvancedState(
-                token_count=1000, messages=[HumanMessage("Hi")] * 60, total_cost=2.0
-            ),
+            AdvancedState(token_count=1000, messages=[HumanMessage("Hi")] * 60, total_cost=2.0),
         ),
         (
             "Few messages",
-            AdvancedState(
-                token_count=100, messages=[HumanMessage("Hi")], total_cost=0.1
-            ),
+            AdvancedState(token_count=100, messages=[HumanMessage("Hi")], total_cost=0.1),
         ),
     ]
 
@@ -305,7 +283,6 @@ def demonstrate_state_agnostic_wrapper():
 
 
 if __name__ == "__main__":
-
     demonstrate_schema_composition()
     demonstrate_generic_extraction()
     demonstrate_conditional_routing()

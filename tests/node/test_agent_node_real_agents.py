@@ -126,9 +126,7 @@ class TestAgentNodeRealAgents:
         )
 
         # Create node
-        node = create_agent_node_v3(
-            agent_name="module_selector", agent=agent, name="selector_node"
-        )
+        node = create_agent_node_v3(agent_name="module_selector", agent=agent, name="selector_node")
 
         # Execute
         result = node(state, {"debug": True})
@@ -141,8 +139,7 @@ class TestAgentNodeRealAgents:
             assert len(result.update["selected_modules"]) >= 2
             assert all(isinstance(m, str) for m in result.update["selected_modules"])
         elif (
-            "agent_outputs" in result.update
-            and "module_selector" in result.update["agent_outputs"]
+            "agent_outputs" in result.update and "module_selector" in result.update["agent_outputs"]
         ):
             # Agent outputs pattern
             output = result.update["agent_outputs"]["module_selector"]
@@ -152,9 +149,7 @@ class TestAgentNodeRealAgents:
     def test_self_discover_agent_sequence(self, real_llm_config):
         """Test sequence of Self-Discover style agents with real execution."""
         state = SelfDiscoverMultiAgentState()
-        state.task_description = (
-            "How can we reduce carbon emissions in urban transportation?"
-        )
+        state.task_description = "How can we reduce carbon emissions in urban transportation?"
         state.available_modules = [
             "systems_thinking",
             "cost_benefit_analysis",
@@ -184,9 +179,7 @@ class TestAgentNodeRealAgents:
         self._apply_command_updates(state, selector_result)
 
         # Verify selection happened
-        assert (
-            len(state.selected_modules) > 0 or "select_modules" in state.agent_outputs
-        )
+        assert len(state.selected_modules) > 0 or "select_modules" in state.agent_outputs
 
         # Step 2: Module Adaptation Agent
 

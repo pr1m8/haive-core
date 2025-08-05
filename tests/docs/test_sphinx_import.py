@@ -29,7 +29,6 @@ except Exception:
 
 # Test what autodoc would do
 try:
-
     # This is what autodoc does
     obj = haive.core.models.llm.LLMConfig
 

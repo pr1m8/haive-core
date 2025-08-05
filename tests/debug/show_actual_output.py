@@ -28,9 +28,7 @@ def show_agentnodev3_output():
         test_state = {"messages": [], "task": "test task"}
 
         # Create AgentNodeV3Config
-        node = AgentNodeV3Config(
-            agent_name="test_agent", agent=SimpleAgent(), name="test_node"
-        )
+        node = AgentNodeV3Config(agent_name="test_agent", agent=SimpleAgent(), name="test_node")
 
         # THIS IS THE KEY PART - Call the node and see what it returns
         result = node(test_state)
@@ -52,7 +50,6 @@ def show_agentnodev3_output():
 
 
 if __name__ == "__main__":
-
     actual_output = show_agentnodev3_output()
 
     if actual_output is not None:

@@ -103,10 +103,7 @@ class MockAdapterAgent:
         selected = getattr(state, "selected_modules", [])
 
         # Adapt each module
-        adapted = [
-            {"module": mod, "adaptation": f"Enhanced {mod} for task"}
-            for mod in selected
-        ]
+        adapted = [{"module": mod, "adaptation": f"Enhanced {mod} for task"} for mod in selected]
 
         return {
             "adapted_modules": adapted,
@@ -148,9 +145,7 @@ class TestAgentNodeFieldUpdates:
 
         # Create selector agent and node
         agent = MockSelectorAgent()
-        node = AgentNodeV3Config(
-            name="selector_node", agent_name="selector", agent=agent
-        )
+        node = AgentNodeV3Config(name="selector_node", agent_name="selector", agent=agent)
 
         # Execute - should update selected_modules field
         result = node(state, {})
@@ -190,9 +185,7 @@ class TestAgentNodeFieldUpdates:
 
         # Execute adapter agent - reads selected_modules
         adapter = MockAdapterAgent()
-        adapter_node = AgentNodeV3Config(
-            name="adapter_node", agent_name="adapter", agent=adapter
-        )
+        adapter_node = AgentNodeV3Config(name="adapter_node", agent_name="adapter", agent=adapter)
 
         result2 = adapter_node(state, {})
 
@@ -241,9 +234,7 @@ class TestAgentNodeFieldUpdates:
                 return {"selected_modules": ["A", "B"], "rationale": "First selection"}
 
         agent = StatefulAgent()
-        node = AgentNodeV3Config(
-            name="stateful_node", agent_name="stateful", agent=agent
-        )
+        node = AgentNodeV3Config(name="stateful_node", agent_name="stateful", agent=agent)
 
         result = node(state, {})
 
@@ -277,9 +268,7 @@ class TestAgentNodeFieldUpdates:
 
         for agent in agents:
             # Tools should be in agent's private state, not in main update
-            node = AgentNodeV3Config(
-                name=f"{agent.name}_node", agent_name=agent.name, agent=agent
-            )
+            node = AgentNodeV3Config(name=f"{agent.name}_node", agent_name=agent.name, agent=agent)
 
             result = node(state, {})
 
@@ -287,10 +276,7 @@ class TestAgentNodeFieldUpdates:
             assert "tools" not in result.update
 
             # Agent state COULD have tools (private)
-            if (
-                "agent_states" in result.update
-                and agent.name in result.update["agent_states"]
-            ):
+            if "agent_states" in result.update and agent.name in result.update["agent_states"]:
                 result.update["agent_states"][agent.name]
                 # In full implementation, tools would be here
                 # assert "tools" in agent_state  # Private to agent
@@ -309,9 +295,7 @@ class TestAgentNodeFieldUpdates:
                 return {"messages": [AIMessage(content="Processing...")]}
 
         agent = MessageAgent()
-        node = AgentNodeV3Config(
-            name="messenger_node", agent_name="messenger", agent=agent
-        )
+        node = AgentNodeV3Config(name="messenger_node", agent_name="messenger", agent=agent)
 
         result = node(state, {})
 
@@ -387,9 +371,7 @@ class TestAgentNodeFieldUpdates:
 
         # Structured agent
         agent = MockSelectorAgent()
-        node = AgentNodeV3Config(
-            name="selector_node", agent_name="selector", agent=agent
-        )
+        node = AgentNodeV3Config(name="selector_node", agent_name="selector", agent=agent)
 
         result = node(state, {})
 

@@ -38,7 +38,6 @@ def test_duplication_fix():
 
         # Verify the result has the expected structure
         if hasattr(result, "original_data"):
-
             # Check if it has the expected structured output field
             if hasattr(result.original_data, "test_model"):
                 pass

@@ -29,15 +29,11 @@ logger = logging.getLogger(__name__)
 class DemoState(StateSchema):
     """State for our demo with multiple message lists."""
 
-    messages: list[BaseMessage] = Field(
-        default_factory=list, description="Main conversation"
-    )
+    messages: list[BaseMessage] = Field(default_factory=list, description="Main conversation")
     analysis_messages: list[BaseMessage] = Field(
         default_factory=list, description="Analysis results"
     )
-    engines: dict[str, Any] = Field(
-        default_factory=dict, description="Engine instances"
-    )
+    engines: dict[str, Any] = Field(default_factory=dict, description="Engine instances")
 
 
 def create_demo_graph():
@@ -54,11 +50,10 @@ def create_demo_graph():
             "name": "main_llm",
             "invoke": lambda self, input_data, config=None: AIMessage(
                 content=f"Main LLM response to: {
-    input_data.get(
-        'messages',
-        [''])[0].content if isinstance(
-            input_data,
-             dict) and 'messages' in input_data else input_data}"
+                    input_data.get('messages', [''])[0].content
+                    if isinstance(input_data, dict) and 'messages' in input_data
+                    else input_data
+                }"
             ),
         },
     )()
@@ -70,11 +65,10 @@ def create_demo_graph():
             "name": "analyzer_llm",
             "invoke": lambda self, input_data, config=None: AIMessage(
                 content=f"Analysis of: {
-    input_data.get(
-        'messages',
-        [''])[0].content if isinstance(
-            input_data,
-             dict) and 'messages' in input_data else input_data}"
+                    input_data.get('messages', [''])[0].content
+                    if isinstance(input_data, dict) and 'messages' in input_data
+                    else input_data
+                }"
             ),
         },
     )()
@@ -139,9 +133,7 @@ async def run_demo():
     app = create_demo_graph()
 
     # Create initial state
-    initial_state = DemoState(
-        messages=[HumanMessage(content="What is the capital of France?")]
-    )
+    initial_state = DemoState(messages=[HumanMessage(content="What is the capital of France?")])
 
     # Run the graph
     try:
@@ -181,9 +173,7 @@ def test_direct_attribution():
     node.engine = type("MockEngine", (), {"name": "test_engine_v1"})()
 
     # Create a test message
-    original_msg = AIMessage(
-        content="Test response", additional_kwargs={"custom_field": "value"}
-    )
+    original_msg = AIMessage(content="Test response", additional_kwargs={"custom_field": "value"})
 
     # Add attribution
     attributed_msg = node._add_engine_attribution_to_message(original_msg)
@@ -194,7 +184,6 @@ def test_direct_attribution():
 
 
 if __name__ == "__main__":
-
     # First run the direct test
     test_direct_attribution()
 

@@ -76,6 +76,4 @@ def test_deserialize_invalid_path_should_fail():
 
 def test_deserialize_non_callable_should_fail(tmp_path):
     with pytest.raises(ImportError, match="is not callable"):
-        SerializableCallable.deserialize(
-            "os.path"
-        )  # resolves to a module, not a function
+        SerializableCallable.deserialize("os.path")  # resolves to a module, not a function

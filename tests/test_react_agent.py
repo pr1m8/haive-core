@@ -123,7 +123,6 @@ def run_test_cases():
 
     # Run test cases
     for _i, test_case in enumerate(TEST_CASES, 1):
-
         # Run agent
         result = agent.run(test_case)
 
@@ -132,9 +131,7 @@ def run_test_cases():
 
         # Print messages in a readable format
         for msg in messages:
-            if (hasattr(msg, "content") and hasattr(msg, "type")) or hasattr(
-                msg, "content"
-            ):
+            if (hasattr(msg, "content") and hasattr(msg, "type")) or hasattr(msg, "content"):
                 pass
             else:
                 pass

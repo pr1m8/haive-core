@@ -55,9 +55,7 @@ class TestUnifiedValidationNode:
 
     def test_basic_instantiation(self):
         """Test basic node creation."""
-        node = UnifiedValidationNodeConfig(
-            name="test_validation", engine_name="test_engine"
-        )
+        node = UnifiedValidationNodeConfig(name="test_validation", engine_name="test_engine")
 
         assert node.name == "test_validation"
         assert node.engine_name == "test_engine"
@@ -109,9 +107,7 @@ class TestUnifiedValidationNode:
 
     def test_pydantic_model_validation_success(self):
         """Test successful Pydantic model validation."""
-        engine = MockEngine(
-            tool_routes={"UserQuery": "pydantic_model"}, schemas=[UserQuery]
-        )
+        engine = MockEngine(tool_routes={"UserQuery": "pydantic_model"}, schemas=[UserQuery])
 
         node = UnifiedValidationNodeConfig(name="test", engine_name="test_engine")
 
@@ -143,9 +139,7 @@ class TestUnifiedValidationNode:
 
     def test_pydantic_model_validation_error(self):
         """Test Pydantic model validation with error."""
-        engine = MockEngine(
-            tool_routes={"UserQuery": "pydantic_model"}, schemas=[UserQuery]
-        )
+        engine = MockEngine(tool_routes={"UserQuery": "pydantic_model"}, schemas=[UserQuery])
 
         node = UnifiedValidationNodeConfig(name="test", engine_name="test_engine")
 
@@ -178,9 +172,7 @@ class TestUnifiedValidationNode:
 
     def test_langchain_tool_routing(self):
         """Test routing for langchain tools."""
-        engine = MockEngine(
-            tool_routes={"calculate": "langchain_tool"}, tools=[calculate]
-        )
+        engine = MockEngine(tool_routes={"calculate": "langchain_tool"}, tools=[calculate])
 
         node = UnifiedValidationNodeConfig(name="test", engine_name="test_engine")
 

@@ -27,9 +27,7 @@ def import_module_from_file(module_name, file_path):
 
 
 # Set up module paths
-base_path = Path(
-    "/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core"
-)
+base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core")
 
 
 try:
@@ -38,34 +36,19 @@ try:
     # Import essential sources first
     essential_sources_module = import_module_from_file(
         "haive.core.engine.document.loaders.sources.essential_sources",
-        base_path
-        / "engine"
-        / "document"
-        / "loaders"
-        / "sources"
-        / "essential_sources.py",
+        base_path / "engine" / "document" / "loaders" / "sources" / "essential_sources.py",
     )
 
     # Import database sources (this registers all database sources)
     database_sources_module = import_module_from_file(
         "haive.core.engine.document.loaders.sources.database_sources",
-        base_path
-        / "engine"
-        / "document"
-        / "loaders"
-        / "sources"
-        / "database_sources.py",
+        base_path / "engine" / "document" / "loaders" / "sources" / "database_sources.py",
     )
 
     # Import registry for testing
     registry_module = import_module_from_file(
         "haive.core.engine.document.loaders.sources.enhanced_registry",
-        base_path
-        / "engine"
-        / "document"
-        / "loaders"
-        / "sources"
-        / "enhanced_registry.py",
+        base_path / "engine" / "document" / "loaders" / "sources" / "enhanced_registry.py",
     )
 
     # Import source types for testing
@@ -103,9 +86,9 @@ def test_database_loaders_system():
     db_validation = database_sources_module.validate_database_sources()
 
     assert db_validation, "Database source validation failed"
-    assert (
-        db_stats["total_database_sources"] >= 9
-    ), f"Expected at least 9 database sources, got {db_stats['total_database_sources']}"
+    assert db_stats["total_database_sources"] >= 9, (
+        f"Expected at least 9 database sources, got {db_stats['total_database_sources']}"
+    )
     assert db_stats["sql_sources"] >= 3, "Expected at least 3 SQL sources"
     assert db_stats["nosql_sources"] >= 3, "Expected at least 3 NoSQL sources"
     assert db_stats["graph_sources"] >= 2, "Expected at least 2 Graph sources"
@@ -136,9 +119,9 @@ def test_database_loaders_system():
         else:
             pass
 
-    assert (
-        detection_success >= 7
-    ), f"Expected at least 7/8 successful detections, got {detection_success}"
+    assert detection_success >= 7, (
+        f"Expected at least 7/8 successful detections, got {detection_success}"
+    )
 
     # Test 3: Database Source Auto-Classification
 
@@ -166,7 +149,6 @@ def test_database_loaders_system():
         except Exception as e:
             pass
 
-
     # Test 4: Loading Strategy Configuration
 
     # Test creating sources with different loading strategies
@@ -193,11 +175,8 @@ def test_database_loaders_system():
             loader_kwargs = source.get_loader_kwargs()
             loading_method = source.get_loading_method()
 
-
             if strategy == LoadingStrategy.LOAD_AND_SPLIT:
-                assert (
-                    "text_splitter_config" in loader_kwargs
-                ), "Missing text splitter config"
+                assert "text_splitter_config" in loader_kwargs, "Missing text splitter config"
 
             elif strategy in [LoadingStrategy.FETCH_ALL, LoadingStrategy.SCRAPE_ALL]:
                 assert "fetch_all_tables" in loader_kwargs, "Missing fetch_all config"
@@ -235,17 +214,13 @@ def test_database_loaders_system():
 
             splitter_config = source.get_text_splitter_config()
 
-
             assert splitter_config["chunk_size"] == 500, "Chunk size not set correctly"
-            assert (
-                splitter_config["chunk_overlap"] == 50
-            ), "Chunk overlap not set correctly"
+            assert splitter_config["chunk_overlap"] == 50, "Chunk overlap not set correctly"
 
             splitter_tests_passed += 1
 
         except Exception as e:
             pass
-
 
     # Test 6: Fetch All Configuration
 
@@ -266,12 +241,8 @@ def test_database_loaders_system():
         fetch_config = source.get_fetch_all_config()
         loader_kwargs = source.get_loader_kwargs()
 
-
         assert fetch_config["fetch_all_tables"], "Fetch all tables not enabled"
-        assert (
-            "user_temp" in fetch_config["exclude_tables"]
-        ), "Exclude tables not working"
-
+        assert "user_temp" in fetch_config["exclude_tables"], "Exclude tables not working"
 
     except Exception as e:
         pass
@@ -295,11 +266,8 @@ def test_database_loaders_system():
                 loaders = registration.loaders
                 capabilities = registration.capabilities.capabilities
 
-                has_fetch_all = any(
-                    "fetch_all" in loader_name for loader_name in loaders
-                )
+                has_fetch_all = any("fetch_all" in loader_name for loader_name in loaders)
                 has_bulk_loading = LoaderCapability.BULK_LOADING in capabilities
-
 
                 db_specific_success += 1
             else:
@@ -307,7 +275,6 @@ def test_database_loaders_system():
 
         except Exception as e:
             pass
-
 
     # Test 8: Document State Schema Integration
 
@@ -332,10 +299,8 @@ def test_database_loaders_system():
             metadata={"database_type": "postgresql", "tables_processed": 3},
         )
 
-
         assert source_info.source_type == "postgresql", "Source type not preserved"
         assert source_info.chunks_created == 45, "Chunk count not preserved"
-
 
     except Exception as e:
         pass
@@ -377,14 +342,12 @@ def test_database_loaders_system():
                 loader_kwargs = source.get_loader_kwargs()
                 loading_method = source.get_loading_method()
 
-
                 multi_db_success += 1
             else:
                 pass
 
         except Exception as e:
             pass
-
 
     # Test 10: Overall System Statistics
 
@@ -393,11 +356,9 @@ def test_database_loaders_system():
         db_stats["total_database_sources"] / overall_stats["total_sources"]
     ) * 100
 
-
-    assert (
-        database_percentage >= 15
-    ), f"Database sources should be at least 15% of total, got {database_percentage:.1f}%"
-
+    assert database_percentage >= 15, (
+        f"Database sources should be at least 15% of total, got {database_percentage:.1f}%"
+    )
 
     return True
 
@@ -409,16 +370,9 @@ def display_database_system_summary():
     db_stats = database_sources_module.get_database_sources_statistics()
     overall_stats = enhanced_registry.get_statistics()
 
-
-
-
-
-
-
     database_percentage = (
         db_stats["total_database_sources"] / overall_stats["total_sources"]
     ) * 100
-
 
 
 def main():

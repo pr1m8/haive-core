@@ -236,9 +236,7 @@ class TestValidationNodeV2Comprehensive:
 
         content = json.loads(tool_message.content)
         assert content["success"] is False
-        assert (
-            "Unknown tool" in content["error"] or "unknown" in content["error"].lower()
-        )
+        assert "Unknown tool" in content["error"] or "unknown" in content["error"].lower()
 
     def test_multiple_mixed_tool_calls(self, validation_node, base_state):
         """Test handling multiple tool calls of different types in one message."""
@@ -271,9 +269,7 @@ class TestValidationNodeV2Comprehensive:
         # Count new ToolMessages
         new_messages = result.update.get("messages", [])
         new_tool_messages = [
-            m
-            for m in new_messages[len(base_state.messages) :]
-            if isinstance(m, ToolMessage)
+            m for m in new_messages[len(base_state.messages) :] if isinstance(m, ToolMessage)
         ]
 
         # Should have 2 ToolMessages: TaskAnalysis and unknown_tool
@@ -294,9 +290,7 @@ class TestValidationNodeV2Comprehensive:
     def test_dynamic_engine_attribution(self, validation_node, base_state):
         """Test that engine_name is extracted from AIMessage attribution."""
         # Create another engine
-        other_engine = AugLLMConfig(
-            model="gpt-3.5-turbo", structured_output_model=InvalidModel
-        )
+        other_engine = AugLLMConfig(model="gpt-3.5-turbo", structured_output_model=InvalidModel)
         other_engine.tool_routes = {"InvalidModel": "pydantic_model"}
         other_engine.schemas = [InvalidModel]
 

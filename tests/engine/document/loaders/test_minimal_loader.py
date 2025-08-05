@@ -35,14 +35,11 @@ def import_module_from_file(module_name, file_path):
 
 
 # Import base path
-base_path = Path(
-    "/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core"
-)
+base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src/haive/core")
 
 # Import modules
 config_module = import_module_from_file(
-    "haive.core.engine.document.config", base_path /
-    "engine" / "document" / "config.py"
+    "haive.core.engine.document.config", base_path / "engine" / "document" / "config.py"
 )
 
 source_base_module = import_module_from_file(
@@ -91,32 +88,26 @@ def test_loader_selection_fix():
     source = source_registry.create_source("/path/to/document.pdf")
 
     # Test loader selection with different preferences
-    fast_loader = source_registry.get_loader_for_source(
-        source, preference=LoaderPreference.SPEED
-    )
+    fast_loader = source_registry.get_loader_for_source(source, preference=LoaderPreference.SPEED)
     quality_loader = source_registry.get_loader_for_source(
         source, preference=LoaderPreference.QUALITY
     )
-    default_loader = source_registry.get_loader_for_source(
-        source)  # No preference
+    default_loader = source_registry.get_loader_for_source(source)  # No preference
 
     # Verify the fix worked
-    assert (
-        fast_loader.name == "PyPDFLoader"
-    ), f"Expected PyPDFLoader for speed, got {fast_loader.name}"
-    assert fast_loader.speed == "fast", f"Expected fast speed, got {
-        fast_loader.speed}"
+    assert fast_loader.name == "PyPDFLoader", (
+        f"Expected PyPDFLoader for speed, got {fast_loader.name}"
+    )
+    assert fast_loader.speed == "fast", f"Expected fast speed, got {fast_loader.speed}"
 
-    assert (
-        quality_loader.name == "UnstructuredPDFLoader"
-    ), f"Expected UnstructuredPDFLoader for quality, got {quality_loader.name}"
-    assert (
-        quality_loader.quality == "high"
-    ), f"Expected high quality, got {quality_loader.quality}"
+    assert quality_loader.name == "UnstructuredPDFLoader", (
+        f"Expected UnstructuredPDFLoader for quality, got {quality_loader.name}"
+    )
+    assert quality_loader.quality == "high", f"Expected high quality, got {quality_loader.quality}"
 
-    assert (
-        default_loader.name == "PyPDFLoader"
-    ), f"Expected default PyPDFLoader, got {default_loader.name}"
+    assert default_loader.name == "PyPDFLoader", (
+        f"Expected default PyPDFLoader, got {default_loader.name}"
+    )
 
     return True
 

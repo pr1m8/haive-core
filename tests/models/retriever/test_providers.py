@@ -16,9 +16,7 @@ class TestVectorStoreProvider:
 
     def test_initialization(self, mock_vector_store):
         """Test provider initialization."""
-        provider = VectorStoreProvider(
-            vector_store=mock_vector_store, k=5, search_type="mmr"
-        )
+        provider = VectorStoreProvider(vector_store=mock_vector_store, k=5, search_type="mmr")
 
         assert provider.provider == RetrieverProvider.VECTOR_STORE
         assert provider.vector_store == mock_vector_store
@@ -121,9 +119,7 @@ class TestMultiQueryProvider:
         assert "llm" not in params
         assert params["llm_chain"] == mock_llm
 
-    def test_instantiate_success(
-        self, mock_retriever, mock_llm, mock_multi_query_retriever
-    ):
+    def test_instantiate_success(self, mock_retriever, mock_llm, mock_multi_query_retriever):
         """Test successful instantiation."""
         with patch(
             "haive.core.models.retriever.providers.multi_query.MultiQueryProvider._get_retriever_class"
@@ -157,16 +153,12 @@ class TestEnsembleProvider:
         retriever2 = Mock()
 
         # Valid weights
-        provider = EnsembleProvider(
-            retrievers=[mock_retriever, retriever2], weights=[0.7, 0.3]
-        )
+        provider = EnsembleProvider(retrievers=[mock_retriever, retriever2], weights=[0.7, 0.3])
         assert provider.weights == [0.7, 0.3]
 
         # Invalid weights (don't sum to 1.0)
         with pytest.raises(ValueError, match="Weights must sum to 1.0"):
-            EnsembleProvider(
-                retrievers=[mock_retriever, retriever2], weights=[0.5, 0.6]
-            )
+            EnsembleProvider(retrievers=[mock_retriever, retriever2], weights=[0.5, 0.6])
 
     def test_retrievers_validation(self):
         """Test retrievers validation."""
@@ -179,9 +171,7 @@ class TestEnsembleProvider:
         retriever2 = Mock()
         retriever3 = Mock()
 
-        provider = EnsembleProvider(
-            retrievers=[mock_retriever, retriever2], weights=[0.6, 0.4]
-        )
+        provider = EnsembleProvider(retrievers=[mock_retriever, retriever2], weights=[0.6, 0.4])
 
         provider.add_retriever(retriever3, 0.2)
 
@@ -212,14 +202,10 @@ class TestEnsembleProvider:
         """Test remove retriever error cases."""
         retriever2 = Mock()
 
-        provider = EnsembleProvider(
-            retrievers=[mock_retriever, retriever2], weights=[0.6, 0.4]
-        )
+        provider = EnsembleProvider(retrievers=[mock_retriever, retriever2], weights=[0.6, 0.4])
 
         # Can't remove from ensemble with only 2 retrievers
-        with pytest.raises(
-            ValueError, match="ensemble must have at least 2 retrievers"
-        ):
+        with pytest.raises(ValueError, match="ensemble must have at least 2 retrievers"):
             provider.remove_retriever(0)
 
         # Add third retriever to test index error
@@ -318,9 +304,7 @@ class TestBm25Provider:
         """Test instantiation without documents or texts."""
         provider = Bm25Provider(k=4)
 
-        with pytest.raises(
-            ValueError, match="Either 'documents' or 'texts' must be provided"
-        ):
+        with pytest.raises(ValueError, match="Either 'documents' or 'texts' must be provided"):
             provider.instantiate()
 
     def test_get_corpus_info(self, sample_documents):
@@ -372,9 +356,7 @@ class TestProviderErrorHandling:
             with pytest.raises(ValueError, match="requires package"):
                 provider.validate_config()
 
-    def test_validation_config_success(
-        self, mock_vector_store, mock_vector_store_retriever
-    ):
+    def test_validation_config_success(self, mock_vector_store, mock_vector_store_retriever):
         """Test successful config validation."""
         with patch(
             "haive.core.models.retriever.providers.vector_store.VectorStoreProvider._get_retriever_class"

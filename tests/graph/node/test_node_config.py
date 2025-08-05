@@ -28,9 +28,7 @@ def test_node_config_init_basic():
     assert node_config.output_mapping is None
     logger.debug(f"Asserted output_mapping: {node_config.output_mapping}")
     assert isinstance(node_config.config_overrides, dict)
-    logger.debug(
-        f"Asserted config_overrides type: {type(node_config.config_overrides)}"
-    )
+    logger.debug(f"Asserted config_overrides type: {type(node_config.config_overrides)}")
     assert isinstance(node_config.metadata, dict)
     logger.debug(f"Asserted metadata type: {type(node_config.metadata)}")
     logger.debug("--- Finished test_node_config_init_basic ---")
@@ -41,27 +39,17 @@ def test_node_config_with_end():
     logger.debug("--- Starting test_node_config_with_end ---")
     # Test with string "END"
     logger.debug("Testing with command_goto='END'")
-    node_config_str = NodeConfig(
-        name="test_node_str", engine="test_engine", command_goto="END"
-    )
+    node_config_str = NodeConfig(name="test_node_str", engine="test_engine", command_goto="END")
     logger.debug(f"Created NodeConfig (str): {node_config_str}")
     assert node_config_str.command_goto is END
-    logger.debug(
-        f"Asserted command_goto (str): {
-            node_config_str.command_goto}"
-    )
+    logger.debug(f"Asserted command_goto (str): {node_config_str.command_goto}")
 
     # Test with END constant
     logger.debug("Testing with command_goto=END")
-    node_config_const = NodeConfig(
-        name="test_node_const", engine="test_engine", command_goto=END
-    )
+    node_config_const = NodeConfig(name="test_node_const", engine="test_engine", command_goto=END)
     logger.debug(f"Created NodeConfig (const): {node_config_const}")
     assert node_config_const.command_goto is END
-    logger.debug(
-        f"Asserted command_goto (const): {
-            node_config_const.command_goto}"
-    )
+    logger.debug(f"Asserted command_goto (const): {node_config_const.command_goto}")
     logger.debug("--- Finished test_node_config_with_end ---")
 
 
@@ -146,9 +134,7 @@ def test_node_config_resolve_engine(real_llm_engine, monkeypatch):
 
         def get(self, engine_type, name):
             # Add the 'get' method used inside the loop in resolve_engine
-            logger.debug(
-                f"MockRegistry.get called with type: {engine_type}, name: {name}"
-            )
+            logger.debug(f"MockRegistry.get called with type: {engine_type}, name: {name}")
             if engine_type == EngineType.LLM and name == "test_engine":
                 logger.debug(f"MockRegistry.get returning: {real_llm_engine}")
                 return real_llm_engine
@@ -212,9 +198,7 @@ def test_node_config_serialization(real_llm_engine, monkeypatch):
 
     class MockRegistry:
         def find(self, name_or_id):
-            logger.debug(
-                f"MockRegistry.find called with: {name_or_id} during deserialization"
-            )
+            logger.debug(f"MockRegistry.find called with: {name_or_id} during deserialization")
             if name_or_id in (real_llm_engine.id, real_llm_engine.name):
                 logger.debug(f"MockRegistry returning engine: {real_llm_engine}")
                 return real_llm_engine

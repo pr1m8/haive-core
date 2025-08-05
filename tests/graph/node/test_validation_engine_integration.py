@@ -195,9 +195,7 @@ def validation_branching_graph(validation_node_config, mock_engines):
 
     # Final processing node
     def final_node(state):
-        return Command(
-            update={"current_stage": "complete", "processing_complete": True}, goto=END
-        )
+        return Command(update={"current_stage": "complete", "processing_complete": True}, goto=END)
 
     # Add nodes to graph
     graph.add_node("validator", validation_node)
@@ -262,20 +260,14 @@ def complex_engine_chain_graph(mock_engines, validation_tools):
         # Route based on presence of error_count
         if state.get("error_count", 0) > 0:
             return Command(goto="error_handler")
-        return Command(
-            update={"processing_complete": True, "current_stage": "complete"}, goto=END
-        )
+        return Command(update={"processing_complete": True, "current_stage": "complete"}, goto=END)
 
     # Error handler
     def error_handler(state):
         return Command(
             update={
                 "messages": state["messages"]
-                + [
-                    ToolMessage(
-                        content="Error occurred during processing", name="error_handler"
-                    )
-                ],
+                + [ToolMessage(content="Error occurred during processing", name="error_handler")],
                 "current_stage": "error",
             },
             goto=END,

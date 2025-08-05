@@ -11,10 +11,8 @@ import sys
 import traceback
 
 # Add packages to path
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
 
 # Set up EXTREMELY verbose logging
 logging.basicConfig(
@@ -95,9 +93,7 @@ def trace_model_dump_calls():
             result = original_model_dump(self, *args, **kwargs)
 
             if isinstance(result, dict) and "prompt_template" in result:
-                logger.error(
-                    f"   RESULT prompt_template type: {type(result['prompt_template'])}"
-                )
+                logger.error(f"   RESULT prompt_template type: {type(result['prompt_template'])}")
                 logger.error(f"   RESULT prompt_template: {result['prompt_template']}")
 
                 # Breakpoint for dict conversion
@@ -141,9 +137,7 @@ def trace_pydantic_validation():
                 stack = traceback.extract_stack()
                 logger.error("   FULL VALIDATION STACK:")
                 for i, frame in enumerate(stack):
-                    logger.error(
-                        f"     [{i}] {frame.filename}:{frame.lineno} in {frame.name}"
-                    )
+                    logger.error(f"     [{i}] {frame.filename}:{frame.lineno} in {frame.name}")
                     logger.error(f"         {frame.line}")
 
                 # Breakpoint before the error
@@ -165,18 +159,14 @@ def trace_serialization():
     original_dumps = None
 
     def debug_dumps(self, obj):
-        if hasattr(obj, "prompt_template") or (
-            isinstance(obj, dict) and "prompt_template" in obj
-        ):
+        if hasattr(obj, "prompt_template") or (isinstance(obj, dict) and "prompt_template" in obj):
             logger.error("🔍 SERIALIZATION of object with prompt_template!")
             logger.error(f"   Object type: {type(obj)}")
 
             if hasattr(obj, "prompt_template"):
                 logger.error(f"   prompt_template type: {type(obj.prompt_template)}")
             elif isinstance(obj, dict) and "prompt_template" in obj:
-                logger.error(
-                    f"   prompt_template type in dict: {type(obj['prompt_template'])}"
-                )
+                logger.error(f"   prompt_template type in dict: {type(obj['prompt_template'])}")
 
             # Stack trace
             stack = traceback.extract_stack()
@@ -263,9 +253,7 @@ def main():
     # Step 3: Run the agent (this is where the error occurs)
     logger.error("🎯 STEP 3: Running agent (WHERE ERROR OCCURS)")
     try:
-        result = agent.run(
-            {"query": "what is the tallest building in france"}, debug=True
-        )
+        result = agent.run({"query": "what is the tallest building in france"}, debug=True)
         logger.error(f"✅ Agent run successful: {result}")
     except Exception as e:
         logger.error(f"❌ AGENT RUN FAILED: {e}")

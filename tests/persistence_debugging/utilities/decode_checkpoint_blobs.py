@@ -38,13 +38,10 @@ def decode_checkpoint_blobs(thread_id: str):
             blobs = cur.fetchall()
 
             for _i, (_version, _channel, blob_type, blob_data) in enumerate(blobs):
-
                 if blob_type == "msgpack" and blob_data:
                     try:
                         # Decode msgpack
-                        messages = msgpack.unpackb(
-                            blob_data, raw=False, strict_map_key=False
-                        )
+                        messages = msgpack.unpackb(blob_data, raw=False, strict_map_key=False)
 
                         if isinstance(messages, list):
                             for _j, msg in enumerate(messages):
@@ -100,17 +97,13 @@ def check_persistence_store_link():
     if os.path.exists(store_dir):
         for file in os.listdir(store_dir):
             if file.endswith(".py"):
-
                 # Check if it imports ConnectionManager
                 file_path = os.path.join(store_dir, file)
                 try:
                     with open(file_path) as f:
                         content = f.read()
 
-                    if (
-                        "ConnectionManager" in content
-                        or "connection" in content.lower()
-                    ):
+                    if "ConnectionManager" in content or "connection" in content.lower():
                         pass
                 except:
                     pass
@@ -127,9 +120,7 @@ def main():
         thread_id = sys.argv[1]
     else:
         # Use the most recent test thread
-        thread_id = (
-            f"msg_test_{datetime.now().strftime('%H%M%S')[:-2]}02"  # Guess recent
-        )
+        thread_id = f"msg_test_{datetime.now().strftime('%H%M%S')[:-2]}02"  # Guess recent
 
     decode_checkpoint_blobs(thread_id)
     check_persistence_store_link()

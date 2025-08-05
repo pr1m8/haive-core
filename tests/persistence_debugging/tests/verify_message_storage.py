@@ -46,9 +46,7 @@ def test_message_persistence():
         {"messages": [HumanMessage(content="What was my first message?")]}, config
     )
 
-    msg2_response = (
-        result2.messages[-1].content if hasattr(result2, "messages") else "No response"
-    )
+    msg2_response = result2.messages[-1].content if hasattr(result2, "messages") else "No response"
 
     # Check if agent remembers
     ("message one" in msg2_response.lower() or "hello" in msg2_response.lower())
@@ -81,15 +79,10 @@ def test_message_persistence():
                 latest_cp_id, latest_cp = checkpoints[0]
 
                 # Parse checkpoint
-                cp_data = (
-                    json.loads(latest_cp) if isinstance(latest_cp, str) else latest_cp
-                )
+                cp_data = json.loads(latest_cp) if isinstance(latest_cp, str) else latest_cp
 
                 # Check messages
-                if (
-                    "channel_values" in cp_data
-                    and "messages" in cp_data["channel_values"]
-                ):
+                if "channel_values" in cp_data and "messages" in cp_data["channel_values"]:
                     messages = cp_data["channel_values"]["messages"]
 
                     for i, msg in enumerate(messages):
@@ -108,10 +101,7 @@ def test_message_persistence():
                                 and msg_type == "human"
                                 and "first message" in msg.get("content", "")
                             )
-                            or (
-                                msg_type == "ai"
-                                and "PERSISTENCE" in msg.get("content", "")
-                            )
+                            or (msg_type == "ai" and "PERSISTENCE" in msg.get("content", ""))
                         ):
                             pass
                 else:
@@ -160,7 +150,6 @@ def check_store_persistence_link():
 
                 # Check for ConnectionManager usage
                 if "ConnectionManager" in content:
-
                     # Check how it's used
                     for line in content.split("\n"):
                         if "ConnectionManager.get_or_create" in line:

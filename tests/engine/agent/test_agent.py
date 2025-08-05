@@ -198,9 +198,7 @@ class TestAgentClass:
                 mock_makedirs.assert_any_call(agent_config.output_dir, exist_ok=True)
 
                 # Should create state history directory
-                state_history_dir = os.path.join(
-                    agent_config.output_dir, "state_history"
-                )
+                state_history_dir = os.path.join(agent_config.output_dir, "state_history")
                 mock_makedirs.assert_any_call(state_history_dir, exist_ok=True)
 
                 # Should create graphs directory
@@ -279,9 +277,7 @@ class TestAgentClass:
         """Test that node configs are applied."""
         # Add a node config to the agent config using NodeConfig instead of dict
         # Create a proper NodeConfig instance
-        node_config = NodeConfig(
-            name="custom_node", engine=node_engine, command_goto="END"
-        )
+        node_config = NodeConfig(name="custom_node", engine=node_engine, command_goto="END")
 
         # Assign the NodeConfig to the agent_config
         if hasattr(agent_config, "node_configs"):
@@ -290,9 +286,7 @@ class TestAgentClass:
         with patch("haive.core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
             # Instead of patching the method at module level, we'll patch the
             # method on the Agent class
-            with patch.object(
-                AgentForTests, "_apply_node_configs", MagicMock()
-            ) as mock_apply:
+            with patch.object(AgentForTests, "_apply_node_configs", MagicMock()) as mock_apply:
                 AgentForTests(agent_config)
 
                 # Check that _apply_node_configs was called
@@ -441,9 +435,7 @@ class TestAgentClass:
 
             # Stream from the agent
             results = list(
-                agent.stream(
-                    {"input": "test"}, thread_id="test-thread", stream_mode="updates"
-                )
+                agent.stream({"input": "test"}, thread_id="test-thread", stream_mode="updates")
             )
 
             # Check results

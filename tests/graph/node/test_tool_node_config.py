@@ -146,9 +146,7 @@ def test_tool_node_error_handling():
     assert "messages" in result.update
 
     # Find the tool message and check that it contains an error
-    tool_messages = [
-        msg for msg in result.update["messages"] if isinstance(msg, ToolMessage)
-    ]
+    tool_messages = [msg for msg in result.update["messages"] if isinstance(msg, ToolMessage)]
     assert len(tool_messages) > 0
     assert (
         "error" in tool_messages[0].content.lower()

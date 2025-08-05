@@ -61,17 +61,13 @@ class _TestState(StateSchema):
 
 
 # Debugging helper to display test information
-def log_test(
-    title: str, state: Any = None, branch: Branch | None = None, result: Any = None
-):
+def log_test(title: str, state: Any = None, branch: Branch | None = None, result: Any = None):
     """Log test information with rich formatting."""
     console.rule(f"[bold magenta]{title}")
 
     if state:
         console.print(
-            Panel(
-                Pretty(state, expand_all=True), title="Test State", border_style="blue"
-            )
+            Panel(Pretty(state, expand_all=True), title="Test State", border_style="blue")
         )
 
     if branch:
@@ -134,9 +130,7 @@ def mapper_function():
     """Create a function that maps contents to Send objects."""
 
     def map_contents(state: Any) -> list[Send]:
-        contents = (
-            state.contents if hasattr(state, "contents") else state.get("contents", [])
-        )
+        contents = state.contents if hasattr(state, "contents") else state.get("contents", [])
 
         return [Send("process_content", {"content": content}) for content in contents]
 
@@ -230,9 +224,7 @@ def test_chain_branches(schema_state):
 def test_conditional_branch(schema_state):
     """Test conditional branch."""
     # Create conditional branch
-    branch = conditional(
-        lambda state: state.count > 3, "high_count_route", "low_count_route"
-    )
+    branch = conditional(lambda state: state.count > 3, "high_count_route", "low_count_route")
 
     # Evaluate branch
     result = branch(schema_state)
@@ -380,9 +372,9 @@ def test_dynamic_output_mapping():
 
     # For debugging - print the dynamic_mapping config
     console.print(
-        f"\nDynamic Mapping: key={
-            branch.dynamic_mapping.key}, value={
-            branch.dynamic_mapping.value}, "
+        f"\nDynamic Mapping: key={branch.dynamic_mapping.key}, value={
+            branch.dynamic_mapping.value
+        }, "
         f"comparison={branch.dynamic_mapping.comparison}"
     )
 
@@ -423,9 +415,7 @@ def test_serialization_deserialization(schema_state):
     console.rule("[bold magenta]Serialization Test")
     console.print(
         Panel(
-            Pretty(
-                branch_dict, expand_all=False
-            ),  # Not expanding to avoid too much output
+            Pretty(branch_dict, expand_all=False),  # Not expanding to avoid too much output
             title="Serialized Branch Dictionary",
             border_style="cyan",
         )

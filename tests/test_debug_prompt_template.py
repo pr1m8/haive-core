@@ -77,9 +77,7 @@ async def test_simple_agent():
             pass
 
         # This is where it will likely fail
-        await agent.arun(
-            {"query": "what is the tallest building in france"}, debug=True
-        )
+        await agent.arun({"query": "what is the tallest building in france"}, debug=True)
 
     except Exception:
         import traceback

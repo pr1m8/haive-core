@@ -10,7 +10,6 @@ sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/
 def show_langgraph_version():
     """Check LangGraph version to understand expected return types."""
     try:
-
         # Check if Command is available
         try:
             from langgraph.types import Command
@@ -28,7 +27,6 @@ def show_langgraph_version():
 def analyze_agent_node_v3_return():
     """Analyze what AgentNodeV3 actually returns."""
     try:
-
         # Show the return type
 
         # The issue: Let's check if there's a version mismatch
@@ -88,7 +86,6 @@ def test_simple_agent_execution():
 def check_langgraph_expects():
     """Check what LangGraph StateGraph actually expects."""
     try:
-
         # Check the LangGraph source/docs for expected return types
 
         # The ERROR MESSAGE tells us: "Expected dict, got"
@@ -102,7 +99,6 @@ def check_langgraph_expects():
 
 
 if __name__ == "__main__":
-
     show_langgraph_version()
     analyze_agent_node_v3_return()
     test_simple_agent_execution()

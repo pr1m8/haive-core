@@ -29,7 +29,6 @@ def main():
     step72_records = cursor.fetchall()
 
     for record in step72_records:
-
         # Check metadata writes
         metadata = record["metadata"]
         if metadata and "writes" in metadata:

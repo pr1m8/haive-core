@@ -102,9 +102,7 @@ class TestAutoLoaderConfig:
 class TestAutoLoaderBasic:
     """Test basic AutoLoader functionality."""
 
-    def test_initialization(
-        self, auto_loader_config, mock_enhanced_registry, mock_path_analyzer
-    ):
+    def test_initialization(self, auto_loader_config, mock_enhanced_registry, mock_path_analyzer):
         """Test AutoLoader initialization."""
         loader = AutoLoader(
             config=auto_loader_config,
@@ -133,15 +131,11 @@ class TestAutoLoaderBasic:
         result = auto_loader.detect_source("/path/to/test.pdf")
 
         assert result == mock_source_info
-        auto_loader.path_analyzer.analyze_path.assert_called_once_with(
-            "/path/to/test.pdf"
-        )
+        auto_loader.path_analyzer.analyze_path.assert_called_once_with("/path/to/test.pdf")
 
     def test_detect_source_error(self, auto_loader):
         """Test source detection with error."""
-        auto_loader.path_analyzer.analyze_path.side_effect = Exception(
-            "Analysis failed"
-        )
+        auto_loader.path_analyzer.analyze_path.side_effect = Exception("Analysis failed")
 
         with pytest.raises(ValueError, match="Could not detect source type"):
             auto_loader.detect_source("/invalid/path")
@@ -162,9 +156,7 @@ class TestAutoLoaderBasic:
 
     def test_get_best_loader_error(self, auto_loader, mock_source_info):
         """Test best loader selection with error."""
-        auto_loader.registry.get_loader_for_source.side_effect = Exception(
-            "No loader found"
-        )
+        auto_loader.registry.get_loader_for_source.side_effect = Exception("No loader found")
 
         with pytest.raises(ValueError, match="No suitable loader found"):
             auto_loader.get_best_loader(mock_source_info)
@@ -193,9 +185,10 @@ class TestAutoLoaderLoading:
         mock_source_instance = Mock()
         mock_source_instance.get_loader_kwargs.return_value = {"file_path": "/test.pdf"}
 
-        with patch.object(
-            auto_loader, "create_source_instance", return_value=mock_source_instance
-        ), patch.object(auto_loader, "_load_with_retry", return_value=sample_documents):
+        with (
+            patch.object(auto_loader, "create_source_instance", return_value=mock_source_instance),
+            patch.object(auto_loader, "_load_with_retry", return_value=sample_documents),
+        ):
             result = auto_loader.load("/test.pdf")
 
         assert result == sample_documents
@@ -206,8 +199,9 @@ class TestAutoLoaderLoading:
         auto_loader.config.enable_caching = True
 
         # First load
-        with patch.object(auto_loader, "detect_source"), patch.object(
-            auto_loader, "_load_documents_internal", return_value=sample_documents
+        with (
+            patch.object(auto_loader, "detect_source"),
+            patch.object(auto_loader, "_load_documents_internal", return_value=sample_documents),
         ):
             result1 = auto_loader.load("/test.pdf")
 
@@ -243,9 +237,7 @@ class TestAutoLoaderLoading:
 
     def test_load_detailed_error(self, auto_loader):
         """Test detailed loading with error."""
-        with patch.object(
-            auto_loader, "detect_source", side_effect=Exception("Detection failed")
-        ):
+        with patch.object(auto_loader, "detect_source", side_effect=Exception("Detection failed")):
             result = auto_loader.load_detailed("/invalid.pdf")
 
         assert isinstance(result, LoadingResult)
@@ -254,9 +246,7 @@ class TestAutoLoaderLoading:
         assert len(result.errors) == 1
         assert "Detection failed" in result.errors[0]
 
-    def test_load_all(
-        self, auto_loader, sample_documents, mock_source_info, mock_web_source
-    ):
+    def test_load_all(self, auto_loader, sample_documents, mock_source_info, mock_web_source):
         """Test loading all documents with scrape_all."""
         # Create mock source instance with scrape_all
         mock_source_instance = Mock()
@@ -269,20 +259,14 @@ class TestAutoLoaderLoading:
             with patch.object(
                 auto_loader, "create_source_instance", return_value=mock_source_instance
             ):
-                with patch.object(
-                    auto_loader, "load", return_value=sample_documents
-                ) as mock_load:
+                with patch.object(auto_loader, "load", return_value=sample_documents) as mock_load:
                     result = auto_loader.load_all("https://example.com")
 
         assert result == sample_documents
         # Verify load was called with scrape_all config
-        mock_load.assert_called_once_with(
-            "https://example.com", recursive=True, max_depth=3
-        )
+        mock_load.assert_called_once_with("https://example.com", recursive=True, max_depth=3)
 
-    def test_load_all_no_scrape_support(
-        self, auto_loader, sample_documents, mock_source_info
-    ):
+    def test_load_all_no_scrape_support(self, auto_loader, sample_documents, mock_source_info):
         """Test load_all when source doesn't support scrape_all."""
         # Create mock source without scrape_all
         mock_source_instance = Mock(spec=[])  # No scrape_all method
@@ -291,9 +275,7 @@ class TestAutoLoaderLoading:
             with patch.object(
                 auto_loader, "create_source_instance", return_value=mock_source_instance
             ):
-                with patch.object(
-                    auto_loader, "load", return_value=sample_documents
-                ) as mock_load:
+                with patch.object(auto_loader, "load", return_value=sample_documents) as mock_load:
                     result = auto_loader.load_all("/test.pdf")
 
         assert result == sample_documents
@@ -419,9 +401,7 @@ class TestAutoLoaderAsync:
     @pytest.mark.asyncio
     async def test_aload(self, auto_loader, sample_documents):
         """Test asynchronous document loading."""
-        with patch.object(
-            auto_loader, "load", return_value=sample_documents
-        ) as mock_load:
+        with patch.object(auto_loader, "load", return_value=sample_documents) as mock_load:
             result = await auto_loader.aload("/test.pdf")
 
         assert result == sample_documents
@@ -439,9 +419,7 @@ class TestAutoLoaderAsync:
             summary={},
         )
 
-        with patch.object(
-            auto_loader, "load_bulk", return_value=mock_result
-        ) as mock_bulk:
+        with patch.object(auto_loader, "load_bulk", return_value=mock_result) as mock_bulk:
             result = await auto_loader.aload_bulk(sources)
 
         assert result == mock_result
@@ -538,17 +516,13 @@ class TestAutoLoaderUtilities:
 
     def test_validate_credentials_failure(self, auto_loader):
         """Test failed credential validation."""
-        auto_loader.registry.get_source_class.side_effect = Exception(
-            "Invalid credentials"
-        )
+        auto_loader.registry.get_source_class.side_effect = Exception("Invalid credentials")
 
         result = auto_loader.validate_credentials("pdf", invalid_param="invalid")
 
         assert result is False
 
-    def test_enrich_documents_metadata(
-        self, auto_loader, sample_documents, mock_source_info
-    ):
+    def test_enrich_documents_metadata(self, auto_loader, sample_documents, mock_source_info):
         """Test metadata enrichment."""
         auto_loader.config.enable_metadata = True
 
@@ -556,9 +530,7 @@ class TestAutoLoaderUtilities:
         for doc in sample_documents:
             doc.metadata = {"original": "metadata"}
 
-        auto_loader._enrich_documents_metadata(
-            sample_documents, mock_source_info, "pypdf"
-        )
+        auto_loader._enrich_documents_metadata(sample_documents, mock_source_info, "pypdf")
 
         for doc in sample_documents:
             assert doc.metadata["source_type"] == mock_source_info.source_type
@@ -575,9 +547,7 @@ class TestConvenienceFunctions:
 
     def test_load_document(self, sample_documents):
         """Test load_document convenience function."""
-        with patch(
-            "haive.core.engine.document.loaders.auto_loader.AutoLoader"
-        ) as MockAutoLoader:
+        with patch("haive.core.engine.document.loaders.auto_loader.AutoLoader") as MockAutoLoader:
             mock_loader = Mock()
             mock_loader.load.return_value = sample_documents
             MockAutoLoader.return_value = mock_loader
@@ -606,9 +576,7 @@ class TestConvenienceFunctions:
             summary={},
         )
 
-        with patch(
-            "haive.core.engine.document.loaders.auto_loader.AutoLoader"
-        ) as MockAutoLoader:
+        with patch("haive.core.engine.document.loaders.auto_loader.AutoLoader") as MockAutoLoader:
             mock_loader = Mock()
             mock_loader.load_bulk.return_value = mock_bulk_result
             MockAutoLoader.return_value = mock_loader
@@ -621,9 +589,7 @@ class TestConvenienceFunctions:
     @pytest.mark.asyncio
     async def test_aload_document(self, sample_documents):
         """Test aload_document convenience function."""
-        with patch(
-            "haive.core.engine.document.loaders.auto_loader.AutoLoader"
-        ) as MockAutoLoader:
+        with patch("haive.core.engine.document.loaders.auto_loader.AutoLoader") as MockAutoLoader:
             mock_loader = Mock()
             mock_loader.aload = Mock(return_value=sample_documents)
             MockAutoLoader.return_value = mock_loader
@@ -690,9 +656,7 @@ class TestErrorScenarios:
         """Test loading from unsupported source type."""
         mock_source_info.source_type = "unsupported"
         auto_loader.path_analyzer.analyze_path.return_value = mock_source_info
-        auto_loader.registry.get_loader_for_source.side_effect = ValueError(
-            "Unsupported"
-        )
+        auto_loader.registry.get_loader_for_source.side_effect = ValueError("Unsupported")
 
         with pytest.raises(ValueError, match="No suitable loader found"):
             auto_loader.load("/test.unsupported")
@@ -702,9 +666,7 @@ class TestErrorScenarios:
         auto_loader.path_analyzer.analyze_path.return_value = mock_source_info
         auto_loader.registry.get_loader_for_source.return_value = "pypdf"
         auto_loader.registry.get_loader_config.return_value = {}
-        auto_loader.registry.get_source_class.side_effect = Exception(
-            "Source creation failed"
-        )
+        auto_loader.registry.get_source_class.side_effect = Exception("Source creation failed")
 
         with pytest.raises(ValueError, match="Could not create source"):
             auto_loader.load("/test.pdf")
@@ -773,12 +735,12 @@ class TestPerformance:
             time.sleep(0.1)
             return sample_documents
 
-        with patch.object(auto_loader, "detect_source"), patch.object(
-            auto_loader, "get_best_loader"
-        ), patch.object(auto_loader, "create_source_instance"), patch.object(
-            auto_loader, "_load_with_retry", side_effect=slow_load
+        with (
+            patch.object(auto_loader, "detect_source"),
+            patch.object(auto_loader, "get_best_loader"),
+            patch.object(auto_loader, "create_source_instance"),
+            patch.object(auto_loader, "_load_with_retry", side_effect=slow_load),
         ):
-
             # First load (should be slow)
             start_time = time.time()
             result1 = auto_loader.load("/test.pdf")
@@ -791,9 +753,7 @@ class TestPerformance:
 
         assert result1 == sample_documents
         assert result2 == sample_documents
-        assert (
-            second_load_time < first_load_time / 2
-        )  # Cache should be significantly faster
+        assert second_load_time < first_load_time / 2  # Cache should be significantly faster
 
 
 class TestRealWorldScenarios:
@@ -876,9 +836,7 @@ class TestRealWorldScenarios:
         assert len(result.failed_sources) == 2  # 2 bad files
         assert result.summary["success_rate"] == 60.0  # 3/5 = 60%
 
-    def test_configuration_driven_loading(
-        self, mock_enhanced_registry, mock_path_analyzer
-    ):
+    def test_configuration_driven_loading(self, mock_enhanced_registry, mock_path_analyzer):
         """Test loading with different configurations."""
         configs = [
             AutoLoaderConfig(preference=LoaderPreference.SPEED, max_concurrency=20),

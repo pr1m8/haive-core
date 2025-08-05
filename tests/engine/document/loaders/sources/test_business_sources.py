@@ -245,9 +245,7 @@ class TestHubSpotSource:
         assert "company_properties" in kwargs
         assert len(kwargs["company_properties"]) == 3
 
-    @patch(
-        "haive.core.engine.document.loaders.sources.business_sources.HubSpotSource.get_api_key"
-    )
+    @patch("haive.core.engine.document.loaders.sources.business_sources.HubSpotSource.get_api_key")
     def test_hubspot_api_key_fallback(self, mock_get_api_key):
         """Test HubSpot API key fallback to secure config."""
         mock_get_api_key.return_value = "secure-api-key"
@@ -441,9 +439,7 @@ class TestBusinessDataTypes:
             (BusinessDataType.REPORTS, "reports"),
         ],
     )
-    def test_business_data_type_values(
-        self, data_type: BusinessDataType, expected: str
-    ):
+    def test_business_data_type_values(self, data_type: BusinessDataType, expected: str):
         """Test business data type enum values."""
         assert data_type.value == expected
 
@@ -470,17 +466,13 @@ class TestBusinessDataTypes:
 class TestBusinessUtilityFunctions:
     """Test suite for business source utility functions."""
 
-    @patch(
-        "haive.core.engine.document.loaders.sources.business_sources.enhanced_registry"
-    )
+    @patch("haive.core.engine.document.loaders.sources.business_sources.enhanced_registry")
     def test_get_business_sources_statistics(self, mock_registry):
         """Test business sources statistics calculation."""
         # Mock registry responses
         mock_registry.find_sources_by_category.return_value = ["hubspot", "salesforce"]
         mock_registry._sources = {
-            "hubspot": MagicMock(
-                requires_credentials=True, credential_type=CredentialType.API_KEY
-            ),
+            "hubspot": MagicMock(requires_credentials=True, credential_type=CredentialType.API_KEY),
             "salesforce": MagicMock(
                 requires_credentials=True, credential_type=CredentialType.OAUTH
             ),
@@ -492,9 +484,7 @@ class TestBusinessUtilityFunctions:
         assert "platform_breakdown" in stats
         assert "oauth_authenticated_sources" in stats
 
-    @patch(
-        "haive.core.engine.document.loaders.sources.business_sources.enhanced_registry"
-    )
+    @patch("haive.core.engine.document.loaders.sources.business_sources.enhanced_registry")
     def test_validate_business_sources_success(self, mock_registry):
         """Test successful validation of business sources."""
         # Mock all required sources as present
@@ -512,9 +502,7 @@ class TestBusinessUtilityFunctions:
         result = validate_business_sources()
         assert result is True
 
-    @patch(
-        "haive.core.engine.document.loaders.sources.business_sources.enhanced_registry"
-    )
+    @patch("haive.core.engine.document.loaders.sources.business_sources.enhanced_registry")
     def test_validate_business_sources_missing(self, mock_registry):
         """Test validation failure when sources are missing."""
         # Mock only some sources as present
@@ -560,9 +548,7 @@ class TestBusinessSourceIntegration:
             (BusinessPlatform.JIRA, "JiraLoader"),
         ],
     )
-    def test_platform_loader_mapping(
-        self, platform: BusinessPlatform, loader_class: str
-    ):
+    def test_platform_loader_mapping(self, platform: BusinessPlatform, loader_class: str):
         """Test that each platform maps to the correct loader class."""
         # This test verifies the loader class names match expected conventions
         assert (

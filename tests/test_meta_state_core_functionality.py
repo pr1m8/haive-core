@@ -77,9 +77,7 @@ class TestMetaStateCoreFunctionality:
         )
 
         # Test input preparation for agent execution
-        prepared_input = meta_state.prepare_agent_input(
-            additional_input={"extra": "data"}
-        )
+        prepared_input = meta_state.prepare_agent_input(additional_input={"extra": "data"})
 
         # Should include agent state
         assert prepared_input["input"] == "test_input"
@@ -120,9 +118,7 @@ class TestMetaStateCoreFunctionality:
         mock_agent = Mock()
         mock_agent.name = "mock_agent"
         mock_agent.__class__.__name__ = "MockAgent"
-        mock_agent.run = Mock(
-            return_value={"output": "test_output", "state": {"updated": True}}
-        )
+        mock_agent.run = Mock(return_value={"output": "test_output", "state": {"updated": True}})
 
         meta_state = MetaStateSchema(
             agent=mock_agent,
@@ -307,9 +303,7 @@ class TestMetaStateCoreFunctionality:
             "graph_context",
             "composition_metadata",
         ]
-        assert all(
-            field in meta_state.__reducer_fields__ for field in expected_reducers
-        )
+        assert all(field in meta_state.__reducer_fields__ for field in expected_reducers)
         assert "messages" not in meta_state.__reducer_fields__
 
     def test_string_representation_shows_graph_state(self):

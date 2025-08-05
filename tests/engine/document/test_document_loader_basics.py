@@ -143,21 +143,15 @@ class TestSourceRegistry:
         # Test speed preference
         from haive.core.engine.document.config import LoaderPreference
 
-        loader = source_registry.get_loader_for_source(
-            source, preference=LoaderPreference.SPEED
-        )
+        loader = source_registry.get_loader_for_source(source, preference=LoaderPreference.SPEED)
         assert loader.name == "FastLoader"
 
         # Test quality preference
-        loader = source_registry.get_loader_for_source(
-            source, preference=LoaderPreference.QUALITY
-        )
+        loader = source_registry.get_loader_for_source(source, preference=LoaderPreference.QUALITY)
         assert loader.name == "QualityLoader"
 
         # Test default
-        loader = source_registry.get_loader_for_source(
-            source, preference=LoaderPreference.BALANCED
-        )
+        loader = source_registry.get_loader_for_source(source, preference=LoaderPreference.BALANCED)
         assert loader.name == "BalancedLoader"
 
 
@@ -247,9 +241,7 @@ class TestIntegration:
     def test_factory_error_handling(self):
         """Test factory error handling."""
         # Try unknown file type
-        result = document_loader_factory.analyze_path_with_sources(
-            "/unknown/file.xyz123"
-        )
+        result = document_loader_factory.analyze_path_with_sources("/unknown/file.xyz123")
         assert result["source"] is None
         assert result["loaders"] == {}
 

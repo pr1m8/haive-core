@@ -15,10 +15,9 @@ def db_params():
     """Get database parameters for testing."""
     params = get_db_params()
     logger.info(
-        f"Using DB params: host={
-            params['db_host']}, port={
-            params['db_port']}, db={
-            params['db_name']}"
+        f"Using DB params: host={params['db_host']}, port={params['db_port']}, db={
+            params['db_name']
+        }"
     )
     return params
 
@@ -35,10 +34,7 @@ def sync_postgres_config(db_params):
     config = PostgresCheckpointerConfig(
         **db_params, mode=CheckpointerMode.SYNC, storage_mode=CheckpointStorageMode.FULL
     )
-    logger.info(
-        f"Created sync PostgreSQL config with URI: {
-            config.get_connection_uri()}"
-    )
+    logger.info(f"Created sync PostgreSQL config with URI: {config.get_connection_uri()}")
     return config
 
 
@@ -53,10 +49,7 @@ def async_postgres_config(db_params):
         mode=CheckpointerMode.ASYNC,
         storage_mode=CheckpointStorageMode.FULL,
     )
-    logger.info(
-        f"Created async PostgreSQL config with URI: {
-            config.get_connection_uri()}"
-    )
+    logger.info(f"Created async PostgreSQL config with URI: {config.get_connection_uri()}")
     return config
 
 
@@ -68,10 +61,7 @@ def shallow_postgres_config(db_params):
         mode=CheckpointerMode.SYNC,
         storage_mode=CheckpointStorageMode.SHALLOW,
     )
-    logger.info(
-        f"Created shallow PostgreSQL config with URI: {
-            config.get_connection_uri()}"
-    )
+    logger.info(f"Created shallow PostgreSQL config with URI: {config.get_connection_uri()}")
     return config
 
 

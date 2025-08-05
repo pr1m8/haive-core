@@ -128,9 +128,9 @@ def test_token_tracking():
     # Debug: Check what happened
 
     # Verify token tracking works
-    assert (
-        llm_state.token_usage is not None
-    ), f"Token usage is None, but should be tracked. Messages: {len(llm_state.messages)}"
+    assert llm_state.token_usage is not None, (
+        f"Token usage is None, but should be tracked. Messages: {len(llm_state.messages)}"
+    )
     assert llm_state.token_usage.total_tokens == 15
 
     # Test LLMState-specific features

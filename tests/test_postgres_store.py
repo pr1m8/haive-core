@@ -44,9 +44,9 @@ def test_sync_postgres_store():
         # Extract value from Item object if needed
         retrieved_value = retrieved.value if hasattr(retrieved, "value") else retrieved
 
-        assert (
-            retrieved_value == value
-        ), f"Retrieved value doesn't match: {retrieved_value} != {value}"
+        assert retrieved_value == value, (
+            f"Retrieved value doesn't match: {retrieved_value} != {value}"
+        )
 
         logger.info("Testing delete operation...")
         store.delete(namespace, key)
@@ -96,9 +96,9 @@ async def test_async_postgres_store():
         # Extract value from Item object if needed
         retrieved_value = retrieved.value if hasattr(retrieved, "value") else retrieved
 
-        assert (
-            retrieved_value == value
-        ), f"Retrieved value doesn't match: {retrieved_value} != {value}"
+        assert retrieved_value == value, (
+            f"Retrieved value doesn't match: {retrieved_value} != {value}"
+        )
 
         logger.info("Testing async delete operation...")
         await store.adelete(namespace, key)
@@ -130,9 +130,9 @@ def test_memory_store_fallback():
         logger.info(f"Created store: {type(store).__name__}")
 
         # Should have fallen back to memory store
-        assert (
-            "Memory" in type(store).__name__
-        ), f"Expected memory store, got {type(store).__name__}"
+        assert "Memory" in type(store).__name__, (
+            f"Expected memory store, got {type(store).__name__}"
+        )
 
         logger.info("✅ Memory store fallback test passed!")
 

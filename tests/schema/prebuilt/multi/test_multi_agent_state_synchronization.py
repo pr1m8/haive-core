@@ -50,9 +50,7 @@ class ReasoningAgentState(BaseModel):
     final_answer: str = ""  # Output
     # Private
     reasoning_steps: list[str] = Field(default_factory=list)
-    tools: list[str] = Field(
-        default_factory=lambda: ["logic_checker", "fact_validator"]
-    )
+    tools: list[str] = Field(default_factory=lambda: ["logic_checker", "fact_validator"])
 
 
 # Combined state that includes all fields
@@ -136,9 +134,7 @@ class TestMultiAgentStateSynchronization:
         selector_output = {"selected_modules": ["A", "B"], "rationale": "Best for task"}
 
         # Update both agent state and combined state
-        state.agent_states["selector"]["selected_modules"] = selector_output[
-            "selected_modules"
-        ]
+        state.agent_states["selector"]["selected_modules"] = selector_output["selected_modules"]
         # Sync to combined
         state.selected_modules = selector_output["selected_modules"]
 
@@ -271,10 +267,7 @@ class TestMultiAgentStateSynchronization:
         # Verify all updates applied
         assert state.selected_modules == ["reasoning", "planning"]
         assert len(state.messages) == 1
-        assert (
-            state.agent_states["selector"]["rationale"]
-            == "Best modules for complex reasoning"
-        )
+        assert state.agent_states["selector"]["rationale"] == "Best modules for complex reasoning"
         assert state.agent_states["selector"]["selection_history"][0]["round"] == 1
 
     def test_output_fields_as_state_keys(self):

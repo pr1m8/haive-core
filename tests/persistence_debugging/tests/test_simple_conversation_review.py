@@ -9,12 +9,8 @@ def test_basic_conversation():
     """Basic test of conversation agent with fixed persistence."""
     try:
         # Add the packages to path
-        sys.path.insert(
-            0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src"
-        )
-        sys.path.insert(
-            0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src"
-        )
+        sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+        sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
 
         # Import the correct collaborative agent
         from haive.agents.conversation.collaberative.agent import (

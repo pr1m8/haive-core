@@ -39,11 +39,8 @@ def view_checkpoint_metadata(thread_id: str | None = None):
             checkpoints = cur.fetchall()
 
             for _thread, _cp_id, metadata in checkpoints:
-
                 try:
-                    meta_dict = (
-                        json.loads(metadata) if isinstance(metadata, str) else metadata
-                    )
+                    meta_dict = json.loads(metadata) if isinstance(metadata, str) else metadata
 
                     # Show key fields
                     if "step" in meta_dict:
@@ -65,21 +62,14 @@ def view_checkpoint_metadata(thread_id: str | None = None):
                                         pass
                                     if "process_response" in data:
                                         pr = data["process_response"]
-                                        if (
-                                            isinstance(pr, dict)
-                                            and "contributions" in pr
-                                        ):
+                                        if isinstance(pr, dict) and "contributions" in pr:
                                             # Check for errors in contributions
                                             for contrib in pr["contributions"]:
-                                                if (
-                                                    isinstance(contrib, list)
-                                                    and len(contrib) >= 3
-                                                ):
+                                                if isinstance(contrib, list) and len(contrib) >= 3:
                                                     content = str(contrib[2])
                                                     if (
                                                         "error" in content.lower()
-                                                        or "prepared statement"
-                                                        in content.lower()
+                                                        or "prepared statement" in content.lower()
                                                     ):
                                                         pass
 

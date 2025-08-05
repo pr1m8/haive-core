@@ -29,9 +29,7 @@ class TestVectorStoreProviders(unittest.TestCase):
         """Test that the provider registry returns classes for built-in providers."""
         # Test getting the class for a built-in provider
         # Note: This doesn't actually instantiate the class
-        provider_class = VectorStoreProviderRegistry.get_provider_class(
-            VectorStoreProvider.FAISS
-        )
+        provider_class = VectorStoreProviderRegistry.get_provider_class(VectorStoreProvider.FAISS)
         assert (
             provider_class is None
         )  # Should be None since we're falling back to the built-in imports
@@ -87,9 +85,7 @@ class TestVectorStoreProviders(unittest.TestCase):
                     return []
 
                 @classmethod
-                def from_texts(
-                    cls, texts: list[str], embedding, metadatas=None, **kwargs
-                ):
+                def from_texts(cls, texts: list[str], embedding, metadatas=None, **kwargs):
                     """Create a vector store from texts."""
                     return cls()
 
@@ -106,9 +102,7 @@ class TestVectorStoreProviders(unittest.TestCase):
         )
 
         # Get the class from the registry
-        provider_class = VectorStoreProviderRegistry.get_provider_class(
-            "FactoryMockStore"
-        )
+        provider_class = VectorStoreProviderRegistry.get_provider_class("FactoryMockStore")
         assert provider_class is not None
         assert issubclass(provider_class, VectorStore)
 

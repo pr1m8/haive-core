@@ -321,10 +321,10 @@ class TestPathAnalyzer:
         for path, expected_type in test_paths:
             result = analyzer.analyze_path(path)
             assert result is not None
-            assert (
-                expected_type in result.source_type.lower()
-                or result.source_type in ["local_file", "file"]
-            )
+            assert expected_type in result.source_type.lower() or result.source_type in [
+                "local_file",
+                "file",
+            ]
 
     def test_analyze_url_patterns(self):
         """Test analyzing URL patterns."""

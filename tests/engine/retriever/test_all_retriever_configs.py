@@ -33,9 +33,7 @@ def test_sparse_retriever_configs(sample_documents):
             TFIDFRetrieverConfig,
         )
 
-        config = TFIDFRetrieverConfig(
-            name="test_tfidf", documents=sample_documents, k=3
-        )
+        config = TFIDFRetrieverConfig(name="test_tfidf", documents=sample_documents, k=3)
         assert config.name == "test_tfidf"
         assert len(config.documents) == len(sample_documents)
     except Exception:
@@ -60,9 +58,7 @@ def test_sparse_retriever_configs(sample_documents):
             SVMRetrieverConfig,
         )
 
-        config = SVMRetrieverConfig(
-            name="test_svm", documents=sample_documents, k=2, kernel="rbf"
-        )
+        config = SVMRetrieverConfig(name="test_svm", documents=sample_documents, k=2, kernel="rbf")
         assert config.kernel == "rbf"
     except Exception:
         pass
@@ -90,9 +86,7 @@ def test_api_retriever_configs():
             AskNewsRetrieverConfig,
         )
 
-        config = AskNewsRetrieverConfig(
-            name="test_asknews", k=10, hours_back=24, language="en"
-        )
+        config = AskNewsRetrieverConfig(name="test_asknews", k=10, hours_back=24, language="en")
         assert config.k == 10
         assert config.hours_back == 24
     except Exception:
@@ -104,9 +98,7 @@ def test_api_retriever_configs():
             PubMedRetrieverConfig,
         )
 
-        config = PubMedRetrieverConfig(
-            name="test_pubmed", top_k_results=5, load_max_docs=25
-        )
+        config = PubMedRetrieverConfig(name="test_pubmed", top_k_results=5, load_max_docs=25)
         assert config.top_k_results == 5
         assert config.load_max_docs == 25
     except Exception:
@@ -212,9 +204,7 @@ def test_specialized_retriever_configs(sample_documents):
             MetalRetrieverConfig,
         )
 
-        config = MetalRetrieverConfig(
-            name="test_metal", index_id="my-metal-index-123", k=10
-        )
+        config = MetalRetrieverConfig(name="test_metal", index_id="my-metal-index-123", k=10)
         assert config.index_id == "my-metal-index-123"
     except Exception:
         pass
@@ -325,7 +315,9 @@ def test_validation_errors():
         # This should raise a validation error (k too small)
         with pytest.raises(Exception):
             BM25RetrieverConfig(
-                name="test_invalid", documents=[], k=0  # Invalid: k must be >= 1
+                name="test_invalid",
+                documents=[],
+                k=0,  # Invalid: k must be >= 1
             )
     except ImportError:
         pass
@@ -353,7 +345,6 @@ def test_retriever_registration():
 
     # Import all our retrievers to trigger registration
     try:
-
         # Check that they're registered
         registry = BaseRetrieverConfig._registry
 

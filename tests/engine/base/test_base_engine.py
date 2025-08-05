@@ -132,16 +132,12 @@ def test_apply_runnable_config():
     assert params == {"test_param": "by_id"}
 
     # Config with engine name targeting
-    config = {
-        "configurable": {"engine_configs": {"test_engine": {"test_param": "by_name"}}}
-    }
+    config = {"configurable": {"engine_configs": {"test_engine": {"test_param": "by_name"}}}}
     params = engine.apply_runnable_config(config)
     assert params == {"test_param": "by_name"}
 
     # Config with engine type targeting
-    config = {
-        "configurable": {"engine_configs": {"llm_config": {"test_param": "by_type"}}}
-    }
+    config = {"configurable": {"engine_configs": {"llm_config": {"test_param": "by_type"}}}}
     params = engine.apply_runnable_config(config)
     assert params == {"test_param": "by_type"}
 

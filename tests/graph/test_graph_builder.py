@@ -57,9 +57,7 @@ sys.modules["src.haive.core.engine.aug_llm"] = mock_aug_llm_module
 mock_state_schema_manager = MagicMock()
 mock_schema_manager_module = MagicMock()
 mock_schema_manager_module.StateSchemaManager = mock_state_schema_manager
-sys.modules["src.haive.core.graph.schema.StateSchemaManager"] = (
-    mock_schema_manager_module
-)
+sys.modules["src.haive.core.graph.schema.StateSchemaManager"] = mock_schema_manager_module
 
 # Mock SchemaComposer
 mock_schema_composer = MagicMock()
@@ -80,9 +78,7 @@ mock_graph_editor_module.StateGraphEditor = mock_state_graph_editor
 sys.modules["src.haive.core.graph.StateGraphEditor"] = mock_graph_editor_module
 
 # Import path handling to ensure proper imports
-sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../../"))
-)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../../")))
 
 
 # Create classes we expect to exist within GraphBuilder
@@ -137,9 +133,7 @@ class MockDynamicGraph(BaseModel):
         self.graph_editor = mock_state_graph_editor.return_value
 
     def _lookup_engine(self, name, engine_type=None):
-        return next(
-            (e for e in self.components if hasattr(e, "name") and e.name == name), None
-        )
+        return next((e for e in self.components if hasattr(e, "name") and e.name == name), None)
 
     def with_runnable_config(self, runnable_config):
         new_graph = MockDynamicGraph(
@@ -196,9 +190,7 @@ class MockDynamicGraph(BaseModel):
 
         return self
 
-    def add_config_node(
-        self, name="set_config", runnable_config=None, command_goto=None
-    ):
+    def add_config_node(self, name="set_config", runnable_config=None, command_goto=None):
         # Create a node function using NodeFactory
         # This now explicitly calls the factory method to pass the test
         # assertion
@@ -275,9 +267,7 @@ class MockDynamicGraph(BaseModel):
                 condition_or_branch.destinations,
             )
         else:
-            self.graph_editor.add_conditional_edges(
-                from_node, condition_or_branch, routes
-            )
+            self.graph_editor.add_conditional_edges(from_node, condition_or_branch, routes)
         return self
 
     def set_entry_point(self, node_name):
@@ -319,9 +309,7 @@ class MockDynamicGraph(BaseModel):
             "components": [],
             "custom_fields": self.custom_fields,
             "default_runnable_config": (
-                str(self.default_runnable_config)
-                if self.default_runnable_config
-                else None
+                str(self.default_runnable_config) if self.default_runnable_config else None
             ),
         }
 
@@ -408,7 +396,6 @@ class RealEngine(AugLLMConfig):
 
 # Test class
 class DynamicGraphTests(unittest.TestCase):
-
     def setUp(self):
         # Create test engines
         self.llm_engine = RealEngine(name="llm_engine", engine_type=EngineType.LLM)
@@ -433,9 +420,7 @@ class DynamicGraphTests(unittest.TestCase):
     def test_init_with_state_schema(self):
         """Test initializing with custom state schema."""
         # Create DynamicGraph with state schema
-        graph = MockDynamicGraph(
-            name="test_graph", state_schema=StateModel, visualize=False
-        )
+        graph = MockDynamicGraph(name="test_graph", state_schema=StateModel, visualize=False)
 
         # Check schema initialization
         assert graph.schema_manager is not None
@@ -575,9 +560,7 @@ class DynamicGraphTests(unittest.TestCase):
         graph.structured_output_model = ResponseFormat
 
         # Add structured output node
-        result = graph.add_structured_output_node(
-            name="format_output", command_goto="END"
-        )
+        result = graph.add_structured_output_node(name="format_output", command_goto="END")
 
         # Check that NodeFactory.create_structured_output_node was called
         mock_node_factory.create_structured_output_node.assert_called_once()
@@ -637,9 +620,7 @@ class DynamicGraphTests(unittest.TestCase):
         result = graph.add_edge("node1", "node2")
 
         # Check that edge was added to graph editor
-        mock_state_graph_editor.return_value.add_edge.assert_called_once_with(
-            "node1", "node2"
-        )
+        mock_state_graph_editor.return_value.add_edge.assert_called_once_with("node1", "node2")
 
         # Check that method returns self for chaining
         assert result is graph
@@ -682,9 +663,7 @@ class DynamicGraphTests(unittest.TestCase):
         result = graph.set_entry_point("start_node")
 
         # Check that entry point was set in graph editor
-        mock_state_graph_editor.return_value.set_entry_point.assert_called_once_with(
-            "start_node"
-        )
+        mock_state_graph_editor.return_value.set_entry_point.assert_called_once_with("start_node")
 
         # Check that method returns self for chaining
         assert result is graph

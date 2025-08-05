@@ -22,8 +22,7 @@ class TestResponse(BaseModel):
 
 # Simple prompt
 TEST_PROMPT = ChatPromptTemplate.from_messages(
-    [("system", "You are a helpful assistant."),
-     ("human", "Say hello: {query}")]
+    [("system", "You are a helpful assistant."), ("human", "Say hello: {query}")]
 )
 
 

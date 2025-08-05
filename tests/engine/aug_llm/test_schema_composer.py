@@ -50,9 +50,7 @@ class ChatState(StateSchema):
     query: str = Field(default="", description="User query")
 
 
-def log_composer_debug_info(
-    composer: SchemaComposer, title: str = "Composer Debug Info"
-):
+def log_composer_debug_info(composer: SchemaComposer, title: str = "Composer Debug Info"):
     """Log detailed debug information about the composer's state."""
     console.print(Panel(title, expand=False))
 
@@ -88,11 +86,7 @@ def log_composer_debug_info(
         for model_name, model in composer.structured_models.items():
             console.print(f"  {model_name}: {model.__name__}")
             if model_name in composer.structured_model_fields:
-                console.print(
-                    f"    Fields: {
-                        list(
-                            composer.structured_model_fields[model_name])}"
-                )
+                console.print(f"    Fields: {list(composer.structured_model_fields[model_name])}")
 
 
 def log_schema_debug_info(schema, title: str = "Schema Debug Info"):
@@ -124,9 +118,7 @@ def log_schema_debug_info(schema, title: str = "Schema Debug Info"):
         console.print("\n[bold]Model Fields:[/bold]")
         for field_name, field_info in schema.model_fields.items():
             console.print(
-                f"  {field_name}: {
-                    field_info.annotation} (default: {
-                    field_info.default})"
+                f"  {field_name}: {field_info.annotation} (default: {field_info.default})"
             )
 
 
@@ -143,15 +135,11 @@ def test_schema_composer_basics():
     log_composer_debug_info(composer, "After adding 'name' field")
 
     console.print("\n[yellow]Adding field: value (int)[/yellow]")
-    composer.add_field(
-        name="value", field_type=int, default=0, description="Value field"
-    )
+    composer.add_field(name="value", field_type=int, default=0, description="Value field")
     log_composer_debug_info(composer, "After adding 'value' field")
 
     console.print("\n[yellow]Adding field: active (bool)[/yellow]")
-    composer.add_field(
-        name="active", field_type=bool, default=False, description="Active status"
-    )
+    composer.add_field(name="active", field_type=bool, default=False, description="Active status")
     log_composer_debug_info(composer, "After adding 'active' field")
 
     # Build schema
@@ -161,15 +149,15 @@ def test_schema_composer_basics():
 
     # Verify fields
     assert hasattr(schema, "model_fields"), "Schema missing model_fields attribute"
-    assert (
-        "name" in schema.model_fields
-    ), f"Field 'name' missing. Available: {list(schema.model_fields.keys())}"
-    assert (
-        "value" in schema.model_fields
-    ), f"Field 'value' missing. Available: {list(schema.model_fields.keys())}"
-    assert (
-        "active" in schema.model_fields
-    ), f"Field 'active' missing. Available: {list(schema.model_fields.keys())}"
+    assert "name" in schema.model_fields, (
+        f"Field 'name' missing. Available: {list(schema.model_fields.keys())}"
+    )
+    assert "value" in schema.model_fields, (
+        f"Field 'value' missing. Available: {list(schema.model_fields.keys())}"
+    )
+    assert "active" in schema.model_fields, (
+        f"Field 'active' missing. Available: {list(schema.model_fields.keys())}"
+    )
 
     # Create instance
     instance = schema(name="Test")
@@ -186,11 +174,7 @@ def test_schema_composer_from_model():
     # Show what we're extracting from
     console.print("\n[bold]SimpleModel fields:[/bold]")
     for field_name, field_info in SimpleModel.model_fields.items():
-        console.print(
-            f"  {field_name}: {
-                field_info.annotation} (default: {
-                field_info.default})"
-        )
+        console.print(f"  {field_name}: {field_info.annotation} (default: {field_info.default})")
 
     # Add fields from model
     composer = SchemaComposer(name="ModelSchema")
@@ -206,9 +190,7 @@ def test_schema_composer_from_model():
     assert hasattr(schema, "model_fields"), "Schema missing model_fields attribute"
 
     for field_name in SimpleModel.model_fields:
-        assert (
-            field_name in schema.model_fields
-        ), f"Field '{field_name}' not found in schema"
+        assert field_name in schema.model_fields, f"Field '{field_name}' not found in schema"
 
         # Compare field info
         original_field = SimpleModel.model_fields[field_name]
@@ -239,32 +221,15 @@ def test_schema_composer_with_engine():
     console.print("\n[bold]Engine Attributes:[/bold]")
     console.print(f"  Name: {aug_llm.name}")
     console.print(f"  Engine Type: {aug_llm.engine_type}")
-    console.print(
-        f"  Has structured_output_model: {
-            hasattr(
-                aug_llm,
-                'structured_output_model')}"
-    )
+    console.print(f"  Has structured_output_model: {hasattr(aug_llm, 'structured_output_model')}")
     if hasattr(aug_llm, "structured_output_model"):
         console.print(f"  Structured Model: {aug_llm.structured_output_model}")
         console.print(
-            f"  Model Fields: {
-                list(
-                    aug_llm.structured_output_model.model_fields.keys())}"
+            f"  Model Fields: {list(aug_llm.structured_output_model.model_fields.keys())}"
         )
 
-    console.print(
-        f"  Has get_input_fields: {
-            hasattr(
-                aug_llm,
-                'get_input_fields')}"
-    )
-    console.print(
-        f"  Has get_output_fields: {
-            hasattr(
-                aug_llm,
-                'get_output_fields')}"
-    )
+    console.print(f"  Has get_input_fields: {hasattr(aug_llm, 'get_input_fields')}")
+    console.print(f"  Has get_output_fields: {hasattr(aug_llm, 'get_output_fields')}")
 
     # Test field extraction methods
     if hasattr(aug_llm, "get_input_fields"):
@@ -297,11 +262,7 @@ def test_schema_composer_with_engine():
 
     # Verify schema has fields
     assert hasattr(schema, "model_fields"), "Schema missing model_fields attribute"
-    console.print(
-        f"\n[green]Schema fields: {
-            list(
-                schema.model_fields.keys())}[/green]"
-    )
+    console.print(f"\n[green]Schema fields: {list(schema.model_fields.keys())}[/green]")
 
     # Check for expected fields
     expected_fields = ["messages", "content"]
@@ -328,9 +289,7 @@ def test_schema_composer_input_output_schema():
 
     # Test input schema creation
     console.print("\n[yellow]Creating input schema...[/yellow]")
-    input_schema = SchemaComposer.compose_input_schema(
-        components=[aug_llm], name="InputSchema"
-    )
+    input_schema = SchemaComposer.compose_input_schema(components=[aug_llm], name="InputSchema")
 
     console.print("\n[bold]Input Schema Fields:[/bold]")
     for field_name, field_info in input_schema.model_fields.items():
@@ -365,9 +324,7 @@ def test_schema_composer_input_output_schema():
             console.print(f"  {field_name}: {field_info.annotation}")
 
     # Create output schema using the method
-    output_schema = SchemaComposer.compose_output_schema(
-        components=[aug_llm], name="OutputSchema"
-    )
+    output_schema = SchemaComposer.compose_output_schema(components=[aug_llm], name="OutputSchema")
 
     console.print("\n[bold]Generated Output Schema Fields:[/bold]")
     for field_name, field_info in output_schema.model_fields.items():
@@ -383,9 +340,7 @@ def test_schema_composer_input_output_schema():
             console.print(f"  ✓ Input schema has '{field}'")
         else:
             console.print(
-                f"  ✗ Input schema missing '{field}'. Has: {
-                    list(
-                        input_schema.model_fields.keys())}"
+                f"  ✗ Input schema missing '{field}'. Has: {list(input_schema.model_fields.keys())}"
             )
 
     # Check what's in output schema
@@ -408,9 +363,7 @@ def test_schema_composer_merge():
     # Create first composer
     composer1 = SchemaComposer(name="FirstSchema")
     console.print("\n[yellow]Setting up first composer...[/yellow]")
-    composer1.add_field(
-        name="field1", field_type=str, description="Field from first composer"
-    )
+    composer1.add_field(name="field1", field_type=str, description="Field from first composer")
     composer1.add_field(
         name="shared_field",
         field_type=int,
@@ -422,9 +375,7 @@ def test_schema_composer_merge():
     # Create second composer
     composer2 = SchemaComposer(name="SecondSchema")
     console.print("\n[yellow]Setting up second composer...[/yellow]")
-    composer2.add_field(
-        name="field2", field_type=str, description="Field from second composer"
-    )
+    composer2.add_field(name="field2", field_type=str, description="Field from second composer")
     composer2.add_field(
         name="shared_field",
         field_type=int,
@@ -445,20 +396,17 @@ def test_schema_composer_merge():
     # Verify merge results
     expected_fields = ["field1", "field2", "shared_field"]
     for field in expected_fields:
-        assert (
-            field in schema.model_fields
-        ), f"Expected field '{field}' not found in merged schema"
+        assert field in schema.model_fields, f"Expected field '{field}' not found in merged schema"
         console.print(f"  ✓ Found merged field: {field}")
 
     # Check which value was used for shared_field
     instance = schema(field1="test1", field2="test2")
     console.print(
         f"\n[bold]shared_field value (should be from first composer):[/bold] {
-            instance.shared_field}"
+            instance.shared_field
+        }"
     )
-    assert (
-        instance.shared_field == 0
-    ), f"Expected shared_field = 0, got {instance.shared_field}"
+    assert instance.shared_field == 0, f"Expected shared_field = 0, got {instance.shared_field}"
 
     SchemaUI.display_schema(schema, "Merged Schema")
 
@@ -473,9 +421,7 @@ def test_schema_composer_state_from_io():
 
         messages: list[BaseMessage] = Field(default_factory=list)
         query: str = Field(default="", description="User query")
-        context: list[str] = Field(
-            default_factory=list, description="Context documents"
-        )
+        context: list[str] = Field(default_factory=list, description="Context documents")
 
     # Define output schema
     class ResponseOutputSchema(BaseModel):
@@ -483,9 +429,7 @@ def test_schema_composer_state_from_io():
 
         messages: list[BaseMessage] = Field(default_factory=list)
         response: str = Field(default="", description="Generated response")
-        sources: list[dict[str, Any]] = Field(
-            default_factory=list, description="Source documents"
-        )
+        sources: list[dict[str, Any]] = Field(default_factory=list, description="Source documents")
         confidence: float = Field(default=0.0, description="Confidence score")
 
     # Show schema details
@@ -508,23 +452,10 @@ def test_schema_composer_state_from_io():
 
         # Verify inheritance
         console.print("\n[bold]Schema Inheritance Check:[/bold]")
+        console.print(f"  Is StateSchema: {issubclass(state_schema, StateSchema)}")
+        console.print(f"  Is QueryInputSchema: {issubclass(state_schema, QueryInputSchema)}")
         console.print(
-            f"  Is StateSchema: {
-                issubclass(
-                    state_schema,
-                    StateSchema)}"
-        )
-        console.print(
-            f"  Is QueryInputSchema: {
-                issubclass(
-                    state_schema,
-                    QueryInputSchema)}"
-        )
-        console.print(
-            f"  Is ResponseOutputSchema: {
-                issubclass(
-                    state_schema,
-                    ResponseOutputSchema)}"
+            f"  Is ResponseOutputSchema: {issubclass(state_schema, ResponseOutputSchema)}"
         )
 
         # Verify all fields
@@ -543,9 +474,7 @@ def test_schema_composer_state_from_io():
                 console.print(f"  ✗ Missing field: {field}")
 
         # Test instance creation
-        state = state_schema(
-            query="What is AI?", context=["AI is artificial intelligence."]
-        )
+        state = state_schema(query="What is AI?", context=["AI is artificial intelligence."])
         console.print(f"\n[green]Successfully created state instance: {state}[/green]")
 
         SchemaUI.display_schema(state_schema, "Composed State Schema")

@@ -134,9 +134,7 @@ def test_state_injection():
     # We can't directly call execute_tool with state injection
     # In a real environment, LangGraph would handle the injection
     # For testing, we can call the tool directly
-    result = tool_manager.execute_tool(
-        "extract_last_message", kwargs={"state": mock_state}
-    )
+    result = tool_manager.execute_tool("extract_last_message", kwargs={"state": mock_state})
 
     assert result == "This is the last message"
 
@@ -222,9 +220,7 @@ def test_tool_filtering():
     manager.create_and_register_tool(
         lambda x: x - 1,
         name="decrement",
-        config=ToolConfig(
-            name="decrement", tags=["math", "basic"], denied_in_states=["finished"]
-        ),
+        config=ToolConfig(name="decrement", tags=["math", "basic"], denied_in_states=["finished"]),
     )
 
     manager.create_and_register_tool(
@@ -251,9 +247,7 @@ def test_tool_filtering():
     assert len(basic_tools) == 2
 
     # Get tools requiring all tags
-    advanced_math = manager.get_allowed_tools(
-        tags=["math", "advanced"], require_all_tags=True
-    )
+    advanced_math = manager.get_allowed_tools(tags=["math", "advanced"], require_all_tags=True)
     assert len(advanced_math) == 1
     assert "multiply" in advanced_math
 

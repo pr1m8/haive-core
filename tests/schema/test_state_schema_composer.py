@@ -34,16 +34,12 @@ class MockEngine(InvokableEngine):
     def derive_input_schema(self):
         from pydantic import create_model
 
-        return create_model(
-            "MockInputSchema", query=(str, ""), temperature=(float, 0.7)
-        )
+        return create_model("MockInputSchema", query=(str, ""), temperature=(float, 0.7))
 
     def derive_output_schema(self):
         from pydantic import create_model
 
-        return create_model(
-            "MockOutputSchema", result=(str, ""), confidence=(float, 0.0)
-        )
+        return create_model("MockOutputSchema", result=(str, ""), confidence=(float, 0.0))
 
     def get_schema_fields(self):
         return {
@@ -140,9 +136,7 @@ def test_derived_input_schema(mock_engine):
     """Test creating an input schema from engines."""
     logger.info("Testing input schema creation")
 
-    input_schema = SchemaComposer.compose_input_schema(
-        [mock_engine], name="InputSchema"
-    )
+    input_schema = SchemaComposer.compose_input_schema([mock_engine], name="InputSchema")
     logger.debug(f"Created input schema: {input_schema.__name__}")
 
     # Verify schema has expected fields
@@ -159,9 +153,7 @@ def test_derived_output_schema(mock_engine):
     """Test creating an output schema from engines."""
     logger.info("Testing output schema creation")
 
-    output_schema = SchemaComposer.compose_output_schema(
-        [mock_engine], name="OutputSchema"
-    )
+    output_schema = SchemaComposer.compose_output_schema([mock_engine], name="OutputSchema")
     logger.debug(f"Created output schema: {output_schema.__name__}")
 
     # Verify schema has expected fields
@@ -181,11 +173,7 @@ def test_create_schema_for_components(mock_engine, sample_model):
     schema_manager = SchemaComposer.create_schema_for_components(
         [mock_engine, sample_model], name="CombinedSchema"
     )
-    logger.debug(
-        f"Created schema manager with fields: {
-            list(
-                schema_manager.fields.keys())}"
-    )
+    logger.debug(f"Created schema manager with fields: {list(schema_manager.fields.keys())}")
 
     # Verify schema manager has expected fields
     assert schema_manager.name == "CombinedSchema"

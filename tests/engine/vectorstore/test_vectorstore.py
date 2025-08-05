@@ -17,14 +17,9 @@ logging.basicConfig(level=logging.INFO)
 
 def make_default_config(docs: list[Document] | None = None) -> VectorStoreConfig:
     used_docs = (
-        docs
-        if docs is not None
-        else [Document(page_content="The capital of France is Paris.")]
+        docs if docs is not None else [Document(page_content="The capital of France is Paris.")]
     )
-    logger.info(
-        f"[make_default_config] Initializing with {
-            len(used_docs)} document(s)"
-    )
+    logger.info(f"[make_default_config] Initializing with {len(used_docs)} document(s)")
     for i, doc in enumerate(used_docs):
         logger.info(f" - Doc {i}: {doc.page_content}")
 
@@ -32,9 +27,7 @@ def make_default_config(docs: list[Document] | None = None) -> VectorStoreConfig
         name="test_vs",
         documents=used_docs,
         vector_store_provider=VectorStoreProvider.IN_MEMORY,
-        embedding_model=HuggingFaceEmbeddingConfig(
-            model="sentence-transformers/all-MiniLM-L6-v2"
-        ),
+        embedding_model=HuggingFaceEmbeddingConfig(model="sentence-transformers/all-MiniLM-L6-v2"),
     )
 
 
@@ -68,16 +61,8 @@ def test_input_output_schemas():
     config = make_default_config()
     input_schema = config.derive_input_schema()
     output_schema = config.derive_output_schema()
-    logger.info(
-        f"✅ Input schema fields: {
-            list(
-                input_schema.model_fields.keys())}"
-    )
-    logger.info(
-        f"✅ Output schema fields: {
-            list(
-                output_schema.model_fields.keys())}"
-    )
+    logger.info(f"✅ Input schema fields: {list(input_schema.model_fields.keys())}")
+    logger.info(f"✅ Output schema fields: {list(output_schema.model_fields.keys())}")
     assert "query" in input_schema.model_fields
     assert "documents" in output_schema.model_fields
 

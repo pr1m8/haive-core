@@ -193,10 +193,7 @@ class TestToolStateWithValidation:
 
         # Check execution history
         assert len(state.tool_execution_history) == 3
-        assert all(
-            record["tool_name"] == "search_tool"
-            for record in state.tool_execution_history
-        )
+        assert all(record["tool_name"] == "search_tool" for record in state.tool_execution_history)
 
     def test_branch_conditions(self):
         """Test conditional branching support."""
@@ -346,9 +343,7 @@ class TestValidationNodeWithRouting:
         # Create state with tool call and response
         ai_message = AIMessage(
             content="Searching...",
-            tool_calls=[
-                {"id": "call_001", "name": "search_tool", "args": {"query": "test"}}
-            ],
+            tool_calls=[{"id": "call_001", "name": "search_tool", "args": {"query": "test"}}],
         )
 
         tool_message = ToolMessage(content="Search results", tool_call_id="call_001")

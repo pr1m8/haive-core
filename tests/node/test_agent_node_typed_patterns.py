@@ -55,9 +55,7 @@ class SelectedModules(BaseModel):
 class MockTypedAgent:
     """Mock agent with typed input/output schemas."""
 
-    def __init__(
-        self, name: str, input_schema: type[BaseModel], output_schema: type[BaseModel]
-    ):
+    def __init__(self, name: str, input_schema: type[BaseModel], output_schema: type[BaseModel]):
         self.name = name
         self.input_schema = input_schema
         self.output_schema = output_schema
@@ -146,9 +144,7 @@ class TestAgentNodeTypedPatterns:
         agent = MockTypedAgent("analyzer", AnalysisInput, AnalysisResult)
 
         # Create node
-        node = AgentNodeV3Config(
-            name="analyzer_node", agent_name="analyzer", agent=agent
-        )
+        node = AgentNodeV3Config(name="analyzer_node", agent_name="analyzer", agent=agent)
 
         # Execute
         node(state, {})
@@ -168,9 +164,7 @@ class TestAgentNodeTypedPatterns:
 
         # Create typed agent
         agent = MockTypedAgent("analyzer", AnalysisInput, AnalysisResult)
-        node = AgentNodeV3Config(
-            name="analyzer_node", agent_name="analyzer", agent=agent
-        )
+        node = AgentNodeV3Config(name="analyzer_node", agent_name="analyzer", agent=agent)
 
         # Execute
         result = node(state, {})
@@ -226,9 +220,7 @@ class TestAgentNodeTypedPatterns:
 
         # Create selector agent
         agent = MockTypedAgent("selector", SelectorInput, SelectedModules)
-        node = AgentNodeV3Config(
-            name="selector_node", agent_name="selector", agent=agent
-        )
+        node = AgentNodeV3Config(name="selector_node", agent_name="selector", agent=agent)
 
         # Execute
         result = node(state, {})
@@ -268,9 +260,7 @@ class TestAgentNodeTypedPatterns:
         }
 
         agent = PromptAgent()
-        node = AgentNodeV3Config(
-            name="prompt_node", agent_name="prompt_agent", agent=agent
-        )
+        node = AgentNodeV3Config(name="prompt_node", agent_name="prompt_agent", agent=agent)
 
         result = node(state, {})
 
@@ -333,9 +323,7 @@ class TestAgentNodeTypedPatterns:
 
         # Message agent first
         chat = MockMessageAgent("assistant")
-        chat_node = AgentNodeV3Config(
-            name="assistant_node", agent_name="assistant", agent=chat
-        )
+        chat_node = AgentNodeV3Config(name="assistant_node", agent_name="assistant", agent=chat)
 
         result1 = chat_node(state, {})
         state.agent_outputs.update(result1.update["agent_outputs"])

@@ -257,9 +257,9 @@ def test_media_sources():
 
             # Verify video ID extraction
             if "expected_id" in config:
-                assert (
-                    source.video_id == config["expected_id"]
-                ), f"Expected {config['expected_id']}, got {source.video_id}"
+                assert source.video_id == config["expected_id"], (
+                    f"Expected {config['expected_id']}, got {source.video_id}"
+                )
 
             # Verify loader kwargs
             if source.media_type == MediaType.TRANSCRIPT:
@@ -298,9 +298,7 @@ def test_development_sources():
 
             if DevelopmentDataType.ISSUES in self.data_types:
                 kwargs["state"] = self.issue_state
-                kwargs["include_prs"] = (
-                    DevelopmentDataType.PULL_REQUESTS in self.data_types
-                )
+                kwargs["include_prs"] = DevelopmentDataType.PULL_REQUESTS in self.data_types
 
             if self.file_path:
                 kwargs["file_path"] = self.file_path
@@ -380,9 +378,7 @@ def test_knowledge_sources():
             if self.query:
                 kwargs["query"] = self.query
             elif self.page_titles:
-                kwargs["query"] = (
-                    self.page_titles[0] if len(self.page_titles) == 1 else None
-                )
+                kwargs["query"] = self.page_titles[0] if len(self.page_titles) == 1 else None
                 kwargs["load_max_docs"] = len(self.page_titles)
 
             if self.doc_content_chars_max:

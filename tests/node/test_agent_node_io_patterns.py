@@ -119,9 +119,7 @@ class TestAgentNodeIOPatterns:
 
         # Create structured agent node
         agent = MockStructuredAgent("analyzer")
-        node = AgentNodeV3Config(
-            name="analyzer_node", agent_name="analyzer", agent=agent
-        )
+        node = AgentNodeV3Config(name="analyzer_node", agent_name="analyzer", agent=agent)
 
         # Execute node
         result = node(state, {})
@@ -162,9 +160,7 @@ class TestAgentNodeIOPatterns:
                 }
 
         agent = AnnotatedMessageAgent()
-        node = AgentNodeV3Config(
-            name="annotated_node", agent_name="annotated_agent", agent=agent
-        )
+        node = AgentNodeV3Config(name="annotated_node", agent_name="annotated_agent", agent=agent)
 
         # Execute
         result = node(state, {})
@@ -197,9 +193,7 @@ class TestAgentNodeIOPatterns:
 
         for test_case in test_cases:
             agent = test_case["agent"]
-            node = AgentNodeV3Config(
-                name=f"{agent.name}_node", agent_name=agent.name, agent=agent
-            )
+            node = AgentNodeV3Config(name=f"{agent.name}_node", agent_name=agent.name, agent=agent)
 
             # Execute
             result = node(state, {})
@@ -212,17 +206,11 @@ class TestAgentNodeIOPatterns:
             # Check expected fields
             output = result.update["agent_outputs"][agent.name]
             for field in test_case["expected_fields"]:
-                assert (
-                    field in output
-                ), f"Expected {field} in {
-                    agent.name} output"
+                assert field in output, f"Expected {field} in {agent.name} output"
 
             # Check unexpected fields
             for field in test_case["unexpected_fields"]:
-                assert (
-                    field not in output
-                ), f"Unexpected {field} in {
-                    agent.name} output"
+                assert field not in output, f"Unexpected {field} in {agent.name} output"
 
     def test_agent_output_schema_field_mapping(self):
         """Test that agent output schemas map to correct state fields."""
@@ -245,9 +233,7 @@ class TestAgentNodeIOPatterns:
 
         # Create and execute node
         agent = SelectModulesAgent()
-        node = AgentNodeV3Config(
-            name="select_node", agent_name="select_modules", agent=agent
-        )
+        node = AgentNodeV3Config(name="select_node", agent_name="select_modules", agent=agent)
 
         result = node(state, {})
 
@@ -273,9 +259,7 @@ class TestAgentNodeIOPatterns:
         ]
 
         for agent in agents:
-            node = AgentNodeV3Config(
-                name=f"{agent.name}_node", agent_name=agent.name, agent=agent
-            )
+            node = AgentNodeV3Config(name=f"{agent.name}_node", agent_name=agent.name, agent=agent)
 
             # Execute and apply update
             result = node(state, {})
@@ -340,9 +324,7 @@ class TestAgentNodeIOPatterns:
                 }
 
         agent = NoMessageAgent()
-        node = AgentNodeV3Config(
-            name="no_msg_node", agent_name="no_messages", agent=agent
-        )
+        node = AgentNodeV3Config(name="no_msg_node", agent_name="no_messages", agent=agent)
 
         # Execute
         result = node(state, {})
