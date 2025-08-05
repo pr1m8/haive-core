@@ -154,9 +154,30 @@ os.environ.setdefault("HAIVE_DEBUG_CONFIG", "false")
 
 __version__ = "0.1.0"
 
+# Type-checking imports for pyright - only classes that have explicit imports in _common_imports
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # These are available through lazy loading but need explicit imports for pyright
+    from haive.core import (
+        common,
+        config,
+        engine,
+        errors,
+        graph,
+        models,
+        persistence,
+        registry,
+        runtime,
+        schema,
+        tools,
+        types,
+        utils,
+    )
+
 # Public API - includes both modules and common classes
 __all__ = [
-    # Modules
+    # Modules (available through lazy loading)
     "engine",
     "graph",
     "schema",
@@ -170,7 +191,7 @@ __all__ = [
     "config",
     "common",
     "errors",
-    # Common classes for convenience
+    # Common classes for convenience (available through lazy loading)
     "AugLLMConfig",
     "AugLLMFactory",
     "BaseGraph",
