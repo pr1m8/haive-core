@@ -14,7 +14,7 @@ from langchain_core.messages.utils import convert_to_openai_messages, messages_f
 from langchain_core.output_parsers import BaseOutputParser, PydanticToolsParser
 from langgraph.graph import add_messages
 from langgraph.types import Send
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 from haive.core.schema.state_schema import StateSchema
 
@@ -24,9 +24,11 @@ try:
         is_real_human_message,
         is_tool_error,
     )
+
     ENHANCED_FEATURES_AVAILABLE = True
 except ImportError:
     ENHANCED_FEATURES_AVAILABLE = False
+
 
 class MessagesState(StateSchema):
     """State schema for conversation management with LangChain integration.
@@ -63,32 +65,50 @@ class MessagesState(StateSchema):
     need conversation capabilities, and is the default base class used by SchemaComposer
     when message handling is detected in the components being composed.
     """
-    messages: Annotated[list[AnyMessage], add_messages] = Field(default_factory=list, description='Conversation messages')
-    structured_output_models: list[type[BaseModel]] | None = Field(default=None, description='Pydantic models for parsing structured outputs from AI messages')
-    structured_output_parser: BaseOutputParser | None = Field(default=None, description='Output parser for structured outputs (auto-configured if not provided)')
-    parse_structured_outputs: bool = Field(default=False, description='Enable automatic parsing of AI messages as structured outputs')
-    __shared_fields__ = ['messages']
-    __serializable_reducers__ = {'messages': 'add_messages'}
-    __reducer_fields__ = {'messages': add_messages}
 
-    @model_validator(mode='before')
+    messages: Annotated[list[AnyMessage], add_messages] = Field(
+        default_factory=list, description="Conversation messages"
+    )
+    structured_output_models: list[type[BaseModel]] | None = Field(
+        default=None,
+        description="Pydantic models for parsing structured outputs from AI messages",
+    )
+    structured_output_parser: BaseOutputParser | None = Field(
+        default=None,
+        description="Output parser for structured outputs (auto-configured if not provided)",
+    )
+    parse_structured_outputs: bool = Field(
+        default=False,
+        description="Enable automatic parsing of AI messages as structured outputs",
+    )
+    __shared_fields__ = ["messages"]
+    __serializable_reducers__ = {"messages": "add_messages"}
+    __reducer_fields__ = {"messages": add_messages}
+
+    @model_validator(mode="before")
     @classmethod
     def validate_message_format(cls, data: Any) -> Any:
         """Automatically convert message dicts to proper Message objects."""
-        if isinstance(data, dict) and 'messages' in data:
-            data['messages'] = convert_to_messages(data['messages'])
+        if isinstance(data, dict) and "messages" in data:
+            data["messages"] = convert_to_messages(data["messages"])
         return data
 
-    @model_validator(mode='before')
+    @model_validator(mode="before")
     @classmethod
     def setup_structured_output_parser(cls, data: Any) -> Any:
         """Setup structured output parser if models are provided but parser isn't."""
         if isinstance(data, dict):
-            if data.get('structured_output_models') and (not data.get('structured_output_parser')) and data.get('parse_structured_outputs', False):
-                data['structured_output_parser'] = PydanticToolsParser(tools=data['structured_output_models'])
+            if (
+                data.get("structured_output_models")
+                and (not data.get("structured_output_parser"))
+                and data.get("parse_structured_outputs", False)
+            ):
+                data["structured_output_parser"] = PydanticToolsParser(
+                    tools=data["structured_output_models"]
+                )
         return data
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def ensure_system_before_human(self) -> Self:
         """Ensure system messages come before human messages.
         If a human message is followed by a system message, flip their order.
@@ -100,58 +120,68 @@ class MessagesState(StateSchema):
         while i < len(messages) - 1:
             current_msg = messages[i]
             next_msg = messages[i + 1]
-            if isinstance(current_msg, HumanMessage) and isinstance(next_msg, SystemMessage):
+            if isinstance(current_msg, HumanMessage) and isinstance(
+                next_msg, SystemMessage
+            ):
                 messages[i], messages[i + 1] = (messages[i + 1], messages[i])
                 i += 2
             else:
                 i += 1
         return self
 
-    @field_validator('messages', mode='after')
-    @classmethod
-    def parse_ai_structured_outputs(cls, messages: list[AnyMessage], info) -> list[AnyMessage]:
+    @model_validator(mode="after")
+    def parse_ai_structured_outputs(self) -> Self:
         """Parse AI messages with structured output using PydanticToolsParser.
 
         This validator automatically parses AI message content that matches
         the configured structured output models and adds corresponding tool
         messages to the conversation.
         """
-        if not info.data.get('parse_structured_outputs', False):
-            return messages
-        parser = info.data.get('structured_output_parser')
+        if not self.parse_structured_outputs:
+            return self
+
+        parser = self.structured_output_parser
         if not parser:
-            return messages
+            return self
+
         enhanced_messages = []
-        for msg in messages:
+        for msg in self.messages:
             enhanced_messages.append(msg)
             if isinstance(msg, AIMessage) and msg.content:
                 try:
                     if isinstance(parser, PydanticToolsParser):
                         parsed_tools = parser.parse(msg.content)
                         for idx, tool_instance in enumerate(parsed_tools):
-                            tool_msg = ToolMessage(content=tool_instance.json(), tool_call_id=f'parse_{id(msg)}_{idx}', name=tool_instance.__class__.__name__)
+                            tool_msg = ToolMessage(
+                                content=tool_instance.json(),
+                                tool_call_id=f"parse_{id(msg)}_{idx}",
+                                name=tool_instance.__class__.__name__,
+                            )
                             enhanced_messages.append(tool_msg)
                 except Exception:
+                    # Silently ignore parsing errors to maintain conversation flow
                     pass
-        return enhanced_messages
 
-    @model_validator(mode='after')
+        self.messages = enhanced_messages
+        return self
+
+    @model_validator(mode="after")
     def sync_message_engine_settings(self) -> Self:
         """Sync message-related settings with engine if present.
 
         This enhances MessagesState to work better with the new engine management.
         """
         main_engine = None
-        if hasattr(self, 'engine') and self.engine:
+        if hasattr(self, "engine") and self.engine:
             main_engine = self.engine
-        elif hasattr(self, 'engines') and self.engines.get('main'):
-            main_engine = self.engines['main']
+        elif hasattr(self, "engines") and self.engines.get("main"):
+            main_engine = self.engines["main"]
         if main_engine:
-            if hasattr(main_engine, 'system_message'):
+            if hasattr(main_engine, "system_message"):
                 system_msg = self.get_system_message()
                 if system_msg and system_msg.content:
                     main_engine.system_message = system_msg.content
-            if hasattr(main_engine, 'messages'):
+            if hasattr(main_engine, "messages"):
                 main_engine.messages = self.messages
         return self
 
@@ -167,13 +197,15 @@ class MessagesState(StateSchema):
             return None
         return self.messages[-1]
 
-    def add_system_message(self, content: str, metadata: dict[str, Any] | None=None) -> None:
+    def add_system_message(
+        self, content: str, metadata: dict[str, Any] | None = None
+    ) -> None:
         """Add a system message at the beginning of the conversation.
         If a system message already exists, it will be replaced.
         """
-        kwargs = {'content': content}
+        kwargs: dict[str, Any] = {"content": content}
         if metadata:
-            kwargs['additional_kwargs'] = metadata
+            kwargs["additional_kwargs"] = metadata
         system_msg = SystemMessage(**kwargs)
         system_msgs = self.get_filtered_messages(include_types=[SystemMessage])
         if system_msgs:
@@ -200,7 +232,7 @@ class MessagesState(StateSchema):
                 - exclude_ids: List of message IDs to exclude
                 - exclude_tool_calls: Tool call IDs to exclude
         """
-        limit = filter_kwargs.pop('limit', None)
+        limit = filter_kwargs.pop("limit", None)
         filtered_messages = filter_messages(self.messages, **filter_kwargs)
         if limit is not None and limit > 0:
             return filtered_messages[-limit:]
@@ -224,29 +256,29 @@ class MessagesState(StateSchema):
     def is_last_message_from_ai(self) -> bool:
         """Check if the last message is from the AI."""
         last_msg = self.get_last_message()
-        return last_msg is not None and last_msg.type == 'ai'
+        return last_msg is not None and last_msg.type == "ai"
 
     def is_last_message_from_human(self) -> bool:
         """Check if the last message is from a human."""
         last_msg = self.get_last_message()
-        return last_msg is not None and last_msg.type == 'human'
+        return last_msg is not None and last_msg.type == "human"
 
     def is_last_message_from_tool(self) -> bool:
         """Check if the last message is from a tool."""
         last_msg = self.get_last_message()
-        return last_msg is not None and last_msg.type == 'tool'
+        return last_msg is not None and last_msg.type == "tool"
 
     def has_tool_calls(self) -> bool:
         """Check if the last AI message has tool calls."""
         last_ai = self.get_last_ai_message()
         if not last_ai:
             return False
-        tool_calls = getattr(last_ai, 'tool_calls', None)
+        tool_calls = getattr(last_ai, "tool_calls", None)
         if tool_calls:
             return bool(tool_calls)
-        return bool(getattr(last_ai, 'additional_kwargs', {}).get('tool_calls'))
+        return bool(getattr(last_ai, "additional_kwargs", {}).get("tool_calls"))
 
-    def get_tool_calls(self, message: AIMessage | None=None) -> list[dict]:
+    def get_tool_calls(self, message: AIMessage | None = None) -> list[dict]:
         """Get tool calls from an AI message.
 
         Args:
@@ -258,13 +290,17 @@ class MessagesState(StateSchema):
         msg = message or self.get_last_ai_message()
         if not msg:
             return []
-        if hasattr(msg, 'tool_calls') and msg.tool_calls:
+        if hasattr(msg, "tool_calls") and msg.tool_calls:
             return msg.tool_calls
-        if hasattr(msg, 'additional_kwargs') and msg.additional_kwargs.get('tool_calls'):
-            return msg.additional_kwargs['tool_calls']
+        if hasattr(msg, "additional_kwargs") and msg.additional_kwargs.get(
+            "tool_calls"
+        ):
+            return msg.additional_kwargs["tool_calls"]
         return []
 
-    def inject_state_into_tool_calls(self, tool_calls: list[dict], keys: list[str] | None=None) -> list[dict]:
+    def inject_state_into_tool_calls(
+        self, tool_calls: list[dict], keys: list[str] | None = None
+    ) -> list[dict]:
         """Inject state data into tool call arguments.
 
         Args:
@@ -283,14 +319,14 @@ class MessagesState(StateSchema):
         injected_calls = []
         for call in tool_calls:
             call_copy = call.copy()
-            if 'args' not in call_copy or not isinstance(call_copy['args'], dict):
-                call_copy['args'] = {}
-            if '_state' not in call_copy['args']:
-                call_copy['args']['_state'] = state_dict
+            if "args" not in call_copy or not isinstance(call_copy["args"], dict):
+                call_copy["args"] = {}
+            if "_state" not in call_copy["args"]:
+                call_copy["args"]["_state"] = state_dict
             injected_calls.append(call_copy)
         return injected_calls
 
-    def send_tool_calls(self, node_name: str='tools') -> str | list[Send]:
+    def send_tool_calls(self, node_name: str = "tools") -> str | list[Send]:
         """Convert tool calls from the last AI message into Send objects for LangGraph routing.
 
         Args:
@@ -301,7 +337,7 @@ class MessagesState(StateSchema):
         """
         tool_calls = self.get_tool_calls()
         if not tool_calls:
-            return 'END'
+            return "END"
         injected_calls = self.inject_state_into_tool_calls(tool_calls)
         return [Send(node_name, tool_call) for tool_call in injected_calls]
 
@@ -313,17 +349,19 @@ class MessagesState(StateSchema):
         """
         last_msg = self.get_last_message()
         if not last_msg:
-            return 'START'
-        if last_msg.type == 'ai':
+            return "START"
+        if last_msg.type == "ai":
             tool_calls = self.get_tool_calls(last_msg)
             if tool_calls:
-                return self.send_tool_calls('tools')
-            return 'END'
-        if last_msg.type == 'tool' and getattr(last_msg, 'additional_kwargs', {}).get('is_error'):
-            return 'handle_error'
-        if last_msg.type == 'human':
-            return 'process_input'
-        return 'continue'
+                return self.send_tool_calls("tools")
+            return "END"
+        if last_msg.type == "tool" and getattr(last_msg, "additional_kwargs", {}).get(
+            "is_error"
+        ):
+            return "handle_error"
+        if last_msg.type == "human":
+            return "process_input"
+        return "continue"
 
     def to_openai_format(self) -> list[dict]:
         """Convert messages to OpenAI API format."""
@@ -331,19 +369,21 @@ class MessagesState(StateSchema):
 
     def to_langchain_prompt(self) -> str:
         """Convert message history to LangChain compatible prompt string."""
-        return get_buffer_string(self.messages, human_prefix='User', ai_prefix='Assistant')
+        return get_buffer_string(
+            self.messages, human_prefix="User", ai_prefix="Assistant"
+        )
 
     @classmethod
-    def from_dict(cls, data: list[dict] | dict[str, Any]) -> 'MessagesState':
+    def from_dict(cls, data: list[dict] | dict[str, Any]) -> "MessagesState":
         """Create instance from dictionary format."""
-        if isinstance(data, dict) and 'messages' in data:
-            messages = convert_to_messages(data['messages'])
+        if isinstance(data, dict) and "messages" in data:
+            messages = convert_to_messages(data["messages"])
             return cls(messages=messages)
         messages = convert_to_messages(data)
         return cls(messages=messages)
 
     @classmethod
-    def with_system_message(cls, system_content: str) -> 'MessagesState':
+    def with_system_message(cls, system_content: str) -> "MessagesState":
         """Create a new state with a system message."""
         state = cls()
         state.add_system_message(system_content)
@@ -359,7 +399,9 @@ class MessagesState(StateSchema):
             List of MessageRound objects with round details
         """
         if not ENHANCED_FEATURES_AVAILABLE:
-            raise NotImplementedError('Enhanced features not available. Install the enhanced MessagesState package.')
+            raise NotImplementedError(
+                "Enhanced features not available. Install the enhanced MessagesState package."
+            )
         adapter = MessagesStateAdapter(self)
         return adapter.get_conversation_rounds()
 
@@ -373,7 +415,9 @@ class MessagesState(StateSchema):
             Number of duplicates removed
         """
         if not ENHANCED_FEATURES_AVAILABLE:
-            raise NotImplementedError('Enhanced features not available. Install the enhanced MessagesState package.')
+            raise NotImplementedError(
+                "Enhanced features not available. Install the enhanced MessagesState package."
+            )
         adapter = MessagesStateAdapter(self)
         return adapter.deduplicate_tool_calls()
 
@@ -387,7 +431,9 @@ class MessagesState(StateSchema):
             List of ToolCallInfo objects with tool call details
         """
         if not ENHANCED_FEATURES_AVAILABLE:
-            raise NotImplementedError('Enhanced features not available. Install the enhanced MessagesState package.')
+            raise NotImplementedError(
+                "Enhanced features not available. Install the enhanced MessagesState package."
+            )
         adapter = MessagesStateAdapter(self)
         return adapter.get_completed_tool_calls()
 
@@ -401,8 +447,12 @@ class MessagesState(StateSchema):
             True if the message is from a real human, False if transformed
         """
         if not ENHANCED_FEATURES_AVAILABLE:
-            has_name = hasattr(msg, 'name') and msg.name is not None
-            has_engine_metadata = hasattr(msg, 'additional_kwargs') and msg.additional_kwargs and ('engine_id' in msg.additional_kwargs)
+            has_name = hasattr(msg, "name") and msg.name is not None
+            has_engine_metadata = (
+                hasattr(msg, "additional_kwargs")
+                and msg.additional_kwargs
+                and ("engine_id" in msg.additional_kwargs)
+            )
             return not (has_name or has_engine_metadata)
         return is_real_human_message(msg)
 
@@ -416,12 +466,14 @@ class MessagesState(StateSchema):
             True if the message indicates an error, False otherwise
         """
         if not ENHANCED_FEATURES_AVAILABLE:
-            if hasattr(msg, 'additional_kwargs') and msg.additional_kwargs:
-                return msg.additional_kwargs.get('is_error', False)
+            if hasattr(msg, "additional_kwargs") and msg.additional_kwargs:
+                return msg.additional_kwargs.get("is_error", False)
             return False
         return is_tool_error(msg)
 
-    def transform_ai_to_human(self, preserve_metadata: bool=True, engine_id: str | None=None) -> None:
+    def transform_ai_to_human(
+        self, preserve_metadata: bool = True, engine_id: str | None = None
+    ) -> None:
         """Transform AI messages to Human messages in place.
 
         This is useful for agent-to-agent communication or for
@@ -432,11 +484,15 @@ class MessagesState(StateSchema):
             engine_id: Optional engine ID to add to transformed messages
         """
         if not ENHANCED_FEATURES_AVAILABLE:
-            raise NotImplementedError('Enhanced features not available. Install the enhanced MessagesState package.')
+            raise NotImplementedError(
+                "Enhanced features not available. Install the enhanced MessagesState package."
+            )
         adapter = MessagesStateAdapter(self)
         adapter.transform_ai_to_human(preserve_metadata, engine_id)
 
-    def enable_structured_output_parsing(self, models: list[type[BaseModel]], parser: BaseOutputParser | None=None) -> None:
+    def enable_structured_output_parsing(
+        self, models: list[type[BaseModel]], parser: BaseOutputParser | None = None
+    ) -> None:
         """Enable structured output parsing for AI messages.
 
         Args:
@@ -456,7 +512,11 @@ class MessagesState(StateSchema):
         Returns:
             List of ToolMessage objects created by structured output parsing
         """
-        return [msg for msg in self.messages if isinstance(msg, ToolMessage) and msg.tool_call_id.startswith('parse_')]
+        return [
+            msg
+            for msg in self.messages
+            if isinstance(msg, ToolMessage) and msg.tool_call_id.startswith("parse_")
+        ]
 
     def get_latest_structured_output(self) -> ToolMessage | None:
         """Get the most recent parsed structured output as a tool message.
@@ -473,9 +533,11 @@ class MessagesState(StateSchema):
         Returns:
             String with formatting instructions for the LLM
         """
-        if self.structured_output_parser and hasattr(self.structured_output_parser, 'get_format_instructions'):
+        if self.structured_output_parser and hasattr(
+            self.structured_output_parser, "get_format_instructions"
+        ):
             return self.structured_output_parser.get_format_instructions()
         if self.structured_output_models:
             model_names = [model.__name__ for model in self.structured_output_models]
-            return f'Please format your response as one of: {', '.join(model_names)}'
-        return ''
+            return f"Please format your response as one of: {', '.join(model_names)}"
+        return ""
