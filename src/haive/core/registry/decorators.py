@@ -64,9 +64,7 @@ def register_component(
                     register_fn(reg_item)
 
                     logger.debug(
-                        f"Auto-registered {
-                            cls.__name__} with {
-                            registry.__class__.__name__}"
+                        f"Auto-registered {cls.__name__} with {registry.__class__.__name__}"
                     )
                 except Exception as e:
                     logger.warning(f"Failed to auto-register {cls.__name__}: {e}")
