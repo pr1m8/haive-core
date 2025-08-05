@@ -44,6 +44,28 @@ class PostgresCheckpointerConfig(CheckpointerConfig):
     _pool: Any | None = None
     _checkpointer: Any | None = None
 
+    def _configure_connection(self, connection) -> None:
+        """Configure a new connection from the pool.
+
+        This method is called for each new connection to configure it properly
+        and avoid prepared statement conflicts.
+
+        Args:
+            connection: The psycopg connection to configure
+        """
+        try:
+            # Deallocate all prepared statements to avoid conflicts
+            with connection.cursor() as cursor:
+                cursor.execute("DEALLOCATE ALL")
+
+            # Configure connection to not use pipeline mode (avoids prepared statement conflicts)
+            if hasattr(connection, "pipeline"):
+                connection.pipeline = False
+
+            logger.debug("PostgreSQL connection configured successfully")
+        except Exception as e:
+            logger.warning(f"Failed to configure PostgreSQL connection: {e}")
+
     @model_validator(mode="after")
     def validate_postgres_available(self) -> Self:
         """Validate that postgres dependencies are available if this config is used."""
@@ -79,8 +101,9 @@ class PostgresCheckpointerConfig(CheckpointerConfig):
                     max_size=self.max_pool_size,
                     kwargs={
                         "autocommit": self.auto_commit,
-                        "prepare_threshold": self.prepare_threshold,
+                        "prepare_threshold": None,  # Fix: Disable prepared statements to avoid conflicts
                     },
+                    configure=self._configure_connection,
                     open=True,
                 )
             self._checkpointer = PostgresSaver(self._pool)

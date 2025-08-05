@@ -33,6 +33,11 @@ class NodeType(str, Enum):
 
     # Message handling nodes
     MESSAGE_TRANSFORMER = "message_transformer"
+
+    # Coordination nodes
+    COORDINATOR = "coordinator"
+    TRANSFORM = "transform"
+
     # SEND = "send"  # Send nodes for dynamic routing
     CUSTOM = "custom"  # Custom node types
     PARSER = "parser"  # Parser nodes for parsing tool results

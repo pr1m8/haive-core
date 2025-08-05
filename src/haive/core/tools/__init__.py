@@ -25,3 +25,16 @@ __getattr__, __dir__, __all__ = lazy.attach(
 # Add any eager imports here (lightweight utilities, etc.)
 # Example: from .metadata import SomeUtility
 # __all__ += ['SomeUtility']
+
+# Import commonly used tool decorator
+try:
+    from langchain_core.tools import tool
+
+    __all__ += ["tool"]
+except ImportError:
+    # Fallback if langchain not available
+    def tool(func):
+        """Fallback tool decorator."""
+        return func
+
+    __all__ += ["tool"]
