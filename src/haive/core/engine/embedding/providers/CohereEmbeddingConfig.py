@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from pydantic import Field, validator
+from pydantic import Field
 
 from haive.core.engine.embedding.base import BaseEmbeddingConfig
 from haive.core.engine.embedding.types import EmbeddingType
