@@ -23,7 +23,6 @@ C = TypeVar("C")
 
 @runtime_checkable
 class Buildable(Protocol[BuildT]):
-
     def build(self) -> BuildT: ...
 
 
