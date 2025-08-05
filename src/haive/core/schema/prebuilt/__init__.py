@@ -46,6 +46,7 @@ from haive.core.schema.prebuilt.query_state import (
     QueryType,
     RetrievalStrategy,
 )
+from haive.core.schema.prebuilt.rag_state import RAGState
 from haive.core.schema.prebuilt.tool_state import ToolState
 
 # Document state components are imported lazily to avoid triggering document system auto-registry
@@ -101,6 +102,7 @@ __all__ = [
     "QueryResult",
     "QueryState",
     "QueryType",
+    "RAGState",
     "RetrievalStrategy",
     # Aliases
     "TokenAwareState",
