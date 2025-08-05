@@ -230,14 +230,18 @@ class CheckpointerMixin(BaseModel):
 
         # Get the compiled app - this should be implemented by the class using
         # the mixin
-        app = self.compile() if hasattr(self, "compile") else self.app
+        app = (
+            self.compile()
+            if hasattr(self, "compile") and callable(getattr(self, "compile", None))
+            else getattr(self, "app", None)
+        )
 
         # Prepare runtime config
         runtime_config = self._prepare_runnable_config(
             thread_id=thread_id, config=config, **kwargs
         )
 
-        thread_id = runtime_config["configurable"]["thread_id"]
+        thread_id = runtime_config.get("configurable", {}).get("thread_id")
         checkpointer = self.get_checkpointer(async_mode=False)
 
         # Register thread if needed
@@ -247,7 +251,7 @@ class CheckpointerMixin(BaseModel):
         # Get previous state if available
         previous_state = None
         try:
-            if checkpointer and thread_id:
+            if checkpointer and thread_id and app:
                 previous_state = app.get_state(runtime_config)
         except Exception as e:
             logger.warning(f"Error retrieving previous state: {e}")
@@ -261,7 +265,7 @@ class CheckpointerMixin(BaseModel):
                 input_data = prepare_merged_input(
                     input_data,
                     previous_state,
-                    runtime_config,
+                    dict(runtime_config) if runtime_config else None,
                     input_schema,
                     state_schema,
                 )
@@ -269,7 +273,12 @@ class CheckpointerMixin(BaseModel):
                 logger.warning(f"Error merging with previous state: {e}")
 
         # Invoke the app
-        return app.invoke(input_data, runtime_config)
+        if app:
+            return app.invoke(input_data, runtime_config)
+        else:
+            raise ValueError(
+                "No app available to invoke - compile() method or app attribute required"
+            )
 
     async def arun(
         self,
@@ -296,7 +305,11 @@ class CheckpointerMixin(BaseModel):
         await self._ensure_async_checkpointer_initialized()
 
         # Get the compiled app
-        app = self.compile() if hasattr(self, "compile") else self.app
+        app = (
+            self.compile()
+            if hasattr(self, "compile") and callable(getattr(self, "compile", None))
+            else getattr(self, "app", None)
+        )
 
         # Check if we should use async mode
         checkpoint_mode = kwargs.get(
@@ -312,11 +325,14 @@ class CheckpointerMixin(BaseModel):
             **kwargs,
         )
 
-        thread_id = runtime_config["configurable"]["thread_id"]
+        thread_id = runtime_config.get("configurable", {}).get("thread_id")
 
         if use_async:
             # Use async checkpointer - recompile app with it
-            await register_async_thread_if_needed(self._async_checkpointer, thread_id)
+            if thread_id:
+                await register_async_thread_if_needed(
+                    self._async_checkpointer, thread_id
+                )
 
             # Get store if available
             store = (
@@ -364,7 +380,7 @@ class CheckpointerMixin(BaseModel):
         # Get previous state
         previous_state = None
         try:
-            if checkpointer and thread_id:
+            if checkpointer and thread_id and app:
                 previous_state = app.get_state(runtime_config)
         except Exception as e:
             logger.warning(f"Error retrieving previous state: {e}")
@@ -378,7 +394,7 @@ class CheckpointerMixin(BaseModel):
                 input_data = prepare_merged_input(
                     input_data,
                     previous_state,
-                    runtime_config,
+                    dict(runtime_config) if runtime_config else None,
                     input_schema,
                     state_schema,
                 )
@@ -419,14 +435,18 @@ class CheckpointerMixin(BaseModel):
         self._ensure_checkpointer_initialized()
 
         # Get the compiled app
-        app = self.compile() if hasattr(self, "compile") else self.app
+        app = (
+            self.compile()
+            if hasattr(self, "compile") and callable(getattr(self, "compile", None))
+            else getattr(self, "app", None)
+        )
 
         # Prepare runtime config
         runtime_config = self._prepare_runnable_config(
             thread_id=thread_id, config=config, stream_mode=stream_mode, **kwargs
         )
 
-        thread_id = runtime_config["configurable"]["thread_id"]
+        thread_id = runtime_config.get("configurable", {}).get("thread_id")
         checkpointer = self.get_checkpointer(async_mode=False)
 
         # Register thread if needed
@@ -436,7 +456,7 @@ class CheckpointerMixin(BaseModel):
         # Get previous state if available
         previous_state = None
         try:
-            if checkpointer and thread_id:
+            if checkpointer and thread_id and app:
                 previous_state = app.get_state(runtime_config)
         except Exception as e:
             logger.warning(f"Error retrieving previous state: {e}")
@@ -450,7 +470,7 @@ class CheckpointerMixin(BaseModel):
                 input_data = prepare_merged_input(
                     input_data,
                     previous_state,
-                    runtime_config,
+                    dict(runtime_config) if runtime_config else None,
                     input_schema,
                     state_schema,
                 )
@@ -488,7 +508,11 @@ class CheckpointerMixin(BaseModel):
         await self._ensure_async_checkpointer_initialized()
 
         # Get the compiled app
-        app = self.compile() if hasattr(self, "compile") else self.app
+        app = (
+            self.compile()
+            if hasattr(self, "compile") and callable(getattr(self, "compile", None))
+            else getattr(self, "app", None)
+        )
 
         # Check if we should use async mode
         checkpoint_mode = kwargs.get(
@@ -505,11 +529,14 @@ class CheckpointerMixin(BaseModel):
             **kwargs,
         )
 
-        thread_id = runtime_config["configurable"]["thread_id"]
+        thread_id = runtime_config.get("configurable", {}).get("thread_id")
 
         if use_async:
             # Use async checkpointer
-            await register_async_thread_if_needed(self._async_checkpointer, thread_id)
+            if thread_id:
+                await register_async_thread_if_needed(
+                    self._async_checkpointer, thread_id
+                )
 
             # Get store if available
             store = (

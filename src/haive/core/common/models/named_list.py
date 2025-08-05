@@ -22,7 +22,7 @@ class NamedList(BaseModel, Generic[T]):
     Automatically resolves string references to actual instances.
     """
 
-    items: Sequence[T] = Field(default_factory=list, description="The resolved items")
+    items: list[T] = Field(default_factory=list, description="The resolved items")
     names: list[str] = Field(
         default_factory=list, description="Names of items (in order)"
     )
