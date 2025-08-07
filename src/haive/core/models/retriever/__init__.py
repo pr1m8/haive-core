@@ -123,41 +123,18 @@ Examples:
    VectorStoreRetrieverConfig
 """
 
-from haive.core.models.retriever.base import RetrieverConfig, RetrieverType
+from haive.core.models.retriever.base import (
+    RetrieverConfig,
+    RetrieverType,
+    create_retriever_config,
+)
 from haive.core.models.retriever.vectorstore_retriever import VectorStoreRetrieverConfig
 
 __all__ = [
-    "BM25",
-    "CONTEXTUAL_COMPRESSION",
-    "ELASTICSEARCH",
-    "ENSEMBLE",
-    "FAISS",
-    "GOLDEN",
-    "IN_MEMORY",
-    "KNN",
-    "KNOWLEDGE_GRAPH",
-    "MERGER",
-    "MULTI_QUERY",
-    "MULTI_VECTOR",
-    "NEO4J",
-    "PARENT_DOCUMENT",
-    "PINECONE",
-    "QDRANT",
-    "REPHRASE_QUERY",
     "RetrieverConfig",
     "RetrieverType",
-    "SELF_QUERY",
-    "SPARSE",
-    "SVM",
-    "TFIDF",
-    "TIME_WEIGHTED",
-    "VECTOR_STORE",
     "VectorStoreRetrieverConfig",
     "create_retriever_config",
-    "decorator",
-    "from_retriever_type",
-    "get_config_class",
-    "get_retriever",
-    "instantiate",
-    "register",
+    # Note: Individual RetrieverType enum values are accessible via RetrieverType.VALUE
+    # They are not listed here to avoid AutoAPI import issues
 ]

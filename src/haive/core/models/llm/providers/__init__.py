@@ -1,42 +1,17 @@
 """LLM Providers Module.
 
-
-__all__ = [
-    "AI21Provider",
-    "AnthropicProvider",
-    "AzureOpenAIProvider",
-    "BaseLLMProvider",
-    "BedrockProvider",
-    "CohereProvider",
-    "FireworksProvider",
-    "GeminiProvider",
-    "GroqProvider",
-    "HuggingFaceProvider",
-    "MistralProvider",
-    "NVIDIAProvider",
-    "OllamaProvider",
-    "OpenAIProvider",
-    "ProviderImportError",
-    "ReplicateProvider",
-    "TogetherProvider",
-    "VertexAIProvider",
-    "XAIProvider",
-    "create_graph_transformer",
-    "get_models",
-    "instantiate",
-    "load_api_key",
-    "set_defaults",
-    "validate_endpoint",
-    "validate_model_format",
-    "validate_model_id",
-]
-
 This module contains provider-specific implementations for various Language Model
 providers supported by the Haive framework. Each provider is implemented in its
 own module with safe imports and proper error handling.
 
 The module uses lazy imports to avoid requiring all provider dependencies to be
 installed. Only the providers actually used will trigger dependency checks.
+
+Attributes:
+    BaseLLMProvider: Base class for all LLM provider implementations.
+    ProviderImportError: Exception raised when provider dependencies are missing.
+    get_provider: Function to get a provider class by enum value.
+    list_providers: Function to list all available providers.
 
 Available Providers:
     - OpenAI (GPT-3.5, GPT-4, etc.)
@@ -59,20 +34,41 @@ Examples:
     Safe import with error handling::
 
         from haive.core.models.llm.providers import get_provider
+        from haive.core.models.llm.provider_types import LLMProvider
 
         try:
-            provider_class = get_provider("openai")
+            provider_class = get_provider(LLMProvider.OPENAI)
             provider = provider_class(model="gpt-4")
             llm = provider.instantiate()
         except ImportError as e:
             print(f"Provider not available: {e}")
 
-.. autosummary::
-   :toctree: generated/
+    List available providers::
 
-   get_provider
-   list_providers
+        available_providers = list_providers()
+        print(f"Available LLM providers: {available_providers}")
+
+    Dynamic provider instantiation::
+
+        provider_name = "OpenAI"
+        if provider_name in list_providers():
+            provider_class = get_provider(LLMProvider.OPENAI)
+            llm = provider_class(model="gpt-4").instantiate()
+
+Note:
+    Provider classes are available via lazy loading through __getattr__.
+    They are not included in __all__ to avoid AutoAPI import issues and
+    ensure fast module initialization.
 """
+
+__all__ = [
+    "BaseLLMProvider",
+    "ProviderImportError",
+    "get_provider",
+    "list_providers",
+    # Note: Provider classes are available via lazy loading through __getattr__
+    # They are not listed here to avoid AutoAPI import issues
+]
 
 import logging
 
@@ -175,7 +171,9 @@ def _lazy_import_provider(provider: LLMProvider) -> type[BaseLLMProvider] | None
         # Dynamic import
         import importlib
 
-        module = importlib.import_module(f".{module_name}", package=__name__)
+        module = importlib.import_module(
+            f"haive.core.models.llm.providers.{module_name}"
+        )
         provider_class = getattr(module, class_name)
 
         # Cache for future use
