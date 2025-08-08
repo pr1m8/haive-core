@@ -9,7 +9,7 @@ are not available. The fallbacks maintain the same API but with reduced function
 import functools
 import sys
 import time
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 
 
 class FallbackDebug:

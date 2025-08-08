@@ -8,8 +8,7 @@ including debugging, logging, profiling, and static analysis tools.
 import os
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 
 def _parse_environment_from_env() -> "Environment":

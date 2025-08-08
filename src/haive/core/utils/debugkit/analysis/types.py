@@ -481,7 +481,7 @@ class TypeAnalyzer:
         try:
             # Get type hints
             hints = get_type_hints(func, include_extras=True)
-        except (NameError, AttributeError, TypeError) as e:
+        except (NameError, AttributeError, TypeError):
             # Fallback for functions with problematic type hints
             hints = getattr(func, "__annotations__", {})
 

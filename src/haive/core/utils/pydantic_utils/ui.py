@@ -396,9 +396,7 @@ def format_value(value: Any) -> str:
                 return "{}"
             if len(value) > 3:
                 items = list(value.items())[:2]
-                return f"{{{', '.join(f'{k}: {format_value(v)}' for k, v in items)}, ... ({
-                    len(value)
-                } items)}}"
+                return f"{{{', '.join(f'{k}: {format_value(v)}' for k, v in items)}, ... ({len(value)} items)}}"
             return (
                 f"{{{', '.join(f'{k}: {format_value(v)}' for k, v in value.items())}}}"
             )

@@ -122,9 +122,7 @@ def _extract_from_langchain_tool(tool: Any, schema_name: str) -> type[BaseModel]
 
     # Fallback: create a generic schema
     logger.warning(
-        f"Could not extract specific schema from tool {
-            tool.name if hasattr(tool, 'name') else 'unknown'
-        }"
+        f"Could not extract specific schema from tool { tool.name if hasattr(tool, 'name') else 'unknown' }"
     )
     return create_model(schema_name, input=(str, Field(description="Tool input")))
 
@@ -148,7 +146,7 @@ def _extract_from_callable(
         )
         if include_signature:
             # Use setattr to avoid pyright complaints about unknown attributes
-            setattr(schema, "__signature_info__", {"error": str(e), "callable": func})
+            schema.__signature_info__ = {"error": str(e), "callable": func}
         return schema
 
     # Get type hints
@@ -212,17 +210,15 @@ def _extract_from_callable(
     # Handle case where function has no parameters
     if not fields:
         logger.warning(
-            f"Function {
-                func.__name__ if hasattr(func, '__name__') else 'unknown'
-            } has no extractable parameters"
+            f"Function { func.__name__ if hasattr(func, '__name__') else 'unknown' } has no extractable parameters"
         )
         schema = create_model(schema_name)
         if include_signature:
-            setattr(schema, "__signature_info__", {
+            schema.__signature_info__ = {
                 "signature": signature,
                 "callable": func,
                 "has_parameters": False,
-            })
+            }
         return schema
 
     # Create and return the model
@@ -231,7 +227,7 @@ def _extract_from_callable(
 
         # Store signature information for dynamic invocation
         if include_signature:
-            setattr(schema, "__signature_info__", {
+            schema.__signature_info__ = {
                 "signature": signature,
                 "callable": func,
                 "parameter_count": len(signature.parameters),
@@ -247,7 +243,7 @@ def _extract_from_callable(
                 ],
                 "type_hints": type_hints,
                 "docstring": func.__doc__,
-            })
+            }
 
         return schema
     except Exception as e:
@@ -257,11 +253,11 @@ def _extract_from_callable(
             schema_name, input=(str, Field(description="Function input"))
         )
         if include_signature:
-            setattr(fallback_schema, "__signature_info__", {
+            fallback_schema.__signature_info__ = {
                 "signature": signature,
                 "callable": func,
                 "error": str(e),
-            })
+            }
         return fallback_schema
 
 
@@ -442,7 +438,7 @@ def invoke_from_schema(schema_instance: BaseModel, **extra_kwargs) -> Any:
             "Ensure include_signature=True was used during extraction."
         )
 
-    sig_info = getattr(schema_class, "__signature_info__")
+    sig_info = schema_class.__signature_info__
     callable_func = sig_info.get("callable")
     signature = sig_info.get("signature")
 

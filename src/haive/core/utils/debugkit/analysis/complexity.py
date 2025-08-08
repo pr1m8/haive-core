@@ -19,8 +19,7 @@ import inspect
 import math
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional
 
 try:
     import radon.complexity as radon_cc
@@ -848,7 +847,6 @@ class ComplexityAnalyzer:
         self, tree: ast.AST, metrics: ComplexityMetrics
     ) -> List[ComplexityHotspot]:
         """Find specific complexity hotspots in the code."""
-        hotspots = []
 
         class HotspotFinder(ast.NodeVisitor):
             def __init__(self):

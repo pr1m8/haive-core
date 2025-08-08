@@ -172,9 +172,7 @@ class DocumentLoaderAnalyzer(ComponentAnalyzer):
             return StructuredTool.from_function(
                 func=loader_function,
                 name=tool_name,
-                description=f"Load documents using {component_info.class_name}: {
-                    component_info.description[:100]
-                }",
+                description=f"Load documents using {component_info.class_name}: { component_info.description[:100] }",
                 args_schema=args_model,
             )
 

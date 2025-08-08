@@ -4,11 +4,9 @@ This module contains the main UnifiedDev class and CodeAnalysisReport
 that were previously in the main __init__.py file.
 """
 
-import asyncio
 import functools
 import inspect
 import time
-import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
@@ -222,7 +220,6 @@ class UnifiedDev:
             custom_config: Custom configuration (uses global config if None)
         """
         from haive.core.utils.debugkit.benchmarking import benchmark
-        from haive.core.utils.debugkit.config import DevConfig
         from haive.core.utils.debugkit.debug import debug
         from haive.core.utils.debugkit.logging import log
         from haive.core.utils.debugkit.profiling import profile
