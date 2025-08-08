@@ -37,6 +37,7 @@ Usage:
 
 import inspect
 import logging
+import re
 from collections.abc import Callable
 from typing import Any, Self, get_type_hints
 
@@ -47,6 +48,41 @@ from rich.tree import Tree
 
 logger = logging.getLogger(__name__)
 console = Console()
+
+
+def sanitize_tool_name(raw_name: str) -> str:
+    """Sanitize tool names for OpenAI compliance and readability.
+
+    Converts generic class names like 'Plan[Task]' to snake_case like 'plan_task_generic'
+    and handles other naming edge cases.
+
+    Args:
+        raw_name: Raw tool name from __name__ or other source
+
+    Returns:
+        Sanitized snake_case name that's OpenAI-compliant
+    """
+    # Handle generic classes like Plan[Task] -> plan_task_generic
+    if "[" in raw_name and "]" in raw_name:
+        # Extract base class and generic type: Plan[Task] -> Plan, Task
+        match = re.match(r"^(\w+)\[(\w+)\]$", raw_name)
+        if match:
+            base_class, generic_type = match.groups()
+            # Convert to snake_case and add generic suffix
+            base_snake = re.sub(r"([A-Z])", r"_\1", base_class).lower().lstrip("_")
+            generic_snake = re.sub(r"([A-Z])", r"_\1", generic_type).lower().lstrip("_")
+            return f"{base_snake}_{generic_snake}_generic"
+
+    # Convert CamelCase to snake_case
+    snake_name = re.sub(r"([A-Z])", r"_\1", raw_name).lower().lstrip("_")
+
+    # Remove any remaining invalid characters for OpenAI (keep alphanumeric, underscore, dot, dash)
+    sanitized = re.sub(r"[^a-zA-Z0-9_.-]", "_", snake_name)
+
+    # Clean up multiple underscores
+    sanitized = re.sub(r"_+", "_", sanitized).strip("_")
+
+    return sanitized or "unnamed_tool"
 
 
 class ToolRouteMixin(BaseModel):
@@ -290,13 +326,21 @@ class ToolRouteMixin(BaseModel):
             # Set the route (use explicit route)
             self.set_tool_route(tool_name, route, metadata)
 
+    def _sanitize_tool_name(self, raw_name: str) -> str:
+        """Sanitize tool names for OpenAI compliance and readability."""
+        from haive.core.utils.naming import (
+            sanitize_tool_name as util_sanitize_tool_name,
+        )
+
+        return util_sanitize_tool_name(raw_name)
+
     def _generate_tool_name(self, tool: Any, prefix: str, index: int) -> str:
         """Generate a unique tool name for a tool."""
         # Try to get name from tool
         if hasattr(tool, "name") and tool.name:
-            base_name = tool.name
+            base_name = self._sanitize_tool_name(tool.name)
         elif isinstance(tool, type) and hasattr(tool, "__name__"):
-            base_name = tool.__name__
+            base_name = self._sanitize_tool_name(tool.__name__)
         else:
             base_name = f"tool_{index}"
 

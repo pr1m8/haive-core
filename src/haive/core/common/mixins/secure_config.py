@@ -157,9 +157,7 @@ class SecureConfigMixin:
             # Check if api_key attribute exists and is not None
             if not hasattr(self, "api_key") or self.api_key is None:
                 logger.warning(
-                    f"No API key attribute found for {
-                        getattr(self, 'provider', 'unknown provider')
-                    }"
+                    f"No API key attribute found for {getattr(self, 'provider', 'unknown provider')}"
                 )
                 return None
 

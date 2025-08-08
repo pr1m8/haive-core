@@ -41,11 +41,20 @@ from haive.core.common.mixins import (
     VersionMixin,
 )
 from haive.core.common.models import DynamicChoiceModel, NamedList
+
+# Import tree_leaf structures
+from haive.core.common.structures import (
+    Leaf,
+    Tree,
+    TreeLeaf,
+    TreeNode,
+)
 from haive.core.common.types import DictStrAny, JsonType, StrOrPath
 
 # Import common models
 
 # Import common types
+
 
 # Export all these symbols when using star imports
 __all__ = [
@@ -63,4 +72,9 @@ __all__ = [
     "StrOrPath",
     "TimestampMixin",
     "VersionMixin",
+    # Tree structures
+    "TreeNode",
+    "Leaf",
+    "Tree",
+    "TreeLeaf",
 ]
