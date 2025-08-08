@@ -70,7 +70,7 @@ class TestValidationNodeV2Comprehensive:
             {
                 "name": "test_engine",
                 "tool_routes": {
-                    "TaskAnalysis": "pydantic_model",
+                    "TaskAnalysis": "parse_output",  # structured_output_model gets parse_output route
                     "InvalidModel": "pydantic_model",
                     "calculator": "langchain_tool",
                     "search_tool": "langchain_tool",
@@ -358,8 +358,8 @@ class TestValidationNodeV2Comprehensive:
     def test_structured_output_model_as_tool(self, validation_node, base_state):
         """Test that structured_output_model from engine is recognized as a tool."""
         # The engine already has TaskAnalysis as structured_output_model
-        # Verify it's in tool_routes as pydantic_model
-        assert base_state.tool_routes["TaskAnalysis"] == "pydantic_model"
+        # Verify it's in tool_routes as parse_output (per routing refactor)
+        assert base_state.tool_routes["TaskAnalysis"] == "parse_output"
 
         # Call it as a tool
         ai_message = AIMessage(

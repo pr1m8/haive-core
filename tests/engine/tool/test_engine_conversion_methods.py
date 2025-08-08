@@ -19,7 +19,7 @@ from haive.core.engine.tool.types import ToolCapability
 from haive.core.engine.aug_llm import AugLLMConfig
 
 
-class TestStructuredOutputModel(BaseModel):
+class StructuredOutputModel(BaseModel):
     """Test structured output model."""
     query: str = Field(description="Search query")
     results: List[str] = Field(description="Search results")
@@ -33,7 +33,7 @@ class TestToolEngineConversionMethods:
         """Test basic conversion from AugLLMConfig."""
         # Create AugLLMConfig with structured output
         aug_config = AugLLMConfig(
-            structured_output_model=TestStructuredOutputModel
+            structured_output_model=StructuredOutputModel
         )
         
         # Test conversion method exists

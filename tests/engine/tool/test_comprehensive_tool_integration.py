@@ -34,10 +34,12 @@ class RegularValidationModel(BaseModel):
     value: int = Field(ge=0, description="Value field")
 
 
-@tool
-def test_calculator(expression: str) -> str:
+def calculator_func(expression: str) -> str:
     """Test calculator tool."""
     return f"Calculated: {expression} = 42"
+
+# Create tool from function to avoid pytest collection issue
+calculator_tool = tool("test_calculator")(calculator_func)
 
 
 class TestComprehensiveToolIntegration:
@@ -111,7 +113,7 @@ class TestComprehensiveToolIntegration:
         """Test that tools with STRUCTURED_OUTPUT capability get proper treatment."""
         # Create a tool with capabilities
         enhanced_tool = ToolEngine.augment_tool(
-            test_calculator,
+            calculator_tool,
             structured_output_model=ComprehensiveTestModel,
             name="enhanced_calculator"
         )
@@ -142,7 +144,7 @@ class TestComprehensiveToolIntegration:
         # Create config with multiple tool types
         config = AugLLMConfig(
             structured_output_model=ComprehensiveTestModel,
-            tools=[test_calculator, RegularValidationModel]
+            tools=[calculator_tool, RegularValidationModel]
         )
         
         # Verify each tool gets correct route
@@ -151,6 +153,8 @@ class TestComprehensiveToolIntegration:
             'RegularValidationModel': 'pydantic_model',
             'test_calculator': 'langchain_tool'
         }
+        
+        # Verify we have the expected tool routes
         
         for tool_name, expected_route in expected_routes.items():
             actual_route = config.tool_routes.get(tool_name)
@@ -169,8 +173,10 @@ class TestComprehensiveToolIntegration:
     def test_backward_compatibility(self):
         """Test that existing functionality still works."""
         # Test regular LangChain tools
-        config = AugLLMConfig(tools=[test_calculator])
+        config = AugLLMConfig(tools=[calculator_tool])
+        # The tool should be registered with its correct name
         assert 'test_calculator' in config.tool_routes
+        assert config.tool_routes['test_calculator'] == 'langchain_tool'
         
         # Test regular Pydantic models
         config2 = AugLLMConfig(tools=[RegularValidationModel])

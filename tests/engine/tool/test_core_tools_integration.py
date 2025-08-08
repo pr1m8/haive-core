@@ -43,7 +43,11 @@ class TestCoreToolsIntegration:
     def test_create_store_tools_suite_calls_factory(self, mock_create):
         """Test that create_store_tools_suite calls the factory method."""
         # Mock the factory to return a list of tools
-        mock_tools = [Mock(spec=Tool) for _ in range(3)]
+        mock_tools = []
+        for i, name in enumerate(['store_memory', 'search_memory', 'retrieve_memory']):
+            mock_tool = Mock(spec=Tool)
+            mock_tool.name = name
+            mock_tools.append(mock_tool)
         mock_create.return_value = mock_tools
         
         # Mock store manager
@@ -55,7 +59,7 @@ class TestCoreToolsIntegration:
             
             # Verify factory was called
             mock_create.assert_called_once_with(
-                mock_store_manager, 
+                store_manager=mock_store_manager, 
                 namespace=None, 
                 include_tools=None
             )
