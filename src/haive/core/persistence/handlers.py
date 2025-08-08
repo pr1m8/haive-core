@@ -84,11 +84,7 @@ def setup_checkpointer(config: Any) -> Any:
     # Default to memory checkpointer
     if not hasattr(config, "persistence") or config.persistence is None:
         logger.info(
-            f"No persistence config for {
-                getattr(
-                    config,
-                    'name',
-                    'unnamed')}. Using memory checkpointer."
+            f"No persistence config for { getattr(config, 'name', 'unnamed') }. Using memory checkpointer."
         )
         memory_config = MemoryCheckpointerConfig()
         return memory_config.create_checkpointer()
@@ -101,11 +97,7 @@ def setup_checkpointer(config: Any) -> Any:
         except Exception as e:
             logger.exception(f"Failed to create checkpointer: {e}")
             logger.warning(
-                f"Falling back to memory checkpointer for {
-                    getattr(
-                        config,
-                        'name',
-                        'unnamed')}"
+                f"Falling back to memory checkpointer for {getattr(config, 'name', 'unnamed')}"
             )
             memory_config = MemoryCheckpointerConfig()
             return memory_config.create_checkpointer()
@@ -156,22 +148,14 @@ def setup_checkpointer(config: Any) -> Any:
             except Exception as e:
                 logger.exception(f"Failed to create PostgreSQL checkpointer: {e}")
                 logger.warning(
-                    f"Falling back to memory checkpointer for {
-                        getattr(
-                            config,
-                            'name',
-                            'unnamed')}"
+                    f"Falling back to memory checkpointer for {getattr(config, 'name', 'unnamed')}"
                 )
                 memory_config = MemoryCheckpointerConfig()
                 return memory_config.create_checkpointer()
 
     # Default to memory checkpointer for any other case
     logger.info(
-        f"Using memory checkpointer (default) for {
-            getattr(
-                config,
-                'name',
-                'unnamed')}"
+        f"Using memory checkpointer (default) for {getattr(config, 'name', 'unnamed')}"
     )
     memory_config = MemoryCheckpointerConfig()
     return memory_config.create_checkpointer()
@@ -196,11 +180,7 @@ async def setup_async_checkpointer(config: Any) -> Any:
     # Default to memory checkpointer
     if not hasattr(config, "persistence") or config.persistence is None:
         logger.info(
-            f"No persistence config for {
-                getattr(
-                    config,
-                    'name',
-                    'unnamed')}. Using memory checkpointer."
+            f"No persistence config for { getattr(config, 'name', 'unnamed') }. Using memory checkpointer."
         )
 
         memory_config = MemoryCheckpointerConfig()
@@ -215,11 +195,7 @@ async def setup_async_checkpointer(config: Any) -> Any:
         except Exception as e:
             logger.exception(f"Failed to create async checkpointer: {e}")
             logger.warning(
-                f"Falling back to memory checkpointer for {
-                    getattr(
-                        config,
-                        'name',
-                        'unnamed')}"
+                f"Falling back to memory checkpointer for {getattr(config, 'name', 'unnamed')}"
             )
 
             memory_config = MemoryCheckpointerConfig()
@@ -273,11 +249,7 @@ async def setup_async_checkpointer(config: Any) -> Any:
             except Exception as e:
                 logger.exception(f"Failed to create async PostgreSQL checkpointer: {e}")
                 logger.warning(
-                    f"Falling back to memory checkpointer for {
-                        getattr(
-                            config,
-                            'name',
-                            'unnamed')}"
+                    f"Falling back to memory checkpointer for {getattr(config, 'name', 'unnamed')}"
                 )
 
                 memory_config = MemoryCheckpointerConfig()
@@ -285,11 +257,7 @@ async def setup_async_checkpointer(config: Any) -> Any:
 
     # Default to memory checkpointer for any other case
     logger.info(
-        f"Using memory checkpointer (default) for {
-            getattr(
-                config,
-                'name',
-                'unnamed')}"
+        f"Using memory checkpointer (default) for {getattr(config, 'name', 'unnamed')}"
     )
 
     memory_config = MemoryCheckpointerConfig()
@@ -315,7 +283,6 @@ def ensure_pool_open(checkpointer: Any) -> Any | None:
 
             # Import here to avoid dependency issues
             try:
-
                 # Check if it's a pool
                 if isinstance(conn, (ConnectionPool, AsyncConnectionPool)):
                     # Check if the pool is already open
@@ -409,7 +376,6 @@ async def ensure_async_pool_open(checkpointer: Any) -> Any | None:
 
             # Import here to avoid dependency issues
             try:
-
                 # Check if it's an async pool
                 if isinstance(conn, AsyncConnectionPool):
                     # Check if the pool is already open
@@ -498,7 +464,6 @@ async def close_async_pool_if_needed(checkpointer: Any, pool: Any = None) -> Non
 
     # Close the pool if it's an AsyncConnectionPool
     try:
-
         if isinstance(pool, AsyncConnectionPool):
             try:
                 is_open = False
@@ -540,7 +505,6 @@ async def register_async_thread_if_needed(
     # Handle async PostgreSQL checkpointers
     if hasattr(checkpointer, "conn"):
         try:
-
             pool = checkpointer.conn
 
             if pool and isinstance(pool, AsyncConnectionPool):
@@ -624,7 +588,6 @@ def close_pool_if_needed(checkpointer: Any, pool: Any = None) -> None:
 
     # Close the pool if it's a ConnectionPool
     try:
-
         if isinstance(pool, ConnectionPool) and pool.is_open():
             logger.debug("Closing PostgreSQL connection pool")
             # We don't actually close the pool - generally not recommended
@@ -653,7 +616,6 @@ async def close_async_pool_if_needed(checkpointer: Any, pool: Any = None) -> Non
 
     # Close the pool if it's an AsyncConnectionPool
     try:
-
         if isinstance(pool, AsyncConnectionPool) and await pool.is_open():
             logger.debug("Closing async PostgreSQL connection pool")
             # Similarly, we don't actually close the pool

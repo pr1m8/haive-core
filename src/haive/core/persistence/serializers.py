@@ -84,9 +84,7 @@ class SecureSecretStrSerializer(JsonPlusSerializer):
                     cls, "__module__", ""
                 ):
                     logger.debug(
-                        f"Allowing LangChain Serializable object to handle its own serialization: {
-                            type(value)
-                        }"
+                        f"Allowing LangChain Serializable object to handle its own serialization: { type(value) }"
                     )
                     return value
 

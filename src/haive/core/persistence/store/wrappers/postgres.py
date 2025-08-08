@@ -130,9 +130,7 @@ class AsyncPostgresStoreWrapper(SerializableStoreWrapper):
             store = AsyncPostgresStore(pool, index=index_config)
         else:
             logger.info(
-                f"Creating AsyncPostgresStore without semantic search for {
-                    self.config.connection_id
-                }"
+                f"Creating AsyncPostgresStore without semantic search for { self.config.connection_id }"
             )
             store = AsyncPostgresStore(pool)
 
