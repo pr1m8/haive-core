@@ -102,6 +102,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
             self.routed_tools = []
         super().auto_track_all_tokens()
         super()._validate_and_process_tools()
+        self._process_direct_tools()  # Process tools list into tool_instances
         self._sync_tools_from_instance_engines()
         if hasattr(self.__class__, "engines") and (not self.tools):
             logger.debug(
@@ -111,6 +112,30 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         self._sync_tool_routes()
         self._sync_tools_to_engines_by_route()
         return self
+
+    def _process_direct_tools(self) -> None:
+        """Process the direct tools list into tool_instances and tool_routes."""
+        if not hasattr(self, "tools") or not self.tools:
+            return
+
+        for i, tool in enumerate(self.tools):
+            # Get tool name
+            tool_name = self._get_tool_name(tool, i)
+
+            # Add to tool_instances if not already there
+            if tool_name not in self.tool_instances:
+                self.tool_instances[tool_name] = tool
+                logger.debug(f"Added tool '{tool_name}' to tool_instances")
+
+                # Also add to tool_routes if not already there
+                if tool_name not in self.tool_routes:
+                    route, metadata = self._analyze_tool(tool)
+                    self.tool_routes[tool_name] = route
+                    if metadata:
+                        if not hasattr(self, "tool_metadata"):
+                            self.tool_metadata = {}
+                        self.tool_metadata[tool_name] = metadata
+                    logger.debug(f"Added tool '{tool_name}' with route '{route}'")
 
     def _sync_tools_from_instance_engines(self) -> None:
         """Sync tools from instance-level engine fields to state."""

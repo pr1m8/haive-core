@@ -162,10 +162,12 @@ def _get_target_node_for_route(tool_route: str) -> str:
     """Map tool routes to target node names.
 
     This demonstrates how different tool types can be routed to different nodes.
+    Updated to support parse_output route for structured output models.
     """
     route_to_node = {
         "langchain_tool": "langchain_tools",
         "pydantic_model": "pydantic_tools",
+        "parse_output": "parser_tools",  # NEW: For structured output models
         "function": "function_tools",
         "retriever": "retriever_tools",
         "agent": "sub_agents",
