@@ -12,7 +12,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from pydantic import Field, validator
+from pydantic import Field
 
 from .enhanced_registry import enhanced_registry, register_file_source, register_source
 from .source_types import (

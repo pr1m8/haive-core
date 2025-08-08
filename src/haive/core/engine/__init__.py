@@ -193,14 +193,11 @@ _VECTORSTORE_COMPONENTS = {
 
 
 # Import core components directly - lazy loading was causing too many issues
-from haive.core.engine.aug_llm import AugLLMConfig
-from haive.core.engine.base import Engine, EngineRegistry, EngineType, InvokableEngine
 from haive.core.engine.embedding import (
     BaseEmbeddingConfig,
     EmbeddingType,
     create_embedding_config,
 )
-from haive.core.engine.output_parser import OutputParserEngine, OutputParserType
 
 # Note: Heavy components (agent, document, retriever, vectorstore) are available
 # via explicit imports but not auto-imported to avoid startup cost

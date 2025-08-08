@@ -519,7 +519,12 @@ class AugLLMConfig(*_get_augllm_base_classes()):
                 data["force_tool_use"] = True
                 data["tool_choice_mode"] = "required"
                 if hasattr(structured_output_model, "__name__"):
-                    data["force_tool_choice"] = structured_output_model.__name__
+                    # Use sanitized tool name for OpenAI compliance
+                    from haive.core.utils.naming import sanitize_tool_name
+
+                    data["force_tool_choice"] = sanitize_tool_name(
+                        structured_output_model.__name__
+                    )
         return data
 
     @model_validator(mode="before")
@@ -1275,7 +1280,12 @@ class AugLLMConfig(*_get_augllm_base_classes()):
                     debug_print(
                         "🔧 [green]Added structured_output_model to tools for v2[/green]"
                     )
-                expected_tool_name = self.structured_output_model.__name__
+                # Use sanitized tool name for OpenAI compliance
+                from haive.core.utils.naming import sanitize_tool_name
+
+                expected_tool_name = sanitize_tool_name(
+                    self.structured_output_model.__name__
+                )
                 if self.force_tool_choice != expected_tool_name:
                     self.force_tool_choice = expected_tool_name
                     debug_print(
@@ -2183,7 +2193,10 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         if force_tool_use:
             tool_choice_mode = "required"
             if len(tool_models) == 1:
-                force_tool_choice = tool_models[0].__name__
+                # Use sanitized tool name for OpenAI compliance
+                from haive.core.utils.naming import sanitize_tool_name
+
+                force_tool_choice = sanitize_tool_name(tool_models[0].__name__)
         messages = []
         if system_message:
             messages.append(SystemMessage(content=system_message))
@@ -2314,7 +2327,10 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         kwargs["tool_choice_mode"] = "required"
         kwargs["include_format_instructions"] = include_instructions
         if "force_tool_choice" not in kwargs:
-            kwargs["force_tool_choice"] = model.__name__
+            # Use sanitized tool name for OpenAI compliance
+            from haive.core.utils.naming import sanitize_tool_name
+
+            kwargs["force_tool_choice"] = sanitize_tool_name(model.__name__)
         if output_field_name:
             kwargs["output_field_name"] = output_field_name
         messages = []

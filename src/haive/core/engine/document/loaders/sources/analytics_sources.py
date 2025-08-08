@@ -581,9 +581,7 @@ class InfluxDBSource(RemoteSource):
 
             if self.window_period and self.aggregation_method:
                 query_parts.append(
-                    f"|> aggregateWindow(every: {self.window_period}, fn: {
-                        self.aggregation_method
-                    })"
+                    f"|> aggregateWindow(every: {self.window_period}, fn: {self.aggregation_method})"
                 )
 
             kwargs["query"] = "\n".join(query_parts)

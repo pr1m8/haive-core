@@ -133,9 +133,7 @@ class MergerRetrieverConfig(BaseRetrieverConfig):
         # Validate we have the right number of retrievers
         if len(instantiated_retrievers) < 2:
             raise ValueError(
-                f"MergerRetriever requires at least 2 retrievers, got {
-                    len(instantiated_retrievers)
-                }"
+                f"MergerRetriever requires at least 2 retrievers, got {len(instantiated_retrievers)}"
             )
 
         return MergerRetriever(

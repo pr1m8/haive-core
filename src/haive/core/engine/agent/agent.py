@@ -196,7 +196,7 @@ class Agent(Generic[TConfig], ABC):
         self._apply_configured_patterns()
 
         # Generate visualization if requested
-        if getattr(self.config, "visualize", True) and hasattr(self, "graph"):
+        if getattr(self.config, "visualize", False) and hasattr(self, "graph"):
             self.visualize_graph()
 
         self._log_agent_ready()
@@ -254,9 +254,7 @@ class Agent(Generic[TConfig], ABC):
         # Show initialization banner
         self.console.print(
             Panel.fit(
-                f"[bold blue]Haive Agent: [green]{
-                    getattr(self.config, 'name', 'Unnamed')
-                }[/green][/bold blue]",
+                f"[bold blue]Haive Agent: [green]{getattr(self.config, 'name', 'Unnamed')}[/green][/bold blue]",
                 border_style="blue",
                 title="Initializing",
                 subtitle=f"v{getattr(self.config, 'version', '1.0.0')}",
@@ -370,14 +368,8 @@ class Agent(Generic[TConfig], ABC):
         self.console.print(
             Panel.fit(
                 f"[bold green]Agent {self.config.name} Ready[/bold green]\n"
-                f"[cyan]Workflow nodes:[/cyan] {
-                    len(self.graph.nodes) if hasattr(self.graph, 'nodes') else 0
-                }\n"
-                f"[cyan]Schema fields:[/cyan] {
-                    len(self.state_schema.model_fields)
-                    if hasattr(self.state_schema, 'model_fields')
-                    else 0
-                }\n"
+                f"[cyan]Workflow nodes:[/cyan] {len(self.graph.nodes) if hasattr(self.graph, 'nodes') else 0}\n"
+                f"[cyan]Schema fields:[/cyan] {len(self.state_schema.model_fields) if hasattr(self.state_schema, 'model_fields') else 0}\n"
                 f"[cyan]Persistence:[/cyan] {type(self.checkpointer).__name__}\n"
                 f"[cyan]Checkpoint mode:[/cyan] {self._checkpoint_mode}\n"
                 f"[cyan]Runnable config:[/cyan] {self.config.runnable_config}",
@@ -989,9 +981,7 @@ class Agent(Generic[TConfig], ABC):
             # Standard synchronous checkpointer setup
             self.checkpointer = setup_checkpointer(self.config)
             logger.debug(
-                f"Synchronous checkpointer set up for {self.config.name}: {
-                    type(self.checkpointer).__name__
-                }"
+                f"Synchronous checkpointer set up for {self.config.name}: {type(self.checkpointer).__name__}"
             )
 
             # Add store if configured
@@ -1528,9 +1518,7 @@ class Agent(Generic[TConfig], ABC):
 
             # Show compilation result
             self.console.print(
-                f"[bold green]Graph compiled successfully[/bold green] in {
-                    compile_time:.2f
-                } seconds"
+                f"[bold green]Graph compiled successfully[/bold green] in {compile_time:.2f} seconds"
             )
 
             # Get node count
@@ -2238,9 +2226,7 @@ class Agent(Generic[TConfig], ABC):
         if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
             self.console.print(
                 Panel.fit(
-                    f"[bold blue]Running Agent Async: [green]{
-                        self.config.name
-                    }[/green][/bold blue]\n"
+                    f"[bold blue]Running Agent Async: [green]{self.config.name}[/green][/bold blue]\n"
                     f"[cyan]Thread ID:[/cyan] {thread_id}\n"
                     f"[cyan]Checkpoint Mode:[/cyan] {checkpoint_mode}",
                     border_style="blue",
@@ -2330,11 +2316,7 @@ class Agent(Generic[TConfig], ABC):
                 try:
                     # Log execution details
                     logger.info(
-                        f"Executing async app with checkpointer: {
-                            async_app.checkpointer.__class__.__name__
-                            if hasattr(async_app, 'checkpointer') and async_app.checkpointer
-                            else 'None'
-                        }"
+                        f"Executing async app with checkpointer: {async_app.checkpointer.__class__.__name__ if hasattr(async_app, 'checkpointer') and async_app.checkpointer else 'None'}"
                     )
 
                     # Run with async app and async checkpointer
@@ -2741,9 +2723,7 @@ class Agent(Generic[TConfig], ABC):
         if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
             self.console.print(
                 Panel.fit(
-                    f"[bold blue]Async Streaming Agent: [green]{
-                        self.config.name
-                    }[/green][/bold blue]\n"
+                    f"[bold blue]Async Streaming Agent: [green]{self.config.name}[/green][/bold blue]\n"
                     f"[cyan]Thread ID:[/cyan] {thread_id}\n"
                     f"[cyan]Stream Mode:[/cyan] {stream_mode}\n"
                     f"[cyan]Checkpoint Mode:[/cyan] {checkpoint_mode}",

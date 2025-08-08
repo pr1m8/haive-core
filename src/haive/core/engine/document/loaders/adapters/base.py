@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 
 from langchain_core.documents import Document
 
-from haive.core.engine.loaders.sources.base import BaseSource
+from haive.core.engine.document.loaders.sources.base.base import BaseSource
 
 
 class LoaderAdapter(ABC):

@@ -99,12 +99,8 @@ class AugLLMFactory:
             f"has_tools: {len(self.aug_config.tools) > 0}, "
             f"has_structured_output: {self.aug_config.structured_output_model is not None}, "
             f"force_messages_optional: {self.aug_config.force_messages_optional}, "
-            f"messages_in_optional_vars: {
-                self.aug_config.messages_placeholder_name in self.aug_config.optional_variables
-            }, "
-            f"use_tool_for_format_instructions: {
-                self.aug_config.use_tool_for_format_instructions
-            }, "
+            f"messages_in_optional_vars: { self.aug_config.messages_placeholder_name in self.aug_config.optional_variables },"
+            f"use_tool_for_format_instructions: { self.aug_config.use_tool_for_format_instructions },"
             f"tool_is_base_model: {self.aug_config.tool_is_base_model}, "
             f"force_tool_use: {self.aug_config.force_tool_use}, "
             f"force_tool_choice: {self.aug_config.force_tool_choice}, "
@@ -167,9 +163,7 @@ class AugLLMFactory:
                 self.aug_config.messages_placeholder_name
             )
             logger.warning(
-                f"Added {
-                    self.aug_config.messages_placeholder_name
-                } to optional_variables during config param application"
+                f"Added { self.aug_config.messages_placeholder_name } to optional_variables during config param application"
             )
 
         # Handle prompt modification if system_message was updated
@@ -293,9 +287,7 @@ class AugLLMFactory:
                 self.aug_config.messages_placeholder_name
             )
             logger.warning(
-                f"Added {
-                    self.aug_config.messages_placeholder_name
-                } to optional_variables during runnable creation"
+                f"Added { self.aug_config.messages_placeholder_name } to optional_variables during runnable creation"
             )
 
         # Force chat templates to have optional messages placeholder if
@@ -324,9 +316,7 @@ class AugLLMFactory:
         # Debug LLM initialization
         logger.debug(
             f"LLM Initialization - model: {self.aug_config.llm_config.model}, "
-            f"temperature: {self.aug_config.temperature}, max_tokens: {
-                self.aug_config.max_tokens
-            }, "
+            f"temperature: {self.aug_config.temperature}, max_tokens: { self.aug_config.max_tokens },"
             f"override_params: {llm_params}"
         )
 
@@ -444,9 +434,7 @@ class AugLLMFactory:
                             )
                         except Exception as e:
                             logger.exception(
-                                f"Failed to instantiate tool {
-                                    getattr(tool, '__name__', 'Unknown')
-                                }: {e}"
+                                f"Failed to instantiate tool { getattr(tool, '__name__', 'Unknown') }: {e}"
                             )
                             failed_tools.append((tool, str(e)))
                     else:
@@ -743,21 +731,11 @@ class AugLLMFactory:
 
         # Debug final chain composition
         logger.debug(
-            f"Chain Composition - prompt_template_type: {
-                type(self.aug_config.prompt_template).__name__
-            }, "
-            f"has_preprocess: {bool(self.aug_config.preprocess)}, has_postprocess: {
-                bool(self.aug_config.postprocess)
-            }, "
-            f"custom_runnables: {len(self.aug_config.custom_runnables or [])}, messages_optional: {
-                self.aug_config.force_messages_optional
-            }, "
-            f"has_format_instructions: {
-                'format_instructions' in self.aug_config.partial_variables
-            }, "
-            f"tool_is_base_model: {self.aug_config.tool_is_base_model}, structured_output_version: {
-                self.aug_config.structured_output_version
-            }"
+            f"Chain Composition - prompt_template_type: { type(self.aug_config.prompt_template).__name__ },"
+            f"has_preprocess: {bool(self.aug_config.preprocess)}, has_postprocess: { bool(self.aug_config.postprocess) },"
+            f"custom_runnables: {len(self.aug_config.custom_runnables or [])}, messages_optional: { self.aug_config.force_messages_optional },"
+            f"has_format_instructions: { 'format_instructions' in self.aug_config.partial_variables },"
+            f"tool_is_base_model: {self.aug_config.tool_is_base_model}, structured_output_version: { self.aug_config.structured_output_version }"
         )
 
         return chain

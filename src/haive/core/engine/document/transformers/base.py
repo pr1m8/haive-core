@@ -247,9 +247,7 @@ class DocTransformerEngine(InvokableEngine[list[Document], list[Document]]):
             documents = input_data.documents
         else:
             raise ValueError(
-                f"Invalid input type: {
-                    type(input_data)
-                }. Expected list of documents or dict with 'documents' key."
+                f"Invalid input type: {type(input_data)}. Expected list of documents or dict with 'documents' key."
             )
 
         # Handle empty input

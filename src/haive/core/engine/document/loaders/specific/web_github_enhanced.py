@@ -627,9 +627,7 @@ class GitHubActionsLoader(BaseLoader):
                         continue
 
                     # Get runs for this workflow
-                    runs_url = f"https://api.github.com/repos/{self.owner}/{
-                        self.repo
-                    }/actions/workflows/{workflow['id']}/runs"
+                    runs_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/actions/workflows/{workflow['id']}/runs"
                     params = {"per_page": min(self.max_runs, 100)}
                     if self.status:
                         params["status"] = self.status

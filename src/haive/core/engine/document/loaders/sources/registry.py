@@ -12,13 +12,15 @@ The registry enables automatic source detection and loader selection.
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from haive.core.engine.document.config import LoaderPreference
-from haive.core.engine.document.loaders.path_analyzer import (
-    PathAnalysisResult,
-    analyze_path,
-)
+
+if TYPE_CHECKING:
+    from haive.core.engine.document.loaders.path_analyzer import (
+        PathAnalysisResult,
+        analyze_path,
+    )
 from haive.core.engine.document.loaders.sources.source_base import (
     BaseSource,
     DatabaseSource,
@@ -74,7 +76,7 @@ class SourceRegistration:
     priority: int = 0
 
     # Custom matcher function
-    custom_matcher: Callable[[PathAnalysisResult], bool] | None = None
+    custom_matcher: Callable[["PathAnalysisResult"], bool] | None = None
 
 
 class SourceRegistry:
@@ -102,7 +104,7 @@ class SourceRegistry:
         loaders: dict[str, str | dict[str, Any]] | None = None,
         default_loader: str | None = None,
         priority: int = 0,
-        custom_matcher: Callable[[PathAnalysisResult], bool] | None = None,
+        custom_matcher: Callable[["PathAnalysisResult"], bool] | None = None,
     ) -> SourceRegistration:
         """Register a source with the registry."""
         # Create registration
@@ -180,11 +182,14 @@ class SourceRegistry:
             self._mime_index[mime].add(name)
 
     def find_source_for_path(
-        self, path: str, analysis: PathAnalysisResult | None = None
+        self, path: str, analysis: "PathAnalysisResult | None" = None
     ) -> SourceRegistration | None:
         """Find the best source for a given path."""
         # Analyze path if not provided
         if not analysis:
+            # Import here to avoid circular import
+            from haive.core.engine.document.loaders.path_analyzer import analyze_path
+
             analysis = analyze_path(path)
 
         candidates: list[SourceRegistration] = []
@@ -340,7 +345,7 @@ def register_source(
     loaders: dict[str, str | dict[str, Any]] | None = None,
     default_loader: str | None = None,
     priority: int = 0,
-    custom_matcher: Callable[[PathAnalysisResult], bool] | None = None,
+    custom_matcher: Callable[["PathAnalysisResult"], bool] | None = None,
 ) -> Callable[[type[BaseSource]], type[BaseSource]]:
     """Decorator to register a source class.
 

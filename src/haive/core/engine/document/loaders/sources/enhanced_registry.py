@@ -288,7 +288,7 @@ class EnhancedSourceRegistry:
 
     def find_source_for_path(self, path: str) -> EnhancedSourceRegistration | None:
         """Find the best source for a given path."""
-        from core.engine.document.loaders.path_analyzer import PathAnalyzer
+        from haive.core.engine.document.loaders.path_analyzer import PathAnalyzer
 
         # Analyze the path
         analysis = PathAnalyzer.analyze(path)
@@ -332,7 +332,7 @@ class EnhancedSourceRegistry:
         if not registration:
             return None
 
-        from core.engine.document.loaders.path_analyzer import PathAnalyzer
+        from haive.core.engine.document.loaders.path_analyzer import PathAnalyzer
 
         analysis = PathAnalyzer.analyze(path)
 

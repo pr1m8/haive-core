@@ -153,9 +153,7 @@ class PersistenceManager:
             self.postgres_setup_needed = setup_needed
 
             logger.info(
-                f"Using PostgreSQL checkpointer with {'async' if use_async else 'sync'} {
-                    'pool' if use_pool else 'connection'
-                }"
+                f"Using PostgreSQL checkpointer with {'async' if use_async else 'sync'} {'pool' if use_pool else 'connection'}"
             )
             return checkpointer
 

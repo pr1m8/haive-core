@@ -149,7 +149,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         default_factory=list,
         description="Patterns to apply by default during initialization",
     )
-    visualize: bool = Field(default=True)
+    visualize: bool = Field(default=False)  # Disabled by default to prevent hangs
     output_dir: str = Field(default="resources/graph_images")
     debug: bool = Field(default=False)
     save_history: bool = Field(default=True)
