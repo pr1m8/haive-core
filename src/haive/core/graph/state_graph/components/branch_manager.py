@@ -136,9 +136,7 @@ class BranchManager(BaseGraphComponent):
 
         # Create branch object if needed
         if not isinstance(condition, Branch):
-            branch = self._create_branch_from_condition(
-                condition, destinations, default
-            )
+            branch = self._create_branch_from_condition(condition, destinations, default)
         else:
             branch = condition
 
@@ -441,9 +439,7 @@ class BranchManager(BaseGraphComponent):
                 if create_missing:
                     # Create a placeholder node
                     self.graph.nodes[dest] = self._create_placeholder_node(dest)
-                    logger.debug(
-                        f"Created placeholder node '{dest}' for branch destination"
-                    )
+                    logger.debug(f"Created placeholder node '{dest}' for branch destination")
                 else:
                     raise ValueError(f"Destination node '{dest}' not found in graph")
 
@@ -465,10 +461,7 @@ class BranchManager(BaseGraphComponent):
         errors = []
 
         # Check source node exists
-        if (
-            hasattr(branch, "source_node")
-            and branch.source_node not in self.graph.nodes
-        ):
+        if hasattr(branch, "source_node") and branch.source_node not in self.graph.nodes:
             errors.append(
                 f"Branch '{branch_id}' references non-existent source node '{branch.source_node}'"
             )
@@ -478,9 +471,7 @@ class BranchManager(BaseGraphComponent):
             try:
                 branch.function_ref.get_callable()
             except Exception as e:
-                errors.append(
-                    f"Branch '{branch_id}' has invalid function reference: {e}"
-                )
+                errors.append(f"Branch '{branch_id}' has invalid function reference: {e}")
 
         # Check value mapping destinations
         if hasattr(branch, "value_mapping") and branch.value_mapping:

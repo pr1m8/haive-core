@@ -33,15 +33,13 @@ class ValidationConfig(BaseModel):
     schemas: dict[str, type[BaseModel]] = Field(
         default_factory=dict, description="Tool schemas by name"
     )
-    format_error: (
-        Callable[[BaseException, dict[str, Any], type[BaseModel]], str] | None
-    ) = Field(default=None, description="Function to format validation errors")
+    format_error: Callable[[BaseException, dict[str, Any], type[BaseModel]], str] | None = Field(
+        default=None, description="Function to format validation errors"
+    )
     auto_retry: bool = Field(
         default=True, description="Whether to automatically retry on validation errors"
     )
-    retry_destination: str | None = Field(
-        default=None, description="Node to route to for retries"
-    )
+    retry_destination: str | None = Field(default=None, description="Node to route to for retries")
     add_error_metadata: bool = Field(
         default=True, description="Whether to add error metadata to tool messages"
     )
@@ -136,8 +134,7 @@ class Router:
             name=name,
             condition=condition,
             destination=destination,
-            description=description
-            or f"Route when tools called: {', '.join(tool_names)}",
+            description=description or f"Route when tools called: {', '.join(tool_names)}",
         )
 
         return self.add_route(route)
@@ -180,8 +177,7 @@ class Router:
             name=name,
             condition=condition,
             destination=destination,
-            description=description
-            or f"Route when content contains: {', '.join(keywords)}",
+            description=description or f"Route when content contains: {', '.join(keywords)}",
         )
 
         return self.add_route(route)
@@ -276,16 +272,13 @@ class Router:
         Returns:
             Self for chaining
         """
-        condition = CompositeCondition(
-            conditions=conditions, operator=operator, priority=priority
-        )
+        condition = CompositeCondition(conditions=conditions, operator=operator, priority=priority)
 
         route = Route(
             name=name,
             condition=condition,
             destination=destination,
-            description=description
-            or f"Route based on {operator} of {len(conditions)} conditions",
+            description=description or f"Route based on {operator} of {len(conditions)} conditions",
         )
 
         return self.add_route(route)
@@ -320,9 +313,7 @@ class Router:
         self.validation_config.schemas[tool_name] = schema
         return self
 
-    def add_tool_schemas(
-        self, schemas: list[BaseTool | type[BaseModel] | Callable]
-    ) -> "Router":
+    def add_tool_schemas(self, schemas: list[BaseTool | type[BaseModel] | Callable]) -> "Router":
         """Add multiple schemas for tool validation.
 
         Args:
@@ -339,16 +330,12 @@ class Router:
         for schema in schemas:
             if isinstance(schema, BaseTool):
                 if schema.args_schema is None:
-                    logger.warning(
-                        f"Tool {schema.name} does not have an args_schema defined"
-                    )
+                    logger.warning(f"Tool {schema.name} does not have an args_schema defined")
                     continue
-                if not isinstance(
-                    schema.args_schema, type
-                ) or not is_basemodel_subclass(schema.args_schema):
-                    logger.warning(
-                        f"Tool {schema.name} does not have a valid args_schema"
-                    )
+                if not isinstance(schema.args_schema, type) or not is_basemodel_subclass(
+                    schema.args_schema
+                ):
+                    logger.warning(f"Tool {schema.name} does not have a valid args_schema")
                     continue
                 self.validation_config.schemas[schema.name] = schema.args_schema
             elif isinstance(schema, type) and issubclass(schema, BaseModel):
@@ -405,9 +392,7 @@ class Router:
             for route in self.routes:
                 try:
                     if route.condition.evaluate(state):
-                        logger.info(
-                            f"Route matched: {route.name} -> {route.destination}"
-                        )
+                        logger.info(f"Route matched: {route.name} -> {route.destination}")
                         return route.destination
                 except Exception as e:
                     logger.exception(f"Error evaluating route {route.name}: {e}")
@@ -439,8 +424,7 @@ class Router:
         ai_message = None
         for msg in reversed(messages):
             if (
-                isinstance(msg, AIMessage)
-                or (hasattr(msg, "type") and msg.type == "ai")
+                isinstance(msg, AIMessage) or (hasattr(msg, "type") and msg.type == "ai")
             ) and hasattr(msg, "tool_calls"):
                 ai_message = msg
                 break
@@ -474,9 +458,7 @@ class Router:
 
             except ValidationError as e:
                 # Format error
-                format_error = (
-                    self.validation_config.format_error or default_format_error
-                )
+                format_error = self.validation_config.format_error or default_format_error
                 error_content = format_error(e, call, schema)
 
                 # Create error tool message

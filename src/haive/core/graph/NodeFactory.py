@@ -1020,9 +1020,7 @@ class NodeFactory:
                     )
 
                 logger.debug(
-                    f"Embeddings generated with shape: {
-                        len(result) if isinstance(result, list) else 'unknown'
-                    }"
+                    f"Embeddings generated with shape: {len(result) if isinstance(result, list) else 'unknown'}"
                 )
             except Exception as e:
                 logger.error(f"Error generating embeddings: {e}")

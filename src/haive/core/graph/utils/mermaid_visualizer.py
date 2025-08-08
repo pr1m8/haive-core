@@ -269,34 +269,24 @@ class MermaidVisualizer:
 
             # Get node details for richer visualization
             node_type = self.node_types.get(name, "default")
-            node_status = getattr(self.graph, "node_statuses", {}).get(
-                name, NodeStatus.ADDED
-            )
+            node_status = getattr(self.graph, "node_statuses", {}).get(name, NodeStatus.ADDED)
 
             # Create node ID (escape special characters for Mermaid)
             node_id = self._sanitize_id(name)
 
             # Get icon for node type
-            icon = MermaidStyle.NODE_ICONS.get(
-                node_type, MermaidStyle.NODE_ICONS["default"]
-            )
+            icon = MermaidStyle.NODE_ICONS.get(node_type, MermaidStyle.NODE_ICONS["default"])
 
             # Add node with appropriate shape and icon
             mermaid_lines.append(f'  {node_id}["{icon} {name}"]')
 
             # Apply style based on node type and status
             if node_status == NodeStatus.UNREACHABLE:
-                mermaid_lines.append(
-                    f"  style {node_id} {MermaidStyle.NODE_STYLES['unreachable']}"
-                )
+                mermaid_lines.append(f"  style {node_id} {MermaidStyle.NODE_STYLES['unreachable']}")
             elif node_status == NodeStatus.ERROR:
-                mermaid_lines.append(
-                    f"  style {node_id} {MermaidStyle.NODE_STYLES['error']}"
-                )
+                mermaid_lines.append(f"  style {node_id} {MermaidStyle.NODE_STYLES['error']}")
             else:
-                mermaid_lines.append(
-                    f"  style {node_id} {MermaidStyle.NODE_STYLES[node_type]}"
-                )
+                mermaid_lines.append(f"  style {node_id} {MermaidStyle.NODE_STYLES[node_type]}")
 
             processed_nodes.add(name)
 
@@ -345,14 +335,10 @@ class MermaidVisualizer:
                     and edge.metadata.get("condition_key")
                 ):
                     condition_key = edge.metadata.get("condition_key")
-                    mermaid_lines.append(
-                        f"  {source_id} -->|{condition_key}| {target_id}"
-                    )
+                    mermaid_lines.append(f"  {source_id} -->|{condition_key}| {target_id}")
                 else:
                     # Generic conditional edge
-                    mermaid_lines.append(
-                        f"  {source_id} -.->|cond{condition_name}| {target_id}"
-                    )
+                    mermaid_lines.append(f"  {source_id} -.->|cond{condition_name}| {target_id}")
             # Standard edge with different styles based on type
             elif edge_type in {"start", "end"}:
                 mermaid_lines.append(f"  {source_id} ==> {target_id}")
@@ -663,9 +649,7 @@ class MermaidVisualizer:
         # Save HTML to file
         try:
             # Create directory if it doesn't exist
-            os.makedirs(
-                os.path.dirname(os.path.abspath(output_file)) or ".", exist_ok=True
-            )
+            os.makedirs(os.path.dirname(os.path.abspath(output_file)) or ".", exist_ok=True)
 
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(html_template)
@@ -685,9 +669,7 @@ class MermaidVisualizer:
             logger.exception(f"Error saving Mermaid diagram: {e!s}")
             raise
 
-    def render_as_png(
-        self, output_file: str | None = None, open_image: bool = True
-    ) -> str:
+    def render_as_png(self, output_file: str | None = None, open_image: bool = True) -> str:
         """Render Mermaid diagram to a PNG file.
 
         This uses the mermaid.ink service to render the diagram.
@@ -714,9 +696,7 @@ class MermaidVisualizer:
 
         try:
             # Encode the Mermaid diagram for URL
-            encoded_diagram = base64.b64encode(mermaid_code.encode("utf-8")).decode(
-                "utf-8"
-            )
+            encoded_diagram = base64.b64encode(mermaid_code.encode("utf-8")).decode("utf-8")
 
             # Construct the URL for the Mermaid.ink service
             mermaid_url = f"https://mermaid.ink/img/{encoded_diagram}"
@@ -726,9 +706,7 @@ class MermaidVisualizer:
             response.raise_for_status()
 
             # Create directory if it doesn't exist
-            os.makedirs(
-                os.path.dirname(os.path.abspath(output_file)) or ".", exist_ok=True
-            )
+            os.makedirs(os.path.dirname(os.path.abspath(output_file)) or ".", exist_ok=True)
 
             # Save the PNG to file
             with open(output_file, "wb") as f:
@@ -791,9 +769,7 @@ def visualize_graph(
     # Generate visualization based on format
     if format.lower() == "png":
         return visualizer.render_as_png(output_file, open_browser)
-    return visualizer.render_to_file(
-        output_file, open_browser, include_legend, include_stats
-    )
+    return visualizer.render_to_file(output_file, open_browser, include_legend, include_stats)
 
 
 # Function that replaces the original visualization method
@@ -853,9 +829,7 @@ def replace_visualization_method() -> Any:
 
 
 # Sample usage function to demonstrate how to use the visualizer directly
-def generate_mermaid_diagram(
-    graph, output_file=None, format="html", open_result=True
-) -> Any:
+def generate_mermaid_diagram(graph, output_file=None, format="html", open_result=True) -> Any:
     """Helper function to generate a Mermaid diagram from a DynamicGraph.
 
     Args:

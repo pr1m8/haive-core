@@ -70,12 +70,8 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
 
     # Graph structure
     nodes: dict[str, Any] = Field(default_factory=dict, description="Graph nodes")
-    edges: list[tuple[str, str]] = Field(
-        default_factory=list, description="Direct edges"
-    )
-    branches: dict[str, Any] = Field(
-        default_factory=dict, description="Conditional branches"
-    )
+    edges: list[tuple[str, str]] = Field(default_factory=list, description="Direct edges")
+    branches: dict[str, Any] = Field(default_factory=dict, description="Conditional branches")
 
     # Entry and exit points
     entry_point: str | None = Field(None, description="Main entry point")
@@ -85,9 +81,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
 
     # Schema and metadata
     state_schema: type | None = Field(None, description="Graph state schema")
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.now)
@@ -157,9 +151,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         self._node_manager.add_node(node_or_name, node_like, **kwargs)
         return self
 
-    def remove_node(
-        self, node_name: str, cleanup_edges: bool = True
-    ) -> "ModularBaseGraph":
+    def remove_node(self, node_name: str, cleanup_edges: bool = True) -> "ModularBaseGraph":
         """Remove a node from the graph.
 
         Args:
@@ -193,9 +185,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
     # EDGE MANAGEMENT - Delegate to EdgeManager
     # =================================================================
 
-    def add_edge(
-        self, source: str, target: str, validate_nodes: bool = True
-    ) -> "ModularBaseGraph":
+    def add_edge(self, source: str, target: str, validate_nodes: bool = True) -> "ModularBaseGraph":
         """Add a direct edge between two nodes.
 
         Args:
@@ -276,9 +266,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         default_destination: str | Literal["END"] = "END",
     ) -> "ModularBaseGraph":
         """Add a function-based branch."""
-        self._branch_manager.add_function_branch(
-            source_node, function, default_destination
-        )
+        self._branch_manager.add_function_branch(source_node, function, default_destination)
         return self
 
     def add_key_value_branch(
@@ -289,9 +277,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         default_destination: str | Literal["END"] = "END",
     ) -> "ModularBaseGraph":
         """Add a key-value conditional branch."""
-        self._branch_manager.add_key_value_branch(
-            source_node, key, value_map, default_destination
-        )
+        self._branch_manager.add_key_value_branch(source_node, key, value_map, default_destination)
         return self
 
     def remove_branch(self, branch_id: str) -> "ModularBaseGraph":
