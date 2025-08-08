@@ -41,17 +41,15 @@ class ExampleAgent:
 
         # Simple response based on behavior
         if self.behavior == "helpful":
-            response_content = f"Hello! I'm {
-                self.name}, a helpful assistant. How can I help you today?"
+            response_content = f"Hello! I'm {self.name}, a helpful assistant. How can I help you today?"
         elif self.behavior == "creative":
-            response_content = f"Greetings! I'm {
-                self.name}, your creative companion. Let's explore ideas together!"
+            response_content = f"Greetings! I'm {self.name}, your creative companion. Let's explore ideas together!"
         elif self.behavior == "analytical":
-            response_content = f"Hello, I'm {
-                    self.name}. I'll analyze your request systematically."
+            response_content = (
+                f"Hello, I'm {self.name}. I'll analyze your request systematically."
+            )
         else:
-            response_content = f"Hi, I'm {
-                self.name}. What would you like to discuss?"
+            response_content = f"Hi, I'm {self.name}. What would you like to discuss?"
 
         # Create response message
         response_message = AIMessage(content=response_content)
@@ -128,14 +126,10 @@ def create_meta_agent_graph_example():
         agent_output = state.get("agent_output", {})
 
         if execution_status == "completed":
-            final_response = f"Task completed successfully by {
-                agent_output.get(
-                    'agent_name', 'agent')}"
+            final_response = f"Task completed successfully by {agent_output.get('agent_name', 'agent')}"
         elif execution_status == "error":
             error_info = state.get("error_info", {})
-            final_response = f"Task failed: {
-                error_info.get(
-                    'error', 'Unknown error')}"
+            final_response = f"Task failed: {error_info.get('error', 'Unknown error')}"
         else:
             final_response = f"Task status: {execution_status}"
 
@@ -166,7 +160,6 @@ def create_meta_agent_graph_example():
     ]
 
     for user_input in test_inputs:
-
         with contextlib.suppress(Exception):
             compiled_graph.invoke({"user_input": user_input})
 
@@ -203,7 +196,6 @@ def create_advanced_meta_agent_example():
     ]
 
     for stage, agent_type, task in workflow_stages:
-
         # Switch to appropriate agent
         meta_state.agent = agents[agent_type]
         meta_state.agent_name = agents[agent_type].name
