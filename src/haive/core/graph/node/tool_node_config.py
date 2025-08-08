@@ -27,12 +27,10 @@ class ToolNodeConfig(NodeConfig):
     node_type: NodeType = Field(default=NodeType.TOOL, description="The type of node")
 
     # Tool-specific fields
-    tags: list[str] | None = Field(
-        default=None, description="Optional tags for the tool node"
+    tags: list[str] | None = Field(default=None, description="Optional tags for the tool node")
+    handle_tool_errors: bool | str | Callable[..., str] | tuple[type[Exception], ...] = Field(
+        default=True, description="How to handle tool errors"
     )
-    handle_tool_errors: (
-        bool | str | Callable[..., str] | tuple[type[Exception], ...]
-    ) = Field(default=True, description="How to handle tool errors")
     messages_key: str = Field(
         default="messages", description="The key to use for the messages field"
     )
@@ -81,9 +79,7 @@ class ToolNodeConfig(NodeConfig):
 
         return None
 
-    def __call__(
-        self, state: dict[str, Any], config: dict[str, Any] | None = None
-    ) -> Command:
+    def __call__(self, state: dict[str, Any], config: dict[str, Any] | None = None) -> Command:
         """Execute the tool node with the given state and configuration.
 
         Gets tools from engine in state.engines dict.
@@ -159,9 +155,7 @@ class ToolNodeConfig(NodeConfig):
         filtered_tools = []
         for tool in engine_tools:
             tool_name = getattr(tool, "name", getattr(tool, "__name__", str(tool)))
-            route = tool_routes.get(
-                tool_name, "langchain_tool"
-            )  # Default to langchain_tool
+            route = tool_routes.get(tool_name, "langchain_tool")  # Default to langchain_tool
 
             logger.debug(f"Tool '{tool_name}' has route '{route}'")
 
@@ -181,9 +175,7 @@ class ToolNodeConfig(NodeConfig):
             logger.warning(f"Tool routes found: {list(tool_routes.values())}")
             return Command(update={}, goto=self.command_goto)
 
-        logger.info(
-            f"Tool node using {len(filtered_tools)} tools from engine '{self.engine_name}'"
-        )
+        logger.info(f"Tool node using {len(filtered_tools)} tools from engine '{self.engine_name}'")
 
         # Log tool names
         for tool in filtered_tools:
@@ -211,18 +203,14 @@ class ToolNodeConfig(NodeConfig):
             # The result should have the messages key with tool messages added
             if isinstance(result, dict) and self.messages_key in result:
                 updated_messages = result[self.messages_key]
-                logger.info(
-                    f"Tool node added {len(updated_messages) - len(messages)} ToolMessages"
-                )
+                logger.info(f"Tool node added {len(updated_messages) - len(messages)} ToolMessages")
 
                 # Count ToolMessages added
                 tool_msg_count = 0
                 for msg in updated_messages[len(messages) :]:
                     if isinstance(msg, ToolMessage):
                         tool_msg_count += 1
-                        logger.debug(
-                            f"ToolMessage: {msg.name} - {str(msg.content)[:100]}..."
-                        )
+                        logger.debug(f"ToolMessage: {msg.name} - {str(msg.content)[:100]}...")
 
                 logger.info(f"✅ Added {tool_msg_count} ToolMessages to state")
 
@@ -237,9 +225,7 @@ class ToolNodeConfig(NodeConfig):
 
             for tool_call in last_message.tool_calls:
                 # Find the tool
-                tool_name = (
-                    tool_call["name"] if isinstance(tool_call, dict) else tool_call.name
-                )
+                tool_name = tool_call["name"] if isinstance(tool_call, dict) else tool_call.name
                 tool_id = (
                     tool_call.get("id", f"call_{tool_name}")
                     if isinstance(tool_call, dict)
@@ -255,9 +241,7 @@ class ToolNodeConfig(NodeConfig):
                 new_messages.append(tool_msg)
                 logger.debug(f"Added error ToolMessage for {tool_name}")
 
-            return Command(
-                update={self.messages_key: new_messages}, goto=self.command_goto
-            )
+            return Command(update={self.messages_key: new_messages}, goto=self.command_goto)
 
         except Exception as e:
             logger.exception(f"Error executing tool node: {e}")
@@ -267,9 +251,7 @@ class ToolNodeConfig(NodeConfig):
             new_messages = list(messages)
 
             for tool_call in last_message.tool_calls:
-                tool_name = (
-                    tool_call["name"] if isinstance(tool_call, dict) else tool_call.name
-                )
+                tool_name = tool_call["name"] if isinstance(tool_call, dict) else tool_call.name
                 tool_id = (
                     tool_call.get("id", f"call_{tool_name}")
                     if isinstance(tool_call, dict)
@@ -284,9 +266,7 @@ class ToolNodeConfig(NodeConfig):
                 new_messages.append(tool_msg)
                 logger.debug(f"Added error ToolMessage for {tool_name}")
 
-            return Command(
-                update={self.messages_key: new_messages}, goto=self.command_goto
-            )
+            return Command(update={self.messages_key: new_messages}, goto=self.command_goto)
 
     @classmethod
     def from_route_filter(cls, allowed_routes: list[str], engine_name: str, **kwargs):

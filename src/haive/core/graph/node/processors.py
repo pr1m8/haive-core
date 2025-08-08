@@ -68,15 +68,11 @@ def merge_configs(
 
     # Use RunnableConfigManager for proper merging
     merged = RunnableConfigManager.merge(base_config, override_config)
-    logger.debug(
-        f"Merged config keys: {list(merged.keys() if isinstance(merged, dict) else [])}"
-    )
+    logger.debug(f"Merged config keys: {list(merged.keys() if isinstance(merged, dict) else [])}")
     return merged
 
 
-def ensure_engine_id_targeting(
-    config: dict[str, Any], engine_id: str
-) -> dict[str, Any]:
+def ensure_engine_id_targeting(config: dict[str, Any], engine_id: str) -> dict[str, Any]:
     """Ensure config includes targeting for a specific engine ID."""
     logger.debug(f"Ensuring engine ID targeting for: {engine_id}")
 
@@ -171,17 +167,13 @@ def extract_input(state: Any, config: NodeConfig) -> Any:
             if is_base_model:
                 if hasattr(state, state_key):
                     mapped_input[input_key] = getattr(state, state_key)
-                    logger.debug(
-                        f"Mapped BaseModel attribute {state_key} → {input_key}"
-                    )
+                    logger.debug(f"Mapped BaseModel attribute {state_key} → {input_key}")
                 else:
                     logger.warning(f"BaseModel has no attribute '{state_key}'")
             # Extract from dict
             elif isinstance(state, dict) and state_key in state:
                 mapped_input[input_key] = state[state_key]
-                logger.debug(
-                    f"Mapped {state_key} → {input_key}: {type(state[state_key]).__name__}"
-                )
+                logger.debug(f"Mapped {state_key} → {input_key}: {type(state[state_key]).__name__}")
             else:
                 logger.warning(f"State key '{state_key}' not found in state")
 
@@ -199,14 +191,10 @@ def extract_input(state: Any, config: NodeConfig) -> Any:
             # value directly
             if len(config.input_mapping) == 1 and len(mapped_input) == 1:
                 single_value = next(iter(mapped_input.values()))
-                logger.debug(
-                    f"Returning single mapped value: {type(single_value).__name__}"
-                )
+                logger.debug(f"Returning single mapped value: {type(single_value).__name__}")
                 return single_value
 
-            logger.debug(
-                f"Returning mapped input with keys: {list(mapped_input.keys())}"
-            )
+            logger.debug(f"Returning mapped input with keys: {list(mapped_input.keys())}")
             return mapped_input
 
         # If mapping exists but resulted in empty dict, log warning
@@ -221,9 +209,7 @@ def extract_input(state: Any, config: NodeConfig) -> Any:
             return state.query
         # From dict
         if isinstance(state, dict) and "query" in state:
-            logger.debug(
-                f"No mapping for retriever, using direct query: {state['query']}"
-            )
+            logger.debug(f"No mapping for retriever, using direct query: {state['query']}")
             return state["query"]
 
     # If using direct messages and they exist
@@ -242,9 +228,7 @@ def extract_input(state: Any, config: NodeConfig) -> Any:
 
     # If we get here with a mapping but no matches, log a clear error
     if config.input_mapping and len(config.input_mapping) > 0:
-        msg = (
-            f"No input fields could be extracted using mapping: {config.input_mapping}"
-        )
+        msg = f"No input fields could be extracted using mapping: {config.input_mapping}"
         logger.error(msg)
 
         # Check for common errors
@@ -254,9 +238,7 @@ def extract_input(state: Any, config: NodeConfig) -> Any:
                 for attr in dir(state)
                 if not attr.startswith("_") and not callable(getattr(state, attr))
             ]
-            missing_attrs = [
-                k for k in config.input_mapping if k not in available_attrs
-            ]
+            missing_attrs = [k for k in config.input_mapping if k not in available_attrs]
             if missing_attrs:
                 logger.error(
                     f"BaseModel is missing these attributes defined in mapping: {missing_attrs}"
@@ -269,9 +251,7 @@ def extract_input(state: Any, config: NodeConfig) -> Any:
         elif isinstance(state, dict):
             missing_keys = [k for k in config.input_mapping if k not in state]
             if missing_keys:
-                logger.error(
-                    f"State is missing these keys defined in mapping: {missing_keys}"
-                )
+                logger.error(f"State is missing these keys defined in mapping: {missing_keys}")
                 logger.error(f"Available state keys: {list(state.keys())}")
 
     # Default to returning the state as-is (preserving BaseModel if present)
@@ -311,9 +291,7 @@ def process_output(result: Any, config: NodeConfig, original_state: Any) -> Any:
         and not config.output_mapping
         and not is_retriever
     ):
-        logger.debug(
-            f"Preserving BaseModel result directly: {result.__class__.__name__}"
-        )
+        logger.debug(f"Preserving BaseModel result directly: {result.__class__.__name__}")
         return result
 
     # Special handling for retriever nodes
@@ -343,15 +321,11 @@ def process_output(result: Any, config: NodeConfig, original_state: Any) -> Any:
         if hasattr(original_state, "model_copy"):
             # Pydantic v2
             updates = original_state.model_copy(deep=True)
-            logger.debug(
-                f"Created deep copy of original BaseModel: {updates.__class__.__name__}"
-            )
+            logger.debug(f"Created deep copy of original BaseModel: {updates.__class__.__name__}")
         else:
             # Pydantic v1
             updates = original_state.copy(deep=True)
-            logger.debug(
-                f"Created deep copy of original BaseModel: {updates.__class__.__name__}"
-            )
+            logger.debug(f"Created deep copy of original BaseModel: {updates.__class__.__name__}")
     else:
         # Start with empty dict or original state dict if preserving
         updates = {}
@@ -379,9 +353,7 @@ def process_output(result: Any, config: NodeConfig, original_state: Any) -> Any:
             # For BaseModel, set attribute directly
             try:
                 setattr(updates, output_key, result)
-                logger.debug(
-                    f"Set BaseModel attribute {output_key} with {len(result)} documents"
-                )
+                logger.debug(f"Set BaseModel attribute {output_key} with {len(result)} documents")
 
                 # Preserve query if available
                 if hasattr(original_state, "query"):
@@ -432,13 +404,9 @@ def process_output(result: Any, config: NodeConfig, original_state: Any) -> Any:
                     if output_key in result:
                         try:
                             setattr(updates, state_key, result[output_key])
-                            logger.debug(
-                                f"Mapped {output_key} → {state_key} in BaseModel"
-                            )
+                            logger.debug(f"Mapped {output_key} → {state_key} in BaseModel")
                         except AttributeError as e:
-                            logger.exception(
-                                f"Cannot set attribute {state_key} on BaseModel: {e}"
-                            )
+                            logger.exception(f"Cannot set attribute {state_key} on BaseModel: {e}")
             else:
                 # Regular dictionary mapping
                 for output_key, state_key in config.output_mapping.items():
@@ -450,19 +418,13 @@ def process_output(result: Any, config: NodeConfig, original_state: Any) -> Any:
 
                         # Special case for retrievers returning a 'documents'
                         # key
-                        if (
-                            is_retriever
-                            and output_key == "documents"
-                            and "documents" not in result
-                        ):
+                        if is_retriever and output_key == "documents" and "documents" not in result:
                             # Check if the result itself is a list of documents
                             if isinstance(result, list) and all(
                                 hasattr(doc, "page_content") for doc in result
                             ):
                                 updates[state_key] = result
-                                logger.debug(
-                                    f"Mapped document list directly to {state_key}"
-                                )
+                                logger.debug(f"Mapped document list directly to {state_key}")
         elif is_original_model and updates is not None:
             # For BaseModel, try to set each result key as an attribute
             for key, value in result.items():
@@ -480,9 +442,7 @@ def process_output(result: Any, config: NodeConfig, original_state: Any) -> Any:
         logger.debug(f"Result is BaseModel: {result.__class__.__name__}")
 
         # Get model as dict
-        result_dict = (
-            result.model_dump() if hasattr(result, "model_dump") else result.dict()
-        )
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else result.dict()
 
         logger.debug(f"Model keys: {list(result_dict.keys())}")
 
@@ -498,20 +458,14 @@ def process_output(result: Any, config: NodeConfig, original_state: Any) -> Any:
                     if output_key in result_dict:
                         try:
                             setattr(updates, state_key, result_dict[output_key])
-                            logger.debug(
-                                f"Mapped {output_key} → {state_key} in BaseModel"
-                            )
+                            logger.debug(f"Mapped {output_key} → {state_key} in BaseModel")
                         except AttributeError as e:
-                            logger.exception(
-                                f"Cannot set attribute {state_key} on BaseModel: {e}"
-                            )
+                            logger.exception(f"Cannot set attribute {state_key} on BaseModel: {e}")
             else:
                 # Try to store the model itself as an attribute if possible
                 try:
                     setattr(updates, model_name, result)
-                    logger.debug(
-                        f"Set BaseModel attribute '{model_name}' to result model"
-                    )
+                    logger.debug(f"Set BaseModel attribute '{model_name}' to result model")
                 except AttributeError:
                     logger.warning(f"Could not set model as attribute '{model_name}'")
                     # Try to set individual attributes instead
@@ -520,9 +474,7 @@ def process_output(result: Any, config: NodeConfig, original_state: Any) -> Any:
                             setattr(updates, key, value)
                             logger.debug(f"Set individual attribute: {key}")
                         except AttributeError:
-                            logger.warning(
-                                f"Could not set attribute '{key}' on BaseModel"
-                            )
+                            logger.warning(f"Could not set attribute '{key}' on BaseModel")
         elif config.output_mapping:
             logger.debug("Applying output mapping")
             for output_key, state_key in config.output_mapping.items():
@@ -551,9 +503,7 @@ def process_output(result: Any, config: NodeConfig, original_state: Any) -> Any:
                 ):
                     messages = updates.messages
                     messages.append(result)
-                    logger.debug(
-                        f"Added message to existing messages list (now {len(messages)})"
-                    )
+                    logger.debug(f"Added message to existing messages list (now {len(messages)})")
                 else:
                     try:
                         updates.messages = [result]
@@ -595,9 +545,7 @@ def process_output(result: Any, config: NodeConfig, original_state: Any) -> Any:
             ):
                 messages = updates.messages
                 messages.append(result)
-                logger.debug(
-                    f"Added message to existing messages list (now {len(messages)})"
-                )
+                logger.debug(f"Added message to existing messages list (now {len(messages)})")
             else:
                 try:
                     updates.messages = [result]
@@ -632,9 +580,7 @@ def process_output(result: Any, config: NodeConfig, original_state: Any) -> Any:
     elif isinstance(result, list):
         # Check if this is a list of Document-like objects
         if result and all(hasattr(item, "page_content") for item in result):
-            logger.debug(
-                f"Result is a list of Document-like objects (count: {len(result)})"
-            )
+            logger.debug(f"Result is a list of Document-like objects (count: {len(result)})")
 
             # Determine output key based on mapping
             output_key = "retrieved_documents"
@@ -648,9 +594,7 @@ def process_output(result: Any, config: NodeConfig, original_state: Any) -> Any:
                     setattr(updates, output_key, result)
                     logger.debug(f"Set documents in BaseModel attribute: {output_key}")
                 except AttributeError:
-                    logger.warning(
-                        f"Could not set documents on BaseModel attribute: {output_key}"
-                    )
+                    logger.warning(f"Could not set documents on BaseModel attribute: {output_key}")
             else:
                 # For dictionary state
                 updates[output_key] = result
@@ -719,9 +663,7 @@ def handle_command_pattern(result: Any, config: NodeConfig) -> Any:
                 else:
                     # Use as attribute
                     update_data = result.update
-                    logger.debug(
-                        f"Used update attribute, type: {type(update_data).__name__}"
-                    )
+                    logger.debug(f"Used update attribute, type: {type(update_data).__name__}")
             else:
                 update_data = {}
                 logger.debug("No update data found, using empty dict")
@@ -746,14 +688,8 @@ def handle_command_pattern(result: Any, config: NodeConfig) -> Any:
         return result
 
     # Special handling for BaseModel if preserving and command_goto is set
-    if (
-        isinstance(result, BaseModel)
-        and preserve_model
-        and config.command_goto is not None
-    ):
-        logger.debug(
-            f"Wrapping preserved BaseModel in Command with goto: {config.command_goto}"
-        )
+    if isinstance(result, BaseModel) and preserve_model and config.command_goto is not None:
+        logger.debug(f"Wrapping preserved BaseModel in Command with goto: {config.command_goto}")
         return Command(update=result, goto=config.command_goto)
 
     # Not Command/Send - apply command_goto if specified
@@ -812,9 +748,7 @@ class InvokableNodeProcessor:
         """Create a node function for an invokable engine."""
         logger.debug(f"Creating node function for invokable engine: {config.name}")
 
-        def node_function(
-            state: dict[str, Any], runtime_config: dict[str, Any] | None = None
-        ):
+        def node_function(state: dict[str, Any], runtime_config: dict[str, Any] | None = None):
             """Node function for invokable engines."""
             try:
                 # Process state - preserving BaseModel if present
@@ -842,9 +776,7 @@ class InvokableNodeProcessor:
                     and getattr(engine, "engine_type", None) == EngineType.LLM
                 )
                 if is_llm:
-                    logger.debug(
-                        "Detected LLM engine, ensuring proper message formatting"
-                    )
+                    logger.debug("Detected LLM engine, ensuring proper message formatting")
 
                     # If input_data is a dict with 'messages' key, extract the
                     # messages
@@ -887,9 +819,7 @@ class AsyncInvokableNodeProcessor:
         """Create a node function for an async invokable engine."""
         logger.debug(f"Creating async node function for engine: {config.name}")
 
-        def node_function(
-            state: dict[str, Any], runtime_config: dict[str, Any] | None = None
-        ):
+        def node_function(state: dict[str, Any], runtime_config: dict[str, Any] | None = None):
             """Node function that internally handles async execution."""
             logger.debug(f"Called async invokable node: {config.name}")
 
@@ -921,9 +851,7 @@ class AsyncInvokableNodeProcessor:
                     and getattr(engine, "engine_type", None) == EngineType.LLM
                 )
                 if is_llm:
-                    logger.debug(
-                        "Detected LLM engine, ensuring proper message formatting"
-                    )
+                    logger.debug("Detected LLM engine, ensuring proper message formatting")
 
                     # If input_data is a dict with 'messages' key, extract the
                     # messages
@@ -944,17 +872,13 @@ class AsyncInvokableNodeProcessor:
 
                         # Run the coroutine
                         logger.debug("Running ainvoke coroutine")
-                        result = loop.run_until_complete(
-                            engine.ainvoke(input_data, merged_config)
-                        )
+                        result = loop.run_until_complete(engine.ainvoke(input_data, merged_config))
                     else:
                         # Fall back to synchronous invoke
                         logger.debug("Falling back to synchronous invoke")
                         result = engine.invoke(input_data, merged_config)
 
-                    logger.debug(
-                        f"Async engine returned result of type: {type(result).__name__}"
-                    )
+                    logger.debug(f"Async engine returned result of type: {type(result).__name__}")
 
                     # Process output
                     processed_output = process_output(result, config, processed_state)
@@ -968,15 +892,11 @@ class AsyncInvokableNodeProcessor:
 
                     # Try the sync method if ainvoke failed
                     if hasattr(engine, "invoke") and callable(engine.invoke):
-                        logger.warning(
-                            "Attempting fallback to sync invoke after async error"
-                        )
+                        logger.warning("Attempting fallback to sync invoke after async error")
                         result = engine.invoke(input_data, merged_config)
 
                         # Process output
-                        processed_output = process_output(
-                            result, config, processed_state
-                        )
+                        processed_output = process_output(result, config, processed_state)
 
                         # Handle command pattern
                         return handle_command_pattern(processed_output, config)
@@ -1007,9 +927,7 @@ class CallableNodeProcessor:
         """Create a node function from a callable function."""
         logger.debug(f"Creating callable node function: {config.name}")
 
-        def node_function(
-            state: dict[str, Any], runtime_config: dict[str, Any] | None = None
-        ):
+        def node_function(state: dict[str, Any], runtime_config: dict[str, Any] | None = None):
             """Node function for callable."""
             logger.debug(f"Called callable node: {config.name}")
 
@@ -1038,8 +956,7 @@ class CallableNodeProcessor:
                 # For callable functions, we assume they might directly return Command/Send
                 # so we don't process the output further unless it's a dict
                 if isinstance(result, Command | Send) or (
-                    isinstance(result, list)
-                    and all(isinstance(x, Send) for x in result)
+                    isinstance(result, list) and all(isinstance(x, Send) for x in result)
                 ):
                     logger.debug("Returning Command/Send directly")
                     return result
@@ -1074,9 +991,7 @@ class AsyncNodeProcessor:
         """Create a node function for an async function."""
         logger.debug(f"Creating async function node: {config.name}")
 
-        def node_function(
-            state: dict[str, Any], runtime_config: dict[str, Any] | None = None
-        ):
+        def node_function(state: dict[str, Any], runtime_config: dict[str, Any] | None = None):
             """Node function for async callable."""
             logger.debug(f"Called async node: {config.name}")
 
@@ -1116,8 +1031,7 @@ class AsyncNodeProcessor:
 
                 # Handle Command/Send directly
                 if isinstance(result, Command | Send) or (
-                    isinstance(result, list)
-                    and all(isinstance(x, Send) for x in result)
+                    isinstance(result, list) and all(isinstance(x, Send) for x in result)
                 ):
                     logger.debug("Returning Command/Send from async function directly")
                     return result
@@ -1152,12 +1066,8 @@ class MappingNodeProcessor:
             if hasattr(engine, "__annotations__"):
                 if "return" in engine.__annotations__:
                     return_type = str(engine.__annotations__["return"])
-                    has_send = (
-                        "List[Send]" in return_type or "list[Send]" in return_type
-                    )
-                    logger.debug(
-                        f"MappingNodeProcessor.can_process (annotations): {has_send}"
-                    )
+                    has_send = "List[Send]" in return_type or "list[Send]" in return_type
+                    logger.debug(f"MappingNodeProcessor.can_process (annotations): {has_send}")
                     return has_send
         return False
 
@@ -1165,9 +1075,7 @@ class MappingNodeProcessor:
         """Create a node function for a mapping function."""
         logger.debug(f"Creating mapping node function: {config.name}")
 
-        def node_function(
-            state: dict[str, Any], runtime_config: dict[str, Any] | None = None
-        ):
+        def node_function(state: dict[str, Any], runtime_config: dict[str, Any] | None = None):
             """Node function for mapping."""
             logger.debug(f"Called mapping node: {config.name}")
 
@@ -1221,9 +1129,7 @@ class GenericNodeProcessor:
         """Create a node function for a generic object."""
         logger.debug(f"Creating generic node function: {config.name}")
 
-        def node_function(
-            state: dict[str, Any], runtime_config: dict[str, Any] | None = None
-        ):
+        def node_function(state: dict[str, Any], runtime_config: dict[str, Any] | None = None):
             """Node function for generic engine."""
             logger.debug(f"Called generic node: {config.name}")
 

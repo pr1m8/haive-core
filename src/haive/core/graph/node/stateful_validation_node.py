@@ -36,9 +36,7 @@ class ToolCallValidationResult(BaseModel):
     error_message: str | None = Field(
         default=None, description="Error message if validation failed"
     )
-    validated_args: dict[str, Any] | None = Field(
-        default=None, description="Validated arguments"
-    )
+    validated_args: dict[str, Any] | None = Field(default=None, description="Validated arguments")
     timestamp: str = Field(
         default_factory=lambda: datetime.utcnow().isoformat(),
         description="Validation timestamp",
@@ -71,9 +69,7 @@ class StatefulValidationNode(BaseNodeConfig):
     engine_name: str = Field(..., description="Engine name for tool routes")
     tool_node: str = Field(default="tool_node", description="Tool execution node name")
     parser_node: str = Field(default="parse_output", description="Parser node name")
-    available_nodes: list[str] = Field(
-        default_factory=list, description="Available nodes"
-    )
+    available_nodes: list[str] = Field(default_factory=list, description="Available nodes")
     pydantic_models: dict[str, type[BaseModel]] = Field(
         default_factory=dict, description="Pydantic models for validation"
     )
@@ -122,9 +118,7 @@ class StatefulValidationNode(BaseNodeConfig):
             route = tool_routes.get(tool_name, "unknown")
 
             # Validate the tool call
-            validation_result = self._validate_tool_call(
-                tool_name, tool_id, args, route
-            )
+            validation_result = self._validate_tool_call(tool_name, tool_id, args, route)
             validation_results.append(validation_result)
 
             # Create ToolMessage based on validation result
@@ -146,8 +140,7 @@ class StatefulValidationNode(BaseNodeConfig):
             else:
                 # Create error ToolMessage
                 tool_msg = ToolMessage(
-                    content=validation_result.error_message
-                    or f"Validation failed for {tool_name}",
+                    content=validation_result.error_message or f"Validation failed for {tool_name}",
                     tool_call_id=tool_id,
                     name=tool_name,
                 )
@@ -173,9 +166,7 @@ class StatefulValidationNode(BaseNodeConfig):
             update_dict["validation_history"] = new_history
 
             # Update validation stats
-            update_dict["validation_stats"] = self._calculate_validation_stats(
-                new_history
-            )
+            update_dict["validation_stats"] = self._calculate_validation_stats(new_history)
 
         # Add new messages if any
         if new_messages:
@@ -337,9 +328,7 @@ class StatefulValidationNode(BaseNodeConfig):
             "total_validations": total_validations,
             "valid_validations": valid_validations,
             "invalid_validations": invalid_validations,
-            "success_rate": (
-                valid_validations / total_validations if total_validations > 0 else 0
-            ),
+            "success_rate": (valid_validations / total_validations if total_validations > 0 else 0),
             "type_stats": type_stats,
             "tool_stats": tool_stats,
         }
@@ -358,9 +347,7 @@ class StatefulValidationNode(BaseNodeConfig):
 
         # Multiple destinations - use validation pattern routing if enabled
         if self.route_on_validation_pattern:
-            return self._route_by_validation_pattern(
-                destinations_list, validation_results
-            )
+            return self._route_by_validation_pattern(destinations_list, validation_results)
 
         # Default prioritization
         if self.tool_node in destinations_list:
@@ -377,9 +364,7 @@ class StatefulValidationNode(BaseNodeConfig):
         """Route based on validation patterns."""
         # Count successful validations by destination type
         pydantic_successes = sum(
-            1
-            for r in validation_results
-            if r.is_valid and r.validation_type == "pydantic_model"
+            1 for r in validation_results if r.is_valid and r.validation_type == "pydantic_model"
         )
 
         tool_successes = sum(
