@@ -350,16 +350,13 @@ class AugLLMConfig(*_get_augllm_base_classes()):
             return
         self.sync_tool_routes_from_tools(self.tools)
         if self.structured_output_model:
-            # Fix routing for structured output model
-            structured_model_name = self.structured_output_model.__name__
-            if structured_model_name in self.tool_routes:
-                metadata = self.get_tool_metadata(structured_model_name) or {}
-                metadata["is_structured_output"] = True
-                metadata["purpose"] = "structured_output"
-                metadata["version"] = self.structured_output_version
-                metadata["tool_type"] = "structured_output_model"
-                # Route to parse_output instead of pydantic_model
-                self.set_tool_route(structured_model_name, "parse_output", metadata)
+            for tool_name, route in self.tool_routes.items():
+                if route == "pydantic_model":
+                    metadata = self.get_tool_metadata(tool_name) or {}
+                    metadata["is_structured_output"] = (
+                        tool_name == self.structured_output_model.__name__
+                    )
+                    self.set_tool_route(tool_name, route, metadata)
 
     def _debug_initialization_summary(self):
         """Show rich initialization summary."""
@@ -578,33 +575,20 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         """Analyze tool with AugLLM-specific context awareness.
 
         Extends ToolRouteMixin's analysis with structured output detection.
-        Routes structured output models to 'parse_output' for ValidationNodeConfigV2.
         """
-        # Check if this is the configured structured output model
         if self.structured_output_model and tool == self.structured_output_model:
-            return "parse_output", {
+            route = (
+                "structured_output_tool"
+                if self.structured_output_version == "v2"
+                else "parser"
+            )
+            metadata = {
                 "purpose": "structured_output",
                 "version": self.structured_output_version,
                 "force_choice": self.structured_output_version == "v2",
                 "class_name": tool.__name__ if hasattr(tool, "__name__") else str(tool),
-                "tool_type": "structured_output_model",
-                "is_structured_output": True,
             }
-
-        # Check if tool has STRUCTURED_OUTPUT capability
-        from haive.core.engine.tool.types import ToolCapability
-
-        capabilities = getattr(tool, "__tool_capabilities__", set())
-        if ToolCapability.STRUCTURED_OUTPUT in capabilities:
-            tool_name = getattr(tool, "name", getattr(tool, "__name__", "unknown"))
-            return "parse_output", {
-                "tool_name": tool_name,
-                "tool_type": "structured_output_tool",
-                "capabilities": list(capabilities),
-                "has_structured_output": True,
-                "purpose": "structured_output",
-            }
-
+            return (route, metadata)
         return super()._analyze_tool(tool)
 
     def _process_and_validate_tools(self):
@@ -2509,6 +2493,21 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         if not hasattr(self, "_active_template"):
             self._active_template = None
         return self._active_template
+
+    def add_tool(self, tool: Any) -> AugLLMConfig:
+        """Add a tool to the configuration.
+
+        Args:
+            tool: Tool to add (LangChain tool, Pydantic model, or callable)
+
+        Returns:
+            Self for method chaining
+        """
+        current_tools = list(self.tools) if self.tools else []
+        current_tools.append(tool)
+        self.tools = current_tools
+        debug_print(f"Added tool: {getattr(tool, 'name', type(tool).__name__)}")
+        return self
 
     def remove_tool(self, tool: Any) -> AugLLMConfig:
         """Remove a tool from the configuration.

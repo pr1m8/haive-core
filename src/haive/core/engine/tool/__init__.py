@@ -1,86 +1,54 @@
-"""Tool engine module for the Haive framework.
+"""Enhanced tool engine with universal typing.
 
-This module provides engine implementations for LangChain tools and toolkits,
-enabling tool execution within the Haive framework's engine system.
-
-The tool engine supports individual tools, collections of tools, and toolkits,
-with features like automatic routing, parallel execution, and retry policies.
-It integrates with LangGraph for tool execution management and provides a
-consistent interface for tool usage across the framework.
-
-Key Components:
-    ToolEngine: Engine for executing tools based on input state
-
-Features:
-    - Support for multiple tool types (BaseTool, Tool, StructuredTool, BaseModel)
-    - Toolkit integration for grouped tool functionality
-    - Automatic tool routing based on input
-    - Parallel tool execution when appropriate
-    - Configurable retry policies
-    - Message-based tool invocation
-    - Source tracking for tool results
-
-Examples:
-    Basic tool engine::
-
-        from haive.core.engine.tool import ToolEngine
-        from langchain_core.tools import Tool
-
-        def calculator(expression: str) -> str:
-            return str(eval(expression))
-
-        calc_tool = Tool(
-            name="calculator",
-            description="Calculate mathematical expressions",
-            func=calculator
-        )
-
-        engine = ToolEngine(
-            name="calc_engine",
-            tools=[calc_tool]
-        )
-
-        result = engine.invoke({
-            "messages": [{"role": "user", "content": "Calculate 2 + 2"}]
-        })
-
-    Tool engine with toolkit::
-
-        from haive.core.engine.tool import ToolEngine
-        from langchain_community.agent_toolkits import SQLDatabaseToolkit
-
-        toolkit = SQLDatabaseToolkit(db=database)
-
-        engine = ToolEngine(
-            name="sql_engine",
-            toolkit=toolkit,
-            parallel=True,
-            auto_route=True
-        )
-
-    Tool engine with retry policy::
-
-        from haive.core.engine.tool import ToolEngine
-        from langgraph.types import RetryPolicy
-
-        engine = ToolEngine(
-            name="robust_engine",
-            tools=my_tools,
-            retry_policy=RetryPolicy(
-                max_attempts=3,
-                initial_interval=1.0,
-                backoff_factor=2.0
-            )
-        )
-
-See Also:
-    - LangChain tools documentation
-    - Tool implementation: base.py
-    - LangGraph integration guide
+This module provides the ToolEngine with comprehensive tool analysis,
+universal type definitions, and factory methods for creating specialized tools.
 """
 
-from haive.core.engine.tool.base import ToolEngine
+from .analyzer import ToolAnalyzer
+from .engine import ToolEngine
+from .types import (
+    InterruptibleTool,
+    StateAwareTool,
+    ToolCapability,
+    ToolCategory,
+    ToolLike,
+    ToolProperties,
+    ToolType,
+)
 
 __all__ = [
+    # Main engine
     "ToolEngine",
+    # Types
+    "ToolLike",
+    "ToolType",
+    "ToolCategory",
+    "ToolCapability",
+    "ToolProperties",
+    # Protocols
+    "InterruptibleTool",
+    "StateAwareTool",
+    # Analyzer
+    "ToolAnalyzer",
 ]
+
+
+# Convenience exports for backward compatibility
+def get_tool_type():
+    """Get the universal ToolLike type."""
+    return ToolLike
+
+
+def get_tool_analyzer():
+    """Get a tool analyzer instance."""
+    return ToolAnalyzer()
+
+
+def get_capability_enum():
+    """Get the ToolCapability enum."""
+    return ToolCapability
+
+
+def get_category_enum():
+    """Get the ToolCategory enum."""
+    return ToolCategory
