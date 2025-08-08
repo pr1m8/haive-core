@@ -1,4 +1,4 @@
-from typing import Annotated, Any, List, Self, Union, cast
+from typing import Annotated, Any, List, Self, cast
 
 from langchain_core.messages import (
     AIMessage,

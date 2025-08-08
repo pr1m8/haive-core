@@ -3,7 +3,6 @@
 from typing import Any, Dict, List, Optional
 
 from langchain_core.documents import Document
-from langchain_core.messages import BaseMessage
 from pydantic import Field
 
 from haive.core.schema.prebuilt.messages_state import MessagesState

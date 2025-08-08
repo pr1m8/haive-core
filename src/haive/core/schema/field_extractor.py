@@ -384,9 +384,7 @@ class FieldExtractor:
                 # Track as output field
                 output_fields[engine_name].add(model_name)
             except Exception as e:
-                logger.warning(
-                    f"Error extracting structured_output_model from {engine_name}: {e}"
-                )
+                logger.warning(f"Error extracting structured_output_model from {engine_name}: {e}")
 
         # Update engine I/O mappings
         engine_io_mappings[engine_name]["inputs"] = list(input_fields[engine_name])

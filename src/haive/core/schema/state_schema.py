@@ -412,9 +412,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 # 3. Sync tools if engine has tools and we have a tools field
                 if hasattr(field_value, "tools") and hasattr(self, "tools"):
                     engine_tools = getattr(field_value, "tools", [])
-                    logger.debug(
-                        f"Found engine '{engine_name}' with {len(engine_tools)} tools"
-                    )
+                    logger.debug(f"Found engine '{engine_name}' with {len(engine_tools)} tools")
 
                     # Initialize tools list if None
                     if self.tools is None:
@@ -424,9 +422,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     for tool in engine_tools:
                         if tool not in self.tools:
                             tool_name = getattr(tool, "name", str(tool))
-                            logger.debug(
-                                f"Adding tool '{tool_name}' from engine '{engine_name}'"
-                            )
+                            logger.debug(f"Adding tool '{tool_name}' from engine '{engine_name}'")
                             self.tools.append(tool)
 
                 # 4. Sync structured output model if present
@@ -435,27 +431,19 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     and field_value.structured_output_model
                 ) and hasattr(self, "structured_output_model"):
                     if self.structured_output_model is None:
-                        self.structured_output_model = (
-                            field_value.structured_output_model
-                        )
-                        logger.debug(
-                            f"Synced structured output model from engine '{engine_name}'"
-                        )
+                        self.structured_output_model = field_value.structured_output_model
+                        logger.debug(f"Synced structured output model from engine '{engine_name}'")
 
             # Check if field is another StateSchema for recursive handling
             elif isinstance(field_value, StateSchema):
                 nested_schema_name = field_value.__class__.__name__
-                logger.debug(
-                    f"Found nested schema '{nested_schema_name}' in field '{field_name}'"
-                )
+                logger.debug(f"Found nested schema '{nested_schema_name}' in field '{field_name}'")
 
                 # Handle shared fields between parent and child schemas
                 self._sync_shared_fields(field_value, field_name)
 
         if found_engines:
-            logger.debug(
-                f"Found engines in {self.__class__.__name__}: {', '.join(found_engines)}"
-            )
+            logger.debug(f"Found engines in {self.__class__.__name__}: {', '.join(found_engines)}")
 
         return self
 
@@ -565,9 +553,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         # Check if class has engines and sync them to instance
         if hasattr(self.__class__, "engines") and self.__class__.engines:
-            logger.debug(
-                f"Syncing {len(self.__class__.engines)} engines from class to instance"
-            )
+            logger.debug(f"Syncing {len(self.__class__.engines)} engines from class to instance")
 
             # Update instance engines dict with class engines
             for engine_name, engine in self.__class__.engines.items():
@@ -586,9 +572,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     first_engine = next(iter(self.engines.values()))
                     self.engine = first_engine
                     logger.debug(
-                        f"Set first available engine as main: {
-                            getattr(first_engine, 'name', 'unnamed')
-                        }"
+                        f"Set first available engine as main: {getattr(first_engine, 'name', 'unnamed')}"
                     )
 
     def dict(self, **kwargs) -> builtins.dict[str, Any]:
@@ -978,9 +962,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         return self
 
-    def apply_reducers(
-        self, other: builtins.dict[str, Any] | StateSchema
-    ) -> StateSchema:
+    def apply_reducers(self, other: builtins.dict[str, Any] | StateSchema) -> StateSchema:
         """Update state applying reducer functions where defined.
 
         This method processes updates with special handling for fields
@@ -1018,9 +1000,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     logger.debug(f"Applied reducer for field '{key}'")
                     continue  # Skip to next field after successful reduction
                 except Exception as e:
-                    logger.warning(
-                        f"Error applying reducer for {key}: {e}", exc_info=True
-                    )
+                    logger.warning(f"Error applying reducer for {key}: {e}", exc_info=True)
                     # Fall through to special handling or simple assignment
 
             # Special handling for list values - concat them when both are
@@ -1330,9 +1310,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 ),
             )
             base_class = MinimalMessagesSchema
-            logger.debug(
-                "Using minimal messages schema as base for derived input schema"
-            )
+            logger.debug("Using minimal messages schema as base for derived input schema")
         else:
             # For pure input schemas, use BaseModel
             base_class = BaseModel
@@ -1344,10 +1322,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 field_info = cls.model_fields[field_name]
 
                 # Skip fields that are already defined in the base class
-                if (
-                    hasattr(base_class, "model_fields")
-                    and field_name in base_class.model_fields
-                ):
+                if hasattr(base_class, "model_fields") and field_name in base_class.model_fields:
                     logger.debug(
                         f"Skipping field '{field_name}' - already defined in {base_class.__name__}"
                     )
@@ -1412,9 +1387,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         # Get output field names
         if engine_name is not None and hasattr(cls, "__engine_io_mappings__"):
             if engine_name in cls.__engine_io_mappings__:
-                output_fields = cls.__engine_io_mappings__[engine_name].get(
-                    "outputs", []
-                )
+                output_fields = cls.__engine_io_mappings__[engine_name].get("outputs", [])
             else:
                 output_fields = []
         elif hasattr(cls, "__output_fields__"):
@@ -1455,10 +1428,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 field_info = cls.model_fields[field_name]
 
                 # Skip fields that are already defined in the base class
-                if (
-                    hasattr(base_class, "model_fields")
-                    and field_name in base_class.model_fields
-                ):
+                if hasattr(base_class, "model_fields") and field_name in base_class.model_fields:
                     logger.debug(
                         f"Skipping field '{field_name}' - already defined in {base_class.__name__}"
                     )
@@ -1664,9 +1634,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         if hasattr(self.__class__, "__engine_io_mappings__"):
             if engine_name in self.__class__.__engine_io_mappings__:
-                input_fields = self.__class__.__engine_io_mappings__[engine_name].get(
-                    "inputs", []
-                )
+                input_fields = self.__class__.__engine_io_mappings__[engine_name].get("inputs", [])
         elif hasattr(self.__class__, "__input_fields__"):
             if engine_name in self.__class__.__input_fields__:
                 input_fields = self.__class__.__input_fields__[engine_name]
@@ -1752,9 +1720,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 filtered_output = output
             else:
                 # No filtering, use all fields
-                logger.debug(
-                    f"Using all output fields from engine '{engine_name}' (no filtering)"
-                )
+                logger.debug(f"Using all output fields from engine '{engine_name}' (no filtering)")
                 filtered_output = output
 
         # Apply update with or without reducers
@@ -1770,9 +1736,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     # Configuration integration
 
-    def to_runnable_config(
-        self, thread_id: str | None = None, **kwargs
-    ) -> RunnableConfig:
+    def to_runnable_config(self, thread_id: str | None = None, **kwargs) -> RunnableConfig:
         """Convert state to a RunnableConfig.
 
         Args:
@@ -1839,9 +1803,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 field_style = "magenta"
 
             # Add to tree with styled field name
-            tree.add(
-                f"[bold {field_style}]{field_name}[/bold {field_style}]: {formatted_value}"
-            )
+            tree.add(f"[bold {field_style}]{field_name}[/bold {field_style}]: {formatted_value}")
 
         # Create panel with tree
         Panel(tree, title=display_title, border_style="blue")
@@ -1957,22 +1919,14 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
             # Format default value
             if field_info.default_factory is not None:
-                factory_name = getattr(
-                    field_info.default_factory, "__name__", "factory"
-                )
+                factory_name = getattr(field_info.default_factory, "__name__", "factory")
                 default_str = f"default_factory={factory_name}"
             else:
                 default = field_info.default
-                default_str = (
-                    "[red]required[/red]" if default is ... else f"default={default!r}"
-                )
+                default_str = "[red]required[/red]" if default is ... else f"default={default!r}"
 
             # Add description if available
-            desc_str = (
-                f" [dim]# {field_info.description}[/dim]"
-                if field_info.description
-                else ""
-            )
+            desc_str = f" [dim]# {field_info.description}[/dim]" if field_info.description else ""
 
             # Add to tree with proper styling
             fields_node.add(
@@ -2005,9 +1959,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         if hasattr(cls, "__structured_models__") and cls.__structured_models__:
             structured_node = tree.add("[bold green]Structured Models:[/bold green]")
             for model_name, model_path in cls.__structured_models__.items():
-                structured_node.add(
-                    f"[yellow]{model_name}[/yellow]: [blue]{model_path}[/blue]"
-                )
+                structured_node.add(f"[yellow]{model_name}[/yellow]: [blue]{model_path}[/blue]")
 
                 # Add fields if we have them
                 if (
@@ -2046,15 +1998,11 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
             # Format default value
             if field_info.default_factory is not None:
-                factory_name = getattr(
-                    field_info.default_factory, "__name__", "factory"
-                )
+                factory_name = getattr(field_info.default_factory, "__name__", "factory")
                 default_str = f"Field(default_factory={factory_name}"
             else:
                 default = field_info.default
-                default_str = (
-                    "Field(..." if default is ... else f"Field(default={default!r}"
-                )
+                default_str = "Field(..." if default is ... else f"Field(default={default!r}"
 
             # Add description if available
             if field_info.description:
@@ -2073,9 +2021,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             lines.append(f"    __shared_fields__ = {cls.__shared_fields__}")
 
         if cls.__serializable_reducers__:
-            lines.append(
-                f"    __serializable_reducers__ = {cls.__serializable_reducers__}"
-            )
+            lines.append(f"    __serializable_reducers__ = {cls.__serializable_reducers__}")
 
         if cls.__engine_io_mappings__:
             lines.append(f"    __engine_io_mappings__ = {cls.__engine_io_mappings__}")
@@ -2084,13 +2030,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         if hasattr(cls, "__structured_models__") and cls.__structured_models__:
             lines.append(f"    __structured_models__ = {cls.__structured_models__}")
 
-        if (
-            hasattr(cls, "__structured_model_fields__")
-            and cls.__structured_model_fields__
-        ):
-            lines.append(
-                f"    __structured_model_fields__ = {cls.__structured_model_fields__}"
-            )
+        if hasattr(cls, "__structured_model_fields__") and cls.__structured_model_fields__:
+            lines.append(f"    __structured_model_fields__ = {cls.__structured_model_fields__}")
 
         return "\n".join(lines)
 
@@ -2104,10 +2045,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         Returns:
             Model class if found, None otherwise
         """
-        if (
-            not hasattr(cls, "__structured_models__")
-            or model_name not in cls.__structured_models__
-        ):
+        if not hasattr(cls, "__structured_models__") or model_name not in cls.__structured_models__:
             return None
 
         # Get the model path
@@ -2177,15 +2115,9 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             other_field = other.model_fields.get(field_name)
 
             # Format fields
-            cls_str = (
-                cls._format_field_info(cls_field)
-                if cls_field
-                else "[dim]Not present[/dim]"
-            )
+            cls_str = cls._format_field_info(cls_field) if cls_field else "[dim]Not present[/dim]"
             other_str = (
-                cls._format_field_info(other_field)
-                if other_field
-                else "[dim]Not present[/dim]"
+                cls._format_field_info(other_field) if other_field else "[dim]Not present[/dim]"
             )
 
             # Add row
@@ -2219,9 +2151,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             other_field = other.model_fields.get(field_name)
 
             cls_str = cls._format_field_info(cls_field) if cls_field else "Not present"
-            other_str = (
-                cls._format_field_info(other_field) if other_field else "Not present"
-            )
+            other_str = cls._format_field_info(other_field) if other_field else "Not present"
 
             comparison_data[field_name] = (
                 f"{cls.__name__}: {cls_str} | {other.__name__}: {other_str}"
@@ -2251,9 +2181,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             default_str = f"default_factory={factory_name}"
         else:
             default = field_info.default
-            default_str = (
-                "[red]required[/red]" if default is ... else f"default={default!r}"
-            )
+            default_str = "[red]required[/red]" if default is ... else f"default={default!r}"
 
         return f"[yellow]{type_str}[/yellow] ({default_str})"
 
@@ -2285,9 +2213,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
             # Format default value
             if field_info.default_factory is not None:
-                factory_name = getattr(
-                    field_info.default_factory, "__name__", "factory"
-                )
+                factory_name = getattr(field_info.default_factory, "__name__", "factory")
                 default_str = f"default_factory={factory_name}"
             else:
                 default = field_info.default
@@ -2305,9 +2231,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
             # Check if field has reducer
             if field_name in cls.__serializable_reducers__:
-                annotations.append(
-                    f"reducer={cls.__serializable_reducers__[field_name]}"
-                )
+                annotations.append(f"reducer={cls.__serializable_reducers__[field_name]}")
 
             # Check if field is input/output for any engine
             for engine_name, mapping in cls.__engine_io_mappings__.items():
@@ -2317,9 +2241,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     annotations.append(f"output({engine_name})")
 
             # Add row
-            table.add_row(
-                field_name, type_str, default_str, description, ", ".join(annotations)
-            )
+            table.add_row(field_name, type_str, default_str, description, ", ".join(annotations))
 
         return table
 
@@ -2340,9 +2262,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
             # Format default value
             if field_info.default_factory is not None:
-                factory_name = getattr(
-                    field_info.default_factory, "__name__", "factory"
-                )
+                factory_name = getattr(field_info.default_factory, "__name__", "factory")
                 default_str = f"default_factory={factory_name}"
             else:
                 default = field_info.default
@@ -2356,9 +2276,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             if field_name in cls.__shared_fields__:
                 annotations.append("shared")
             if field_name in cls.__serializable_reducers__:
-                annotations.append(
-                    f"reducer={cls.__serializable_reducers__[field_name]}"
-                )
+                annotations.append(f"reducer={cls.__serializable_reducers__[field_name]}")
 
             # Format entry
             value = f"Type: {type_str}, Default: {default_str}"

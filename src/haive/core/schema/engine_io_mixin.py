@@ -42,11 +42,7 @@ class EngineIOSchemaMixin(BaseModel):
     def llm(self) -> Any | None:
         """Convenience property to access the LLM engine."""
         # First check the main engine field
-        if (
-            hasattr(self, "engine")
-            and self.engine
-            and hasattr(self.engine, "engine_type")
-        ):
+        if hasattr(self, "engine") and self.engine and hasattr(self.engine, "engine_type"):
             engine_type_str = str(self.engine.engine_type).lower()
             if "llm" in engine_type_str:
                 return self.engine
@@ -109,9 +105,7 @@ class EngineIOSchemaMixin(BaseModel):
 
         return result
 
-    def update_from_engine_output(
-        self, engine_name: str, output_data: dict[str, Any]
-    ) -> None:
+    def update_from_engine_output(self, engine_name: str, output_data: dict[str, Any]) -> None:
         """Update state from engine output data."""
         output_fields = self.get_engine_output_fields(engine_name)
 
@@ -126,9 +120,7 @@ class EngineIOSchemaMixin(BaseModel):
         """Get list of engines that use a specific field."""
         engines = []
         for engine_name, mapping in self.get_engine_io_mappings().items():
-            if field_name in mapping.get("inputs", []) or field_name in mapping.get(
-                "outputs", []
-            ):
+            if field_name in mapping.get("inputs", []) or field_name in mapping.get("outputs", []):
                 engines.append(engine_name)
         return engines
 
@@ -174,7 +166,5 @@ class EngineIOSchemaMixin(BaseModel):
             "all_input_fields": list(self.get_all_engine_input_fields()),
             "all_output_fields": list(self.get_all_engine_output_fields()),
             "structured_models": getattr(self.__class__, "__structured_models__", {}),
-            "structured_model_fields": getattr(
-                self.__class__, "__structured_model_fields__", {}
-            ),
+            "structured_model_fields": getattr(self.__class__, "__structured_model_fields__", {}),
         }

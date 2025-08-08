@@ -113,9 +113,7 @@ class EngineComposerMixin:
                             updated_count += 1
 
         logger.info(
-            f"Updated {updated_count} fields across {
-                len(self.engines_by_type.get(engine_type, []))
-            } {engine_type} engines"
+            f"Updated {updated_count} fields across {len(self.engines_by_type.get(engine_type, []))} {engine_type} engines"
         )
 
         # Add tracking entry

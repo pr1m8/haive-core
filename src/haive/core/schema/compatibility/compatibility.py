@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Set, Type, Union
+from typing import Any, Dict, List, Optional, Set, Type
 
 from haive.core.schema.compatibility.converters import get_converter_registry
 from haive.core.schema.compatibility.types import (
     CompatibilityLevel,
     ConversionPath,
-    TypeInfo,
 )
 
 

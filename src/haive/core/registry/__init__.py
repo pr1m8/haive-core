@@ -103,7 +103,7 @@ def _initialize_registry_types():
     """Initialize default registry types."""
     try:
         RegistryManager.register_registry_type("memory", MemoryRegistry)
-    except Exception as e:
+    except Exception:
         # Ignore initialization errors during import
         pass
 

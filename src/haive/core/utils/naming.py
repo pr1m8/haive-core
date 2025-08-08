@@ -1,4 +1,4 @@
-"""Robust naming utilities for OpenAI compliance and tool naming.
+r"""Robust naming utilities for OpenAI compliance and tool naming.
 
 This module provides comprehensive utilities for sanitizing and transforming
 class names, especially generic classes, to be compatible with OpenAI's
@@ -31,7 +31,7 @@ Example:
 
 import logging
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -232,7 +232,7 @@ def _convert_to_snake_case(name: str, preserve_acronyms: bool = True) -> str:
 
 
 def _ensure_openai_compliance(name: str) -> str:
-    """Ensure the name complies with OpenAI's function name requirements.
+    r"""Ensure the name complies with OpenAI's function name requirements.
 
     OpenAI requires function names to match: ^[a-zA-Z0-9_\\.-]+$
     """

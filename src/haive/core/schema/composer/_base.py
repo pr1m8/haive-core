@@ -135,9 +135,7 @@ class _SchemaComposerBase:
             )
 
         logger.debug(
-            f"Building {self.name} with {len(self.fields)} fields using base class {
-                base_class.__name__
-            }"
+            f"Building {self.name} with {len(self.fields)} fields using base class {base_class.__name__}"
         )
 
         field_defs = {}

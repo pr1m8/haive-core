@@ -25,9 +25,7 @@ class EngineDetectorMixin:
         self.detected_base_class = None
         self.base_class_fields = set()
 
-    def _detect_base_class_requirements(
-        self, components: list[Any] | None = None
-    ) -> None:
+    def _detect_base_class_requirements(self, components: list[Any] | None = None) -> None:
         """Detect what base class is needed based on components.
 
         Args:
@@ -92,9 +90,7 @@ class EngineDetectorMixin:
                     self.has_tools = True
 
                 # PRIORITY 4: Check for messages in engine I/O
-                if hasattr(component, "get_input_fields") and callable(
-                    component.get_input_fields
-                ):
+                if hasattr(component, "get_input_fields") and callable(component.get_input_fields):
                     try:
                         input_fields = component.get_input_fields()
                         if "messages" in input_fields:

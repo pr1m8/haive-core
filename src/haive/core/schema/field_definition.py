@@ -186,13 +186,9 @@ class FieldDefinition:
         # Extract basic properties
         default = field_info.default if hasattr(field_info, "default") else None
         default_factory = (
-            field_info.default_factory
-            if hasattr(field_info, "default_factory")
-            else None
+            field_info.default_factory if hasattr(field_info, "default_factory") else None
         )
-        description = (
-            field_info.description if hasattr(field_info, "description") else None
-        )
+        description = field_info.description if hasattr(field_info, "description") else None
 
         # If no default or factory and field is required (default is ...), set
         # appropriate default

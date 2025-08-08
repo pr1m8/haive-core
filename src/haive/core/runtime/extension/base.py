@@ -7,7 +7,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 # TODO: Define ExtensibleProtocol if needed
 # from haive.core.engine.base.protocols import ExtensibleProtocol
-from haive.core.runtime.extension.protocols import ExtensionProtocol
 
 T = TypeVar("T")  # Target type
 
