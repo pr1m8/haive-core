@@ -71,7 +71,9 @@ class ValidationNodeConfigV2(BaseNodeConfig):
 
         # Get messages from state (StateLike supports both dict and BaseModel access)
         messages = (
-            state.get("messages", []) if hasattr(state, "get") else getattr(state, "messages", [])
+            state.get("messages", [])
+            if hasattr(state, "get")
+            else getattr(state, "messages", [])
         )
         if not messages:
             return Command(goto="END")
@@ -171,9 +173,7 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         # Combine original messages with new ToolMessages
         messages = original_messages + validation_tool_messages
         logger.info(
-            f"Combined {len(original_messages)} original messages with {
-                len(validation_tool_messages)
-            } validation results",
+            f"Combined {len(original_messages)} original messages with {len(validation_tool_messages)} validation results"
         )
 
         # Analyze the ToolMessages added by LangGraph ValidationNode
@@ -208,16 +208,20 @@ class ValidationNodeConfigV2(BaseNodeConfig):
             if route == "parse_output":
                 # Structured output model route (NEW way)
                 if tool_message and tool_message.additional_kwargs.get("is_error"):
-                    logger.warning(f"Structured output validation failed for {tool_name}")
+                    logger.warning(
+                        f"Structured output validation failed for {tool_name}"
+                    )
                     destinations.add("agent_node")
                     has_errors = True
                 else:
                     logger.info(f"Structured output validation passed for {tool_name}")
                     destinations.add("parse_output")
-            
+
             elif route == "pydantic_model":
                 # DEPRECATED - but keep for backward compatibility
-                logger.warning(f"DEPRECATED: pydantic_model route used for {tool_name}. Use structured_output_model instead.")
+                logger.warning(
+                    f"DEPRECATED: pydantic_model route used for {tool_name}. Use structured_output_model instead."
+                )
                 if tool_message and tool_message.additional_kwargs.get("is_error"):
                     logger.warning(f"Pydantic validation failed for {tool_name}")
                     destinations.add("agent_node")
@@ -355,7 +359,11 @@ class ValidationNodeConfigV2(BaseNodeConfig):
             return None
 
         # Try state.engines first (handle both dict and BaseModel access)
-        engines = state.get("engines") if hasattr(state, "get") else getattr(state, "engines", None)
+        engines = (
+            state.get("engines")
+            if hasattr(state, "get")
+            else getattr(state, "engines", None)
+        )
 
         if engines and isinstance(engines, dict):
             engine = engines.get(self.engine_name)
@@ -480,7 +488,11 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         # Find the AIMessage that contains these tool calls
         for i in reversed(range(len(updated_messages))):
             msg = updated_messages[i]
-            if isinstance(msg, AIMessage) and hasattr(msg, "tool_calls") and msg.tool_calls:
+            if (
+                isinstance(msg, AIMessage)
+                and hasattr(msg, "tool_calls")
+                and msg.tool_calls
+            ):
                 # Create new AIMessage with only the validated tool calls
                 validated_ai_message = AIMessage(
                     content=msg.content,

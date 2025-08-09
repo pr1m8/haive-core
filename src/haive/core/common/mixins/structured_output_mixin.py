@@ -161,7 +161,7 @@ class StructuredOutputMixin:
                 "version": self.structured_output_version,
                 "tool_type": "structured_output",
             }
-            self.set_tool_route(name, "structured_output", metadata)
+            self.set_tool_route(name, "parse_output", metadata)
 
         return tool_class
 
@@ -180,4 +180,4 @@ class StructuredOutputMixin:
                         "is_structured_output": True,
                         "version": self.structured_output_version,
                     }
-                    self.set_tool_route(tool.__name__, "structured_output", metadata)
+                    self.set_tool_route(tool.__name__, "parse_output", metadata)

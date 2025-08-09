@@ -1778,8 +1778,10 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         self, tool: Any, name: str | None = None, route: str | None = None
     ) -> AugLLMConfig:
         """Add a single tool with optional name and route."""
+        tool_was_added = False
         if tool not in self.tools:
             self.tools = [*list(self.tools), tool]
+            tool_was_added = True
             if name or route:
                 auto_name = name or (
                     getattr(tool, "name", None)
@@ -1788,7 +1790,9 @@ class AugLLMConfig(*_get_augllm_base_classes()):
                 auto_route = route or "manual"
                 self.tool_routes[auto_name] = auto_route
             debug_print(f"➕ [green]Added tool: {name or type(tool).__name__}[/green]")
-            self._sync_tool_routes()
+
+        # Always sync tool routes to ensure routing is updated even for existing tools
+        self._sync_tool_routes()
         return self
 
     def remove_tool(self, tool: Any) -> AugLLMConfig:
