@@ -205,7 +205,19 @@ class ValidationNodeConfigV2(BaseNodeConfig):
                     tool_message = msg
                     break
 
-            if route == "pydantic_model":
+            if route == "parse_output":
+                # Structured output model route (NEW way)
+                if tool_message and tool_message.additional_kwargs.get("is_error"):
+                    logger.warning(f"Structured output validation failed for {tool_name}")
+                    destinations.add("agent_node")
+                    has_errors = True
+                else:
+                    logger.info(f"Structured output validation passed for {tool_name}")
+                    destinations.add("parse_output")
+            
+            elif route == "pydantic_model":
+                # DEPRECATED - but keep for backward compatibility
+                logger.warning(f"DEPRECATED: pydantic_model route used for {tool_name}. Use structured_output_model instead.")
                 if tool_message and tool_message.additional_kwargs.get("is_error"):
                     logger.warning(f"Pydantic validation failed for {tool_name}")
                     destinations.add("agent_node")

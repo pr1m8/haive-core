@@ -317,23 +317,50 @@ class ValidationNodeV2(NodeConfig, ToolRouteMixin):
             route = tool_routes.get(tool_name, "unknown")
             logger.debug(f"Tool route: {tool_name} -> {route}")
 
-            if route == "pydantic_model":
-                # Handle Pydantic model
+            if route == "parse_output":
+                # Handle structured output model (NEW way)
                 model_class = self._find_pydantic_model_class(tool_name, engine)
                 if model_class:
                     tool_msg = self._create_tool_message_for_pydantic(
                         tool_name, tool_id, args, model_class
                     )
                     new_tool_messages.append(tool_msg)
-                    logger.info(f"Created ToolMessage for Pydantic model: {tool_name}")
+                    logger.info(
+                        f"Created ToolMessage for structured output model: {tool_name}"
+                    )
                 else:
-                    # Unknown Pydantic model
-                    error_msg = f"Pydantic model '{tool_name}' not found in engine"
+                    # Unknown structured output model
+                    error_msg = (
+                        f"Structured output model '{tool_name}' not found in engine"
+                    )
                     tool_msg = self._create_error_tool_message(
                         tool_name, tool_id, error_msg
                     )
                     new_tool_messages.append(tool_msg)
-                    logger.warning(f"Unknown Pydantic model: {tool_name}")
+                    logger.warning(f"Unknown structured output model: {tool_name}")
+
+            elif route == "pydantic_model":
+                # BaseModel as tool (not for structured output)
+                # These are BaseModel classes that might be used as tools
+                # but don't have __call__ method - typically an error case
+                logger.info(
+                    f"BaseModel tool '{tool_name}' without __call__ - cannot execute as tool"
+                )
+                error_msg = (
+                    f"BaseModel '{tool_name}' cannot be used as a tool without __call__ method. "
+                    f"Use it as structured_output_model instead."
+                )
+                tool_msg = self._create_error_tool_message(
+                    tool_name, tool_id, error_msg
+                )
+                new_tool_messages.append(tool_msg)
+
+            elif route == "pydantic_tool":
+                # BaseModel with __call__ method - executable tool
+                # Let tool_node handle the actual execution
+                logger.debug(
+                    f"BaseModel tool '{tool_name}' with __call__ will be handled by tool_node"
+                )
 
             elif route in ["langchain_tool", "function", "tool_node"]:
                 # Regular tools - don't create ToolMessages here, let tool_node

@@ -222,9 +222,9 @@ class AugLLMConfig(*_get_augllm_base_classes()):
     input_variables: list[str] | None = Field(
         default=None, description="Input variables for the prompt template"
     )
-    schemas: Sequence[
-        type[BaseTool] | type[BaseModel] | Callable | StructuredTool | BaseModel
-    ] = Field(default_factory=list, description="Schemas for tools")
+    schemas: Sequence[type[BaseModel] | Callable | BaseModel | Any] = Field(
+        default_factory=list, description="Schemas for tools (no LangChain validation)"
+    )
     pydantic_tools: list[type[BaseModel]] = Field(
         default_factory=list, description="Pydantic models for tool schemas"
     )
@@ -344,11 +344,21 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         self._sync_tool_routes()
 
     def _sync_tool_routes(self):
-        """Synchronize tool_routes with current tools using mixin functionality."""
+        """Synchronize tool_routes with current tools using enhanced detection."""
         if not self.tools:
             self.clear_tool_routes()
             return
-        self.sync_tool_routes_from_tools(self.tools)
+
+        # Use enhanced tool analysis instead of basic sync
+        for i, tool in enumerate(self.tools):
+            tool_name = self._get_tool_name(tool, i)
+            # Use _analyze_tool for smarter route detection
+            route, metadata = self._analyze_tool(tool)
+            metadata = metadata or {}
+            metadata.update(
+                {"source": "aug_llm_config", "index": i, "enhanced_detection": True}
+            )
+            self.set_tool_route(tool_name, route, metadata)
         if self.structured_output_model:
             # Fix routing for structured output model
             structured_model_name = self.structured_output_model.__name__
