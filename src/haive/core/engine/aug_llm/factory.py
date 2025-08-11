@@ -34,8 +34,47 @@ from langchain_core.runnables import Runnable, RunnableLambda
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
 
+from haive.core.utils.naming import sanitize_tool_name
+
 # Get logger for this module
 logger = logging.getLogger(__name__)
+
+
+class SanitizedBaseModelTool:
+    """Wrapper for BaseModel tools with sanitized names.
+
+    This ensures BaseModel tools have OpenAI-compliant names that match
+    the force_tool_choice configuration.
+    """
+
+    def __init__(self, base_model_class: type[BaseModel]):
+        self.base_model_class = base_model_class
+        self.original_name = base_model_class.__name__
+        self.sanitized_name = sanitize_tool_name(self.original_name)
+
+        # Override the __name__ attribute for OpenAI compatibility
+        self.__name__ = self.sanitized_name
+
+        # Preserve other attributes
+        self.__doc__ = getattr(base_model_class, "__doc__", None)
+        self.model_fields = getattr(base_model_class, "model_fields", {})
+        self.model_config = getattr(base_model_class, "model_config", None)
+
+    def __call__(self, *args, **kwargs):
+        """Delegate to the original BaseModel constructor."""
+        return self.base_model_class(*args, **kwargs)
+
+    def schema(self, *args, **kwargs):
+        """Delegate schema generation to the original BaseModel."""
+        return self.base_model_class.schema(*args, **kwargs)
+
+    def model_json_schema(self, *args, **kwargs):
+        """Delegate model_json_schema to the original BaseModel."""
+        return self.base_model_class.model_json_schema(*args, **kwargs)
+
+    def __getattr__(self, name):
+        """Delegate any other attributes to the original BaseModel."""
+        return getattr(self.base_model_class, name)
 
 
 class AugLLMFactory:
@@ -399,10 +438,16 @@ class AugLLMFactory:
                 # definition
                 if isinstance(tool, type) and issubclass(tool, BaseModel):
                     basemodel_tools.append(tool)
+
+                    # Create sanitized wrapper to ensure OpenAI-compliant names
+                    sanitized_tool = SanitizedBaseModelTool(tool)
                     tool_instances.append(
-                        tool
+                        sanitized_tool
                     )  # v2 structured output needs it as a tool
-                    logger.info(f"Adding BaseModel {tool.__name__} as tool")
+
+                    logger.info(
+                        f"Adding BaseModel {tool.__name__} -> {sanitized_tool.__name__} as tool"
+                    )
 
                     # If using v2 structured output, ensure proper field names
                     if (

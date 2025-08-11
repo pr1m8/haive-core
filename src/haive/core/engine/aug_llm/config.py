@@ -360,16 +360,37 @@ class AugLLMConfig(*_get_augllm_base_classes()):
             )
             self.set_tool_route(tool_name, route, metadata)
         if self.structured_output_model:
-            # Fix routing for structured output model
-            structured_model_name = self.structured_output_model.__name__
-            if structured_model_name in self.tool_routes:
-                metadata = self.get_tool_metadata(structured_model_name) or {}
+            # Fix routing for structured output model - use sanitized name
+            from haive.core.utils.naming import sanitize_tool_name
+
+            original_name = self.structured_output_model.__name__
+            sanitized_name = sanitize_tool_name(original_name)
+
+            # Check both original and sanitized names in tool_routes
+            if original_name in self.tool_routes:
+                metadata = self.get_tool_metadata(original_name) or {}
                 metadata["is_structured_output"] = True
                 metadata["purpose"] = "structured_output"
                 metadata["version"] = self.structured_output_version
                 metadata["tool_type"] = "structured_output_model"
-                # Route to parse_output instead of pydantic_model
-                self.set_tool_route(structured_model_name, "parse_output", metadata)
+
+                # Route to parse_output with sanitized name
+                self.set_tool_route(sanitized_name, "parse_output", metadata)
+
+                # Remove the original name if it's different
+                if (
+                    original_name != sanitized_name
+                    and original_name in self.tool_routes
+                ):
+                    del self.tool_routes[original_name]
+            elif sanitized_name in self.tool_routes:
+                metadata = self.get_tool_metadata(sanitized_name) or {}
+                metadata["is_structured_output"] = True
+                metadata["purpose"] = "structured_output"
+                metadata["version"] = self.structured_output_version
+                metadata["tool_type"] = "structured_output_model"
+                # Route to parse_output
+                self.set_tool_route(sanitized_name, "parse_output", metadata)
 
     def _debug_initialization_summary(self):
         """Show rich initialization summary."""
