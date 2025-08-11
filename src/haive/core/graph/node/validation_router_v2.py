@@ -142,6 +142,29 @@ def validation_router_v2(state: dict[str, Any]) -> str | list[str] | Send:
                 destinations.add("agent_node")
                 has_errors = True
 
+        elif route == "parse_output":
+            # Structured output model route (used by AugLLMConfig v2)
+            if tool_message:
+                # We have a ToolMessage from V2 validation
+                if has_tool_error_v2(tool_message):
+                    logger.warning(
+                        f"Structured output validation failed for {tool_name}"
+                    )
+                    # Route errors back to agent
+                    destinations.add("agent_node")
+                    has_errors = True
+                else:
+                    logger.info(f"Structured output validation passed for {tool_name}")
+                    # Route to parser for processing
+                    destinations.add("parse_output")
+            else:
+                # No ToolMessage found - this shouldn't happen with V2
+                logger.warning(
+                    f"No ToolMessage found for structured output model {tool_name}"
+                )
+                destinations.add("agent_node")
+                has_errors = True
+
         elif route in ["langchain_tool", "function", "tool_node"]:
             if tool_message:
                 # Tool already executed and has ToolMessage
