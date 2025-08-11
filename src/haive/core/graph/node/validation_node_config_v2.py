@@ -98,6 +98,8 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         try:
             # Get tool schemas for validation like LangGraph ValidationNode
             schemas_by_name = {}
+            schemas_for_validation = []
+
             for tool_call in tool_calls:
                 tool_name = tool_call.get("name")
                 if not tool_name:
@@ -108,12 +110,55 @@ class ValidationNodeConfigV2(BaseNodeConfig):
                 if tool_schema:
                     schemas_by_name[tool_name] = tool_schema
 
+                    # For BaseModel schemas, we need to wrap them as tools if the name doesn't match
+                    # because LangGraph uses schema.__name__ as the key
+                    if is_basemodel_subclass(tool_schema):
+                        from haive.core.utils.naming import sanitize_tool_name
+
+                        original_name = tool_schema.__name__
+                        if tool_name != original_name:
+                            # Need to create a tool wrapper with the sanitized name
+                            logger.info(
+                                f"Creating tool wrapper for {original_name} as {tool_name}"
+                            )
+
+                            # Import BaseTool here to avoid circular imports
+                            from langchain_core.tools import BaseTool
+
+                            # Create a minimal tool wrapper class
+                            class ToolWrapper(BaseTool):
+                                name: str = tool_name
+                                description: str = (
+                                    f"Validation wrapper for {original_name}"
+                                )
+                                args_schema: type[BaseModel] = tool_schema
+
+                                def _run(self, *args, **kwargs):
+                                    raise NotImplementedError(
+                                        "This is just a wrapper for validation"
+                                    )
+
+                            schemas_for_validation.append(ToolWrapper())
+                        else:
+                            schemas_for_validation.append(tool_schema)
+                    else:
+                        schemas_for_validation.append(tool_schema)
+
             # Create LangGraph ValidationNode with collected schemas
-            validation_node = ValidationNode(schemas=list(schemas_by_name.values()))
+            logger.info(
+                f"Creating ValidationNode with schemas: {[s.__name__ if hasattr(s, '__name__') else str(s) for s in schemas_for_validation]}"
+            )
+
+            validation_node = ValidationNode(schemas=schemas_for_validation)
 
             # Run LangGraph validation using .invoke() like V1 does (this adds proper
             # ToolMessages to state)
+            logger.info("Invoking LangGraph ValidationNode...")
             validation_result = validation_node.invoke(state)
+            logger.info(f"Validation result type: {type(validation_result)}")
+            logger.info(
+                f"Validation result keys: {validation_result.keys() if isinstance(validation_result, dict) else 'Not a dict'}"
+            )
 
             # Process validation results and determine routing using Send objects like
             # dynamic routing examples
@@ -125,6 +170,12 @@ class ValidationNodeConfigV2(BaseNodeConfig):
 
         except Exception as e:
             logger.exception(f"ValidationNodeV2 error: {e}")
+            # Log more details about the error
+            logger.error(f"Exception type: {type(e).__name__}")
+            logger.error(f"Exception message: {str(e)}")
+            logger.error(f"Tool calls: {tool_calls}")
+            logger.error(f"Schemas by name: {schemas_by_name}")
+
             # Create error ToolMessages for all tool calls
             error_messages = []
             for tool_call in tool_calls:
@@ -133,7 +184,7 @@ class ValidationNodeConfigV2(BaseNodeConfig):
                 if tool_id and tool_name:
                     error_messages.append(
                         ToolMessage(
-                            content=f"Validation error: {e}",
+                            content=f"Validation error: {tool_name}",  # Just use tool name for now
                             tool_call_id=tool_id,
                             name=tool_name,
                             additional_kwargs={"is_error": True},
@@ -331,7 +382,9 @@ class ValidationNodeConfigV2(BaseNodeConfig):
                 if attr_value:
                     tools.extend(attr_value)
 
-        # Find the specific tool by name
+        # Find the specific tool by name - check both original and sanitized names
+        from haive.core.utils.naming import sanitize_tool_name
+
         for tool in tools:
             if hasattr(tool, "name") and tool.name == tool_name:
                 # This is a BaseTool - get its args_schema
@@ -342,13 +395,21 @@ class ValidationNodeConfigV2(BaseNodeConfig):
                     return tool.args_schema
                 logger.warning(f"Tool {tool_name} has no args_schema")
                 return None
-            if hasattr(tool, "__name__") and tool.__name__ == tool_name:
-                # This is a Pydantic model class directly
-                if is_basemodel_subclass(tool):
-                    logger.info(f"Found Pydantic model for {tool_name}: {tool}")
-                    return tool
-                logger.warning(f"Tool {tool_name} is not a BaseModel subclass")
-                return None
+
+            # Check both original and sanitized names for Pydantic models
+            if hasattr(tool, "__name__"):
+                original_name = tool.__name__
+                sanitized_name = sanitize_tool_name(original_name)
+
+                if tool_name in (original_name, sanitized_name):
+                    # This is a Pydantic model class directly
+                    if is_basemodel_subclass(tool):
+                        logger.info(
+                            f"Found Pydantic model for {tool_name}: {tool} (original: {original_name}, sanitized: {sanitized_name})"
+                        )
+                        return tool
+                    logger.warning(f"Tool {tool_name} is not a BaseModel subclass")
+                    return None
 
         logger.warning(f"Tool not found in engine tools: {tool_name}")
         return None
