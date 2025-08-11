@@ -123,24 +123,42 @@ class ValidationNodeV2(NodeConfig, ToolRouteMixin):
         self, tool_name: str, engine: Any
     ) -> type[BaseModel] | None:
         """Find Pydantic model class by name in engine."""
-        # Check structured_output_model
+        from haive.core.utils.naming import sanitize_tool_name
+
+        # Check structured_output_model - compare both original and sanitized names
         if (
             hasattr(engine, "structured_output_model")
             and engine.structured_output_model
-            and getattr(engine.structured_output_model, "__name__", None) == tool_name
         ):
-            return engine.structured_output_model
+            model = engine.structured_output_model
+            original_name = getattr(model, "__name__", None)
+            sanitized_name = (
+                sanitize_tool_name(original_name) if original_name else None
+            )
+
+            if tool_name in (original_name, sanitized_name):
+                return model
 
         # Check schemas
         if hasattr(engine, "schemas") and engine.schemas:
             for schema in engine.schemas:
-                if getattr(schema, "__name__", None) == tool_name:
+                original_name = getattr(schema, "__name__", None)
+                sanitized_name = (
+                    sanitize_tool_name(original_name) if original_name else None
+                )
+
+                if tool_name in (original_name, sanitized_name):
                     return schema
 
         # Check pydantic_tools
         if hasattr(engine, "pydantic_tools") and engine.pydantic_tools:
             for tool in engine.pydantic_tools:
-                if getattr(tool, "__name__", None) == tool_name:
+                original_name = getattr(tool, "__name__", None)
+                sanitized_name = (
+                    sanitize_tool_name(original_name) if original_name else None
+                )
+
+                if tool_name in (original_name, sanitized_name):
                     return tool
 
         return None
