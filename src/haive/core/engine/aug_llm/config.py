@@ -588,6 +588,7 @@ class AugLLMConfig(*_get_augllm_base_classes()):
             self._apply_partial_variables()
             self._apply_optional_variables()
             self._setup_format_instructions()
+            self._integrate_format_instructions_to_prompt()
             self._setup_output_handling()
             self._configure_tool_choice()
             if self.uses_messages_field is None:
@@ -715,16 +716,101 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         if not self.include_format_instructions:
             debug_print("❌ [yellow]include_format_instructions is False[/yellow]")
             return False
-        if "format_instructions" in self.partial_variables:
-            debug_print(
-                "❌ [yellow]format_instructions already exists in partial_variables[/yellow]"
-            )
-            return False
+        # NOTE: Removed check for existing format_instructions because
+        # _setup_format_instructions() deliberately clears them first as part of setup
         if not self.structured_output_model:
             debug_print("❌ [yellow]No structured_output_model set[/yellow]")
             return False
         debug_print("✅ [green]Conditions met for format instructions[/green]")
         return True
+
+    def _integrate_format_instructions_to_prompt(self):
+        """Integrate format instructions into ChatPromptTemplate as messages.
+
+        This method ensures that format instructions generated in partial_variables
+        are properly integrated into the ChatPromptTemplate messages so they reach the LLM.
+
+        For structured output, format instructions should be delivered to help the LLM
+        understand the expected schema format.
+        """
+        debug_print(
+            "🔗 [blue]Integrating format instructions to prompt template...[/blue]"
+        )
+
+        # Check if we have format instructions to integrate
+        if (
+            "format_instructions" not in self.partial_variables
+            or not self._format_instructions_text
+        ):
+            debug_print("❌ [yellow]No format instructions to integrate[/yellow]")
+            return
+
+        # Only work with ChatPromptTemplate (the default type)
+        if not isinstance(self.prompt_template, ChatPromptTemplate):
+            debug_print(
+                f"⚠️ [yellow]Prompt template is {type(self.prompt_template).__name__}, not ChatPromptTemplate - skipping integration[/yellow]"
+            )
+            return
+
+        # Check if format instructions are already integrated
+        existing_messages = self.prompt_template.messages
+        for msg in existing_messages:
+            if hasattr(msg, "prompt") and hasattr(msg.prompt, "template"):
+                if "{format_instructions}" in msg.prompt.template:
+                    debug_print(
+                        "✅ [green]Format instructions placeholder already exists in template[/green]"
+                    )
+                    return
+
+        debug_print("🔧 [cyan]Adding format instructions as system message...[/cyan]")
+
+        try:
+            # Get the format instructions
+            format_instructions = self._format_instructions_text
+
+            # Create a new system message with format instructions
+            from langchain_core.messages import SystemMessage
+
+            format_msg = SystemMessage(
+                content=f"Output format instructions:\n\n{format_instructions}"
+            )
+
+            # Create new template with format instructions message added
+            # Insert after any existing system messages but before user messages
+            new_messages = []
+            system_messages_added = False
+
+            for msg in existing_messages:
+                new_messages.append(msg)
+                # Add format instructions after the last system message
+                if (hasattr(msg, "role") and msg.role == "system") or (
+                    hasattr(msg, "prompt") and "system" in str(type(msg)).lower()
+                ):
+                    if not system_messages_added:
+                        new_messages.append(format_msg)
+                        system_messages_added = True
+
+            # If no system messages found, add at the beginning
+            if not system_messages_added:
+                new_messages.insert(0, format_msg)
+
+            # Create new ChatPromptTemplate with integrated format instructions
+            self.prompt_template = ChatPromptTemplate.from_messages(new_messages)
+
+            # Remove format_instructions from partial_variables since it's now integrated
+            if "format_instructions" in self.partial_variables:
+                del self.partial_variables["format_instructions"]
+
+            debug_print(
+                "✅ [green]Format instructions integrated as system message[/green]"
+            )
+
+        except Exception as e:
+            debug_print(f"❌ [red]Error integrating format instructions: {e}[/red]")
+            # Keep format instructions in partial_variables as fallback
+            debug_print(
+                "🔄 [yellow]Keeping format instructions in partial_variables as fallback[/yellow]"
+            )
 
     def _setup_output_handling(self):
         """Set up output handling based on configuration with proper validation."""
