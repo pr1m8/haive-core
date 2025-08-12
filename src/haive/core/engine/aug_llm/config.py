@@ -222,9 +222,9 @@ class AugLLMConfig(*_get_augllm_base_classes()):
     input_variables: list[str] | None = Field(
         default=None, description="Input variables for the prompt template"
     )
-    schemas: Sequence[type[BaseModel] | Callable | BaseModel | Any] = Field(
-        default_factory=list, description="Schemas for tools (no LangChain validation)"
-    )
+    schemas: Sequence[
+        type[BaseTool] | type[BaseModel] | Callable | StructuredTool | BaseModel
+    ] = Field(default_factory=list, description="Schemas for tools")
     pydantic_tools: list[type[BaseModel]] = Field(
         default_factory=list, description="Pydantic models for tool schemas"
     )
@@ -344,53 +344,19 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         self._sync_tool_routes()
 
     def _sync_tool_routes(self):
-        """Synchronize tool_routes with current tools using enhanced detection."""
+        """Synchronize tool_routes with current tools using mixin functionality."""
         if not self.tools:
             self.clear_tool_routes()
             return
-
-        # Use enhanced tool analysis instead of basic sync
-        for i, tool in enumerate(self.tools):
-            tool_name = self._get_tool_name(tool, i)
-            # Use _analyze_tool for smarter route detection
-            route, metadata = self._analyze_tool(tool)
-            metadata = metadata or {}
-            metadata.update(
-                {"source": "aug_llm_config", "index": i, "enhanced_detection": True}
-            )
-            self.set_tool_route(tool_name, route, metadata)
+        self.sync_tool_routes_from_tools(self.tools)
         if self.structured_output_model:
-            # Fix routing for structured output model - use sanitized name
-            from haive.core.utils.naming import sanitize_tool_name
-
-            original_name = self.structured_output_model.__name__
-            sanitized_name = sanitize_tool_name(original_name)
-
-            # Check both original and sanitized names in tool_routes
-            if original_name in self.tool_routes:
-                metadata = self.get_tool_metadata(original_name) or {}
-                metadata["is_structured_output"] = True
-                metadata["purpose"] = "structured_output"
-                metadata["version"] = self.structured_output_version
-                metadata["tool_type"] = "structured_output_model"
-
-                # Route to parse_output with sanitized name
-                self.set_tool_route(sanitized_name, "parse_output", metadata)
-
-                # Remove the original name if it's different
-                if (
-                    original_name != sanitized_name
-                    and original_name in self.tool_routes
-                ):
-                    del self.tool_routes[original_name]
-            elif sanitized_name in self.tool_routes:
-                metadata = self.get_tool_metadata(sanitized_name) or {}
-                metadata["is_structured_output"] = True
-                metadata["purpose"] = "structured_output"
-                metadata["version"] = self.structured_output_version
-                metadata["tool_type"] = "structured_output_model"
-                # Route to parse_output
-                self.set_tool_route(sanitized_name, "parse_output", metadata)
+            for tool_name, route in self.tool_routes.items():
+                if route == "pydantic_model":
+                    metadata = self.get_tool_metadata(tool_name) or {}
+                    metadata["is_structured_output"] = (
+                        tool_name == self.structured_output_model.__name__
+                    )
+                    self.set_tool_route(tool_name, route, metadata)
 
     def _debug_initialization_summary(self):
         """Show rich initialization summary."""
@@ -588,7 +554,6 @@ class AugLLMConfig(*_get_augllm_base_classes()):
             self._apply_partial_variables()
             self._apply_optional_variables()
             self._setup_format_instructions()
-            self._integrate_format_instructions_to_prompt()
             self._setup_output_handling()
             self._configure_tool_choice()
             if self.uses_messages_field is None:
@@ -610,33 +575,20 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         """Analyze tool with AugLLM-specific context awareness.
 
         Extends ToolRouteMixin's analysis with structured output detection.
-        Routes structured output models to 'parse_output' for ValidationNodeConfigV2.
         """
-        # Check if this is the configured structured output model
         if self.structured_output_model and tool == self.structured_output_model:
-            return "parse_output", {
+            route = (
+                "structured_output_tool"
+                if self.structured_output_version == "v2"
+                else "parser"
+            )
+            metadata = {
                 "purpose": "structured_output",
                 "version": self.structured_output_version,
                 "force_choice": self.structured_output_version == "v2",
                 "class_name": tool.__name__ if hasattr(tool, "__name__") else str(tool),
-                "tool_type": "structured_output_model",
-                "is_structured_output": True,
             }
-
-        # Check if tool has STRUCTURED_OUTPUT capability
-        from haive.core.engine.tool.types import ToolCapability
-
-        capabilities = getattr(tool, "__tool_capabilities__", set())
-        if ToolCapability.STRUCTURED_OUTPUT in capabilities:
-            tool_name = getattr(tool, "name", getattr(tool, "__name__", "unknown"))
-            return "parse_output", {
-                "tool_name": tool_name,
-                "tool_type": "structured_output_tool",
-                "capabilities": list(capabilities),
-                "has_structured_output": True,
-                "purpose": "structured_output",
-            }
-
+            return (route, metadata)
         return super()._analyze_tool(tool)
 
     def _process_and_validate_tools(self):
@@ -716,101 +668,16 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         if not self.include_format_instructions:
             debug_print("❌ [yellow]include_format_instructions is False[/yellow]")
             return False
-        # NOTE: Removed check for existing format_instructions because
-        # _setup_format_instructions() deliberately clears them first as part of setup
+        if "format_instructions" in self.partial_variables:
+            debug_print(
+                "❌ [yellow]format_instructions already exists in partial_variables[/yellow]"
+            )
+            return False
         if not self.structured_output_model:
             debug_print("❌ [yellow]No structured_output_model set[/yellow]")
             return False
         debug_print("✅ [green]Conditions met for format instructions[/green]")
         return True
-
-    def _integrate_format_instructions_to_prompt(self):
-        """Integrate format instructions into ChatPromptTemplate as messages.
-
-        This method ensures that format instructions generated in partial_variables
-        are properly integrated into the ChatPromptTemplate messages so they reach the LLM.
-
-        For structured output, format instructions should be delivered to help the LLM
-        understand the expected schema format.
-        """
-        debug_print(
-            "🔗 [blue]Integrating format instructions to prompt template...[/blue]"
-        )
-
-        # Check if we have format instructions to integrate
-        if (
-            "format_instructions" not in self.partial_variables
-            or not self._format_instructions_text
-        ):
-            debug_print("❌ [yellow]No format instructions to integrate[/yellow]")
-            return
-
-        # Only work with ChatPromptTemplate (the default type)
-        if not isinstance(self.prompt_template, ChatPromptTemplate):
-            debug_print(
-                f"⚠️ [yellow]Prompt template is {type(self.prompt_template).__name__}, not ChatPromptTemplate - skipping integration[/yellow]"
-            )
-            return
-
-        # Check if format instructions are already integrated
-        existing_messages = self.prompt_template.messages
-        for msg in existing_messages:
-            if hasattr(msg, "prompt") and hasattr(msg.prompt, "template"):
-                if "{format_instructions}" in msg.prompt.template:
-                    debug_print(
-                        "✅ [green]Format instructions placeholder already exists in template[/green]"
-                    )
-                    return
-
-        debug_print("🔧 [cyan]Adding format instructions as system message...[/cyan]")
-
-        try:
-            # Get the format instructions
-            format_instructions = self._format_instructions_text
-
-            # Create a new system message with format instructions
-            from langchain_core.messages import SystemMessage
-
-            format_msg = SystemMessage(
-                content=f"Output format instructions:\n\n{format_instructions}"
-            )
-
-            # Create new template with format instructions message added
-            # Insert after any existing system messages but before user messages
-            new_messages = []
-            system_messages_added = False
-
-            for msg in existing_messages:
-                new_messages.append(msg)
-                # Add format instructions after the last system message
-                if (hasattr(msg, "role") and msg.role == "system") or (
-                    hasattr(msg, "prompt") and "system" in str(type(msg)).lower()
-                ):
-                    if not system_messages_added:
-                        new_messages.append(format_msg)
-                        system_messages_added = True
-
-            # If no system messages found, add at the beginning
-            if not system_messages_added:
-                new_messages.insert(0, format_msg)
-
-            # Create new ChatPromptTemplate with integrated format instructions
-            self.prompt_template = ChatPromptTemplate.from_messages(new_messages)
-
-            # Remove format_instructions from partial_variables since it's now integrated
-            if "format_instructions" in self.partial_variables:
-                del self.partial_variables["format_instructions"]
-
-            debug_print(
-                "✅ [green]Format instructions integrated as system message[/green]"
-            )
-
-        except Exception as e:
-            debug_print(f"❌ [red]Error integrating format instructions: {e}[/red]")
-            # Keep format instructions in partial_variables as fallback
-            debug_print(
-                "🔄 [yellow]Keeping format instructions in partial_variables as fallback[/yellow]"
-            )
 
     def _setup_output_handling(self):
         """Set up output handling based on configuration with proper validation."""
@@ -1885,10 +1752,8 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         self, tool: Any, name: str | None = None, route: str | None = None
     ) -> AugLLMConfig:
         """Add a single tool with optional name and route."""
-        tool_was_added = False
         if tool not in self.tools:
             self.tools = [*list(self.tools), tool]
-            tool_was_added = True
             if name or route:
                 auto_name = name or (
                     getattr(tool, "name", None)
@@ -1897,9 +1762,7 @@ class AugLLMConfig(*_get_augllm_base_classes()):
                 auto_route = route or "manual"
                 self.tool_routes[auto_name] = auto_route
             debug_print(f"➕ [green]Added tool: {name or type(tool).__name__}[/green]")
-
-        # Always sync tool routes to ensure routing is updated even for existing tools
-        self._sync_tool_routes()
+            self._sync_tool_routes()
         return self
 
     def remove_tool(self, tool: Any) -> AugLLMConfig:
@@ -2630,6 +2493,21 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         if not hasattr(self, "_active_template"):
             self._active_template = None
         return self._active_template
+
+    def add_tool(self, tool: Any) -> AugLLMConfig:
+        """Add a tool to the configuration.
+
+        Args:
+            tool: Tool to add (LangChain tool, Pydantic model, or callable)
+
+        Returns:
+            Self for method chaining
+        """
+        current_tools = list(self.tools) if self.tools else []
+        current_tools.append(tool)
+        self.tools = current_tools
+        debug_print(f"Added tool: {getattr(tool, 'name', type(tool).__name__)}")
+        return self
 
     def remove_tool(self, tool: Any) -> AugLLMConfig:
         """Remove a tool from the configuration.
