@@ -3,12 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import (
     Generic,
-    List,
     Optional,
-    Union,
-    get_args,
-    get_origin,
-    get_type_hints,
     overload,
 )
 
@@ -24,7 +19,7 @@ class TreeNode(BaseModel, Generic[ContentT, ResultT], ABC):
     """
 
     content: ContentT
-    result: Optional[ResultT] = None
+    result: ResultT | None = None
 
     # Auto-indexing (hidden)
     _index: int = PrivateAttr(default=0)
@@ -56,13 +51,15 @@ class Leaf(TreeNode[ContentT, ResultT], Generic[ContentT, ResultT]):
     """Leaf node - has content but no children.
 
     Example:
-        # With explicit types
-        leaf: Leaf[TaskContent, TaskResult] = Leaf(
-            content=TaskContent(name="Calculate", action="add", params={"a": 1, "b": 2})
-        )
+        .. code-block:: python
 
-        # With default types
-        simple_leaf = Leaf(content=DefaultContent(name="Task1"))
+            # With explicit types
+            leaf: Leaf[TaskContent, TaskResult] = Leaf(
+                content=TaskContent(name="Calculate", action="add", params={"a": 1, "b": 2})
+            )
+
+            # With default types
+            simple_leaf = Leaf(content=DefaultContent(name="Task1"))
     """
 
     def is_leaf(self) -> bool:
@@ -76,18 +73,20 @@ class Tree(TreeNode[ContentT, ResultT], Generic[ContentT, ChildT, ResultT]):
     can be of different types (but all extending the bound).
 
     Example:
-        # Homogeneous tree (all children same type)
-        tree: Tree[PlanContent, PlanNode, PlanResult] = Tree(
-            content=PlanContent(objective="Main Plan")
-        )
+        .. code-block:: python
 
-        # Heterogeneous tree (mixed children)
-        mixed: Tree[DefaultContent, TreeNode, DefaultResult] = Tree(
-            content=DefaultContent(name="Root")
-        )
+            # Homogeneous tree (all children same type)
+            tree: Tree[PlanContent, PlanNode, PlanResult] = Tree(
+                content=PlanContent(objective="Main Plan")
+            )
+
+            # Heterogeneous tree (mixed children)
+            mixed: Tree[DefaultContent, TreeNode, DefaultResult] = Tree(
+                content=DefaultContent(name="Root")
+            )
     """
 
-    children: List[ChildT] = Field(default_factory=list)
+    children: list[ChildT] = Field(default_factory=list)
 
     # Private counter for auto-indexing
     _child_counter: int = PrivateAttr(default=0)
@@ -98,14 +97,12 @@ class Tree(TreeNode[ContentT, ResultT], Generic[ContentT, ChildT, ResultT]):
     @overload
     def add_child(self, child: ChildT) -> ChildT:
         """Add a single child."""
-        ...
 
     @overload
-    def add_child(self, *children: ChildT) -> List[ChildT]:
+    def add_child(self, *children: ChildT) -> list[ChildT]:
         """Add multiple children."""
-        ...
 
-    def add_child(self, *children: ChildT) -> Union[ChildT, List[ChildT]]:
+    def add_child(self, *children: ChildT) -> ChildT | list[ChildT]:
         """Add one or more children with auto-indexing."""
         if len(children) == 1:
             child = children[0]
@@ -166,7 +163,7 @@ class Tree(TreeNode[ContentT, ResultT], Generic[ContentT, ChildT, ResultT]):
 
         return max_child_height + 1
 
-    def find_by_path(self, *indices: int) -> Optional[ChildT]:
+    def find_by_path(self, *indices: int) -> ChildT | None:
         """Find a descendant by path indices."""
         if not indices:
             return self

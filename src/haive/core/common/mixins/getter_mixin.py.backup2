@@ -5,33 +5,33 @@ capabilities to collection classes. It enables attribute-based lookups,
 type filtering, predicate-based searches, and more.
 
 Usage:
-    .. code-block:: python
+    ```python
+    from typing import List
+    from haive.core.common.mixins import GetterMixin
 
-        from typing import List
-        from haive.core.common.mixins import GetterMixin
+    class UserCollection(GetterMixin[User]):
+        def __init__(self, users: List[User]):
+            self._users = users
 
-        class UserCollection(GetterMixin[User]):
-            def __init__(self, users: List[User]):
-                self._users = users
+        def _get_items(self) -> List[User]:
+            return self._users
 
-            def _get_items(self) -> List[User]:
-                return self._users
+    # Create collection
+    users = UserCollection([
+        User(id="1", name="Alice", role="admin"),
+        User(id="2", name="Bob", role="user"),
+        User(id="3", name="Charlie", role="user")
+    ])
 
-        # Create collection
-        users = UserCollection([
-            User(id="1", name="Alice", role="admin"),
-            User(id="2", name="Bob", role="user"),
-            User(id="3", name="Charlie", role="user")
-        ])
+    # Find all users with role="user"
+    user_role_users = users.get_all_by_attr("role", "user")
 
-        # Find all users with role="user"
-        user_role_users = users.get_all_by_attr("role", "user")
+    # Find first admin
+    admin = users.get_by_attr("role", "admin")
 
-        # Find first admin
-        admin = users.get_by_attr("role", "admin")
-
-        # Get all usernames
-        names = users.field_values("name")
+    # Get all usernames
+    names = users.field_values("name")
+    ```
 """
 
 from collections.abc import Callable
@@ -122,10 +122,10 @@ class GetterMixin(Generic[T]):
             List of matching items (empty list if none found).
 
         Example:
-            .. code-block:: python
-
-                # Find all admin users with status='active'
-                active_admins = collection.filter(role="admin", status="active")
+            ```python
+            # Find all admin users with status='active'
+            active_admins = collection.filter(role="admin", status="active")
+            ```
         """
         results = []
         for item in self._get_items():
@@ -151,10 +151,10 @@ class GetterMixin(Generic[T]):
             First matching item or None if none found.
 
         Example:
-            .. code-block:: python
-
-                # Find first user with name longer than 10 characters
-                user = users.find(lambda u: len(u.name) > 10)
+            ```python
+            # Find first user with name longer than 10 characters
+            user = users.find(lambda u: len(u.name) > 10)
+            ```
         """
         for item in self._get_items():
             if predicate(item):
@@ -174,14 +174,14 @@ class GetterMixin(Generic[T]):
             List of matching items (empty list if none found).
 
         Example:
-            .. code-block:: python
-
-                # Find all premium users with subscription expiring in 7 days
-                from datetime import datetime, timedelta
-                next_week = datetime.now() + timedelta(days=7)
-                expiring = users.find_all(
-                    lambda u: u.is_premium and u.expires_at.date() == next_week.date()
-                )
+            ```python
+            # Find all premium users with subscription expiring in 7 days
+            from datetime import datetime, timedelta
+            next_week = datetime.now() + timedelta(days=7)
+            expiring = users.find_all(
+                lambda u: u.is_premium and u.expires_at.date() == next_week.date()
+            )
+            ```
         """
         return [item for item in self._get_items() if predicate(item)]
 
@@ -197,10 +197,10 @@ class GetterMixin(Generic[T]):
             List of matching items (empty list if none found).
 
         Example:
-            .. code-block:: python
-
-                # Get all TextMessage instances
-                text_messages = messages.get_by_type(TextMessage)
+            ```python
+            # Get all TextMessage instances
+            text_messages = messages.get_by_type(TextMessage)
+            ```
         """
         return [item for item in self._get_items() if isinstance(item, type_cls)]
 
@@ -217,10 +217,10 @@ class GetterMixin(Generic[T]):
             List of field values (None for items where field doesn't exist).
 
         Example:
-            .. code-block:: python
-
-                # Get all user IDs
-                user_ids = users.field_values("id")
+            ```python
+            # Get all user IDs
+            user_ids = users.field_values("id")
+            ```
         """
         results = []
         for item in self._get_items():
@@ -246,10 +246,10 @@ class GetterMixin(Generic[T]):
             First matching item or None if none found.
 
         Example:
-            .. code-block:: python
-
-                # Find first active admin user
-                admin = users.first(role="admin", status="active")
+            ```python
+            # Find first active admin user
+            admin = users.first(role="admin", status="active")
+            ```
         """
         results = self.filter(**kwargs)
         return results[0] if results else None

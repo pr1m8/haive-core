@@ -1,5 +1,6 @@
 """PromptTemplateMixin: Advanced prompt template integration for engine classes.
 
+from typing import Any
 This module provides the PromptTemplateMixin class, which adds sophisticated
 prompt template management capabilities to any engine class. The mixin enables
 automatic input schema derivation, prompt template validation, and seamless
@@ -19,7 +20,6 @@ Key Features:
 
 Architecture:
     The mixin uses method override patterns to integrate with engine classes:
-
     - Overrides derive_input_schema() to incorporate prompt template variables
     - Provides field validators for prompt template preprocessing
     - Offers helper methods for prompt formatting and variable management
@@ -33,33 +33,33 @@ Integration Patterns:
 Example:
     Basic integration with an engine class:
 
-    .. code-block:: python
+    ```python
+    from haive.core.common.mixins.prompt_template_mixin import PromptTemplateMixin
+    from haive.core.engine.base import InvokableEngine
 
-        from haive.core.common.mixins.prompt_template_mixin import PromptTemplateMixin
-        from haive.core.engine.base import InvokableEngine
+    class MyEngine(PromptTemplateMixin, InvokableEngine):
+        prompt_template: Optional[BasePromptTemplate] = None
 
-        class MyEngine(PromptTemplateMixin, InvokableEngine):
-            prompt_template: Optional[BasePromptTemplate] = None
+        # The mixin automatically enhances input schema derivation
+        pass
 
-            # The mixin automatically enhances input schema derivation
-            pass
-
-        # Usage
-        engine = MyEngine(prompt_template=my_template)
-        schema = engine.derive_input_schema()  # Includes prompt variables
+    # Usage
+    engine = MyEngine(prompt_template=my_template)
+    schema = engine.derive_input_schema()  # Includes prompt variables
+    ```
 
     Advanced usage with schema composition:
 
-    .. code-block:: python
+    ```python
+    # Engine with existing input schema
+    class AdvancedEngine(PromptTemplateMixin, InvokableEngine):
+        def get_base_input_schema(self):
+            return MyExistingSchema
 
-        # Engine with existing input schema
-        class AdvancedEngine(PromptTemplateMixin, InvokableEngine):
-            def get_base_input_schema(self):
-                return MyExistingSchema
-
-        # The mixin will compose prompt variables with existing schema
-        engine = AdvancedEngine(prompt_template=chat_template)
-        combined_schema = engine.derive_input_schema()
+    # The mixin will compose prompt variables with existing schema
+    engine = AdvancedEngine(prompt_template=chat_template)
+    combined_schema = engine.derive_input_schema()
+    ```
 
 Classes:
     PromptTemplateMixin: Main mixin class for prompt template integration
@@ -130,21 +130,21 @@ class PromptTemplateMixin:
     Examples:
         Basic usage:
 
-        .. code-block:: python
+        ```python
+        class MyEngine(PromptTemplateMixin, InvokableEngine):
+            prompt_template: Optional[BasePromptTemplate] = None
 
-            class MyEngine(PromptTemplateMixin, InvokableEngine):
-                prompt_template: Optional[BasePromptTemplate] = None
-
-            engine = MyEngine(prompt_template=template)
-            schema = engine.derive_input_schema()  # Enhanced with prompt fields
+        engine = MyEngine(prompt_template=template)
+        schema = engine.derive_input_schema()  # Enhanced with prompt fields
+        ```
 
         With existing schema:
 
-        .. code-block:: python
-
-            class ComplexEngine(PromptTemplateMixin, SomeOtherMixin, InvokableEngine):
-                # Existing schema logic preserved and enhanced
-                pass
+        ```python
+        class ComplexEngine(PromptTemplateMixin, SomeOtherMixin, InvokableEngine):
+            # Existing schema logic preserved and enhanced
+            pass
+        ```
 
     Integration Notes:
         - Safe to use with multiple inheritance
@@ -185,21 +185,19 @@ class PromptTemplateMixin:
 
         Examples:
             With prompt template only:
-
-            .. code-block:: python
-
-                # Engine with prompt template
-                engine.prompt_template = PromptTemplate.from_template("Hello {name}")
-                schema = engine.derive_input_schema()
-                # schema includes 'name' field
+            ```python
+            # Engine with prompt template
+            engine.prompt_template = PromptTemplate.from_template("Hello {name}")
+            schema = engine.derive_input_schema()
+            # schema includes 'name' field
+            ```
 
             With existing schema + prompt template:
-
-            .. code-block:: python
-
-                # Engine with both existing schema and prompt template
-                # Result combines both sets of fields intelligently
-                combined_schema = engine.derive_input_schema()
+            ```python
+            # Engine with both existing schema and prompt template
+            # Result combines both sets of fields intelligently
+            combined_schema = engine.derive_input_schema()
+            ```
 
         Note:
             - Respects _use_prompt_for_input_schema configuration flag
@@ -275,13 +273,11 @@ class PromptTemplateMixin:
             - Returns None if no prompt template is configured
 
         Examples:
-            .. code-block:: python
-
-                # Get the prompt engine (creates if first time)
-                engine = self.get_prompt_engine()
-                if engine:
-                    schema = engine.derive_input_schema()
-                    result = engine.invoke(input_data)
+    ... # Get the prompt engine (creates if first time)
+    ... engine = self.get_prompt_engine()
+    ... if engine:
+    ... schema = engine.derive_input_schema()
+    ... result = engine.invoke(input_data)
         """
         if not self.prompt_template:
             return None

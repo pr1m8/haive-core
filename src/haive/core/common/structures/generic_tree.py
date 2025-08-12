@@ -7,7 +7,7 @@ full type safety through generics.
 
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Generic, List, Optional, TypeVar, Union
+from typing import Any, Generic, TypeVar, Union
 
 from pydantic import BaseModel, Field, PrivateAttr, computed_field
 
@@ -35,7 +35,7 @@ class TreeNode(BaseModel, Generic[ContentType, ResultType], ABC):
 
     # User-visible fields
     content: ContentType = Field(..., description="The node's content/objective")
-    result: Optional[ResultType] = Field(None, description="The execution result")
+    result: ResultType | None = Field(None, description="The execution result")
     status: NodeStatus = Field(NodeStatus.PENDING, description="Current node status")
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
@@ -43,14 +43,13 @@ class TreeNode(BaseModel, Generic[ContentType, ResultType], ABC):
 
     # Private auto-indexing fields
     _index: int = PrivateAttr(default=0)
-    _parent_index: Optional[int] = PrivateAttr(default=None)
+    _parent_index: int | None = PrivateAttr(default=None)
     _depth: int = PrivateAttr(default=0)
-    _path: List[int] = PrivateAttr(default_factory=list)
+    _path: list[int] = PrivateAttr(default_factory=list)
 
     @abstractmethod
     def is_leaf(self) -> bool:
         """Whether this is a leaf node."""
-        pass
 
     def set_result(
         self, result: ResultType, status: NodeStatus = NodeStatus.COMPLETED
@@ -81,7 +80,7 @@ class Leaf(TreeNode[ContentType, ResultType]):
 class Branch(TreeNode[ContentType, ResultType], Generic[ContentType, ResultType]):
     """Branch node - contains content and children."""
 
-    children: List[
+    children: list[
         Union[Leaf[ContentType, ResultType], "Branch[ContentType, ResultType]"]
     ] = Field(default_factory=list, description="Child nodes (leaves or branches)")
 
@@ -119,10 +118,10 @@ class Branch(TreeNode[ContentType, ResultType], Generic[ContentType, ResultType]
 
     def add_parallel_children(
         self,
-        children: List[
+        children: list[
             Union[Leaf[ContentType, ResultType], "Branch[ContentType, ResultType]"]
         ],
-    ) -> List[Union[Leaf[ContentType, ResultType], "Branch[ContentType, ResultType]"]]:
+    ) -> list[Union[Leaf[ContentType, ResultType], "Branch[ContentType, ResultType]"]]:
         """Add multiple children that represent parallel execution."""
         base_index = self._next_child_index
 
@@ -207,7 +206,7 @@ class Branch(TreeNode[ContentType, ResultType], Generic[ContentType, ResultType]
     @property
     def current_active_nodes(
         self,
-    ) -> List[Union[Leaf[ContentType, ResultType], "Branch[ContentType, ResultType]"]]:
+    ) -> list[Union[Leaf[ContentType, ResultType], "Branch[ContentType, ResultType]"]]:
         """Get all nodes currently in progress."""
         active = []
 
@@ -224,7 +223,7 @@ class Branch(TreeNode[ContentType, ResultType], Generic[ContentType, ResultType]
 
     @computed_field
     @property
-    def next_pending_leaf(self) -> Optional[Leaf[ContentType, ResultType]]:
+    def next_pending_leaf(self) -> Leaf[ContentType, ResultType] | None:
         """Get the next pending leaf node (depth-first)."""
         for child in self.children:
             if isinstance(child, Leaf) and child.status == NodeStatus.PENDING:
@@ -254,7 +253,7 @@ class Branch(TreeNode[ContentType, ResultType], Generic[ContentType, ResultType]
         """Whether any node in this subtree has failed."""
         return self.failed_count > 0
 
-    def get_all_leaves(self) -> List[Leaf[ContentType, ResultType]]:
+    def get_all_leaves(self) -> list[Leaf[ContentType, ResultType]]:
         """Get all leaf nodes in this subtree."""
         leaves = []
         for child in self.children:
@@ -265,10 +264,8 @@ class Branch(TreeNode[ContentType, ResultType], Generic[ContentType, ResultType]
         return leaves
 
     def find_node_by_path(
-        self, path: List[int]
-    ) -> Optional[
-        Union[Leaf[ContentType, ResultType], "Branch[ContentType, ResultType]"]
-    ]:
+        self, path: list[int]
+    ) -> Union[Leaf[ContentType, ResultType], "Branch[ContentType, ResultType]"] | None:
         """Find a node by its path indices."""
         if not path:
             return self

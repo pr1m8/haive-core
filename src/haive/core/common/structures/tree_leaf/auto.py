@@ -4,11 +4,12 @@ This module provides the AutoTree class that automatically generates tree
 structures from Pydantic BaseModels, handling nested structures and Union types.
 """
 
-from typing import Callable, Optional, TypeVar
+from collections.abc import Callable
+from typing import TypeVar
 
 from pydantic import BaseModel
 
-from .base import Leaf, Tree, TreeNode
+from .base import Leaf, TreeNode
 from .generics import DefaultContent, DefaultResult
 
 T = TypeVar("T", bound=BaseModel)
@@ -20,11 +21,9 @@ class AutoTree:
     TODO: Implement auto-tree generation from BaseModel inspection.
     """
 
-    pass
-
 
 def auto_tree(
-    model: T, content_extractor: Optional[Callable[[BaseModel], BaseModel]] = None
+    model: T, content_extractor: Callable[[BaseModel], BaseModel] | None = None
 ) -> TreeNode[DefaultContent, DefaultResult]:
     """Create a tree structure automatically from a BaseModel instance.
 
