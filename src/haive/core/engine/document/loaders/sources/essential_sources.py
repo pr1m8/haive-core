@@ -358,7 +358,6 @@ class WebPageSource(RemoteSource):
     },
     default_loader="file",
     description="GitHub repository and file loader",
-    credential_type=CredentialType.API_KEY,
     priority=7,
 )
 class GitHubSource(RemoteSource):
