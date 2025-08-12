@@ -6,7 +6,6 @@ import logging
 import re
 import sys
 from pathlib import Path
-from typing import Tuple
 
 # Set up logging
 logging.basicConfig(
@@ -75,7 +74,7 @@ class DocstringFixer(ast.NodeTransformer):
                 }
             )
 
-    def fix_docstring_issues(self, docstring: str) -> Tuple[str, bool]:
+    def fix_docstring_issues(self, docstring: str) -> tuple[str, bool]:
         """Convert markdown code blocks to doctest format."""
         original = docstring
         fixed = docstring
@@ -224,7 +223,7 @@ def main():
 
     print(f"Testing docstring fixes on {file_path}")
 
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, encoding="utf-8") as f:
         original_content = f.read()
 
     try:

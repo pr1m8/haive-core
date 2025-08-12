@@ -13,7 +13,6 @@ import subprocess
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 # Set up logging
 logging.basicConfig(
@@ -35,7 +34,7 @@ class DocstringValidator:
             if temp_dir.exists():
                 shutil.rmtree(temp_dir)
 
-    def count_sphinx_errors(self, file_path: Path) -> Tuple[int, List[str]]:
+    def count_sphinx_errors(self, file_path: Path) -> tuple[int, list[str]]:
         """Count Sphinx errors for a specific file by building docs.
 
         Returns:
@@ -83,6 +82,7 @@ Test Documentation
                     str(temp_dir),
                     str(temp_dir / "_build"),
                 ],
+                check=False,
                 capture_output=True,
                 text=True,
                 cwd=temp_dir,
@@ -102,7 +102,7 @@ Test Documentation
             logger.error(f"Error running Sphinx test: {e}")
             return -1, [str(e)]
 
-    def apply_docstring_fixes(self, content: str) -> Tuple[str, List[str]]:
+    def apply_docstring_fixes(self, content: str) -> tuple[str, list[str]]:
         """Apply docstring fixes to content.
 
         Returns:
@@ -200,7 +200,7 @@ Test Documentation
 
         return fixed_content, changes
 
-    def validate_file(self, file_path: Path, show_diff: bool = True) -> Dict:
+    def validate_file(self, file_path: Path, show_diff: bool = True) -> dict:
         """Validate docstring fixes for a single file.
 
         Returns:
@@ -210,7 +210,7 @@ Test Documentation
 
         try:
             # Read original content
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 original_content = f.read()
 
             # Check if file has docstring issues
@@ -239,7 +239,9 @@ Test Documentation
                 fixed_lines = fixed_content.split("\n")
 
                 # Show first few changes
-                for i, (orig, fixed) in enumerate(zip(orig_lines, fixed_lines)):
+                for i, (orig, fixed) in enumerate(
+                    zip(orig_lines, fixed_lines, strict=False)
+                ):
                     if orig != fixed:
                         print(f"Line {i+1}:")
                         print(f"- {orig}")
@@ -279,7 +281,7 @@ Test Documentation
                 "changes": [],
             }
 
-    def run_test_suite(self, test_files: List[Path]) -> Dict:
+    def run_test_suite(self, test_files: list[Path]) -> dict:
         """Run validation on a suite of test files."""
         results = {
             "files_tested": len(test_files),

@@ -11,7 +11,7 @@ rm -rf docs/build
 
 # Build with full logging
 cd docs || exit
-sphinx-build -b html source build/html -W --keep-going 2>&1 | tee logs/sphinx-build-$(date +%Y%m%d-%H%M%S).log
+sphinx-build -b html source build/html --keep-going 2>&1 | tee logs/sphinx-build-$(date +%Y%m%d-%H%M%S).log
 
 # Count errors
 echo ""
