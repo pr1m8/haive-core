@@ -39,6 +39,7 @@ pytest-html = "^4.1.1"
 #haive-dev = {path = "../../tools/haive-dev", develop = true}
 #haive-testing = {path = "../../tools/haive-testing", develop = true}
 #pydevelop-docs = {path = "../../tools/pydevelop-docs", develop = true}
+pyment = "^0.3.3"
 
 
 [tool.poetry.extras]
