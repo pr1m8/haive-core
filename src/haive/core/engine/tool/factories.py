@@ -4,7 +4,8 @@ This module provides factory functions for creating different types of tools
 including retriever tools, structured output tools, and validation tools.
 """
 
-from typing import Any, Callable, Literal
+from collections.abc import Callable
+from typing import Any, Literal
 
 from langchain_core.prompts import BasePromptTemplate
 from langchain_core.retrievers import BaseRetriever
@@ -197,7 +198,7 @@ def create_validation_tool(
             if error_on_invalid:
                 raise
             return ValidationResult(
-                is_valid=False, message=f"Validation error: {str(e)}", input_data=data
+                is_valid=False, message=f"Validation error: {e!s}", input_data=data
             )
 
     # Create the tool

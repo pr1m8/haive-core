@@ -6,23 +6,24 @@ that all components in Haive should use.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from enum import Enum
-from typing import Any, Callable, Protocol, TypeAlias, Union, runtime_checkable
+from typing import Any, Protocol, TypeAlias, runtime_checkable
 
 from langchain_core.tools import BaseTool, StructuredTool
 from langchain_core.tools.base import BaseToolkit
 from pydantic import BaseModel, ConfigDict, Field
 
 # Universal tool type - single source of truth for all components
-ToolLike: TypeAlias = Union[
-    BaseTool,  # LangChain tool instances
-    StructuredTool,  # Structured tool instances
-    type[BaseTool],  # Tool classes
-    BaseModel,  # Pydantic model instances (callable)
-    type[BaseModel],  # Pydantic model classes
-    Callable[..., Any],  # Raw functions
-    BaseToolkit,  # Tool collections
-]
+ToolLike: TypeAlias = (
+    BaseTool
+    | StructuredTool
+    | type[BaseTool]
+    | BaseModel
+    | type[BaseModel]
+    | Callable[..., Any]
+    | BaseToolkit
+)
 
 
 class ToolType(str, Enum):
@@ -205,11 +206,11 @@ class ToolProperties(BaseModel):
 
 # Type exports for other components to use
 __all__ = [
-    "ToolLike",
-    "ToolType",
-    "ToolCategory",
-    "ToolCapability",
-    "ToolProperties",
     "InterruptibleTool",
     "StateAwareTool",
+    "ToolCapability",
+    "ToolCategory",
+    "ToolLike",
+    "ToolProperties",
+    "ToolType",
 ]

@@ -195,8 +195,6 @@ class RTFSource(LocalFileSource):
 class ODTSource(OpenDocumentTextSource):
     """Alias for OpenDocument Text source for compatibility."""
 
-    pass
-
 
 class ODSSource(LocalFileSource):
     """OpenDocument Spreadsheet (ODS) file source."""

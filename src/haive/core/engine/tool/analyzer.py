@@ -6,7 +6,8 @@ using the existing utilities in haive.core.common.
 
 import asyncio
 import inspect
-from typing import Any, Callable, get_args, get_origin, get_type_hints
+from collections.abc import Callable
+from typing import get_args, get_origin, get_type_hints
 
 from pydantic import BaseModel
 
@@ -131,7 +132,7 @@ class ToolAnalyzer:
 
         # Check for Pydantic model with __call__
         if isinstance(tool, BaseModel):
-            if hasattr(tool, "__call__") and callable(tool.__call__):
+            if callable(tool) and callable(tool.__call__):
                 return ToolType.PYDANTIC_MODEL
             # Could still be a validation tool
             if "validat" in tool.__class__.__name__.lower():
@@ -428,7 +429,7 @@ class ToolAnalyzer:
             return True
 
         # Check if __call__ method is async
-        if hasattr(tool, "__call__"):
+        if callable(tool):
             return asyncio.iscoroutinefunction(tool.__call__)
 
         # Check for async methods

@@ -56,7 +56,6 @@ from haive.core.engine.document.loaders.specific.files_office import (
     ODPSource,
     ODSSource,
     ODTSource,
-    OpenDocumentTextSource,
     PowerPointSource,
     RTFSource,
     WordDocumentSource,

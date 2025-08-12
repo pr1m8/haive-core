@@ -286,11 +286,11 @@ class DocumentOutput(BaseModel):
         self.failed_documents = self.total_documents - self.successful_documents
         if self.documents:
             self.average_processing_time = sum(
-                (d.processing_time for d in self.documents)
+                d.processing_time for d in self.documents
             ) / len(self.documents)
-            self.total_chunks = sum((d.chunk_count for d in self.documents))
-            self.total_characters = sum((d.character_count for d in self.documents))
-            self.total_words = sum((d.word_count for d in self.documents))
+            self.total_chunks = sum(d.chunk_count for d in self.documents)
+            self.total_characters = sum(d.character_count for d in self.documents)
+            self.total_words = sum(d.word_count for d in self.documents)
         self.has_errors = len(self.errors) > 0
         self.has_warnings = len(self.warnings) > 0
         return self

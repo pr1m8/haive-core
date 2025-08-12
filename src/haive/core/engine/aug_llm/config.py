@@ -92,7 +92,7 @@ def debug_print(*args, **kwargs) -> None:
         except ImportError:
             pass
     elif args:
-        logger.debug(" ".join((str(arg) for arg in args)))
+        logger.debug(" ".join(str(arg) for arg in args))
 
 
 ParserType = Literal["pydantic", "pydantic_tools", "str", "json", "custom"]
@@ -351,7 +351,7 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         self.sync_tool_routes_from_tools(self.tools)
         if self.structured_output_model:
             for tool_name, route in self.tool_routes.items():
-                if route == "pydantic_model":
+                if route == "parse_output":
                     metadata = self.get_tool_metadata(tool_name) or {}
                     metadata["is_structured_output"] = (
                         tool_name == self.structured_output_model.__name__
@@ -515,6 +515,12 @@ class AugLLMConfig(*_get_augllm_base_classes()):
             if structured_output_model not in tools:
                 tools.append(structured_output_model)
                 data["tools"] = tools
+
+                # Set the correct route for structured output model
+                tool_routes = data.get("tool_routes", {})
+                if hasattr(structured_output_model, "__name__"):
+                    tool_routes[structured_output_model.__name__] = "parse_output"
+                    data["tool_routes"] = tool_routes
             if structured_output_version == "v2":
                 data["force_tool_use"] = True
                 data["tool_choice_mode"] = "required"
@@ -1381,12 +1387,9 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         if isinstance(self.prompt_template, ChatPromptTemplate):
             msg_count = len(self.prompt_template.messages)
             has_placeholder = any(
-                (
-                    isinstance(msg, MessagesPlaceholder)
-                    and getattr(msg, "variable_name", "")
-                    == self.messages_placeholder_name
-                    for msg in self.prompt_template.messages
-                )
+                isinstance(msg, MessagesPlaceholder)
+                and getattr(msg, "variable_name", "") == self.messages_placeholder_name
+                for msg in self.prompt_template.messages
             )
             info += f" ({msg_count} messages, placeholder={has_placeholder})"
         elif isinstance(self.prompt_template, FewShotChatMessagePromptTemplate):
@@ -1471,7 +1474,7 @@ class AugLLMConfig(*_get_augllm_base_classes()):
                     debug_print(f"[cyan]Added string to field: {var}[/cyan]")
             return result
         if isinstance(input_data, list) and all(
-            (isinstance(item, BaseMessage) for item in input_data)
+            isinstance(item, BaseMessage) for item in input_data
         ):
             result = {self.messages_placeholder_name: input_data}
             debug_print("[green]Added message list to messages field[/green]")
@@ -1797,7 +1800,7 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         route = self.get_tool_route(name)
         if route == "retriever" and hasattr(self, "instantiate"):
             return self._create_retriever_tool(name, description, **kwargs)
-        if self.structured_output_model and route == "pydantic_model":
+        if self.structured_output_model and route == "parse_output":
             return self._create_structured_output_tool(name, description, **kwargs)
         return self._create_llm_function_tool(name, description, **kwargs)
 
@@ -1934,9 +1937,9 @@ class AugLLMConfig(*_get_augllm_base_classes()):
                         isinstance(msg, MessagesPlaceholder)
                         and getattr(msg, "variable_name", "")
                         == messages_placeholder_name
-                        or (hasattr(msg, "role") and msg.role == "system")
-                        for msg in prompt.messages
                     )
+                    or (hasattr(msg, "role") and msg.role == "system")
+                    for msg in prompt.messages
                 )
             elif isinstance(prompt, FewShotChatMessagePromptTemplate):
                 uses_messages = True

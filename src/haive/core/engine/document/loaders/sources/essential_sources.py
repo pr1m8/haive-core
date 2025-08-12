@@ -14,7 +14,6 @@ from .enhanced_registry import (
     register_web_source,
 )
 from .source_types import (
-    CredentialType,
     DatabaseSource,
     DirectorySource,
     LocalFileSource,

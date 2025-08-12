@@ -415,11 +415,8 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                             components.append(AugLLMConfig())
                         elif component_type == "retriever" and (
                             not any(
-                                (
-                                    getattr(c, "engine_type", None)
-                                    == EngineType.RETRIEVER
-                                    for c in [self.engine, *list(self.engines.values())]
-                                )
+                                getattr(c, "engine_type", None) == EngineType.RETRIEVER
+                                for c in [self.engine, *list(self.engines.values())]
                             )
                         ):
                             try:

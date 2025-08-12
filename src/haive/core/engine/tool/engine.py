@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, Literal, Sequence
+from collections.abc import Callable, Sequence
+from typing import Any, Literal
 
 from langchain_core.messages import BaseMessage
 from langchain_core.prompts import BasePromptTemplate
@@ -638,7 +639,6 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
         Returns:
             A StructuredTool that triggers human interrupts
         """
-        from typing import Optional
 
         class HumanInterruptInput(BaseModel):
             """Input schema for human interrupt requests."""
@@ -647,14 +647,14 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
             context: dict[str, Any] = Field(
                 default_factory=dict, description="Context for the request"
             )
-            description: Optional[str] = Field(
+            description: str | None = Field(
                 default=None, description="Detailed description of what's needed"
             )
 
         def request_human_input(
             action: str,
             context: dict[str, Any] = None,
-            description: Optional[str] = None,
+            description: str | None = None,
         ) -> dict[str, Any]:
             """Request human intervention.
 
@@ -868,12 +868,12 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
     @classmethod
     def from_aug_llm_config(
         cls,
-        config: "AugLLMConfig",
+        config: AugLLMConfig,
         *,
         extract_tools: bool = True,
         include_structured_output: bool = True,
         name: str | None = None,
-    ) -> "ToolEngine":
+    ) -> ToolEngine:
         """Create ToolEngine from AugLLMConfig.
 
         Args:
@@ -908,12 +908,12 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
     @classmethod
     def from_retriever_config(
         cls,
-        config: "BaseRetrieverConfig",
+        config: BaseRetrieverConfig,
         *,
         tool_name: str | None = None,
         tool_description: str | None = None,
         name: str | None = None,
-    ) -> "ToolEngine":
+    ) -> ToolEngine:
         """Create ToolEngine from BaseRetrieverConfig.
 
         Args:
@@ -941,13 +941,13 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
     @classmethod
     def from_vectorstore_config(
         cls,
-        config: "VectorStoreConfig",
+        config: VectorStoreConfig,
         *,
         search_tool_name: str | None = None,
         similarity_search_tool: bool = True,
         max_marginal_relevance_tool: bool = False,
         name: str | None = None,
-    ) -> "ToolEngine":
+    ) -> ToolEngine:
         """Create ToolEngine from VectorStoreConfig.
 
         Args:
@@ -995,13 +995,13 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
     @classmethod
     def from_document_engine(
         cls,
-        engine: "DocumentEngine",
+        engine: DocumentEngine,
         *,
         create_loader_tools: bool = True,
         create_splitter_tools: bool = True,
         create_processor_tools: bool = False,
         name: str | None = None,
-    ) -> "ToolEngine":
+    ) -> ToolEngine:
         """Create ToolEngine from DocumentEngine.
 
         Args:
@@ -1058,7 +1058,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
         *,
         engine_conversion_config: dict[str, dict] | None = None,
         name: str | None = None,
-    ) -> "ToolEngine":
+    ) -> ToolEngine:
         """Create ToolEngine from multiple engines.
 
         Args:
