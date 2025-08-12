@@ -358,17 +358,43 @@ class ToolRouteMixin(BaseModel):
                 "module": getattr(tool, "__module__", "unknown"),
                 "tool_type": "pydantic_model",
             }
-            # Check if it has explicitly defined __call__ method (executable tool)
-            # Only consider it executable if __call__ is defined in the class
-            # itself
-            has_explicit_call = (
-                "__call__" in tool.__dict__ if hasattr(tool, "__dict__") else False
-            )
-            if has_explicit_call and callable(tool.__call__):
-                metadata["is_executable"] = True
-                route = "pydantic_tool"
+
+            # Check if this is a structured output model
+            is_structured_output = False
+
+            # Check if it's on self (for engines)
+            if (
+                hasattr(self, "structured_output_model")
+                and self.structured_output_model is tool
+            ):
+                is_structured_output = True
+
+            # Check all engines on self (for state schemas)
+            if not is_structured_output:
+                for field_name, field_value in self.__dict__.items():
+                    if (
+                        hasattr(field_value, "structured_output_model")
+                        and field_value.structured_output_model is tool
+                    ):
+                        is_structured_output = True
+                        break
+
+            if is_structured_output:
+                route = "parse_output"
+                metadata["tool_type"] = "structured_output"
+                metadata["is_structured_output"] = True
             else:
-                metadata["is_executable"] = False
+                # Check if it has explicitly defined __call__ method (executable tool)
+                # Only consider it executable if __call__ is defined in the class
+                # itself
+                has_explicit_call = (
+                    "__call__" in tool.__dict__ if hasattr(tool, "__dict__") else False
+                )
+                if has_explicit_call and callable(tool.__call__):
+                    metadata["is_executable"] = True
+                    route = "pydantic_tool"
+                else:
+                    metadata["is_executable"] = False
         elif hasattr(tool, "__class__") and "BaseTool" in str(tool.__class__.__mro__):
             route = "langchain_tool"
             metadata = {
@@ -579,12 +605,25 @@ class ToolRouteMixin(BaseModel):
             # Determine route/type and metadata
             metadata = {}
             if isinstance(tool, type) and issubclass(tool, BaseModel):
-                route = "pydantic_model"
-                metadata = {
-                    "class_name": tool.__name__,
-                    "module": getattr(tool, "__module__", "unknown"),
-                    "tool_type": "pydantic_model",
-                }
+                # Check if this is a structured output model first
+                if (
+                    hasattr(self, "structured_output_model")
+                    and self.structured_output_model is tool
+                ):
+                    route = "parse_output"
+                    metadata = {
+                        "class_name": tool.__name__,
+                        "module": getattr(tool, "__module__", "unknown"),
+                        "tool_type": "structured_output",
+                        "is_structured_output": True,
+                    }
+                else:
+                    route = "pydantic_model"
+                    metadata = {
+                        "class_name": tool.__name__,
+                        "module": getattr(tool, "__module__", "unknown"),
+                        "tool_type": "pydantic_model",
+                    }
             elif hasattr(tool, "__class__") and "BaseTool" in str(
                 tool.__class__.__mro__
             ):

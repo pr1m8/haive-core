@@ -131,11 +131,17 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
                 if tool_name not in self.tool_routes:
                     route, metadata = self._analyze_tool(tool)
                     self.tool_routes[tool_name] = route
+                    logger.debug(f"Setting route for {tool_name}: {route}")
                     if metadata:
                         if not hasattr(self, "tool_metadata"):
                             self.tool_metadata = {}
                         self.tool_metadata[tool_name] = metadata
                     logger.debug(f"Added tool '{tool_name}' with route '{route}'")
+                else:
+                    # Preserve existing route (likely from engine sync)
+                    logger.debug(
+                        f"Preserving existing route for {tool_name}: {self.tool_routes[tool_name]}"
+                    )
 
     def _sync_tools_from_instance_engines(self) -> None:
         """Sync tools from instance-level engine fields to state."""
@@ -315,10 +321,8 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
             return super()._get_tool_name(tool, index)
         if hasattr(tool, "name"):
             return tool.name
-        if (
-            isinstance(tool, type)
-            and hasattr(tool, "__name__")
-            or hasattr(tool, "__name__")
+        if (isinstance(tool, type) and hasattr(tool, "__name__")) or hasattr(
+            tool, "__name__"
         ):
             return tool.__name__
         return f"tool_{index}"
