@@ -13,7 +13,7 @@ from langgraph.types import Command, Send
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 # Import our components
-from haive.core.graph.node.registry import register_node
+from haive.core.graph.node import register_node
 from haive.core.graph.ToolManager import tool_manager
 
 # from haive.core.graph.GraphBuilder import NodeType, NodeConfig

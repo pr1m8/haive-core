@@ -192,8 +192,75 @@ class RTFSource(LocalFileSource):
 
 
 # Export office file sources
+class ODTSource(OpenDocumentTextSource):
+    """Alias for OpenDocument Text source for compatibility."""
+
+    pass
+
+
+class ODSSource(LocalFileSource):
+    """OpenDocument Spreadsheet (ODS) file source."""
+
+    def __init__(self, file_path: str, **kwargs):
+        super().__init__(
+            source_path=file_path, file_extensions=[".ods", ".ots"], **kwargs
+        )
+        self.file_path = file_path
+
+    def create_loader(self) -> BaseLoader | None:
+        """Create an ODS loader."""
+        try:
+            from langchain_community.document_loaders import UnstructuredFileLoader
+
+            return UnstructuredFileLoader(
+                file_path=self.file_path,
+                mode="elements",
+            )
+
+        except ImportError:
+            logger.warning(
+                "UnstructuredFileLoader not available. Install with: pip install unstructured"
+            )
+            return None
+        except Exception as e:
+            logger.exception(f"Failed to create ODS loader: {e}")
+            return None
+
+
+class ODPSource(LocalFileSource):
+    """OpenDocument Presentation (ODP) file source."""
+
+    def __init__(self, file_path: str, **kwargs):
+        super().__init__(
+            source_path=file_path, file_extensions=[".odp", ".otp"], **kwargs
+        )
+        self.file_path = file_path
+
+    def create_loader(self) -> BaseLoader | None:
+        """Create an ODP loader."""
+        try:
+            from langchain_community.document_loaders import UnstructuredFileLoader
+
+            return UnstructuredFileLoader(
+                file_path=self.file_path,
+                mode="elements",
+            )
+
+        except ImportError:
+            logger.warning(
+                "UnstructuredFileLoader not available. Install with: pip install unstructured"
+            )
+            return None
+        except Exception as e:
+            logger.exception(f"Failed to create ODP loader: {e}")
+            return None
+
+
 __all__ = [
     "ExcelSource",
+    "ODPSource",
+    "ODSSource",
+    "ODTSource",
     "OpenDocumentTextSource",
     "PowerPointSource",
     "RTFSource",
