@@ -7,7 +7,7 @@ and profiling operations with correlation ID management.
 
 import time
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from haive.core.utils.debugkit.config import config
 
@@ -49,9 +49,7 @@ class DevContext:
                 outer.info("Request processed")
     """
 
-    def __init__(
-        self, name: str, correlation_id: Optional[str] = None, **metadata: Any
-    ):
+    def __init__(self, name: str, correlation_id: str | None = None, **metadata: Any):
         """Initialize development context.
 
         Args:
@@ -62,9 +60,9 @@ class DevContext:
         self.name = name
         self.correlation_id = correlation_id or str(uuid.uuid4())
         self.metadata = metadata
-        self.start_time: Optional[float] = None
-        self.data: Dict[str, Any] = {}
-        self._checkpoints: List[Dict[str, Any]] = []
+        self.start_time: float | None = None
+        self.data: dict[str, Any] = {}
+        self._checkpoints: list[dict[str, Any]] = []
 
     def __enter__(self) -> "DevContext":
         """Enter the context."""

@@ -59,16 +59,8 @@ class GraphModel(SerializableModel, Generic[TNode]):
             len(self.edges)
             + len(self.waiting_edges)
             + sum(
-                (
-                    sum(
-                        (
-                            1
-                            for branch in branch_dict.values()
-                            if branch.ends or branch.then
-                        )
-                    )
-                    for branch_dict in self.branches.values()
-                )
+                sum(1 for branch in branch_dict.values() if branch.ends or branch.then)
+                for branch_dict in self.branches.values()
             )
         )
 
@@ -129,7 +121,7 @@ class GraphModel(SerializableModel, Generic[TNode]):
             if dst != name and name not in srcs:
                 new_waiting_edges.add((srcs, dst))
             elif dst != name:
-                new_srcs = tuple((src for src in srcs if src != name))
+                new_srcs = tuple(src for src in srcs if src != name)
                 if new_srcs:
                     new_waiting_edges.add((new_srcs, dst))
         self.waiting_edges = new_waiting_edges

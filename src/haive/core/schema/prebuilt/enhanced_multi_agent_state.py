@@ -46,7 +46,7 @@ See Also:
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from pydantic import Field
 
@@ -111,12 +111,12 @@ class EnhancedMultiAgentState(MultiAgentState):
         description="Enable performance metrics collection for adaptive routing",
     )
 
-    performance_metrics: Dict[str, Dict[str, Any]] = Field(
+    performance_metrics: dict[str, dict[str, Any]] = Field(
         default_factory=dict,
         description="Performance metrics per agent (execution time, success rate, etc.)",
     )
 
-    execution_metadata: Dict[str, Any] = Field(
+    execution_metadata: dict[str, Any] = Field(
         default_factory=dict,
         description="Additional execution metadata for advanced coordination patterns",
     )
@@ -128,7 +128,7 @@ class EnhancedMultiAgentState(MultiAgentState):
 
     # Enhanced methods for V3/V4 workflows
 
-    def get_performance_metrics(self, agent_name: str) -> Dict[str, Any]:
+    def get_performance_metrics(self, agent_name: str) -> dict[str, Any]:
         """Get performance metrics for a specific agent.
 
         Args:
@@ -148,7 +148,7 @@ class EnhancedMultiAgentState(MultiAgentState):
         agent_name: str,
         execution_time: float,
         success: bool = True,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Record performance metrics for an agent execution.
 
@@ -191,7 +191,7 @@ class EnhancedMultiAgentState(MultiAgentState):
             "metadata": metadata or {},
         }
 
-    def get_best_performing_agent(self, metric: str = "success_rate") -> Optional[str]:
+    def get_best_performing_agent(self, metric: str = "success_rate") -> str | None:
         """Get the name of the best performing agent based on a metric.
 
         Args:
@@ -222,11 +222,10 @@ class EnhancedMultiAgentState(MultiAgentState):
                 if best_value is None or value < best_value:
                     best_value = value
                     best_agent = agent_name
-            else:
-                # For other metrics, higher is better
-                if best_value is None or value > best_value:
-                    best_value = value
-                    best_agent = agent_name
+            # For other metrics, higher is better
+            elif best_value is None or value > best_value:
+                best_value = value
+                best_agent = agent_name
 
         return best_agent
 

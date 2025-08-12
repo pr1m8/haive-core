@@ -218,7 +218,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
             state_update[field] = result
         if "messages" in state_update and self.preserve_messages:
             messages = state_update["messages"]
-            if not all((isinstance(m, BaseMessage) for m in messages)):
+            if not all(isinstance(m, BaseMessage) for m in messages):
                 logger.warning("Some messages are not BaseMessage objects")
         return state_update
 
@@ -361,7 +361,7 @@ class CoordinatorNodeConfig(BaseNodeConfig[TInput, TOutput]):
         """Aggregate results from multiple agents."""
         if not results:
             return None
-        if all((isinstance(r, dict) for r in results.values())):
+        if all(isinstance(r, dict) for r in results.values()):
             aggregated = {}
             for agent_name, result in results.items():
                 if self.preserve_individual:
@@ -369,7 +369,7 @@ class CoordinatorNodeConfig(BaseNodeConfig[TInput, TOutput]):
                 else:
                     aggregated.update(result)
             return aggregated
-        if all((isinstance(r, list) for r in results.values())):
+        if all(isinstance(r, list) for r in results.values()):
             aggregated = []
             for result in results.values():
                 aggregated.extend(result)

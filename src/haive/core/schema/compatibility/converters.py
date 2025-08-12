@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from haive.core.schema.compatibility.types import ConversionContext, ConversionQuality
 
@@ -15,7 +15,6 @@ class TypeConverter(ABC):
     @abstractmethod
     def name(self) -> str:
         """Unique name for this converter."""
-        pass
 
     @property
     def priority(self) -> int:
@@ -23,17 +22,15 @@ class TypeConverter(ABC):
         return 0
 
     @abstractmethod
-    def can_convert(self, source_type: Type[Any], target_type: Type[Any]) -> bool:
+    def can_convert(self, source_type: type[Any], target_type: type[Any]) -> bool:
         """Check if this converter can handle the conversion."""
-        pass
 
     @abstractmethod
     def convert(self, value: Any, context: ConversionContext) -> Any:
         """Convert a value from source to target type."""
-        pass
 
     def estimate_quality(
-        self, source_type: Type[Any], target_type: Type[Any]
+        self, source_type: type[Any], target_type: type[Any]
     ) -> ConversionQuality:
         """Estimate the quality of conversion."""
         return ConversionQuality.SAFE
@@ -43,10 +40,8 @@ class ConverterRegistry:
     """Registry for type converters."""
 
     def __init__(self):
-        self._converters: Dict[str, TypeConverter] = {}
-        self._type_cache: Dict[Tuple[Type[Any], Type[Any]], Optional[TypeConverter]] = (
-            {}
-        )
+        self._converters: dict[str, TypeConverter] = {}
+        self._type_cache: dict[tuple[type[Any], type[Any]], TypeConverter | None] = {}
 
     def register(self, converter: TypeConverter) -> None:
         """Register a type converter."""
@@ -61,8 +56,8 @@ class ConverterRegistry:
             self._type_cache.clear()
 
     def get_converter(
-        self, source_type: Type[Any], target_type: Type[Any]
-    ) -> Optional[TypeConverter]:
+        self, source_type: type[Any], target_type: type[Any]
+    ) -> TypeConverter | None:
         """Get the best converter for a type pair."""
         # Check cache first
         cache_key = (source_type, target_type)
@@ -70,7 +65,7 @@ class ConverterRegistry:
             return self._type_cache[cache_key]
 
         # Find compatible converters
-        compatible_converters: List[TypeConverter] = []
+        compatible_converters: list[TypeConverter] = []
         for converter in self._converters.values():
             if converter.can_convert(source_type, target_type):
                 compatible_converters.append(converter)
@@ -84,12 +79,12 @@ class ConverterRegistry:
         self._type_cache[cache_key] = None
         return None
 
-    def can_convert(self, source_type: Type[Any], target_type: Type[Any]) -> bool:
+    def can_convert(self, source_type: type[Any], target_type: type[Any]) -> bool:
         """Check if conversion is possible."""
         return self.get_converter(source_type, target_type) is not None
 
     def convert(
-        self, value: Any, source_type: Type[Any], target_type: Type[Any]
+        self, value: Any, source_type: type[Any], target_type: type[Any]
     ) -> Any:
         """Convert a value using the best available converter."""
         converter = self.get_converter(source_type, target_type)
@@ -103,7 +98,7 @@ class ConverterRegistry:
 
         return converter.convert(value, context)
 
-    def list_converters(self) -> List[str]:
+    def list_converters(self) -> list[str]:
         """List all registered converter names."""
         return list(self._converters.keys())
 

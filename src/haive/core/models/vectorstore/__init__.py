@@ -32,8 +32,8 @@ Key Components:
     - Security: Secure handling of connection strings and API keys
     - Performance: Connection pooling and caching optimizations
 
-Typical usage example:
-    ```python
+Typical usage example::
+
     from haive.core.models.vectorstore import VectorStoreConfig, VectorStoreProvider
 
     # Configure a vector store
@@ -52,7 +52,6 @@ Typical usage example:
 
     # Search for similar documents
     results = vectorstore.similarity_search("query text", k=5)
-    ```
 
 Architecture:
     Vector stores in Haive follow a consistent configuration pattern:
@@ -135,32 +134,26 @@ except ImportError:
     # Factory functions not available
     def add_document(*args, **kwargs):
         """Placeholder function."""
-        pass
 
     def create_retriever(*args, **kwargs):
         """Placeholder function."""
-        pass
 
     def create_retriever_from_documents(*args, **kwargs):
         """Placeholder function."""
-        pass
 
     def create_vectorstore(*args, **kwargs):
         """Placeholder function."""
-        pass
 
     def create_vs_config_from_documents(*args, **kwargs):
         """Placeholder function."""
-        pass
 
     def create_vs_from_documents(*args, **kwargs):
         """Placeholder function."""
-        pass
 
 
 __all__ = [
-    "Chroma",
     "FAISS",
+    "Chroma",
     "InMemory",
     "Milvus",
     "Pinecone",

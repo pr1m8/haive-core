@@ -436,10 +436,10 @@ class DynamicActivationState(StateSchema):
         """
         registry_stats = self.registry.get_stats()
         activations = sum(
-            (1 for event in self.activation_history if event["action"] == "activate")
+            1 for event in self.activation_history if event["action"] == "activate"
         )
         deactivations = sum(
-            (1 for event in self.activation_history if event["action"] == "deactivate")
+            1 for event in self.activation_history if event["action"] == "deactivate"
         )
         return {
             **registry_stats,

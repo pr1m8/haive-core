@@ -91,7 +91,7 @@ class Branch(BaseModel):
         elif (
             len(self.destinations) > 1
             and self.default is None
-            and (not all((isinstance(k, bool) for k in self.destinations)))
+            and (not all(isinstance(k, bool) for k in self.destinations))
         ):
             self.default = END
         return self
@@ -206,9 +206,7 @@ class Branch(BaseModel):
 
         if isinstance(result, Send):
             return BranchResult(send_objects=[result])
-        if isinstance(result, list) and all(
-            (isinstance(item, Send) for item in result)
-        ):
+        if isinstance(result, list) and all(isinstance(item, Send) for item in result):
             return BranchResult(send_objects=result)
         if isinstance(result, Command):
             return BranchResult(command_object=result)
@@ -220,7 +218,7 @@ class Branch(BaseModel):
             if "_send_objects" in result:
                 send_objects = result["_send_objects"]
                 if isinstance(send_objects, list) and all(
-                    (isinstance(item, Send) for item in send_objects)
+                    isinstance(item, Send) for item in send_objects
                 ):
                     return BranchResult(send_objects=send_objects)
         if isinstance(result, bool | str):

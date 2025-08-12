@@ -10,16 +10,13 @@ This example demonstrates:
 """
 
 import asyncio
-from typing import List, Optional
 
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
 from haive.core.engine.tool import (
     ToolCapability,
-    ToolCategory,
     ToolEngine,
-    ToolType,
 )
 from haive.core.tools.store_manager import StoreManager
 
@@ -33,7 +30,7 @@ def calculator(expression: str) -> str:
         result = eval(expression)
         return f"The result is: {result}"
     except Exception as e:
-        return f"Error calculating: {str(e)}"
+        return f"Error calculating: {e!s}"
 
 
 @tool
@@ -59,7 +56,7 @@ class EmailContent(BaseModel):
     to: str = Field(description="Recipient email address")
     subject: str = Field(description="Email subject")
     body: str = Field(description="Email body content")
-    cc: Optional[List[str]] = Field(default=None, description="CC recipients")
+    cc: list[str] | None = Field(default=None, description="CC recipients")
 
 
 def compose_email(
@@ -212,7 +209,7 @@ async def main():
         interrupt_message="Calculation will be performed",
     )
 
-    print(f"  Enhanced calculator capabilities:")
+    print("  Enhanced calculator capabilities:")
     print(f"    - Interruptible: {enhanced_calc.is_interruptible}")
     print(f"    - State-aware: {enhanced_calc.reads_state}")
     print(f"    - Capabilities: {enhanced_calc.__tool_capabilities__}")

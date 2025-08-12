@@ -31,7 +31,6 @@ Example:
 
 import logging
 import re
-from typing import Dict, List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -272,7 +271,7 @@ def _final_cleanup(name: str) -> str:
     return cleaned
 
 
-def validate_tool_name(name: str) -> Tuple[bool, List[str]]:
+def validate_tool_name(name: str) -> tuple[bool, list[str]]:
     """Validate a tool name against OpenAI requirements.
 
     Args:
@@ -318,7 +317,7 @@ def validate_tool_name(name: str) -> Tuple[bool, List[str]]:
     return len(issues) == 0, issues
 
 
-def get_name_suggestions(raw_name: str, count: int = 3) -> List[str]:
+def get_name_suggestions(raw_name: str, count: int = 3) -> list[str]:
     """Get multiple naming suggestions for a raw name.
 
     Provides different variations of sanitized names to choose from.
@@ -365,7 +364,7 @@ def get_name_suggestions(raw_name: str, count: int = 3) -> List[str]:
     return suggestions[:count]
 
 
-def create_name_mapping(original_names: List[str]) -> Dict[str, str]:
+def create_name_mapping(original_names: list[str]) -> dict[str, str]:
     """Create a mapping from original names to sanitized names.
 
     Useful for batch processing and maintaining mappings for debugging.

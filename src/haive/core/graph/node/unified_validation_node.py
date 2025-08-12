@@ -188,7 +188,7 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
         if not engine:
             return False
         tools = getattr(engine, "tools", [])
-        return any((hasattr(tool, "name") and tool.name == tool_name for tool in tools))
+        return any(hasattr(tool, "name") and tool.name == tool_name for tool in tools)
 
     def _validate_pydantic_model(
         self, tool_name: str, tool_args: dict[str, Any], tool_id: str, engine: Any
@@ -257,7 +257,7 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
         """Determine single destination from routing decisions."""
         if not routing_decisions:
             return self.agent_node
-        if any((not decision["success"] for decision in routing_decisions)):
+        if any(not decision["success"] for decision in routing_decisions):
             return self.agent_node
         destinations = [decision["destination"] for decision in routing_decisions]
         unique_destinations = set(destinations)

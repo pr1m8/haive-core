@@ -33,4 +33,4 @@ See Also:
 # Import key naming utilities at package level for convenience
 from .naming import create_openai_compliant_name, sanitize_tool_name, validate_tool_name
 
-__all__ = ["sanitize_tool_name", "create_openai_compliant_name", "validate_tool_name"]
+__all__ = ["create_openai_compliant_name", "sanitize_tool_name", "validate_tool_name"]

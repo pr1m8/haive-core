@@ -14,6 +14,6 @@ except ImportError:
 trace = ExecutionTrace()
 
 __all__ = [
-    "trace",
     "ExecutionTrace",
+    "trace",
 ]

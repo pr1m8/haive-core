@@ -57,8 +57,8 @@ def setup_checkpointer(config: Any) -> Any:
     Returns:
         Any: A configured checkpointer instance ready for use
 
-    Examples:
-        ```python
+    Examples::
+
         # Using a direct config object
         from haive.core.persistence import MemoryCheckpointerConfig
         memory_config = MemoryCheckpointerConfig()
@@ -79,7 +79,6 @@ def setup_checkpointer(config: Any) -> Any:
         except Exception:
             # Should not reach here - function handles errors internally
             pass
-        ```
     """
     # Default to memory checkpointer
     if not hasattr(config, "persistence") or config.persistence is None:
@@ -865,7 +864,7 @@ def prepare_merged_input(
 
                 # Add new messages if any
                 if key in processed_input:
-                    new_messages = processed_input[key]
+                    new_messages = value
                     if isinstance(new_messages, list):
                         merged_messages.extend(new_messages)
                     else:

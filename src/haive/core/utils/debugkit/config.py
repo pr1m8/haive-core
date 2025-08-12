@@ -8,7 +8,7 @@ including debugging, logging, profiling, and static analysis tools.
 import os
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 def _parse_environment_from_env() -> "Environment":
@@ -159,7 +159,7 @@ class DevConfig:
     storage_enabled: bool = True
     storage_backend: StorageBackend = StorageBackend.SQLITE
     storage_path: str = ".haive_dev_data"
-    storage_config: Dict[str, Any] = field(default_factory=dict)
+    storage_config: dict[str, Any] = field(default_factory=dict)
 
     # Output settings
     use_rich: bool = True
@@ -183,10 +183,10 @@ class DevConfig:
     retention_days: int = 30
 
     # Internal field to track environment variable overrides
-    _env_overrides: Dict[str, Any] = field(default_factory=dict, init=True, repr=False)
+    _env_overrides: dict[str, Any] = field(default_factory=dict, init=True, repr=False)
 
     # Tool selection
-    excluded_paths: List[str] = field(
+    excluded_paths: list[str] = field(
         default_factory=lambda: [
             "**/test_*",
             "**/*_test.py",
@@ -194,8 +194,8 @@ class DevConfig:
             "**/.*",
         ]
     )
-    included_tools: Optional[List[str]] = None
-    excluded_tools: List[str] = field(default_factory=list)
+    included_tools: list[str] | None = None
+    excluded_tools: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         """Configure settings based on environment after initialization.
@@ -401,7 +401,7 @@ class DevConfig:
 
         return tool_name not in self.excluded_tools
 
-    def get_storage_config(self) -> Dict[str, Any]:
+    def get_storage_config(self) -> dict[str, Any]:
         """Get complete storage configuration.
 
         Returns:
@@ -458,7 +458,7 @@ class DevConfig:
         """
         return self.log_level.value
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert configuration to dictionary.
 
         Returns:

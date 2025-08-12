@@ -660,8 +660,7 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
     - Applications requiring secure data access controls
     - Environments needing scalable, managed database services
 
-    Example:
-        ```python
+    Example::
 
         # Create a Supabase checkpointer with direct credentials
         config = SupabaseCheckpointerConfig(
@@ -677,7 +676,6 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
 
         # Create a checkpointer
         checkpointer = config.create_checkpointer()
-        ```
 
     Note:
         Requires the supabase-py package to be installed. For shared client
@@ -725,8 +723,8 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
             Any: A SupabaseSaver instance ready for use with LangGraph,
                 or a MemorySaver instance as fallback in case of errors
 
-        Example:
-            ```python
+        Example::
+
             config = SupabaseCheckpointerConfig(
                 supabase_url="https://your-project.supabase.co",
                 supabase_key="your-api-key",
@@ -742,7 +740,6 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
             except Exception as e:
                 print(f"Error creating Supabase checkpointer: {e}")
                 # Handle error...
-            ```
 
         Note:
             This method caches the created checkpointer instance, ensuring that

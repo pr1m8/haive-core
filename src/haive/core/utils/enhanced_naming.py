@@ -32,7 +32,7 @@ Examples:
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -53,10 +53,10 @@ class NamingTransformation:
     final_name: str
     transformation_type: str
     complexity_level: int
-    type_parameters: List[str]
+    type_parameters: list[str]
     nesting_depth: int
     description: str
-    warnings: List[str]
+    warnings: list[str]
 
 
 class EnhancedGenericParser:
@@ -93,7 +93,7 @@ class EnhancedGenericParser:
 
         return result
 
-    def _identify_type_pattern(self, type_name: str) -> Tuple[str, Dict[str, Any]]:
+    def _identify_type_pattern(self, type_name: str) -> tuple[str, dict[str, Any]]:
         """Identify which pattern the type matches."""
         # Check for Union types first
         if union_match := self.PATTERNS["union_type"].match(type_name):
@@ -118,7 +118,7 @@ class EnhancedGenericParser:
         return "unknown", {"content": type_name}
 
     def _handle_nested_generic(
-        self, original: str, data: Dict, warnings: List[str]
+        self, original: str, data: dict, warnings: list[str]
     ) -> NamingTransformation:
         """Handle complex nested generics like List[Dict[str, Task]]."""
         base_class = data["base"]
@@ -168,7 +168,7 @@ class EnhancedGenericParser:
         )
 
     def _handle_union_type(
-        self, original: str, data: Dict, warnings: List[str]
+        self, original: str, data: dict, warnings: list[str]
     ) -> NamingTransformation:
         """Handle Union types like Union[str, List[Task]]."""
         content = data["content"]
@@ -208,7 +208,7 @@ class EnhancedGenericParser:
         )
 
     def _handle_optional_type(
-        self, original: str, data: Dict, warnings: List[str]
+        self, original: str, data: dict, warnings: list[str]
     ) -> NamingTransformation:
         """Handle Optional types like Optional[Plan[Task]]."""
         content = data["content"].strip()
@@ -238,7 +238,7 @@ class EnhancedGenericParser:
         )
 
     def _handle_simple_generic(
-        self, original: str, data: Dict, warnings: List[str]
+        self, original: str, data: dict, warnings: list[str]
     ) -> NamingTransformation:
         """Handle simple generics like Plan[Task] or Plan[Task, Status]."""
         base_class = data["base"]
@@ -266,7 +266,7 @@ class EnhancedGenericParser:
         )
 
     def _handle_unknown_type(
-        self, original: str, warnings: List[str]
+        self, original: str, warnings: list[str]
     ) -> NamingTransformation:
         """Handle unknown/complex types by falling back to basic sanitization."""
         warnings.append("Unknown type pattern, using basic sanitization")
@@ -285,7 +285,7 @@ class EnhancedGenericParser:
             warnings=warnings,
         )
 
-    def _extract_nested_parameters(self, content: str) -> List[str]:
+    def _extract_nested_parameters(self, content: str) -> list[str]:
         """Extract parameters from nested generic content."""
         parameters = []
         current_param = ""
@@ -326,7 +326,7 @@ class EnhancedGenericParser:
 
         return max_depth + 1  # +1 for the outer level
 
-    def _split_union_alternatives(self, content: str) -> List[str]:
+    def _split_union_alternatives(self, content: str) -> list[str]:
         """Split Union alternatives respecting nested brackets."""
         alternatives = []
         current_alt = ""
@@ -356,7 +356,7 @@ class EnhancedGenericParser:
 
 def enhanced_sanitize_tool_name(
     raw_name: str, include_metadata: bool = True, max_complexity: int = 5
-) -> Tuple[str, Optional[NamingTransformation]]:
+) -> tuple[str, NamingTransformation | None]:
     """Enhanced tool name sanitization with metadata and complex type support.
 
     Args:
@@ -429,7 +429,7 @@ def enhanced_sanitize_tool_name(
         return simple_result, None
 
 
-def analyze_naming_complexity(type_names: List[str]) -> Dict[str, Any]:
+def analyze_naming_complexity(type_names: list[str]) -> dict[str, Any]:
     """Analyze naming complexity across multiple type names.
 
     Args:
@@ -513,7 +513,7 @@ def analyze_naming_complexity(type_names: List[str]) -> Dict[str, Any]:
 # Convenience functions for common use cases
 def sanitize_pydantic_model_name_enhanced(
     model,
-) -> Tuple[str, Optional[NamingTransformation]]:
+) -> tuple[str, NamingTransformation | None]:
     """Enhanced Pydantic model name sanitization with metadata."""
     if hasattr(model, "__name__"):
         raw_name = model.__name__
@@ -527,7 +527,7 @@ def sanitize_pydantic_model_name_enhanced(
 
 def get_naming_suggestions_enhanced(
     raw_name: str, count: int = 5
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Get multiple enhanced naming suggestions with metadata."""
     suggestions = []
 

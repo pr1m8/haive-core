@@ -253,11 +253,9 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
         if isinstance(result, dict) and self.messages_field in result:
             updated_messages = result[self.messages_field]
             tool_msg_count = sum(
-                (
-                    1
-                    for msg in updated_messages[len(messages) :]
-                    if isinstance(msg, ToolMessage)
-                )
+                1
+                for msg in updated_messages[len(messages) :]
+                if isinstance(msg, ToolMessage)
             )
             logger.info(f"Added {tool_msg_count} ToolMessages")
             return Command(

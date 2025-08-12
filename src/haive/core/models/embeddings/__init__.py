@@ -34,8 +34,8 @@ Key Components:
     - Security: Secure handling of API keys with environment variable resolution
     - Caching: Efficient caching of embeddings for performance optimization
 
-Typical usage example:
-    ```python
+Typical usage example::
+
     from haive.core.models.embeddings import create_embeddings, OpenAIEmbeddingConfig
 
     # Configure an embedding model
@@ -49,7 +49,6 @@ Typical usage example:
     # Generate embeddings
     doc_vectors = embeddings.embed_documents(["Document text"])
     query_vector = embeddings.embed_query("Query text")
-    ```
 """
 
 from haive.core.models.embeddings.base import (  # Base classes; Cloud providers; Local providers; Factory function
@@ -104,54 +103,49 @@ except ImportError:
     # Test functions not available
     def test_config_classes_exist():
         """Placeholder test function."""
-        pass
 
     def test_factory_function():
         """Placeholder test function."""
-        pass
 
     def test_provider_enum_values():
         """Placeholder test function."""
-        pass
 
     class TestEmbeddingProviders:
         """Placeholder test class."""
-
-        pass
 
 
 __all__ = [
     "ANYSCALE",
     "AZURE",
-    "AnyscaleEmbeddingConfig",
-    "AzureEmbeddingConfig",
     "BEDROCK",
-    "BaseEmbeddingConfig",
-    "BedrockEmbeddingConfig",
     "CLOUDFLARE",
     "COHERE",
-    "CloudflareEmbeddingConfig",
-    "CohereEmbeddingConfig",
-    "EmbeddingProvider",
     "FASTEMBED",
-    "FastEmbedEmbeddingConfig",
     "HUGGINGFACE",
-    "HuggingFaceEmbeddingConfig",
     "JINA",
-    "JinaEmbeddingConfig",
     "LLAMACPP",
-    "LlamaCppEmbeddingConfig",
     "NOVITA",
     "OLLAMA",
     "OPENAI",
+    "SENTENCE_TRANSFORMERS",
+    "VERTEXAI",
+    "VOYAGEAI",
+    "AnyscaleEmbeddingConfig",
+    "AzureEmbeddingConfig",
+    "BaseEmbeddingConfig",
+    "BedrockEmbeddingConfig",
+    "CloudflareEmbeddingConfig",
+    "CohereEmbeddingConfig",
+    "EmbeddingProvider",
+    "FastEmbedEmbeddingConfig",
+    "HuggingFaceEmbeddingConfig",
+    "JinaEmbeddingConfig",
+    "LlamaCppEmbeddingConfig",
     "OllamaEmbeddingConfig",
     "OpenAIEmbeddingConfig",
-    "SENTENCE_TRANSFORMERS",
     "SecureConfigMixin",
     "SentenceTransformerEmbeddingConfig",
     "TestEmbeddingProviders",
-    "VERTEXAI",
-    "VOYAGEAI",
     "VertexAIEmbeddingConfig",
     "VoyageAIEmbeddingConfig",
     "create_embeddings",

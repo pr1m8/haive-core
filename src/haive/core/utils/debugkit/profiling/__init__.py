@@ -16,6 +16,6 @@ except ImportError:
 profile = PerformanceProfiler()
 
 __all__ = [
-    "profile",
     "PerformanceProfiler",
+    "profile",
 ]

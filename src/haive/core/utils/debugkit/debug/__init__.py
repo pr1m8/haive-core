@@ -29,9 +29,9 @@ except ImportError:
 debug = EnhancedDebug()
 
 __all__ = [
-    "debug",
     "EnhancedDebug",
+    "debug",
     "debug_decorators",
-    "variable_inspector",
     "interactive_debugger",
+    "variable_inspector",
 ]

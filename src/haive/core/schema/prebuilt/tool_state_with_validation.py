@@ -85,7 +85,7 @@ class EnhancedToolState(ToolState):
 
     def _tool_is_categorized(self, tool_name: str) -> bool:
         """Check if a tool is already categorized."""
-        return any((tool_name in tools for tools in self.tool_categories.values()))
+        return any(tool_name in tools for tools in self.tool_categories.values())
 
     def _auto_categorize_tool(self, tool_name: str) -> None:
         """Automatically categorize a tool based on its route and name."""
@@ -97,17 +97,13 @@ class EnhancedToolState(ToolState):
             "unknown": "general",
         }
         name_lower = tool_name.lower()
-        if any(
-            (word in name_lower for word in ["search", "query", "find", "retrieve"])
-        ):
+        if any(word in name_lower for word in ["search", "query", "find", "retrieve"]):
             category = "retrieval"
-        elif any(
-            (word in name_lower for word in ["write", "create", "save", "update"])
-        ):
+        elif any(word in name_lower for word in ["write", "create", "save", "update"]):
             category = "creation"
-        elif any((word in name_lower for word in ["analyze", "process", "transform"])):
+        elif any(word in name_lower for word in ["analyze", "process", "transform"]):
             category = "processing"
-        elif any((word in name_lower for word in ["validate", "check", "verify"])):
+        elif any(word in name_lower for word in ["validate", "check", "verify"]):
             category = "validation"
         else:
             category = route_categories.get(route, "general")

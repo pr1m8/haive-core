@@ -16,17 +16,12 @@ import ast
 import inspect
 import os
 import tempfile
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import (
     Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Type,
     Union,
     get_type_hints,
 )
@@ -39,7 +34,7 @@ except ImportError:
     HAS_MYPY = False
 
 try:
-    from typing_extensions import get_args, get_origin
+    from typing import get_args, get_origin
 except ImportError:
     try:
         from typing import get_args, get_origin  # Python 3.8+
@@ -121,17 +116,17 @@ class TypeInfo:
     """
 
     name: str
-    type_annotation: Optional[Type[Any]]
-    actual_type: Optional[Type[Any]] = None
+    type_annotation: type[Any] | None
+    actual_type: type[Any] | None = None
     is_optional: bool = False
     is_generic: bool = False
     is_union: bool = False
-    generic_args: List[Type[Any]] = None
-    union_types: List[Type[Any]] = None
-    source_location: Optional[str] = None
+    generic_args: list[type[Any]] = None
+    union_types: list[type[Any]] = None
+    source_location: str | None = None
     complexity_level: TypeComplexity = TypeComplexity.SIMPLE
     type_string: str = ""
-    validation_errors: List[str] = None
+    validation_errors: list[str] = None
 
     def __post_init__(self) -> None:
         """Initialize computed fields after dataclass creation."""
@@ -257,20 +252,20 @@ class FunctionTypeAnalysis:
     """
 
     function_name: str
-    module_name: Optional[str] = None
-    parameters: Dict[str, TypeInfo] = None
-    return_type: Optional[TypeInfo] = None
-    type_errors: List[str] = None
-    type_warnings: List[str] = None
+    module_name: str | None = None
+    parameters: dict[str, TypeInfo] = None
+    return_type: TypeInfo | None = None
+    type_errors: list[str] = None
+    type_warnings: list[str] = None
     type_coverage: float = 0.0
     return_type_coverage: bool = False
-    generic_types_used: List[str] = None
-    union_types_used: List[str] = None
+    generic_types_used: list[str] = None
+    union_types_used: list[str] = None
     type_complexity_score: float = 0.0
     type_safety_score: float = 0.0
-    recommendations: List[str] = None
+    recommendations: list[str] = None
     mypy_output: str = ""
-    analysis_timestamp: Optional[str] = None
+    analysis_timestamp: str | None = None
 
     def __post_init__(self) -> None:
         """Initialize collections and compute derived metrics."""
@@ -324,7 +319,7 @@ class FunctionTypeAnalysis:
         safety_score += 10 if self.return_type_coverage else 0  # Bonus for return type
         self.type_safety_score = max(0.0, min(100.0, safety_score))
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Get summary statistics for the type analysis.
 
         Returns:
@@ -427,7 +422,7 @@ class TypeAnalyzer:
         self.use_mypy = use_mypy and HAS_MYPY
         self.cache_enabled = cache_enabled
         self.strict_mode = strict_mode
-        self.type_cache: Dict[str, FunctionTypeAnalysis] = {}
+        self.type_cache: dict[str, FunctionTypeAnalysis] = {}
 
     def analyze_function(self, func: Callable[..., Any]) -> FunctionTypeAnalysis:
         """Perform comprehensive type analysis on a function.
@@ -530,7 +525,7 @@ class TypeAnalyzer:
             try:
                 type_errors, mypy_output = self._run_mypy_analysis(func)
             except Exception as e:
-                type_errors.append(f"Mypy analysis failed: {str(e)}")
+                type_errors.append(f"Mypy analysis failed: {e!s}")
 
         # Create analysis result
         analysis = FunctionTypeAnalysis(
@@ -557,7 +552,7 @@ class TypeAnalyzer:
 
         return analysis
 
-    def analyze_module(self, module_path: Path) -> Dict[str, FunctionTypeAnalysis]:
+    def analyze_module(self, module_path: Path) -> dict[str, FunctionTypeAnalysis]:
         """Analyze all functions in a Python module.
 
         Performs type analysis on all function definitions found in the
@@ -594,7 +589,7 @@ class TypeAnalyzer:
 
         try:
             # Read and parse the module
-            with open(module_path, "r", encoding="utf-8") as f:
+            with open(module_path, encoding="utf-8") as f:
                 source = f.read()
 
             tree = ast.parse(source, filename=str(module_path))
@@ -615,13 +610,13 @@ class TypeAnalyzer:
             # Return empty results with error information
             results["_syntax_error"] = FunctionTypeAnalysis(
                 function_name="_syntax_error",
-                type_errors=[f"Syntax error in module: {str(e)}"],
+                type_errors=[f"Syntax error in module: {e!s}"],
                 recommendations=["Fix syntax errors before performing type analysis"],
             )
 
         return results
 
-    def _run_mypy_analysis(self, func: Callable[..., Any]) -> Tuple[List[str], str]:
+    def _run_mypy_analysis(self, func: Callable[..., Any]) -> tuple[list[str], str]:
         """Run mypy type checking on a function.
 
         Args:
@@ -674,9 +669,9 @@ class TypeAnalyzer:
                 os.unlink(temp_path)
 
         except Exception as e:
-            return [f"Mypy analysis failed: {str(e)}"], ""
+            return [f"Mypy analysis failed: {e!s}"], ""
 
-    def _generate_recommendations(self, analysis: FunctionTypeAnalysis) -> List[str]:
+    def _generate_recommendations(self, analysis: FunctionTypeAnalysis) -> list[str]:
         """Generate actionable recommendations based on type analysis.
 
         Args:
@@ -734,8 +729,8 @@ class TypeAnalyzer:
         return recommendations
 
     def _extract_generic_types(
-        self, parameters: Dict[str, TypeInfo], return_type: Optional[TypeInfo]
-    ) -> List[str]:
+        self, parameters: dict[str, TypeInfo], return_type: TypeInfo | None
+    ) -> list[str]:
         """Extract generic types used in the function signature."""
         generic_types = []
 
@@ -749,8 +744,8 @@ class TypeAnalyzer:
         return list(set(generic_types))  # Remove duplicates
 
     def _extract_union_types(
-        self, parameters: Dict[str, TypeInfo], return_type: Optional[TypeInfo]
-    ) -> List[str]:
+        self, parameters: dict[str, TypeInfo], return_type: TypeInfo | None
+    ) -> list[str]:
         """Extract union types used in the function signature."""
         union_types = []
 
@@ -765,7 +760,7 @@ class TypeAnalyzer:
 
     def _analyze_with_libcst(
         self, module_path: Path, source: str
-    ) -> Dict[str, FunctionTypeAnalysis]:
+    ) -> dict[str, FunctionTypeAnalysis]:
         """Analyze module using libcst for detailed analysis."""
         # Placeholder for libcst implementation
         # This would provide more detailed analysis of the source code
@@ -773,7 +768,7 @@ class TypeAnalyzer:
 
     def _analyze_with_ast(
         self, tree: ast.AST, module_path: str
-    ) -> Dict[str, FunctionTypeAnalysis]:
+    ) -> dict[str, FunctionTypeAnalysis]:
         """Analyze module using AST for basic analysis."""
         results = {}
 
@@ -810,7 +805,7 @@ class TypeAnalyzer:
         """
         self.type_cache.clear()
 
-    def get_cache_stats(self) -> Dict[str, int]:
+    def get_cache_stats(self) -> dict[str, int]:
         """Get cache statistics.
 
         Returns:
@@ -824,7 +819,7 @@ class FunctionFinder(ast.NodeVisitor):
 
     def __init__(self) -> None:
         """Initialize the function finder."""
-        self.functions: List[ast.FunctionDef] = []
+        self.functions: list[ast.FunctionDef] = []
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         """Visit function definition nodes."""

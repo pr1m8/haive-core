@@ -95,7 +95,7 @@ from haive.core.registry.manager import RegistryManager
 from haive.core.registry.memory import MemoryRegistry
 
 # Type alias for component metadata
-ComponentMetadata = Dict[str, Any]
+ComponentMetadata = dict[str, Any]
 
 
 # Initialize registry types lazily to avoid circular imports

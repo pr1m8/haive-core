@@ -9,7 +9,8 @@ are not available. The fallbacks maintain the same API but with reduced function
 import functools
 import sys
 import time
-from typing import Any, Callable, Dict, List, Optional
+from collections.abc import Callable
+from typing import Any
 
 
 class FallbackDebug:
@@ -60,7 +61,7 @@ class FallbackDebug:
 
         # Handle keyword arguments
         for key, value in kwargs.items():
-            parts.append(f"{key}={repr(value)}")
+            parts.append(f"{key}={value!r}")
 
         output = " | ".join(parts) if parts else "DEBUG"
         print(f"DEBUG: {output}", file=sys.stderr)
@@ -146,7 +147,7 @@ class FallbackLog:
 
     def __init__(self):
         """Initialize fallback logger."""
-        self._correlation_id: Optional[str] = None
+        self._correlation_id: str | None = None
         self.enabled = True
 
     def set_correlation_id(self, correlation_id: str) -> None:
@@ -176,7 +177,7 @@ class FallbackLog:
             if (
                 key != "correlation_id"
             ):  # Skip correlation_id as it's handled separately
-                context_parts.append(f"{key}={repr(value)}")
+                context_parts.append(f"{key}={value!r}")
 
         context_str = f" | {', '.join(context_parts)}" if context_parts else ""
 
@@ -265,7 +266,7 @@ class FallbackLogContext:
         """
         self.logger = logger
         self.name = name
-        self.start_time: Optional[float] = None
+        self.start_time: float | None = None
 
     def __enter__(self) -> "FallbackLogContext":
         """Enter logging context."""
@@ -323,8 +324,8 @@ class FallbackTrace:
 
     def __init__(self):
         """Initialize fallback tracer."""
-        self._contexts: List[str] = []
-        self._correlation_id: Optional[str] = None
+        self._contexts: list[str] = []
+        self._correlation_id: str | None = None
         self.enabled = True
 
     def set_correlation_id(self, correlation_id: str) -> None:
@@ -376,7 +377,7 @@ class FallbackTrace:
             correlation = f"[{self._correlation_id}] " if self._correlation_id else ""
             context_path = " -> ".join(self._contexts) if self._contexts else "root"
             print(
-                f"TRACE: {correlation}{context_path}: {name} = {repr(value)}",
+                f"TRACE: {correlation}{context_path}: {name} = {value!r}",
                 file=sys.stderr,
             )
 
@@ -446,9 +447,9 @@ class FallbackProfile:
     def __init__(self):
         """Initialize fallback profiler."""
         self.enabled = True
-        self._active_contexts: Dict[str, Dict[str, Any]] = {}
+        self._active_contexts: dict[str, dict[str, Any]] = {}
 
-    def start_context(self, name: str) -> Dict[str, Any]:
+    def start_context(self, name: str) -> dict[str, Any]:
         """Start profiling context.
 
         Args:
@@ -466,7 +467,7 @@ class FallbackProfile:
         self._active_contexts[name] = context
         return context
 
-    def stop_context(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    def stop_context(self, context: dict[str, Any]) -> dict[str, Any]:
         """Stop profiling context and return statistics.
 
         Args:
@@ -585,7 +586,7 @@ class FallbackBenchmark:
 
     def measure(
         self, func: Callable, iterations: int = 100, warmup: int = 10
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Measure function performance over multiple iterations.
 
         Args:
@@ -662,8 +663,8 @@ class FallbackBenchmark:
         return stats
 
     def compare(
-        self, functions: Dict[str, Callable], iterations: int = 100
-    ) -> Dict[str, Dict[str, Any]]:
+        self, functions: dict[str, Callable], iterations: int = 100
+    ) -> dict[str, dict[str, Any]]:
         """Compare performance of multiple functions.
 
         Args:

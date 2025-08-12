@@ -18,7 +18,7 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 try:
     import mypy.api
@@ -116,12 +116,12 @@ class AnalysisFinding:
     analysis_type: AnalysisType
     severity: Severity
     message: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    column_number: Optional[int] = None
-    rule_id: Optional[str] = None
-    suggestion: Optional[str] = None
-    context: Dict[str, Any] = field(default_factory=dict)
+    file_path: str | None = None
+    line_number: int | None = None
+    column_number: int | None = None
+    rule_id: str | None = None
+    suggestion: str | None = None
+    context: dict[str, Any] = field(default_factory=dict)
 
     def get_location_string(self) -> str:
         """Get formatted location string for display.
@@ -138,7 +138,7 @@ class AnalysisFinding:
             parts.append(str(self.column_number))
         return ":".join(parts) if parts else "unknown"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert finding to dictionary for serialization.
 
         Returns:
@@ -196,15 +196,15 @@ class AnalysisResult:
     analysis_type: AnalysisType
     success: bool
     execution_time: float = 0.0
-    findings: List[AnalysisFinding] = field(default_factory=list)
-    metrics: Dict[str, Any] = field(default_factory=dict)
-    suggestions: List[str] = field(default_factory=list)
+    findings: list[AnalysisFinding] = field(default_factory=list)
+    metrics: dict[str, Any] = field(default_factory=dict)
+    suggestions: list[str] = field(default_factory=list)
     raw_output: str = ""
     command_used: str = ""
     exit_code: int = 0
     error_message: str = ""
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Get summary statistics for this analysis result.
 
         Returns:
@@ -227,7 +227,7 @@ class AnalysisResult:
             "suggestions_count": len(self.suggestions),
         }
 
-    def get_critical_findings(self) -> List[AnalysisFinding]:
+    def get_critical_findings(self) -> list[AnalysisFinding]:
         """Get only critical and high severity findings.
 
         Returns:
@@ -273,6 +273,7 @@ class ToolAnalyzer:
         try:
             result = subprocess.run(
                 [self.tool_name, "--version"],
+                check=False,
                 capture_output=True,
                 text=True,
                 timeout=10,
@@ -308,6 +309,7 @@ class ToolAnalyzer:
             # Execute tool
             result = subprocess.run(
                 command,
+                check=False,
                 capture_output=True,
                 text=True,
                 timeout=kwargs.get("timeout", 60),
@@ -351,7 +353,7 @@ class ToolAnalyzer:
                 error_message=str(e),
             )
 
-    def _build_command(self, file_path: Path, **kwargs) -> List[str]:
+    def _build_command(self, file_path: Path, **kwargs) -> list[str]:
         """Build command line for tool execution.
 
         Args:
@@ -366,7 +368,7 @@ class ToolAnalyzer:
 
     def _parse_output(
         self, stdout: str, stderr: str, file_path: Path
-    ) -> List[AnalysisFinding]:
+    ) -> list[AnalysisFinding]:
         """Parse tool output into structured findings.
 
         Args:
@@ -396,7 +398,7 @@ class ToolAnalyzer:
 
         return findings
 
-    def _extract_metrics(self, stdout: str, stderr: str) -> Dict[str, Any]:
+    def _extract_metrics(self, stdout: str, stderr: str) -> dict[str, Any]:
         """Extract numerical metrics from tool output.
 
         Args:
@@ -409,7 +411,7 @@ class ToolAnalyzer:
         # Default implementation - subclasses should override
         return {}
 
-    def _extract_suggestions(self, stdout: str, stderr: str) -> List[str]:
+    def _extract_suggestions(self, stdout: str, stderr: str) -> list[str]:
         """Extract high-level suggestions from tool output.
 
         Args:
@@ -430,7 +432,7 @@ class MypyAnalyzer(ToolAnalyzer):
         """Initialize mypy analyzer."""
         super().__init__("mypy", AnalysisType.TYPE_CHECKING)
 
-    def _build_command(self, file_path: Path, **kwargs) -> List[str]:
+    def _build_command(self, file_path: Path, **kwargs) -> list[str]:
         """Build mypy command."""
         command = ["mypy"]
 
@@ -446,7 +448,7 @@ class MypyAnalyzer(ToolAnalyzer):
 
     def _parse_output(
         self, stdout: str, stderr: str, file_path: Path
-    ) -> List[AnalysisFinding]:
+    ) -> list[AnalysisFinding]:
         """Parse mypy output."""
         findings = []
 
@@ -495,13 +497,13 @@ class RadonAnalyzer(ToolAnalyzer):
         """Initialize radon analyzer."""
         super().__init__("radon", AnalysisType.COMPLEXITY)
 
-    def _build_command(self, file_path: Path, **kwargs) -> List[str]:
+    def _build_command(self, file_path: Path, **kwargs) -> list[str]:
         """Build radon command for cyclomatic complexity."""
         return ["radon", "cc", "-j", str(file_path)]
 
     def _parse_output(
         self, stdout: str, stderr: str, file_path: Path
-    ) -> List[AnalysisFinding]:
+    ) -> list[AnalysisFinding]:
         """Parse radon JSON output."""
         findings = []
 
@@ -536,7 +538,7 @@ class RadonAnalyzer(ToolAnalyzer):
 
         return findings
 
-    def _extract_metrics(self, stdout: str, stderr: str) -> Dict[str, Any]:
+    def _extract_metrics(self, stdout: str, stderr: str) -> dict[str, Any]:
         """Extract complexity metrics from radon output."""
         metrics = {}
 
@@ -565,13 +567,13 @@ class VultureAnalyzer(ToolAnalyzer):
         """Initialize vulture analyzer."""
         super().__init__("vulture", AnalysisType.DEAD_CODE)
 
-    def _build_command(self, file_path: Path, **kwargs) -> List[str]:
+    def _build_command(self, file_path: Path, **kwargs) -> list[str]:
         """Build vulture command."""
         return ["vulture", str(file_path), "--min-confidence", "80"]
 
     def _parse_output(
         self, stdout: str, stderr: str, file_path: Path
-    ) -> List[AnalysisFinding]:
+    ) -> list[AnalysisFinding]:
         """Parse vulture output."""
         findings = []
 
@@ -621,7 +623,7 @@ class PyflakesAnalyzer(ToolAnalyzer):
 
     def _parse_output(
         self, stdout: str, stderr: str, file_path: Path
-    ) -> List[AnalysisFinding]:
+    ) -> list[AnalysisFinding]:
         """Parse pyflakes output."""
         findings = []
 
@@ -703,7 +705,7 @@ class StaticAnalysisOrchestrator:
         self,
         max_workers: int = 4,
         timeout: int = 60,
-        custom_analyzers: Optional[Dict[str, ToolAnalyzer]] = None,
+        custom_analyzers: dict[str, ToolAnalyzer] | None = None,
     ):
         """Initialize the static analysis orchestrator.
 
@@ -716,7 +718,7 @@ class StaticAnalysisOrchestrator:
         self.timeout = timeout
 
         # Initialize built-in analyzers
-        self.available_tools: Dict[str, ToolAnalyzer] = {
+        self.available_tools: dict[str, ToolAnalyzer] = {
             "mypy": MypyAnalyzer(),
             "radon": RadonAnalyzer(),
             "vulture": VultureAnalyzer(),
@@ -738,7 +740,7 @@ class StaticAnalysisOrchestrator:
             ["mypy", "radon", "vulture"] if HAS_MYPY else ["radon", "vulture"]
         )
 
-    def get_available_tools(self) -> List[str]:
+    def get_available_tools(self) -> list[str]:
         """Get list of available analysis tools.
 
         Returns:
@@ -749,10 +751,10 @@ class StaticAnalysisOrchestrator:
     def analyze_file(
         self,
         file_path: Path,
-        tools: Optional[List[str]] = None,
+        tools: list[str] | None = None,
         parallel: bool = True,
         **kwargs,
-    ) -> Dict[str, AnalysisResult]:
+    ) -> dict[str, AnalysisResult]:
         """Analyze a single file with specified tools.
 
         Args:
@@ -832,12 +834,12 @@ class StaticAnalysisOrchestrator:
     def analyze_project(
         self,
         project_path: Path,
-        tools: Optional[List[str]] = None,
-        file_patterns: Optional[List[str]] = None,
-        exclude_patterns: Optional[List[str]] = None,
+        tools: list[str] | None = None,
+        file_patterns: list[str] | None = None,
+        exclude_patterns: list[str] | None = None,
         parallel: bool = True,
-        max_files: Optional[int] = None,
-    ) -> Dict[str, Dict[str, AnalysisResult]]:
+        max_files: int | None = None,
+    ) -> dict[str, dict[str, AnalysisResult]]:
         """Analyze an entire project with specified tools.
 
         Args:
@@ -962,7 +964,7 @@ class StaticAnalysisOrchestrator:
 
     def generate_report(
         self,
-        results: Union[Dict[str, AnalysisResult], Dict[str, Dict[str, AnalysisResult]]],
+        results: dict[str, AnalysisResult] | dict[str, dict[str, AnalysisResult]],
         format: str = "markdown",
     ) -> str:
         """Generate a unified report from analysis results.
@@ -994,7 +996,7 @@ class StaticAnalysisOrchestrator:
 
     def _generate_markdown_report(
         self,
-        results: Union[Dict[str, AnalysisResult], Dict[str, Dict[str, AnalysisResult]]],
+        results: dict[str, AnalysisResult] | dict[str, dict[str, AnalysisResult]],
     ) -> str:
         """Generate markdown format report."""
         lines = ["# Static Analysis Report\n"]
@@ -1094,7 +1096,7 @@ class StaticAnalysisOrchestrator:
 
     def _generate_json_report(
         self,
-        results: Union[Dict[str, AnalysisResult], Dict[str, Dict[str, AnalysisResult]]],
+        results: dict[str, AnalysisResult] | dict[str, dict[str, AnalysisResult]],
     ) -> str:
         """Generate JSON format report."""
         # Convert results to serializable format
@@ -1134,7 +1136,7 @@ class StaticAnalysisOrchestrator:
 
     def _generate_text_report(
         self,
-        results: Union[Dict[str, AnalysisResult], Dict[str, Dict[str, AnalysisResult]]],
+        results: dict[str, AnalysisResult] | dict[str, dict[str, AnalysisResult]],
     ) -> str:
         """Generate plain text format report."""
         lines = ["STATIC ANALYSIS REPORT", "=" * 50, ""]
@@ -1145,8 +1147,8 @@ class StaticAnalysisOrchestrator:
         return "\n".join(lines)
 
     def get_project_summary(
-        self, project_results: Dict[str, Dict[str, AnalysisResult]]
-    ) -> Dict[str, Any]:
+        self, project_results: dict[str, dict[str, AnalysisResult]]
+    ) -> dict[str, Any]:
         """Get summary statistics for project analysis results.
 
         Args:

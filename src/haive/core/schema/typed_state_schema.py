@@ -27,8 +27,8 @@ class TypedStateSchema(StateSchema, Generic[TEngine]):
     This class extends StateSchema with generic type support for engines,
     allowing for better type checking while maintaining backward compatibility.
 
-    Example:
-        ```python
+    Example::
+
         from haive.core.engine.llm import LLMEngine
 
         # Typed usage - engine type is known
@@ -45,7 +45,6 @@ class TypedStateSchema(StateSchema, Generic[TEngine]):
         # Also works with base StateSchema
         class OldState(StateSchema):
             query: str = Field(default="")
-        ```
     """
 
     # Override engine field with generic type
@@ -113,8 +112,8 @@ class MultiEngineStateSchema(StateSchema):
     This schema provides better support for agents with multiple engines,
     with clear field naming and type safety.
 
-    Example:
-        ```python
+    Example::
+
         class RAGState(MultiEngineStateSchema):
             query: str = Field(default="")
 
@@ -123,7 +122,6 @@ class MultiEngineStateSchema(StateSchema):
                 super().__init__(**data)
                 self.register_engine("llm", llm_engine)
                 self.register_engine("retriever", retriever_engine)
-        ```
     """
 
     # Override engines with better typing

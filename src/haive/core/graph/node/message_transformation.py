@@ -244,8 +244,7 @@ class MessageTransformationNodeConfig(NodeConfig):
                         f"[green]Reflection swap {msg.type} → {target_cls.__name__.lower()}:[/] {msg.content[:50]}..."
                     )
             elif not (
-                self.exclude_system_messages
-                and isinstance(msg, SystemMessage)
+                (self.exclude_system_messages and isinstance(msg, SystemMessage))
                 or (self.exclude_tool_messages and isinstance(msg, ToolMessage))
             ):
                 transformed.append(msg)
@@ -324,18 +323,12 @@ class MessageTransformationNodeConfig(NodeConfig):
         """
         for msg in messages:
             if isinstance(msg, HumanMessage):
-                has_metadata = (
-                    hasattr(msg, "name")
-                    and msg.name
-                    or (
-                        hasattr(msg, "additional_kwargs")
-                        and msg.additional_kwargs
-                        and any(
-                            (
-                                key in msg.additional_kwargs
-                                for key in ["engine_id", "engine_name", "source_agent"]
-                            )
-                        )
+                has_metadata = (hasattr(msg, "name") and msg.name) or (
+                    hasattr(msg, "additional_kwargs")
+                    and msg.additional_kwargs
+                    and any(
+                        key in msg.additional_kwargs
+                        for key in ["engine_id", "engine_name", "source_agent"]
                     )
                 )
                 if not has_metadata:

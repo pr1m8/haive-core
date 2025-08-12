@@ -255,10 +255,8 @@ class MessageList(RootModel[list[AnyMessage]]):
     def has_tool_errors(self) -> bool:
         """Check if there are any tool messages with errors."""
         return any(
-            (
-                isinstance(msg, ToolMessage) and self._is_tool_error(msg)
-                for msg in self.root
-            )
+            isinstance(msg, ToolMessage) and self._is_tool_error(msg)
+            for msg in self.root
         )
 
     @computed_field
@@ -433,8 +431,7 @@ class MessageList(RootModel[list[AnyMessage]]):
                 hasattr(msg, "additional_kwargs")
                 and msg.additional_kwargs
                 and (
-                    engine_id
-                    and msg.additional_kwargs.get("engine_id") == engine_id
+                    (engine_id and msg.additional_kwargs.get("engine_id") == engine_id)
                     or (
                         engine_name
                         and msg.additional_kwargs.get("engine_name") == engine_name

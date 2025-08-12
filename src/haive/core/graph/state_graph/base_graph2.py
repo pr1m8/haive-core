@@ -1909,36 +1909,33 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         This method supports multiple ways to handle True/False routing:
 
-        1. **Boolean destinations**: Use True/False as keys
-           ```python
-           graph.add_conditional_edges(
-               'agent_node',
-               has_tool_calls,
-               {True: 'validation', False: END}
-           )
-           ```
+        1. **Boolean destinations**: Use True/False as keys::
+
+               graph.add_conditional_edges(
+                   'agent_node',
+                   has_tool_calls,
+                   {True: 'validation', False: END}
+               )
 
         2. **String destinations with optional boolean fallbacks**:
            String keys like 'has_tool_calls'/'no_tool_calls' can optionally
-           get True/False fallbacks added by setting add_boolean_fallbacks=True
-           ```python
-           graph.add_conditional_edges(
-               'agent_node',
-               has_tool_calls,
-               {'has_tool_calls': 'validation', 'no_tool_calls': END},
-               add_boolean_fallbacks=True
-           )
-           # With add_boolean_fallbacks=True, adds: {True: 'validation', False: END}
-           ```
+           get True/False fallbacks added by setting add_boolean_fallbacks=True::
 
-        3. **List format**: First item = True destination, Second item = False destination
-           ```python
-           graph.add_conditional_edges(
-               'agent_node',
-               has_tool_calls,
-               ['validation', END]  # validation when True, END when False
-           )
-           ```
+               graph.add_conditional_edges(
+                   'agent_node',
+                   has_tool_calls,
+                   {'has_tool_calls': 'validation', 'no_tool_calls': END},
+                   add_boolean_fallbacks=True
+               )
+               # With add_boolean_fallbacks=True, adds: {True: 'validation', False: END}
+
+        3. **List format**: First item = True destination, Second item = False destination::
+
+               graph.add_conditional_edges(
+                   'agent_node',
+                   has_tool_calls,
+                   ['validation', END]  # validation when True, END when False
+               )
 
         **Alternative**: For simple boolean routing, consider using `add_boolean_conditional_edges()`
         which provides cleaner syntax for True/False conditions.
@@ -2095,7 +2092,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                     result = validation_config(state, config)
                     logger.info(f"ValidationNodeConfig result: {type(result).__name__}")
                     if isinstance(result, list) and all(
-                        (isinstance(item, Send) for item in result)
+                        isinstance(item, Send) for item in result
                     ):
                         logger.info(
                             f"ValidationNodeConfig returned {len(result)} Send objects"
@@ -2168,8 +2165,8 @@ class BaseGraph(BaseModel, ValidationMixin):
     def _create_branch_wrapper(self, func, destination_map, default_dest):
         """Wrapper for branch functions that handles boolean to string conversion."""
         param_count = len(inspect.signature(func).parameters)
-        has_boolean_keys = any((isinstance(k, bool) for k in destination_map))
-        has_string_keys = any((isinstance(k, str) for k in destination_map))
+        has_boolean_keys = any(isinstance(k, bool) for k in destination_map)
+        has_string_keys = any(isinstance(k, str) for k in destination_map)
 
         def wrapper(state: dict[str, Any], config: dict[str, Any] | None = None):
             try:
@@ -2815,7 +2812,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                                     else:
                                         result = branch_func(state, config)
                                     if isinstance(result, list) and all(
-                                        (isinstance(item, Send) for item in result)
+                                        isinstance(item, Send) for item in result
                                     ):
                                         logger.info(
                                             f"Branch returning list of {len(result)} Send objects"
@@ -3395,7 +3392,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         for src, _ in self.edges:
             if src == START:
                 return True
-        return any((branch.source_node == START for branch in self.branches.values()))
+        return any(branch.source_node == START for branch in self.branches.values())
 
     def compile(self, raise_on_validation_error: bool = False) -> Any:
         """Validate and compile the graph to a runnable LangGraph StateGraph.
@@ -3445,15 +3442,14 @@ class BaseGraph(BaseModel, ValidationMixin):
         Returns:
             Self for method chaining
 
-        Example:
-            ```python
+        Example::
+
             graph.add_boolean_conditional_edges(
                 'agent_node',
                 has_tool_calls,  # Function that returns True/False
                 'validation',    # Go here when True
                 END             # Go here when False
             )
-            ```
         """
         destinations = {True: true_destination, False: false_destination}
         if also_accept_strings:
@@ -3740,15 +3736,13 @@ class BaseGraph(BaseModel, ValidationMixin):
                 prompt = str(agent.engine.prompt_template)
                 for other_agent in agent_names:
                     if other_agent != agent_name and any(
-                        (
-                            field in prompt.lower()
-                            for field in [
-                                f"{other_agent}_result",
-                                f"{other_agent}_output",
-                                f"result_from_{other_agent}",
-                                f"output_from_{other_agent}",
-                            ]
-                        )
+                        field in prompt.lower()
+                        for field in [
+                            f"{other_agent}_result",
+                            f"{other_agent}_output",
+                            f"result_from_{other_agent}",
+                            f"output_from_{other_agent}",
+                        ]
                     ):
                         dependencies[agent_name].add(other_agent)
         sequence = []

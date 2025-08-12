@@ -77,15 +77,15 @@ def get_static_orchestrator() -> "StaticAnalysisOrchestrator":
 
 
 __all__ = [
-    "TypeAnalyzer",
-    "FunctionTypeAnalysis",
-    "TypeInfo",
-    "ComplexityAnalyzer",
-    "ComplexityReport",
-    "ComplexityMetrics",
-    "StaticAnalysisOrchestrator",
     "AnalysisResult",
-    "get_type_analyzer",
+    "ComplexityAnalyzer",
+    "ComplexityMetrics",
+    "ComplexityReport",
+    "FunctionTypeAnalysis",
+    "StaticAnalysisOrchestrator",
+    "TypeAnalyzer",
+    "TypeInfo",
     "get_complexity_analyzer",
     "get_static_orchestrator",
+    "get_type_analyzer",
 ]

@@ -56,7 +56,7 @@ class ValidationAwareToolState(ToolState):
         """Current validation success rate from recent results."""
         if not self.validation_results:
             return 1.0
-        valid_count = sum((1 for r in self.validation_results if r.is_valid))
+        valid_count = sum(1 for r in self.validation_results if r.is_valid)
         return valid_count / len(self.validation_results)
 
     @computed_field
@@ -65,7 +65,7 @@ class ValidationAwareToolState(ToolState):
         """Overall validation success rate from history."""
         if not self.validation_history:
             return 1.0
-        valid_count = sum((1 for r in self.validation_history if r.is_valid))
+        valid_count = sum(1 for r in self.validation_history if r.is_valid)
         return valid_count / len(self.validation_history)
 
     @computed_field
@@ -150,10 +150,8 @@ class ValidationAwareToolState(ToolState):
         )
         if not older_results:
             return "insufficient_data"
-        recent_rate = sum((1 for r in recent_results if r.is_valid)) / len(
-            recent_results
-        )
-        older_rate = sum((1 for r in older_results if r.is_valid)) / len(older_results)
+        recent_rate = sum(1 for r in recent_results if r.is_valid) / len(recent_results)
+        older_rate = sum(1 for r in older_results if r.is_valid) / len(older_results)
         if recent_rate > older_rate + 0.1:
             return "improving"
         if recent_rate < older_rate - 0.1:
@@ -173,7 +171,7 @@ class ValidationAwareToolState(ToolState):
         if not self.validation_history:
             return
         total_validations = len(self.validation_history)
-        valid_validations = sum((1 for r in self.validation_history if r.is_valid))
+        valid_validations = sum(1 for r in self.validation_history if r.is_valid)
         invalid_validations = total_validations - valid_validations
         type_stats = {}
         for result in self.validation_history:

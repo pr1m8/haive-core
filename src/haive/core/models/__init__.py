@@ -164,7 +164,7 @@ from .metadata import ModelMetadata
 from .metadata_mixin import ModelMetadataMixin as MetadataMixin
 
 # Add eager imports to __all__
-__all__ += ["ModelMetadata", "MetadataMixin"]
+__all__ += ["MetadataMixin", "ModelMetadata"]
 
 # Note: Submodules are available as imports but heavy dependencies
 # (torch, transformers, etc.) are only loaded when actually instantiated

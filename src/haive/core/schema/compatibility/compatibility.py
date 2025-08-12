@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Set, Type
+from typing import Any
 
 from haive.core.schema.compatibility.converters import get_converter_registry
 from haive.core.schema.compatibility.types import (
@@ -18,12 +18,12 @@ class CompatibilityChecker:
     def __init__(self) -> None:
         """Initialize compatibility checker."""
         self._converter_registry = get_converter_registry()
-        self._compatibility_cache: Dict[
-            tuple[Type[Any], Type[Any]], CompatibilityLevel
+        self._compatibility_cache: dict[
+            tuple[type[Any], type[Any]], CompatibilityLevel
         ] = {}
 
     def check_compatibility(
-        self, source_type: Type[Any], target_type: Type[Any]
+        self, source_type: type[Any], target_type: type[Any]
     ) -> CompatibilityLevel:
         """Check compatibility level between two types."""
         # Check cache first
@@ -36,7 +36,7 @@ class CompatibilityChecker:
         return level
 
     def _determine_compatibility(
-        self, source_type: Type[Any], target_type: Type[Any]
+        self, source_type: type[Any], target_type: type[Any]
     ) -> CompatibilityLevel:
         """Determine compatibility level between types."""
         # Exact match
@@ -70,7 +70,7 @@ class CompatibilityChecker:
         return CompatibilityLevel.INCOMPATIBLE
 
     def _check_protocol_compatibility(
-        self, source_type: Type[Any], target_type: Type[Any]
+        self, source_type: type[Any], target_type: type[Any]
     ) -> bool:
         """Check if types are compatible via protocol."""
         # Check if target is a Protocol
@@ -89,7 +89,7 @@ class CompatibilityChecker:
                 return False
         return False
 
-    def _check_coercible(self, source_type: Type[Any], target_type: Type[Any]) -> bool:
+    def _check_coercible(self, source_type: type[Any], target_type: type[Any]) -> bool:
         """Check if types can be coerced (with potential data loss)."""
         # Define coercible type pairs
         coercible_pairs = [
@@ -114,7 +114,7 @@ class CompatibilityChecker:
         return False
 
     def _check_partial_compatibility(
-        self, source_type: Type[Any], target_type: Type[Any]
+        self, source_type: type[Any], target_type: type[Any]
     ) -> bool:
         """Check if types are partially compatible (share some fields)."""
         # Check if both are Pydantic models
@@ -135,8 +135,8 @@ class CompatibilityChecker:
         return False
 
     def get_conversion_path(
-        self, source_type: Type[Any], target_type: Type[Any]
-    ) -> Optional[ConversionPath]:
+        self, source_type: type[Any], target_type: type[Any]
+    ) -> ConversionPath | None:
         """Get conversion path between types if available."""
         return self._converter_registry.get_conversion_path(source_type, target_type)
 
@@ -150,7 +150,7 @@ _global_checker = CompatibilityChecker()
 
 
 def check_compatibility(
-    source_type: Type[Any], target_type: Type[Any]
+    source_type: type[Any], target_type: type[Any]
 ) -> CompatibilityLevel:
     """Check compatibility between two types using global checker."""
     return _global_checker.check_compatibility(source_type, target_type)
@@ -161,13 +161,13 @@ class SchemaCompatibility:
     """Result of schema compatibility check."""
 
     level: CompatibilityLevel
-    compatible_fields: Dict[str, CompatibilityLevel] = field(default_factory=dict)
-    incompatible_fields: Dict[str, CompatibilityLevel] = field(default_factory=dict)
-    missing_fields: Set[str] = field(default_factory=set)
-    extra_fields: Set[str] = field(default_factory=set)
-    conversion_paths: Dict[str, ConversionPath] = field(default_factory=dict)
-    warnings: List[str] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
+    compatible_fields: dict[str, CompatibilityLevel] = field(default_factory=dict)
+    incompatible_fields: dict[str, CompatibilityLevel] = field(default_factory=dict)
+    missing_fields: set[str] = field(default_factory=set)
+    extra_fields: set[str] = field(default_factory=set)
+    conversion_paths: dict[str, ConversionPath] = field(default_factory=dict)
+    warnings: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
     @property
     def is_compatible(self) -> bool:

@@ -196,15 +196,13 @@ class IntelligentMultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]
                 for other_agent in agent_names:
                     if other_agent != agent_name:
                         if any(
-                            (
-                                field in prompt.lower()
-                                for field in [
-                                    f"{other_agent}_result",
-                                    f"{other_agent}_output",
-                                    f"result_from_{other_agent}",
-                                    f"output_from_{other_agent}",
-                                ]
-                            )
+                            field in prompt.lower()
+                            for field in [
+                                f"{other_agent}_result",
+                                f"{other_agent}_output",
+                                f"result_from_{other_agent}",
+                                f"output_from_{other_agent}",
+                            ]
                         ):
                             dependencies[agent_name].add(other_agent)
         sequence = []

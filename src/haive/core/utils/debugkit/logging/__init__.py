@@ -14,6 +14,6 @@ except ImportError:
 log = StructuredLog()
 
 __all__ = [
-    "log",
     "StructuredLog",
+    "log",
 ]

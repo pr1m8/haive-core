@@ -14,12 +14,12 @@ Features:
 Author: Your Name
 """
 
-from typing import Any, Union
+from typing import Any
 
 import yaml
 
 
-def read_yaml_file(file_path: Union[str, Path]) -> Any:
+def read_yaml_file(file_path: str | Path) -> Any:
     """
     Reads a YAML (.yml or .yaml) file and returns the parsed Python object.
 
@@ -33,7 +33,7 @@ def read_yaml_file(file_path: Union[str, Path]) -> Any:
         return yaml.safe_load(file)
 
 
-def read_file_content(file_path: Union[str, Path]) -> Any:
+def read_file_content(file_path: str | Path) -> Any:
     """
     Reads a Markdown or YAML file and returns its content.
 
@@ -55,7 +55,7 @@ def read_file_content(file_path: Union[str, Path]) -> Any:
         return None
 
 
-def read_multiple_files(file_paths: list[Union[str, Path]]) -> dict[str, Any]:
+def read_multiple_files(file_paths: list[str | Path]) -> dict[str, Any]:
     """
     Reads multiple Markdown or YAML files and returns a dictionary of filename to content.
 

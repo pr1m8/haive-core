@@ -19,8 +19,8 @@ except ImportError:
 benchmark = BenchmarkSuite()
 
 __all__ = [
-    "benchmark",
     "BenchmarkSuite",
-    "TimingBenchmark",
     "LoadTester",
+    "TimingBenchmark",
+    "benchmark",
 ]

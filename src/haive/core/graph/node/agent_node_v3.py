@@ -372,8 +372,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             - :class:`haive.core.schema.prebuilt.multi_agent_state.MultiAgentState`: Container state
         """
         debug_mode = (
-            config
-            and config.get("debug", False)
+            (config and config.get("debug", False))
             or (hasattr(state, "debug") and getattr(state, "debug", False))
             or False
         )

@@ -1,4 +1,4 @@
-from typing import Annotated, Any, List, Self, cast
+from typing import Annotated, Any, Self, cast
 
 from langchain_core.messages import (
     AIMessage,
@@ -424,14 +424,14 @@ class MessagesState(StateSchema):
         """Create instance from dictionary format."""
         if isinstance(data, dict) and "messages" in data:
             messages = convert_to_messages(data["messages"])
-            return cls(messages=cast(List[AnyMessage], messages))
+            return cls(messages=cast(list[AnyMessage], messages))
         elif isinstance(data, list):
             messages = convert_to_messages(data)
-            return cls(messages=cast(List[AnyMessage], messages))
+            return cls(messages=cast(list[AnyMessage], messages))
         else:
             # Handle single dict case
             messages = convert_to_messages([data])
-            return cls(messages=cast(List[AnyMessage], messages))
+            return cls(messages=cast(list[AnyMessage], messages))
 
     @classmethod
     def with_system_message(cls, system_content: str) -> "MessagesState":

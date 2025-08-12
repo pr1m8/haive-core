@@ -7,8 +7,8 @@ dynamic, conditional flows within the graph system.
 Classes:
     Branch: Conditional routing component for decision branching in a graph
 
-Typical usage:
-    ```python
+Typical usage::
+
     from haive.core.graph.state_graph.components import Branch
     from haive.core.graph.branches.types import BranchMode
 
@@ -25,7 +25,6 @@ Typical usage:
 
     # Evaluate state to determine the next node
     next_node = branch({"score": 95})  # Returns "high_score_path"
-    ```
 """
 
 import logging
@@ -71,8 +70,8 @@ class Branch(BaseModel, Generic[T, C, O]):
         allow_none: Whether to allow None values in comparisons
         message_key: Key to use when evaluating message content
 
-    Example:
-        ```python
+    Example::
+
         # Function-based routing
         def route_by_length(state):
             if len(state.get("text", "")) > 100:
@@ -97,7 +96,6 @@ class Branch(BaseModel, Generic[T, C, O]):
             value=75,
             destinations={True: "high_score", False: "low_score"}
         )
-        ```
     """
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -151,7 +149,7 @@ class Branch(BaseModel, Generic[T, C, O]):
         elif (
             len(self.destinations) > 1
             and self.default is None
-            and (not all((isinstance(k, bool) for k in self.destinations)))
+            and (not all(isinstance(k, bool) for k in self.destinations))
         ):
             self.default = END
         return self
@@ -237,9 +235,7 @@ class Branch(BaseModel, Generic[T, C, O]):
         """
         if isinstance(result, Send):
             return BranchResult(send_objects=[result])
-        if isinstance(result, list) and all(
-            (isinstance(item, Send) for item in result)
-        ):
+        if isinstance(result, list) and all(isinstance(item, Send) for item in result):
             return BranchResult(send_objects=result)
         if isinstance(result, Command):
             return BranchResult(command_object=result)

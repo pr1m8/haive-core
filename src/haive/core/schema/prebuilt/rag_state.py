@@ -1,6 +1,6 @@
 """RAG (Retrieval-Augmented Generation) state schema for haive agents."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field
@@ -20,12 +20,12 @@ class RAGState(MessagesState):
 
     # Query/Question fields
     query: str = Field(default="", description="Current query/question being processed")
-    original_query: Optional[str] = Field(
+    original_query: str | None = Field(
         default=None, description="Original query before any transformations"
     )
 
     # Document fields
-    documents: List[Document] = Field(
+    documents: list[Document] = Field(
         default_factory=list, description="Retrieved documents for the current query"
     )
 
@@ -35,22 +35,22 @@ class RAGState(MessagesState):
     )
 
     # Retrieval metadata
-    retrieval_metadata: Dict[str, Any] = Field(
+    retrieval_metadata: dict[str, Any] = Field(
         default_factory=dict,
         description="Metadata about the retrieval process (scores, sources, etc.)",
     )
 
     # Answer/Response fields
-    answer: Optional[str] = Field(
+    answer: str | None = Field(
         default=None, description="Generated answer based on retrieved context"
     )
 
     # Optional fields for advanced RAG workflows
-    hypothetical_document: Optional[str] = Field(
+    hypothetical_document: str | None = Field(
         default=None, description="Hypothetical document for HyDE RAG workflows"
     )
 
-    reranked_documents: Optional[List[Document]] = Field(
+    reranked_documents: list[Document] | None = Field(
         default=None, description="Documents after reranking process"
     )
 
@@ -81,13 +81,13 @@ class RAGState(MessagesState):
         self.context = ""
         self.retrieval_metadata.clear()
 
-    def get_top_documents(self, k: int = 5) -> List[Document]:
+    def get_top_documents(self, k: int = 5) -> list[Document]:
         """Get the top k documents based on retrieval scores."""
         # If we have reranked documents, use those
         docs = self.reranked_documents if self.reranked_documents else self.documents
         return docs[:k]
 
-    def update_retrieval_metadata(self, metadata: Dict[str, Any]) -> None:
+    def update_retrieval_metadata(self, metadata: dict[str, Any]) -> None:
         """Update retrieval metadata."""
         self.retrieval_metadata.update(metadata)
 

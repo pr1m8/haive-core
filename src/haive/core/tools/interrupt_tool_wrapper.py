@@ -42,14 +42,13 @@ def add_human_in_the_loop(
 
         interrupt_config (HumanInterruptConfig, optional):
             Configuration dict defining which types of human input are allowed. If not provided,
-            the default enables all three options:
-            ```
-            {
-                "allow_accept": True,
-                "allow_edit": True,
-                "allow_respond": True,
-            }
-            ```
+            the default enables all three options::
+
+                {
+                    "allow_accept": True,
+                    "allow_edit": True,
+                    "allow_respond": True,
+                }
 
     Returns:
         BaseTool:

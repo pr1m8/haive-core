@@ -17,9 +17,10 @@ for improvement.
 import ast
 import inspect
 import math
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 try:
     import radon.complexity as radon_cc
@@ -126,7 +127,7 @@ class ComplexityMetrics:
     # Core complexity metrics
     cyclomatic_complexity: int = 0
     cognitive_complexity: int = 0
-    halstead_metrics: Dict[str, float] = None
+    halstead_metrics: dict[str, float] = None
     maintainability_index: float = 0.0
 
     # Code size metrics
@@ -187,7 +188,7 @@ class ComplexityMetrics:
 
         return cc_score + cognitive_score + nesting_score + mi_score
 
-    def get_complexity_breakdown(self) -> Dict[str, float]:
+    def get_complexity_breakdown(self) -> dict[str, float]:
         """Get detailed breakdown of complexity contributors.
 
         Returns:
@@ -227,7 +228,7 @@ class ComplexityHotspot:
     description: str
     severity: str = "medium"
     suggestion: str = ""
-    context: Dict[str, Any] = None
+    context: dict[str, Any] = None
 
     def __post_init__(self) -> None:
         """Initialize context dictionary."""
@@ -276,17 +277,17 @@ class ComplexityReport:
     """
 
     function_name: str
-    module_name: Optional[str] = None
+    module_name: str | None = None
     metrics: ComplexityMetrics = None
     complexity_grade: ComplexityGrade = ComplexityGrade.C
-    grade_breakdown: Dict[str, str] = None
-    refactoring_suggestions: List[str] = None
-    hotspots: List[ComplexityHotspot] = None
+    grade_breakdown: dict[str, str] = None
+    refactoring_suggestions: list[str] = None
+    hotspots: list[ComplexityHotspot] = None
     risk_score: float = 0.0
     maintainability_score: float = 50.0
     testability_score: float = 50.0
-    analysis_timestamp: Optional[str] = None
-    thresholds_exceeded: List[str] = None
+    analysis_timestamp: str | None = None
+    thresholds_exceeded: list[str] = None
 
     def __post_init__(self) -> None:
         """Initialize default values for complex fields."""
@@ -301,7 +302,7 @@ class ComplexityReport:
         if self.thresholds_exceeded is None:
             self.thresholds_exceeded = []
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Get summary of complexity analysis.
 
         Returns:
@@ -388,7 +389,7 @@ class ComplexityAnalyzer:
         use_radon: bool = HAS_RADON,
         use_mccabe: bool = HAS_MCCABE,
         strict_thresholds: bool = False,
-        custom_thresholds: Optional[Dict[str, Dict[str, int]]] = None,
+        custom_thresholds: dict[str, dict[str, int]] | None = None,
     ) -> None:
         """Initialize the complexity analyzer.
 
@@ -507,7 +508,7 @@ class ComplexityAnalyzer:
             return ComplexityReport(
                 function_name=func_name,
                 complexity_grade=ComplexityGrade.F,
-                refactoring_suggestions=[f"Fix syntax error: {str(e)}"],
+                refactoring_suggestions=[f"Fix syntax error: {e!s}"],
             )
 
         # Calculate metrics
@@ -716,7 +717,7 @@ class ComplexityAnalyzer:
         else:
             return ComplexityGrade.F
 
-    def _calculate_grade_breakdown(self, metrics: ComplexityMetrics) -> Dict[str, str]:
+    def _calculate_grade_breakdown(self, metrics: ComplexityMetrics) -> dict[str, str]:
         """Calculate grade breakdown by complexity type."""
         breakdown = {}
 
@@ -797,7 +798,7 @@ class ComplexityAnalyzer:
 
         return max(0.0, min(100.0, score))
 
-    def _generate_suggestions(self, metrics: ComplexityMetrics) -> List[str]:
+    def _generate_suggestions(self, metrics: ComplexityMetrics) -> list[str]:
         """Generate actionable refactoring suggestions."""
         suggestions = []
 
@@ -845,7 +846,7 @@ class ComplexityAnalyzer:
 
     def _find_hotspots(
         self, tree: ast.AST, metrics: ComplexityMetrics
-    ) -> List[ComplexityHotspot]:
+    ) -> list[ComplexityHotspot]:
         """Find specific complexity hotspots in the code."""
 
         class HotspotFinder(ast.NodeVisitor):
@@ -905,7 +906,7 @@ class ComplexityAnalyzer:
         finder.visit(tree)
         return finder.hotspots
 
-    def _check_thresholds(self, metrics: ComplexityMetrics) -> List[str]:
+    def _check_thresholds(self, metrics: ComplexityMetrics) -> list[str]:
         """Check which complexity thresholds were exceeded."""
         exceeded = []
 

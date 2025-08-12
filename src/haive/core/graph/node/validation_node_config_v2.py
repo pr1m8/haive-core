@@ -113,7 +113,6 @@ class ValidationNodeConfigV2(BaseNodeConfig):
                     # For BaseModel schemas, we need to wrap them as tools if the name doesn't match
                     # because LangGraph uses schema.__name__ as the key
                     if is_basemodel_subclass(tool_schema):
-                        from haive.core.utils.naming import sanitize_tool_name
 
                         original_name = tool_schema.__name__
                         if tool_name != original_name:
@@ -172,7 +171,7 @@ class ValidationNodeConfigV2(BaseNodeConfig):
             logger.exception(f"ValidationNodeV2 error: {e}")
             # Log more details about the error
             logger.error(f"Exception type: {type(e).__name__}")
-            logger.error(f"Exception message: {str(e)}")
+            logger.error(f"Exception message: {e!s}")
             logger.error(f"Tool calls: {tool_calls}")
             logger.error(f"Schemas by name: {schemas_by_name}")
 

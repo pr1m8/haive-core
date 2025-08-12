@@ -7,8 +7,9 @@ that were previously in the main __init__.py file.
 import functools
 import inspect
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional
 
 from haive.core.utils.debugkit.analysis import (
     get_complexity_analyzer,
@@ -69,7 +70,7 @@ class CodeAnalysisReport:
         function_name: str,
         type_analysis: "FunctionTypeAnalysis",
         complexity_analysis: "ComplexityReport",
-        static_analysis: Optional[Dict[str, "AnalysisResult"]] = None,
+        static_analysis: dict[str, "AnalysisResult"] | None = None,
     ):
         """Initialize code analysis report.
 
@@ -112,7 +113,7 @@ class CodeAnalysisReport:
 
         return type_score + complexity_score + static_score
 
-    def _generate_combined_recommendations(self) -> List[str]:
+    def _generate_combined_recommendations(self) -> list[str]:
         """Generate combined recommendations from all analyses.
 
         Returns:
@@ -140,7 +141,7 @@ class CodeAnalysisReport:
 
         return unique_recommendations
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Get summary of the analysis report.
 
         Returns:
@@ -235,13 +236,13 @@ class UnifiedDev:
         self.benchmark = benchmark
 
         # Analysis interfaces (lazy loaded)
-        self._type_analyzer: Optional["TypeAnalyzer"] = None
-        self._complexity_analyzer: Optional["ComplexityAnalyzer"] = None
-        self._static_orchestrator: Optional["StaticAnalysisOrchestrator"] = None
+        self._type_analyzer: TypeAnalyzer | None = None
+        self._complexity_analyzer: ComplexityAnalyzer | None = None
+        self._static_orchestrator: StaticAnalysisOrchestrator | None = None
 
         # State
-        self._correlation_id: Optional[str] = None
-        self._analysis_cache: Dict[str, CodeAnalysisReport] = {}
+        self._correlation_id: str | None = None
+        self._analysis_cache: dict[str, CodeAnalysisReport] = {}
 
     @property
     def type_analyzer(self) -> "TypeAnalyzer":
@@ -265,7 +266,7 @@ class UnifiedDev:
         return self._static_orchestrator
 
     @property
-    def correlation_id(self) -> Optional[str]:
+    def correlation_id(self) -> str | None:
         """Get current correlation ID.
 
         Returns:
@@ -401,14 +402,14 @@ class UnifiedDev:
 
     def instrument(
         self,
-        func: Optional[Callable] = None,
+        func: Callable | None = None,
         *,
         analyze: bool = False,
         profile: bool = None,
         trace: bool = None,
         log: bool = None,
         **options: Any,
-    ) -> Union[Callable, Callable[[Callable], Callable]]:
+    ) -> Callable | Callable[[Callable], Callable]:
         """Decorator for comprehensive function instrumentation.
 
         Adds logging, tracing, profiling, and optional analysis to functions.
@@ -474,7 +475,7 @@ class UnifiedDev:
                 except Exception as e:
                     if enable_log:
                         self.log.warning(
-                            f"Code analysis failed for {f.__name__}: {str(e)}"
+                            f"Code analysis failed for {f.__name__}: {e!s}"
                         )
 
             @functools.wraps(f)
@@ -608,7 +609,7 @@ class UnifiedDev:
         if self._type_analyzer:
             self._type_analyzer.clear_cache()
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get development utilities statistics.
 
         Returns:

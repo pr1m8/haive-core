@@ -133,7 +133,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         return (
             len(self.edges)
             + len(self.waiting_edges)
-            + sum((len(branch_dict) for branch_dict in self.branches.values()))
+            + sum(len(branch_dict) for branch_dict in self.branches.values())
         )
 
     @computed_field
@@ -198,7 +198,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
             if dst != name and name not in srcs:
                 new_waiting_edges.add((srcs, dst))
             elif dst != name:
-                new_srcs = tuple((src for src in srcs if src != name))
+                new_srcs = tuple(src for src in srcs if src != name)
                 if new_srcs:
                     new_waiting_edges.add((new_srcs, dst))
         self.waiting_edges = new_waiting_edges

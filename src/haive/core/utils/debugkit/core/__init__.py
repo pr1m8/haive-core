@@ -9,7 +9,7 @@ from haive.core.utils.debugkit.core.context import DevContext
 from haive.core.utils.debugkit.core.unified import CodeAnalysisReport, UnifiedDev
 
 __all__ = [
+    "CodeAnalysisReport",
     "DevContext",
     "UnifiedDev",
-    "CodeAnalysisReport",
 ]
