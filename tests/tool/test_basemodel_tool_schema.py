@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """Trace BaseModel tool schema creation."""
 
-from pydantic import BaseModel, Field
-from haive.core.engine.tool import ToolEngine
-from langchain_core.tools import tool
 import json
+
+from langchain_core.tools import tool
+from pydantic import BaseModel, Field
+
+from haive.core.engine.tool import ToolEngine
+
 
 class MyTool(BaseModel):
     """A configurable tool."""
     config: str = Field(default="default", description="Tool configuration")
     threshold: float = Field(default=0.5, description="Threshold value")
-    
+
     def __call__(self, query: str) -> str:
         """Process query with configuration."""
         return f"{self.config}: {query} (threshold={self.threshold})"
@@ -38,8 +41,8 @@ print("\n\n2️⃣ BaseModel as INSTANCE")
 try:
     instance = MyTool(config="custom", threshold=0.8)
     print(f"Instance callable: {callable(instance)}")
-    print(f"Instance __call__ exists: {hasattr(instance, '__call__')}")
-    
+    print(f"Instance __call__ exists: {callable(instance)}")
+
     engine2 = ToolEngine(tools=[instance])
     tools2 = engine2.get_tools()
     print(f"Number of tools: {len(tools2)}")
@@ -48,7 +51,7 @@ try:
         print(f"Tool type: {type(tool2)}")
         print(f"Tool name: {tool2.name}")
         print(f"Input schema: {tool2.args_schema.schema() if hasattr(tool2, 'args_schema') else 'No schema'}")
-        
+
         # Try to call it
         result = tool2.invoke({"query": "test input"})
         print(f"Tool result: {result}")
@@ -73,6 +76,7 @@ print(f"\nInstance values: config='{instance.config}', threshold={instance.thres
 # Test 5: Direct __call__ signature
 print("\n\n5️⃣ __call__ signature analysis")
 import inspect
+
 sig = inspect.signature(MyTool.__call__)
 print(f"__call__ signature: {sig}")
 print(f"__call__ parameters: {list(sig.parameters.keys())}")

@@ -64,7 +64,7 @@ def test_postgres_connection_settings():
 
         return True
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -121,7 +121,7 @@ def test_conversation_agent_persistence():
 
         return True
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()

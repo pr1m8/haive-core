@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Debug tool naming in mixed tools."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+
 from haive.core.engine.aug_llm import AugLLMConfig
+
 
 class ExecutableModel(BaseModel):
     """BaseModel with __call__."""
     multiplier: int = 2
-    
+
     def __call__(self, value: int) -> int:
         return value * self.multiplier
 
@@ -23,13 +25,13 @@ print("="*60)
 instance = ExecutableModel(multiplier=5)
 config = AugLLMConfig(tools=[ExecutableModel, instance, NonExecutableModel])
 
-print(f"All tools in config.tools:")
+print("All tools in config.tools:")
 for i, tool in enumerate(config.tools):
     print(f"  {i}: {tool} (type: {type(tool)})")
-    if hasattr(tool, '__name__'):
+    if hasattr(tool, "__name__"):
         print(f"     __name__: {tool.__name__}")
 
-print(f"\nAll tool routes:")
+print("\nAll tool routes:")
 for name, route in config.tool_routes.items():
     print(f"  {name}: {route}")
 

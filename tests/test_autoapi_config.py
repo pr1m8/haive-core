@@ -6,7 +6,6 @@ This validates the settings before running the full build
 
 import sys
 from pathlib import Path
-import os
 
 # Add the project to Python path
 project_root = Path(__file__).parent
@@ -41,7 +40,7 @@ except ImportError as e:
 
 try:
     import haive.core
-    print(f"✅ Successfully imported haive.core")
+    print("✅ Successfully imported haive.core")
 except ImportError as e:
     print(f"❌ Failed to import haive.core: {e}")
 
@@ -64,7 +63,7 @@ if haive_dir.exists():
             # Check for core subdirectories
             if item.name == "core":
                 core_dir = item
-                print(f"     📂 Contents of core/:")
+                print("     📂 Contents of core/:")
                 for core_item in sorted(core_dir.iterdir())[:5]:  # Limit output
                     if core_item.is_dir():
                         print(f"       📁 {core_item.name}/")
@@ -81,19 +80,20 @@ except ImportError as e:
 
 try:
     from haive.core.engine.embedding.providers import OpenAIEmbeddingConfig
-    print(f"✅ Embedding providers accessible: OpenAIEmbeddingConfig")
+    print("✅ Embedding providers accessible: OpenAIEmbeddingConfig")
 except ImportError as e:
     print(f"❌ Embedding provider import failed: {e}")
 
 # Test 6: Namespace package test
 print("\n6. 🏷️  Namespace Package Test:")
 import pkgutil
+
 for importer, modname, ispkg in pkgutil.walk_packages(
-    path=[str(packages_dir / "haive-core/src/haive")], 
+    path=[str(packages_dir / "haive-core/src/haive")],
     prefix="haive.",
     onerror=lambda x: None
 ):
-    if ispkg and modname.count('.') <= 2:  # Limit depth
+    if ispkg and modname.count(".") <= 2:  # Limit depth
         print(f"   📦 {modname}")
 
 print("\n🎯 Configuration Summary:")

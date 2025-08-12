@@ -76,7 +76,7 @@ def view_ps_errors():
                         if "error" in meta_dict:
                             pass
 
-                    except Exception as e:
+                    except Exception:
                         pass
 
                 # Get stats on which agents have errors
@@ -92,7 +92,7 @@ def view_ps_errors():
 
                 stats = cur.fetchone()
 
-    except Exception as e:
+    except Exception:
         pass
 
 

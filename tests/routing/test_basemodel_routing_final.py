@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Test final BaseModel routing behavior."""
 
+import logging
+
+from langchain_core.messages import HumanMessage, ToolCall
 from pydantic import BaseModel, Field
+
+from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.graph.node.validation_node_v2 import ValidationNodeV2
-from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
-from langchain_core.messages import HumanMessage, ToolCall
-import logging
 
 logging.basicConfig(level=logging.INFO)
 
@@ -18,7 +20,7 @@ class PlainModel(BaseModel):
 class ExecutableModel(BaseModel):
     """BaseModel with __call__ - can be a tool."""
     multiplier: int = Field(default=2, description="Multiplication factor")
-    
+
     def __call__(self, value: int) -> int:
         """Multiply value by the configured multiplier."""
         return value * self.multiplier
@@ -76,7 +78,7 @@ state = {
                     id="call_1"
                 ),
                 ToolCall(
-                    name="ExecutableModel", 
+                    name="ExecutableModel",
                     args={"value": 5},
                     id="call_2"
                 )
@@ -92,7 +94,7 @@ class MockEngine:
             "PlainModel": "pydantic_model",
             "ExecutableModel": "pydantic_tool"
         }
-    
+
     def get_tool_route(self, name):
         return self.tool_routes.get(name)
 
@@ -106,6 +108,6 @@ print("\n" + "="*80)
 print("SUMMARY")
 print("="*80)
 print("✅ pydantic_model = BaseModel without __call__ (error for tools)")
-print("✅ pydantic_tool = BaseModel with __call__ (executable)")  
+print("✅ pydantic_tool = BaseModel with __call__ (executable)")
 print("✅ parse_output = BaseModel for structured output")
 print("\nEach route serves a distinct purpose in the system!")

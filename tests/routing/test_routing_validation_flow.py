@@ -2,21 +2,23 @@
 """Test to trace the validation flow for parse_output route."""
 
 import logging
+
 from pydantic import BaseModel, Field
-from haive.core.engine.aug_llm import AugLLMConfig
+
 from haive.agents.simple.agent import SimpleAgent
+from haive.core.engine.aug_llm import AugLLMConfig
 
 # Configure detailed logging
 logging.basicConfig(
     level=logging.DEBUG,
-    format='%(name)s - %(message)s'
+    format="%(name)s - %(message)s"
 )
 
 # Focus on key loggers
 for logger_name in [
-    'haive.core.graph.node.validation_node_v2',
-    'haive.core.common.mixins.tool_route_mixin',
-    'haive.core.engine.aug_llm.config'
+    "haive.core.graph.node.validation_node_v2",
+    "haive.core.common.mixins.tool_route_mixin",
+    "haive.core.engine.aug_llm.config"
 ]:
     logging.getLogger(logger_name).setLevel(logging.DEBUG)
 
@@ -64,7 +66,7 @@ print("\n\n3️⃣ Testing Deprecated Route Warning")
 print("-" * 40)
 
 # Manually set a pydantic_model route to see the warning
-agent2.engine.tool_routes['AnalysisResult'] = 'pydantic_model'
+agent2.engine.tool_routes["AnalysisResult"] = "pydantic_model"
 print(f"📋 Manually set route to: {agent2.engine.tool_routes.get('AnalysisResult')}")
 print("\n🔍 This should trigger a deprecation warning when used...")
 

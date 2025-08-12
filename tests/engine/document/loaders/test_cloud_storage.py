@@ -11,7 +11,6 @@ This test validates:
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 
 # Add the source path to sys.path
 base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src")
@@ -63,7 +62,7 @@ try:
         IAM_ROLE = "iam_role"
 
 
-except Exception as e:
+except Exception:
     pass
 
 
@@ -207,7 +206,7 @@ def test_s3_sources():
 
             s3_tests_passed += 1
 
-        except Exception as e:
+        except Exception:
             pass
 
     return s3_tests_passed >= 2
@@ -270,7 +269,7 @@ def test_file_sharing_services():
 
             sharing_tests_passed += 1
 
-        except Exception as e:
+        except Exception:
             pass
 
     return sharing_tests_passed >= 2
@@ -337,14 +336,12 @@ def test_data_lake_sources():
                 source = MockDeltaLakeSource(**config)
                 loader_kwargs = source.get_loader_kwargs()
 
-                if "version" in loader_kwargs:
-                    pass
-                elif "timestamp" in loader_kwargs:
+                if "version" in loader_kwargs or "timestamp" in loader_kwargs:
                     pass
 
             lake_tests_passed += 1
 
-        except Exception as e:
+        except Exception:
             pass
 
     return lake_tests_passed >= 2
@@ -394,7 +391,7 @@ def test_enterprise_storage():
 
             enterprise_tests_passed += 1
 
-        except Exception as e:
+        except Exception:
             pass
 
     return enterprise_tests_passed >= 1
@@ -436,7 +433,7 @@ def test_authentication_types():
         try:
             auth_tests_passed += 1
 
-        except Exception as e:
+        except Exception:
             pass
 
     return auth_tests_passed >= 4

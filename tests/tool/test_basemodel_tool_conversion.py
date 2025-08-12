@@ -2,10 +2,12 @@
 """Test how BaseModel tools are actually handled."""
 
 import logging
-from pydantic import BaseModel, Field
-from haive.core.engine.tool import ToolEngine
-from haive.core.engine.aug_llm import AugLLMConfig
+
 from langchain_core.tools import StructuredTool
+from pydantic import BaseModel
+
+from haive.core.engine.aug_llm import AugLLMConfig
+from haive.core.engine.tool import ToolEngine
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,7 +36,7 @@ print(f"Tool count: {len(engine1.get_tools())}")
 class ExecutableModel(BaseModel):
     """Model with __call__ method."""
     query: str
-    
+
     def __call__(self):
         return f"Executed: {self.query}"
 
@@ -62,7 +64,7 @@ print("-"*40)
 config1 = AugLLMConfig(tools=[NonExecutableModel])
 print(f"\nNon-executable model routes: {config1.tool_routes}")
 
-# With executable model  
+# With executable model
 config2 = AugLLMConfig(tools=[ExecutableModel])
 print(f"Executable model routes: {config2.tool_routes}")
 print(f"Processed tools in config: {config2.get_tools()}")

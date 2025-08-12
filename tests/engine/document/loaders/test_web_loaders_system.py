@@ -11,7 +11,6 @@ This test validates:
 import importlib.util
 import sys
 from pathlib import Path
-from typing import Any, Dict
 
 
 # Direct imports to avoid package dependency issues
@@ -56,7 +55,7 @@ try:
     )
 
 
-except Exception as e:
+except Exception:
     import traceback
 
     traceback.print_exc()
@@ -103,7 +102,7 @@ def test_web_loaders_system():
                 sitemap_found_count += 1
             else:
                 pass
-        except Exception as e:
+        except Exception:
             pass
 
     # Test 3: Web Source Auto-Classification
@@ -125,7 +124,7 @@ def test_web_loaders_system():
                     classification_success += 1
             else:
                 pass
-        except Exception as e:
+        except Exception:
             pass
 
     # Test 4: Browser Automation Sources
@@ -157,7 +156,7 @@ def test_web_loaders_system():
                 bulk_info = recursive_registration.bulk_info
         else:
             pass
-    except Exception as e:
+    except Exception:
         pass
 
     # Test 6: Documentation Site Sources
@@ -262,7 +261,7 @@ def main():
         print("❌ Web system tests failed")
         return False
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()

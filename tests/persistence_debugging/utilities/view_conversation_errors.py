@@ -42,9 +42,7 @@ def main():
                     for contrib in contributions[:5]:  # First 5
                         if len(contrib) >= 3:
                             agent, section, content = contrib[0], contrib[1], contrib[2]
-                            if "prepared statement" in content:
-                                pass
-                            elif "Error" in content:
+                            if "prepared statement" in content or "Error" in content:
                                 pass
 
     # Also look for any records with "prepared statement" in text
@@ -71,9 +69,7 @@ def main():
             if "channel_values" in checkpoint:
                 values = checkpoint["channel_values"]
                 for key, value in values.items():
-                    if isinstance(value, str) and "prepared statement" in value:
-                        pass
-                    elif (
+                    if (isinstance(value, str) and "prepared statement" in value) or (
                         key == "shared_document"
                         and isinstance(value, str)
                         and "prepared statement" in value

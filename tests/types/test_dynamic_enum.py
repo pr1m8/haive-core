@@ -30,7 +30,7 @@ def test_dynamic_removal():
     AnimalType.unregister("cat")
     try:
         Animal(kind="cat", name="Whiskers")
-    except ValidationError as e:
+    except ValidationError:
         pass
 
 

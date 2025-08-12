@@ -7,7 +7,6 @@ directly to avoid the cascading import issues with the main document engine.
 import importlib.util
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
 
 
 # Direct imports to avoid package dependency issues
@@ -51,7 +50,7 @@ try:
     )
 
 
-except Exception as e:
+except Exception:
     import traceback
 
     traceback.print_exc()
@@ -97,7 +96,7 @@ def test_database_system():
 
         registration_success = db_validation and db_stats["total_database_sources"] >= 9
 
-    except Exception as e:
+    except Exception:
         registration_success = False
 
     # Test 3: Loading Strategies
@@ -130,10 +129,10 @@ def test_database_system():
 
                 strategies_tested += 1
 
-            except Exception as e:
+            except Exception:
                 pass
 
-    except Exception as e:
+    except Exception:
         pass
 
     # Test 4: Text Splitter Configuration
@@ -161,10 +160,10 @@ def test_database_system():
 
                 splitters_tested += 1
 
-            except Exception as e:
+            except Exception:
                 pass
 
-    except Exception as e:
+    except Exception:
         pass
 
     # Test 5: Fetch All Configuration
@@ -192,7 +191,7 @@ def test_database_system():
 
         fetch_all_success = True
 
-    except Exception as e:
+    except Exception:
         fetch_all_success = False
 
     # Test 6: Document Schema Integration
@@ -222,7 +221,7 @@ def test_database_system():
 
         schema_success = True
 
-    except Exception as e:
+    except Exception:
         schema_success = False
 
     # Test 7: Specific Database Source Classes
@@ -277,7 +276,7 @@ def test_database_system():
 
             class_tests_passed += 1
 
-        except Exception as e:
+        except Exception:
             pass
 
     # Summary
@@ -340,7 +339,7 @@ def display_current_progress():
         estimated_total = 13 + 25 + 12 + 11 + 9  # Current phases
         progress_percentage = (estimated_total / 231) * 100
 
-    except Exception as e:
+    except Exception:
         pass
 
 
@@ -351,7 +350,7 @@ def main():
         display_current_progress()
         return success
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()

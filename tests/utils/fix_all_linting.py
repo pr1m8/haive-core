@@ -8,10 +8,9 @@ consistent code quality across the entire codebase.
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 
-def find_packages() -> List[Path]:
+def find_packages() -> list[Path]:
     """Find all package directories with trunk configurations."""
     packages_dir = Path("../../..")  # From tests/utils back to packages
     packages = []
@@ -26,12 +25,12 @@ def find_packages() -> List[Path]:
     return sorted(packages)
 
 
-def run_trunk_command(package_dir: Path, command: List[str]) -> Tuple[int, str, str]:
+def run_trunk_command(package_dir: Path, command: list[str]) -> tuple[int, str, str]:
     """Run a trunk command in the specified package directory."""
     try:
         result = subprocess.run(
             command,
-            cwd=package_dir,
+            check=False, cwd=package_dir,
             capture_output=True,
             text=True,
             timeout=300,  # 5 minute timeout
@@ -43,7 +42,7 @@ def run_trunk_command(package_dir: Path, command: List[str]) -> Tuple[int, str, 
         return 1, "", f"Error running command: {e}"
 
 
-def fix_package_linting(package_dir: Path) -> Dict[str, any]:
+def fix_package_linting(package_dir: Path) -> dict[str, any]:
     """Fix linting issues in a single package."""
     package_name = package_dir.name
     print(f"\n🔧 Fixing {package_name}...")
@@ -132,7 +131,7 @@ def count_issues_from_output(output: str) -> int:
                         return int(part)
 
     # If no issues found in summary, assume 0
-    if "✔ No issues" in output or "Checked" in output and "✔" in output:
+    if "✔ No issues" in output or ("Checked" in output and "✔" in output):
         return 0
 
     # Count individual issue lines as fallback
@@ -144,7 +143,7 @@ def count_issues_from_output(output: str) -> int:
     return issue_count
 
 
-def generate_report(all_results: List[Dict[str, any]]) -> None:
+def generate_report(all_results: list[dict[str, any]]) -> None:
     """Generate a comprehensive report of all linting fixes."""
     print("\n" + "=" * 80)
     print("🎯 LINTING FIX REPORTRT")

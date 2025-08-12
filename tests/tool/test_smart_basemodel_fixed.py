@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 """Test smart BaseModel routing - fixed version."""
 
+
 from pydantic import BaseModel, Field
-from haive.core.engine.aug_llm import AugLLMConfig
+
 from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
-from haive.core.engine.tool import ToolEngine
-import json
+from haive.core.engine.aug_llm import AugLLMConfig
+
 
 class SearchTool(BaseModel):
     """A tool that needs configuration."""
     api_key: str = Field(description="API key for the service")
     endpoint: str = Field(default="https://api.example.com", description="API endpoint")
     max_results: int = Field(default=10, description="Maximum results")
-    
+
     def __call__(self, query: str, filters: str = "") -> str:
         """Execute search with the configured settings."""
         return f"Searching '{query}' at {self.endpoint} (key: {self.api_key[:8]}..., max: {self.max_results})"
@@ -28,19 +29,19 @@ print("-"*60)
 # ToolRouteMixin analysis (more sophisticated)
 mixin = ToolRouteMixin()
 class_route, class_meta = mixin._analyze_tool(SearchTool)
-print(f"ToolRouteMixin - SearchTool CLASS:")
+print("ToolRouteMixin - SearchTool CLASS:")
 print(f"  Route: '{class_route}'")
 print(f"  is_executable: {class_meta.get('is_executable')}")
 
 instance = SearchTool(api_key="sk-1234567890")
 instance_route, instance_meta = mixin._analyze_tool(instance)
-print(f"\nToolRouteMixin - SearchTool INSTANCE:")
+print("\nToolRouteMixin - SearchTool INSTANCE:")
 print(f"  Route: '{instance_route}'")
 print(f"  callable_type: {instance_meta.get('callable_type')}")
 
 # AugLLMConfig behavior (simpler)
 config1 = AugLLMConfig(tools=[SearchTool])
-print(f"\nAugLLMConfig - SearchTool CLASS:")
+print("\nAugLLMConfig - SearchTool CLASS:")
 print(f"  Route: {config1.tool_routes.get('SearchTool')}")
 
 # Test 2: The Gap - ToolRouteMixin sees it correctly
@@ -50,7 +51,7 @@ print("ToolRouteMixin detects:")
 print(f"  SearchTool (class) → '{class_route}' (executable: {class_meta.get('is_executable')})")
 print(f"  instance → '{instance_route}'")
 print("\nAugLLMConfig uses:")
-print(f"  SearchTool (class) → 'pydantic_model'")
+print("  SearchTool (class) → 'pydantic_model'")
 print("  instance → Causes error")
 
 print("\nThe disconnect: ToolRouteMixin is smarter but AugLLMConfig overrides it!")
@@ -64,7 +65,7 @@ print("1. SearchTool (class) should create tool with FULL schema:")
 print("   - Fields: api_key, endpoint, max_results, query, filters")
 print("   - Creates new instance each call")
 
-print("\n2. instance should create tool with CALL schema:")  
+print("\n2. instance should create tool with CALL schema:")
 print("   - Fields: query, filters")
 print("   - Uses pre-configured instance")
 
@@ -73,6 +74,7 @@ print("\n\n4️⃣ Manual Implementation Test")
 print("-"*60)
 
 from langchain_core.tools import tool
+
 
 # Simulate class-based tool (full schema)
 @tool

@@ -12,8 +12,6 @@ This test validates:
 import importlib.util
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
-from unittest.mock import Mock, patch
 
 
 # Direct imports to avoid package dependency issues
@@ -64,7 +62,7 @@ try:
     )
 
 
-except Exception as e:
+except Exception:
     import traceback
 
     traceback.print_exc()
@@ -146,7 +144,7 @@ def test_database_loaders_system():
                     classification_success += 1
             else:
                 pass
-        except Exception as e:
+        except Exception:
             pass
 
     # Test 4: Loading Strategy Configuration
@@ -183,7 +181,7 @@ def test_database_loaders_system():
 
             strategy_tests_passed += 1
 
-        except Exception as e:
+        except Exception:
             pass
 
     assert strategy_tests_passed >= 4, "Most loading strategies should work"
@@ -219,7 +217,7 @@ def test_database_loaders_system():
 
             splitter_tests_passed += 1
 
-        except Exception as e:
+        except Exception:
             pass
 
     # Test 6: Fetch All Configuration
@@ -244,7 +242,7 @@ def test_database_loaders_system():
         assert fetch_config["fetch_all_tables"], "Fetch all tables not enabled"
         assert "user_temp" in fetch_config["exclude_tables"], "Exclude tables not working"
 
-    except Exception as e:
+    except Exception:
         pass
 
     # Test 7: Database-Specific Features
@@ -273,7 +271,7 @@ def test_database_loaders_system():
             else:
                 pass
 
-        except Exception as e:
+        except Exception:
             pass
 
     # Test 8: Document State Schema Integration
@@ -302,7 +300,7 @@ def test_database_loaders_system():
         assert source_info.source_type == "postgresql", "Source type not preserved"
         assert source_info.chunks_created == 45, "Chunk count not preserved"
 
-    except Exception as e:
+    except Exception:
         pass
 
     # Test 9: Multi-Database Integration Test
@@ -346,7 +344,7 @@ def test_database_loaders_system():
             else:
                 pass
 
-        except Exception as e:
+        except Exception:
             pass
 
     # Test 10: Overall System Statistics
@@ -388,7 +386,7 @@ def main():
         print("❌ Database system tests failed")
         return False
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()

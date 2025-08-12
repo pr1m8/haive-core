@@ -2,8 +2,10 @@
 """Test BaseModel routing behavior."""
 
 from pydantic import BaseModel, Field
-from haive.core.engine.aug_llm import AugLLMConfig
+
 from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
+from haive.core.engine.aug_llm import AugLLMConfig
+
 
 class StatelessTool(BaseModel):
     """BaseModel without __call__ - cannot be a tool."""
@@ -13,7 +15,7 @@ class StatelessTool(BaseModel):
 class StatefulTool(BaseModel):
     """BaseModel with __call__ - can be a tool."""
     multiplier: int = Field(default=2)
-    
+
     def __call__(self, value: int) -> int:
         return value * self.multiplier
 
@@ -45,7 +47,7 @@ print("\n4️⃣ In AugLLMConfig:")
 config1 = AugLLMConfig(tools=[StatelessTool])
 print(f"\nStateless class routes: {config1.tool_routes}")
 
-# Test with stateful class  
+# Test with stateful class
 config2 = AugLLMConfig(tools=[StatefulTool])
 print(f"Stateful class routes: {config2.tool_routes}")
 

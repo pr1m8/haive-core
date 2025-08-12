@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 """Test database persistence and retrieve data by thread ID."""
 
-import json
 import os
 import uuid
-from datetime import datetime
 
 import psycopg2
+
 from haive.agents.conversation.collaberative.agent import CollaborativeConversation
 from haive.agents.simple.agent import SimpleAgent
-
 from haive.core.models.llm.base import AugLLMConfig
 
 

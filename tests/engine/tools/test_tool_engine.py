@@ -1,15 +1,13 @@
 """Tests for the enhanced ToolEngine with universal typing."""
 import pytest
-from langchain_core.tools import StructuredTool, tool
+from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
 from haive.core.engine.tool import (
-    ToolEngine,
-    ToolLike,
-    ToolType,
-    ToolCategory,
     ToolCapability,
-    ToolProperties,
+    ToolCategory,
+    ToolEngine,
+    ToolType,
 )
 
 
@@ -33,7 +31,7 @@ def calculator(expression: str) -> str:
         result = eval(expression)
         return f"Result: {result}"
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"Error: {e!s}"
 
 
 def test_tool_engine_creation():
@@ -42,7 +40,7 @@ def test_tool_engine_creation():
         tools=[calculator],
         enable_analysis=True
     )
-    
+
     assert engine is not None
     assert engine.engine_type.value == "tool"
     assert len(engine._tool_properties) > 0
@@ -54,7 +52,7 @@ def test_tool_analysis():
         tools=[calculator],
         enable_analysis=True
     )
-    
+
     props = engine.get_tool_properties("calculator")
     assert props is not None
     assert props.name == "calculator"
@@ -69,13 +67,13 @@ def test_create_retriever_tool():
     class MockRetriever:
         def get_relevant_documents(self, query: str):
             return [{"content": f"Result for {query}"}]
-    
+
     retriever_tool = ToolEngine.create_retriever_tool(
         retriever=MockRetriever(),
         name="test_retriever",
         description="Test retrieval tool"
     )
-    
+
     assert retriever_tool.name == "test_retriever"
     assert hasattr(retriever_tool, "__tool_type__")
     assert retriever_tool.__tool_type__ == ToolType.RETRIEVER_TOOL
@@ -88,13 +86,13 @@ def test_create_state_tool():
     def state_reader(state_key: str) -> str:
         """Read value from state."""
         return f"Value for {state_key}"
-    
+
     state_tool = ToolEngine.create_state_tool(
         func=state_reader,
         reads_state=True,
         state_keys=["messages", "context"]
     )
-    
+
     assert hasattr(state_tool, "__tool_capabilities__")
     assert ToolCapability.READS_STATE in state_tool.__tool_capabilities__
     assert ToolCapability.STATE_AWARE in state_tool.__tool_capabilities__
@@ -108,12 +106,12 @@ def test_create_interruptible_tool():
     def long_task(duration: int) -> str:
         """Perform a long-running task."""
         return f"Task completed in {duration} seconds"
-    
+
     interruptible = ToolEngine.create_interruptible_tool(
         func=long_task,
         interrupt_message="Task interrupted by user"
     )
-    
+
     assert hasattr(interruptible, "is_interruptible")
     assert interruptible.is_interruptible is True
     assert hasattr(interruptible, "interrupt")
@@ -132,14 +130,14 @@ def test_create_structured_output_tool():
             )
             for i in range(limit)
         ]
-    
+
     structured_tool = ToolEngine.create_structured_output_tool(
         func=search_function,
         name="structured_search",
         description="Search with structured output",
         output_model=SearchResult
     )
-    
+
     assert structured_tool.name == "structured_search"
     assert hasattr(structured_tool, "structured_output_model")
     assert structured_tool.structured_output_model == SearchResult
@@ -152,7 +150,7 @@ def test_augment_tool():
     def basic_tool(x: str) -> str:
         """A basic tool."""
         return f"Result: {x}"
-    
+
     enhanced = ToolEngine.augment_tool(
         basic_tool,
         make_interruptible=True,
@@ -161,14 +159,14 @@ def test_augment_tool():
         state_keys=["data"],
         structured_output_model=SearchResult
     )
-    
+
     # Check all enhancements were applied
     assert enhanced.is_interruptible is True
     assert enhanced.reads_state is True
     assert enhanced.writes_state is True
     assert enhanced.state_dependencies == ["data"]
     assert enhanced.structured_output_model == SearchResult
-    
+
     # Check capabilities
     capabilities = enhanced.__tool_capabilities__
     assert ToolCapability.INTERRUPTIBLE in capabilities
@@ -186,26 +184,26 @@ def test_tool_routing():
         name="retriever",
         description="Retrieves documents"
     )
-    
+
     state_tool = ToolEngine.create_state_tool(
         func=lambda x: x,
         name="state_tool",
         reads_state=True
     )
-    
+
     engine = ToolEngine(
         tools=[calculator, retriever, state_tool],
         routing_strategy="capability",
         enable_analysis=True
     )
-    
+
     # Test capability queries
     retrievers = engine.get_tools_by_capability(ToolCapability.RETRIEVER)
     assert "retriever" in retrievers
-    
+
     state_tools = engine.get_state_tools()
     assert "state_tool" in state_tools
-    
+
     # Test category queries
     computation_tools = engine.get_tools_by_category(ToolCategory.COMPUTATION)
     assert "calculator" in computation_tools
@@ -216,16 +214,16 @@ def test_store_tools_suite():
     # Mock StoreManager
     class MockStoreManager:
         pass
-    
+
     # Would need actual store_tools module to test fully
     # This is a placeholder to show the pattern
-    
+
     # tools = ToolEngine.create_store_tools_suite(
     #     store_manager=MockStoreManager(),
     #     namespace=("test", "namespace"),
     #     include_tools=["store", "search"]
     # )
-    
+
     # assert len(tools) == 2
     # for tool in tools:
     #     assert tool.__tool_type__ == ToolType.STORE_TOOL

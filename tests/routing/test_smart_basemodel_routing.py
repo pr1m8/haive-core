@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """Test smart BaseModel routing with defaults and overrides."""
 
+
 from pydantic import BaseModel, Field
-from haive.core.engine.aug_llm import AugLLMConfig
+
 from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
+from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.engine.tool import ToolEngine
-from langchain_core.tools import StructuredTool
-import json
+
 
 class SearchTool(BaseModel):
     """A tool that needs configuration."""
     api_key: str = Field(description="API key for the service")
     endpoint: str = Field(default="https://api.example.com", description="API endpoint")
     max_results: int = Field(default=10, description="Maximum results")
-    
+
     def __call__(self, query: str, filters: str = "") -> str:
         """Execute search with the configured settings."""
         return f"Searching '{query}' at {self.endpoint} (key: {self.api_key[:8]}..., max: {self.max_results})"
@@ -32,7 +33,7 @@ class_route, class_meta = mixin._analyze_tool(SearchTool)
 print(f"SearchTool CLASS route: '{class_route}'")
 print(f"  is_executable: {class_meta.get('is_executable', 'N/A')}")
 
-# Test instance routing  
+# Test instance routing
 instance = SearchTool(api_key="sk-1234567890")
 instance_route, instance_meta = mixin._analyze_tool(instance)
 print(f"SearchTool INSTANCE route: '{instance_route}'")
@@ -44,7 +45,7 @@ print("-"*50)
 
 # With class (should preserve BaseModel schema in future)
 config1 = AugLLMConfig(tools=[SearchTool])
-print(f"Class in AugLLMConfig:")
+print("Class in AugLLMConfig:")
 print(f"  Route: {config1.tool_routes.get('SearchTool', 'Not found')}")
 print(f"  Tool count: {len(config1.get_tools())}")
 
@@ -58,7 +59,7 @@ if tools1:
 # With instance (should use __call__ schema only)
 try:
     config2 = AugLLMConfig(tools=[instance])
-    print(f"\nInstance in AugLLMConfig:")
+    print("\nInstance in AugLLMConfig:")
     print(f"  Route: {config2.tool_routes}")
 except Exception as e:
     print(f"\nInstance in AugLLMConfig: ERROR - {e}")
@@ -93,9 +94,9 @@ if instance_result:
     print(f"  Instance result: {type(instance_result).__name__}")
     print(f"  Tool name: {instance_result.name}")
     print(f"  Tool description: {instance_result.description}")
-    
+
     # Check what schema we get
-    if hasattr(instance_result, 'args_schema'):
+    if hasattr(instance_result, "args_schema"):
         schema = instance_result.args_schema.model_json_schema()
         print(f"  Schema fields: {list(schema['properties'].keys())}")
 else:
@@ -111,8 +112,9 @@ print(f"  Fields: {list(base_schema['properties'].keys())}")
 
 print("\n__call__ schema (what we currently expose):")
 import inspect
+
 sig = inspect.signature(SearchTool.__call__)
-call_params = [p for p in sig.parameters.keys() if p != 'self']
+call_params = [p for p in sig.parameters.keys() if p != "self"]
 print(f"  Parameters: {call_params}")
 
 # Test 6: Proposed Behavior
@@ -132,7 +134,7 @@ print("\n" + "="*80)
 print("IMPLEMENTATION NEEDED:")
 print("="*80)
 print("✅ ToolRouteMixin detects class vs instance correctly")
-print("❌ AugLLMConfig needs to handle instances gracefully") 
+print("❌ AugLLMConfig needs to handle instances gracefully")
 print("❌ Need route that preserves BaseModel schema")
 print("❌ ToolEngine conversion needs both class and instance modes")
 print("✅ Override mechanism exists")

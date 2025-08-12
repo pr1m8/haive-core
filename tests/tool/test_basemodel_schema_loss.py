@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """Test schema loss when BaseModel becomes a tool."""
 
+
+from langchain_core.tools import tool
 from pydantic import BaseModel, Field
-from langchain_core.tools import tool, StructuredTool
-from typing import Type
-import json
+
 
 class SearchConfig(BaseModel):
     """Configuration for search tool."""
     api_key: str = Field(description="API key")
     endpoint: str = Field(default="https://api.example.com", description="API endpoint")
     max_retries: int = Field(default=3, description="Max retries")
-    
+
     def __call__(self, query: str) -> str:
         """Execute search with this configuration."""
         return f"Searching '{query}' at {self.endpoint} with key {self.api_key[:4]}..."
@@ -28,7 +28,7 @@ print("Required:", [k for k, v in SearchConfig.model_fields.items() if v.is_requ
 
 # 2. Create instance with configuration
 instance = SearchConfig(api_key="sk-123456789")
-print(f"\n2️⃣ Instance Configuration")
+print("\n2️⃣ Instance Configuration")
 print(f"api_key: {instance.api_key}")
 print(f"endpoint: {instance.endpoint}")
 print(f"max_retries: {instance.max_retries}")

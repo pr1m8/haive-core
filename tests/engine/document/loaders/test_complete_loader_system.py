@@ -12,7 +12,6 @@ This test verifies the entire document loader architecture including:
 import importlib.util
 import sys
 from pathlib import Path
-from typing import Any, Dict
 
 
 # Direct imports to avoid package dependency issues
@@ -67,7 +66,7 @@ try:
     )
 
 
-except Exception as e:
+except Exception:
     sys.exit(1)
 
 
@@ -247,7 +246,7 @@ def main():
 
         return True
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()

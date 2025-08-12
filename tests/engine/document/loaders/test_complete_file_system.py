@@ -12,7 +12,6 @@ This test validates:
 import importlib.util
 import sys
 from pathlib import Path
-from typing import Any, Dict
 
 
 # Direct imports to avoid package dependency issues
@@ -63,7 +62,7 @@ try:
     )
 
 
-except Exception as e:
+except Exception:
     import traceback
 
     traceback.print_exc()
@@ -283,7 +282,7 @@ def main():
         print("❌ System tests failed")
         return False
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()

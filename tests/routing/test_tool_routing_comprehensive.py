@@ -1,47 +1,50 @@
 #!/usr/bin/env python3
 """Comprehensive test for tool routing with different tool types and structured output models."""
 
-import logging
-from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, validator
-from langchain_core.tools import tool, BaseTool, StructuredTool
-from haive.core.engine.aug_llm import AugLLMConfig
-from haive.agents.simple.agent import SimpleAgent
 import asyncio
+import logging
+from typing import Any
+
+from langchain_core.tools import BaseTool, StructuredTool, tool
+from pydantic import BaseModel, Field, validator
+
+from haive.agents.simple.agent import SimpleAgent
+from haive.core.engine.aug_llm import AugLLMConfig
 
 # Configure detailed logging
 logging.basicConfig(
     level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 # Patch ValidationNodeV2 to add extra logging
 import haive.core.graph.node.validation_node_v2 as vn_module
+
 original_call = vn_module.ValidationNodeV2.__call__
 
 def patched_call(self, state, config=None):
     logger.info("🔍 ValidationNodeV2 INTERCEPTED - Analyzing tool routes:")
-    
+
     # Get tool routes from engine
     engine = self._get_engine_from_state(state)
-    if engine and hasattr(engine, 'tool_routes'):
+    if engine and hasattr(engine, "tool_routes"):
         logger.info(f"📋 Tool routes in engine: {engine.tool_routes}")
         for tool_name, route in engine.tool_routes.items():
             logger.info(f"  • {tool_name} → {route}")
-    
+
     # Get last message
     messages = getattr(state, self.messages_key, [])
     if messages:
         last_message = messages[-1]
-        if hasattr(last_message, 'tool_calls'):
-            tool_calls = getattr(last_message, 'tool_calls', [])
+        if hasattr(last_message, "tool_calls"):
+            tool_calls = getattr(last_message, "tool_calls", [])
             logger.info(f"🔧 Tool calls in message: {len(tool_calls)}")
             for tc in tool_calls:
-                tool_name = tc.get('name', 'unknown')
-                route = engine.tool_routes.get(tool_name, 'unknown') if engine else 'no_engine'
+                tool_name = tc.get("name", "unknown")
+                route = engine.tool_routes.get(tool_name, "unknown") if engine else "no_engine"
                 logger.info(f"  • Tool call: {tool_name} → route: {route}")
-    
+
     return original_call(self, state, config)
 
 vn_module.ValidationNodeV2.__call__ = patched_call
@@ -59,14 +62,14 @@ class SimpleModel(BaseModel):
 class ComplexModel(BaseModel):
     """Complex Pydantic model with nested fields."""
     title: str
-    items: List[str] = Field(default_factory=list)
-    metadata: Optional[Dict[str, Any]] = None
+    items: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] | None = None
 
 # Model with __call__ method (executable)
 class ExecutableModel(BaseModel):
     """Pydantic model with __call__ method."""
     query: str
-    
+
     def __call__(self):
         return f"Executed: {self.query}"
 
@@ -81,7 +84,7 @@ agent_1a = SimpleAgent(
     engine=config_1a,
 )
 
-print(f"\n🔍 Tool routes after setup:")
+print("\n🔍 Tool routes after setup:")
 for name, route in config_1a.tool_routes.items():
     print(f"  • {name} → {route}")
 
@@ -96,7 +99,7 @@ agent_1b = SimpleAgent(
     engine=config_1b,
 )
 
-print(f"\n🔍 Tool routes after setup:")
+print("\n🔍 Tool routes after setup:")
 for name, route in config_1b.tool_routes.items():
     print(f"  • {name} → {route}")
 
@@ -112,7 +115,7 @@ agent_1c = SimpleAgent(
     engine=config_1c,
 )
 
-print(f"\n🔍 Tool routes after setup:")
+print("\n🔍 Tool routes after setup:")
 for name, route in config_1c.tool_routes.items():
     print(f"  • {name} → {route}")
 
@@ -138,10 +141,10 @@ structured_calc = StructuredTool.from_function(
 class SearchTool(BaseTool):
     name: str = "search"
     description: str = "Search for information"
-    
+
     def _run(self, query: str) -> str:
         return f"Search results for: {query}"
-    
+
     async def _arun(self, query: str) -> str:
         return self._run(query)
 
@@ -158,7 +161,7 @@ agent_2 = SimpleAgent(
     engine=config_2,
 )
 
-print(f"\n🔍 Tool routes after setup:")
+print("\n🔍 Tool routes after setup:")
 for name, route in config_2.tool_routes.items():
     metadata = config_2.tool_route_metadata.get(name, {})
     print(f"  • {name} → {route}")
@@ -171,7 +174,7 @@ print("="*80)
 
 async def test_execution():
     """Test actual execution to see routing in action."""
-    
+
     # Test with structured output
     print("\n--- Executing agent with structured output ---")
     agent = SimpleAgent(
@@ -181,12 +184,12 @@ async def test_execution():
             temperature=0.1,
                 ),
         )
-    
+
     # This should trigger the structured output flow
     result = await agent.arun("Create a SimpleModel with name='test' and value=42")
     print(f"\n✅ Result type: {type(result)}")
     print(f"✅ Result: {result}")
-    
+
     # Test with Pydantic model as tool
     print("\n--- Executing agent with Pydantic tool ---")
     agent_tool = SimpleAgent(
@@ -196,7 +199,7 @@ async def test_execution():
             temperature=0.1,
                 ),
         )
-    
+
     # This should trigger tool validation
     result_tool = await agent_tool.arun("Use SimpleModel tool with name='tool_test' and value=99")
     print(f"\n✅ Result: {result_tool}")
@@ -213,18 +216,17 @@ print("="*80)
 # Empty model
 class EmptyModel(BaseModel):
     """Model with no fields."""
-    pass
 
 # Model with complex validation
 class ValidatedModel(BaseModel):
     """Model with validators."""
     email: str
     age: int = Field(ge=0, le=150)
-    
-    @validator('email')
+
+    @validator("email")
     def validate_email(cls, v):
-        if '@' not in v:
-            raise ValueError('Invalid email')
+        if "@" not in v:
+            raise ValueError("Invalid email")
         return v
 
 print("\n--- Test 4: Edge case models ---")
@@ -237,7 +239,7 @@ agent_4 = SimpleAgent(
     engine=config_4,
 )
 
-print(f"\n🔍 Tool routes after setup:")
+print("\n🔍 Tool routes after setup:")
 for name, route in config_4.tool_routes.items():
     print(f"  • {name} → {route}")
 

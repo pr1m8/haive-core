@@ -3,8 +3,6 @@
 Uses git mv to preserve history.
 """
 
-import os
-import re
 import subprocess
 from pathlib import Path
 
@@ -79,7 +77,7 @@ def move_file_with_git(source, destination_dir, filename):
 
         # Try regular mv as fallback
         cmd = ["mv", str(source), str(destination)]
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, check=False, capture_output=True, text=True)
         if result.returncode == 0:
             print(f"✓ Moved {filename} to {destination_dir} (fallback)")
             return True
@@ -87,7 +85,7 @@ def move_file_with_git(source, destination_dir, filename):
             print(f"❌ Regular mv also failed for {filename}: {result.stderr}")
             return False
 
-    except Exception as e:
+    except Exception:
         return False
 
 

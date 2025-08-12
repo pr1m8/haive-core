@@ -18,9 +18,11 @@ Key Changes:
 Result: Proper routing based on intent (structured output vs validation)
 """
 
-from langchain_core.tools import tool, StructuredTool
+from typing import Any
+
+from langchain_core.tools import tool
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any
+
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.engine.tool import ToolEngine
 from haive.core.engine.tool.types import ToolCapability
@@ -34,10 +36,10 @@ class RegularValidationModel(BaseModel):
 
 
 class StructuredOutputModel(BaseModel):
-    """A structured output model (IS structured output).""" 
+    """A structured output model (IS structured output)."""
     query: str = Field(description="Search query")
-    results: List[str] = Field(description="Search results")
-    metadata: Dict[str, Any] = Field(description="Additional metadata")
+    results: list[str] = Field(description="Search results")
+    metadata: dict[str, Any] = Field(description="Additional metadata")
 
 
 class AnalysisResult(BaseModel):
@@ -56,48 +58,48 @@ def test_current_routing_issue():
     """Demonstrate the current routing issue."""
     print("🚨 CURRENT ROUTING ISSUE")
     print("=" * 30)
-    
+
     # Current behavior - structured_output_model gets 'pydantic_model'
     config = AugLLMConfig(structured_output_model=StructuredOutputModel)
-    
+
     print("Current routing:")
     for tool_name, route in config.tool_routes.items():
         print(f"   {tool_name} → {route}")
-    
+
     # The issue: StructuredOutputModel gets 'pydantic_model' instead of 'parse_output'
     structured_model_route = config.tool_routes.get(StructuredOutputModel.__name__)
     print(f"\nIssue: {StructuredOutputModel.__name__} gets route '{structured_model_route}'")
     print("Expected: 'parse_output' (for structured output models)")
     print("Problem: ValidationNodeConfigV2 routes 'pydantic_model' to generic validation")
-    
+
 
 def demonstrate_tool_engine_capabilities():
     """Show how ToolEngine capabilities can identify structured output tools."""
     print("\n\n🔧 TOOL ENGINE CAPABILITIES SOLUTION")
     print("=" * 45)
-    
+
     # Regular tool - no capabilities
     regular = regular_calculator
     print(f"1. Regular tool: {regular.name}")
     print(f"   Capabilities: {getattr(regular, '__tool_capabilities__', 'None')}")
-    
+
     # ToolEngine structured output tool - has STRUCTURED_OUTPUT capability
     structured_tool = ToolEngine.create_structured_output_tool(
         func=lambda query: StructuredOutputModel(
             query=query,
-            results=[f"Result 1", f"Result 2"], 
+            results=["Result 1", "Result 2"],
             metadata={"count": 2}
         ),
         name="search_structured",
         description="Search with structured output",
         output_model=StructuredOutputModel
     )
-    
+
     print(f"\n2. ToolEngine structured output tool: {structured_tool.name}")
-    capabilities = getattr(structured_tool, '__tool_capabilities__', set())
+    capabilities = getattr(structured_tool, "__tool_capabilities__", set())
     print(f"   Capabilities: {capabilities}")
     print(f"   Has STRUCTURED_OUTPUT: {ToolCapability.STRUCTURED_OUTPUT in capabilities}")
-    
+
     return structured_tool
 
 
@@ -105,14 +107,14 @@ def create_enhanced_augllmconfig():
     """Create AugLLMConfig with proper structured output routing."""
     print("\n\n⚙️ ENHANCED AUGLLMCONFIG WITH ROUTING FIX")
     print("=" * 55)
-    
+
     # Create a custom AugLLMConfig subclass with routing fix
     class FixedAugLLMConfig(AugLLMConfig):
         """AugLLMConfig with proper structured output routing."""
-        
+
         def _analyze_tool(self, tool: Any) -> tuple[str, dict[str, Any] | None]:
             """Enhanced tool analysis with structured output detection."""
-            
+
             # Check if this is the configured structured output model
             if self.structured_output_model and tool == self.structured_output_model:
                 return "parse_output", {
@@ -122,35 +124,35 @@ def create_enhanced_augllmconfig():
                     "is_structured_output": True,
                     "structured_output_version": self.structured_output_version
                 }
-            
+
             # Check if tool has STRUCTURED_OUTPUT capability
-            capabilities = getattr(tool, '__tool_capabilities__', set())
+            capabilities = getattr(tool, "__tool_capabilities__", set())
             if ToolCapability.STRUCTURED_OUTPUT in capabilities:
-                tool_name = getattr(tool, 'name', getattr(tool, '__name__', 'unknown'))
+                tool_name = getattr(tool, "name", getattr(tool, "__name__", "unknown"))
                 return "parse_output", {
                     "tool_name": tool_name,
-                    "tool_type": "structured_output_tool", 
+                    "tool_type": "structured_output_tool",
                     "capabilities": list(capabilities),
                     "has_structured_output": True
                 }
-            
+
             # Fall back to parent implementation for other tools
             return super()._analyze_tool(tool)
-    
+
     # Test the fix
     print("Creating FixedAugLLMConfig with structured output model...")
-    
+
     fixed_config = FixedAugLLMConfig(
         structured_output_model=StructuredOutputModel,
         tools=[regular_calculator, RegularValidationModel]
     )
-    
+
     print("\nFixed routing:")
     for tool_name, route in fixed_config.tool_routes.items():
         metadata = fixed_config.get_tool_metadata(tool_name)
-        is_structured = metadata.get('is_structured_output', False) if metadata else False
+        is_structured = metadata.get("is_structured_output", False) if metadata else False
         print(f"   {tool_name} → {route} {'(structured output)' if is_structured else ''}")
-    
+
     return fixed_config
 
 
@@ -158,7 +160,7 @@ def demonstrate_validation_node_integration():
     """Show how ValidationNodeConfigV2 integrates with the fix."""
     print("\n\n🔗 VALIDATION NODE INTEGRATION")
     print("=" * 40)
-    
+
     print("ValidationNodeConfigV2 routing logic (already correct!):")
     print("""
     for tool_call in tool_calls:
@@ -175,7 +177,7 @@ def demonstrate_validation_node_integration():
             # ✅ UNCHANGED: Regular tools → tool execution
             destinations.add('tool_node')
     """)
-    
+
     print("The fix only requires:")
     print("1. ✅ AugLLMConfig assigns 'parse_output' to structured output models")
     print("2. ✅ ValidationNodeConfigV2 routes 'parse_output' correctly (already implemented)")
@@ -183,46 +185,46 @@ def demonstrate_validation_node_integration():
 
 
 def test_comprehensive_routing():
-    """Test comprehensive routing with mixed tool types.""" 
+    """Test comprehensive routing with mixed tool types."""
     print("\n\n🎯 COMPREHENSIVE ROUTING TEST")
     print("=" * 35)
-    
+
     # Create enhanced tool with structured output capability
     enhanced_tool = ToolEngine.augment_tool(
         regular_calculator,
         structured_output_model=AnalysisResult,
         name="enhanced_calculator"
     )
-    
+
     # Create the fixed config with multiple tool types
     fixed_config = create_enhanced_augllmconfig()
-    
+
     print("\nComprehensive test with all tool types:")
-    
+
     test_tools = {
         "Regular LangChain Tool": regular_calculator,
         "Regular Pydantic Model": RegularValidationModel,
-        "Structured Output Model": StructuredOutputModel, 
+        "Structured Output Model": StructuredOutputModel,
         "Enhanced Tool with Capabilities": enhanced_tool
     }
-    
+
     for desc, tool in test_tools.items():
-        if hasattr(tool, 'name'):
+        if hasattr(tool, "name"):
             tool_name = tool.name
-        elif hasattr(tool, '__name__'):
+        elif hasattr(tool, "__name__"):
             tool_name = tool.__name__
         else:
             tool_name = str(type(tool).__name__)
-            
+
         route = fixed_config.tool_routes.get(tool_name, "not_found")
-        capabilities = getattr(tool, '__tool_capabilities__', set())
+        capabilities = getattr(tool, "__tool_capabilities__", set())
         has_structured_output = ToolCapability.STRUCTURED_OUTPUT in capabilities
-        
+
         print(f"\n{desc}:")
         print(f"   Name: {tool_name}")
         print(f"   Route: {route}")
         print(f"   Has STRUCTURED_OUTPUT: {has_structured_output}")
-        
+
         # Expected routing
         if tool == StructuredOutputModel or has_structured_output:
             expected = "parse_output"
@@ -230,7 +232,7 @@ def test_comprehensive_routing():
             expected = "pydantic_model"
         else:
             expected = "langchain_tool"
-            
+
         status = "✅" if route == expected else "❌"
         print(f"   Expected: {expected} {status}")
 
@@ -239,7 +241,7 @@ def show_implementation_guide():
     """Show the actual implementation changes needed."""
     print("\n\n💡 IMPLEMENTATION GUIDE")
     print("=" * 25)
-    
+
     print("Changes needed in AugLLMConfig:")
     print("""
     def _analyze_tool(self, tool: Any) -> tuple[str, dict[str, Any] | None]:
@@ -261,13 +263,13 @@ def show_implementation_guide():
         # UNCHANGED: Fall back to parent implementation
         return super()._analyze_tool(tool)
     """)
-    
+
     print("\nNo changes needed in ValidationNodeConfigV2!")
     print("✅ It already handles 'parse_output' route correctly")
-    
+
     print("\nResult:")
     print("• structured_output_model → 'parse_output' → ParserNodeV2")
-    print("• tools with STRUCTURED_OUTPUT → 'parse_output' → ParserNodeV2") 
+    print("• tools with STRUCTURED_OUTPUT → 'parse_output' → ParserNodeV2")
     print("• regular Pydantic models → 'pydantic_model' → validation logic")
     print("• regular LangChain tools → 'langchain_tool' → tool execution")
 
@@ -279,7 +281,7 @@ if __name__ == "__main__":
     demonstrate_validation_node_integration()
     test_comprehensive_routing()
     show_implementation_guide()
-    
+
     print("\n\n🎯 SUMMARY")
     print("=" * 15)
     print("✅ Identified the routing issue: structured_output_model gets 'pydantic_model'")

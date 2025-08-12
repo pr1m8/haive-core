@@ -5,6 +5,7 @@ import os
 import uuid
 
 import psycopg2
+
 from haive.agents.conversation.collaberative.agent import CollaborativeConversation
 
 
@@ -27,9 +28,7 @@ def test_conversation_with_db():
     result = session.invoke({}, config={"configurable": {"thread_id": thread_id}})
 
     # Handle result which might be an object
-    if hasattr(result, "messages"):
-        pass
-    elif isinstance(result, dict):
+    if hasattr(result, "messages") or isinstance(result, dict):
         pass
 
     return thread_id

@@ -2,7 +2,9 @@
 """Test enhanced tool detection in AugLLMConfig."""
 
 from pydantic import BaseModel, Field
+
 from haive.core.engine.aug_llm import AugLLMConfig
+
 
 class PlainModel(BaseModel):
     """BaseModel without __call__ - not executable."""
@@ -12,7 +14,7 @@ class PlainModel(BaseModel):
 class ExecutableModel(BaseModel):
     """BaseModel with __call__ - executable."""
     multiplier: int = Field(default=2)
-    
+
     def __call__(self, value: int) -> int:
         return value * self.multiplier
 
@@ -28,7 +30,7 @@ config1 = AugLLMConfig(tools=[PlainModel])
 plain_route = config1.tool_routes.get("PlainModel")
 plain_meta = config1.get_tool_metadata("PlainModel")
 
-print(f"PlainModel (no __call__):")
+print("PlainModel (no __call__):")
 print(f"  Route: {plain_route}")
 print(f"  Metadata: {plain_meta}")
 
@@ -36,7 +38,7 @@ config2 = AugLLMConfig(tools=[ExecutableModel])
 exec_route = config2.tool_routes.get("ExecutableModel")
 exec_meta = config2.get_tool_metadata("ExecutableModel")
 
-print(f"\nExecutableModel (has __call__):")
+print("\nExecutableModel (has __call__):")
 print(f"  Route: {exec_route}")
 print(f"  Metadata: {exec_meta}")
 
@@ -49,8 +51,8 @@ try:
     config3 = AugLLMConfig(tools=[instance])
     instance_route = config3.tool_routes.get("ExecutableModel")
     instance_meta = config3.get_tool_metadata("ExecutableModel")
-    
-    print(f"ExecutableModel instance:")
+
+    print("ExecutableModel instance:")
     print(f"  Route: {instance_route}")
     print(f"  Metadata: {instance_meta}")
 except Exception as e:
@@ -64,7 +66,7 @@ config4 = AugLLMConfig(structured_output_model=PlainModel)
 struct_route = config4.tool_routes.get("PlainModel")
 struct_meta = config4.get_tool_metadata("PlainModel")
 
-print(f"PlainModel as structured_output:")
+print("PlainModel as structured_output:")
 print(f"  Route: {struct_route}")
 print(f"  Metadata: {struct_meta}")
 
@@ -72,6 +74,6 @@ print("\n" + "="*60)
 print("EXPECTED RESULTS:")
 print("="*60)
 print("✅ PlainModel (class) → 'pydantic_model' (not executable)")
-print("✅ ExecutableModel (class) → 'pydantic_tool' (executable)") 
+print("✅ ExecutableModel (class) → 'pydantic_tool' (executable)")
 print("✅ ExecutableModel (instance) → 'function' (callable)")
 print("✅ structured_output_model → 'parse_output' (override)")

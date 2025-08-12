@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """Detailed trace of BaseModel tool conversion."""
 
+
 from pydantic import BaseModel, Field
-from haive.core.engine.tool.engine import ToolEngine
+
 from haive.core.engine.aug_llm import AugLLMConfig
-from langchain_core.tools import StructuredTool
-import inspect
+from haive.core.engine.tool.engine import ToolEngine
+
 
 class StatefulTool(BaseModel):
     """A tool with internal state."""
     name: str = Field(default="statefultool", description="Tool name")
     multiplier: int = Field(default=2, description="Multiplication factor")
-    
+
     def __call__(self, value: int) -> int:
         """Multiply value by configured multiplier."""
         return value * self.multiplier
@@ -49,20 +50,20 @@ converted1 = engine._convert_model_to_tool(instance1)
 converted2 = engine._convert_model_to_tool(instance2)
 
 if converted1:
-    print(f"\nConverted tool 1:")
+    print("\nConverted tool 1:")
     print(f"  Type: {type(converted1)}")
     print(f"  Name: {converted1.name}")
     print(f"  Description: {converted1.description}")
-    if hasattr(converted1, 'args_schema'):
+    if hasattr(converted1, "args_schema"):
         print(f"  Args schema: {converted1.args_schema.model_json_schema()}")
-    
+
     # Test execution
-    print(f"\n  Testing execution:")
+    print("\n  Testing execution:")
     result1 = converted1.invoke({"value": 10})
     print(f"  10 * 3 = {result1}")
 
 if converted2:
-    print(f"\nConverted tool 2:")
+    print("\nConverted tool 2:")
     result2 = converted2.invoke({"value": 10})
     print(f"  10 * 5 = {result2}")
 
@@ -94,7 +95,7 @@ if converted3:
     for val in [1, 5, 10]:
         result = converted3.invoke({"value": val})
         print(f"  {val} * 7 = {result}")
-        
+
 print("\n\n5️⃣ Key insights:")
 print("-"*40)
 print("- BaseModel CLASS cannot be converted (not callable)")

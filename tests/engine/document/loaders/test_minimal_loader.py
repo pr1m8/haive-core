@@ -123,7 +123,7 @@ def main():
 
         return success
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()

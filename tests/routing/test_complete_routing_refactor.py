@@ -15,20 +15,20 @@ Key Changes:
 4. Easy to extend structured output features
 """
 
+from typing import Any
+
 from langchain_core.tools import tool
-from langchain_core.messages import AIMessage, ToolMessage
 from pydantic import BaseModel, Field
-from typing import Dict, List, Any
+
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.engine.tool import ToolEngine
-from haive.core.schema.prebuilt.tool_state import ToolState
 
 
 # Test models
 class SearchResult(BaseModel):
     """Search results structured output model."""
     query: str = Field(description="Search query")
-    results: List[str] = Field(description="Search results")
+    results: list[str] = Field(description="Search results")
     count: int = Field(description="Number of results")
 
 
@@ -45,7 +45,7 @@ def calculator(expression: str) -> str:
     return f"Result: {eval(expression)}"
 
 
-def apply_routing_refactor(config: AugLLMConfig) -> Dict[str, Any]:
+def apply_routing_refactor(config: AugLLMConfig) -> dict[str, Any]:
     """Apply the structured output routing refactor to AugLLMConfig.
     
     This implements the user's concept: structured output models → parse_output route.
@@ -58,22 +58,22 @@ def apply_routing_refactor(config: AugLLMConfig) -> Dict[str, Any]:
     """
     print("🔧 APPLYING ROUTING REFACTOR")
     print("=" * 35)
-    
+
     changes = {}
-    
+
     # Find all pydantic_model routes (structured output models)
     pydantic_routes = [
-        (name, route) for name, route in config.tool_routes.items() 
+        (name, route) for name, route in config.tool_routes.items()
         if route == "pydantic_model"
     ]
-    
+
     print(f"Found {len(pydantic_routes)} structured output models:")
-    
+
     for tool_name, current_route in pydantic_routes:
         print(f"   {tool_name}: {current_route} → parse_output")
         config.update_tool_route(tool_name, "parse_output")
         changes[tool_name] = {"from": current_route, "to": "parse_output"}
-    
+
     # Handle main structured_output_model
     if config.structured_output_model:
         model_name = config.structured_output_model.__name__
@@ -83,7 +83,7 @@ def apply_routing_refactor(config: AugLLMConfig) -> Dict[str, Any]:
                 print(f"   Main model: {model_name}: {current_route} → parse_output")
                 config.update_tool_route(model_name, "parse_output")
                 changes[model_name] = {"from": current_route, "to": "parse_output"}
-    
+
     print(f"Refactor completed: {len(changes)} routes changed")
     return changes
 
@@ -92,7 +92,7 @@ def show_validation_node_v2_integration(config: AugLLMConfig):
     """Show how ValidationNodeV2 would integrate with the refactored routes."""
     print("\n\n⚙️ VALIDATION NODE V2 INTEGRATION")
     print("=" * 40)
-    
+
     print("Current ValidationNodeV2 routing logic (line 320):")
     print("   if route == 'pydantic_model':")
     print("      → Handle Pydantic model, create ToolMessage")
@@ -100,10 +100,10 @@ def show_validation_node_v2_integration(config: AugLLMConfig):
     print("      → Let tool_node handle it")
     print("   else:")
     print("      → Unknown tool, create error ToolMessage")
-    
+
     print("\nPROPOSED REFACTORED ROUTING LOGIC:")
-    
-    refactored_logic = '''
+
+    refactored_logic = """
     if route == "parse_output":
         # NEW: Structured output models → ParserNodeV2
         logger.debug(f"Structured output model {tool_name} routed to parse_output")
@@ -127,10 +127,10 @@ def show_validation_node_v2_integration(config: AugLLMConfig):
         error_msg = f"Unknown tool: {tool_name}"
         tool_msg = self._create_error_tool_message(tool_name, tool_id, error_msg)
         new_tool_messages.append(tool_msg)
-    '''
-    
+    """
+
     print(refactored_logic)
-    
+
     print("KEY BENEFIT: The user's concept in action:")
     print(f"   • if tool_name == '{config.structured_output_model.__name__}' (engine.structured_output_model)")
     print("   • route == 'parse_output'")
@@ -143,10 +143,10 @@ def demonstrate_router_integration(config: AugLLMConfig):
     """Show how the validation router would handle the refactored routes."""
     print("\n\n🔀 VALIDATION ROUTER INTEGRATION")
     print("=" * 38)
-    
+
     print("ValidationNodeV2 creates ToolMessages and goes to validation_router.")
     print("The validation_router then makes routing decisions based on tool routes.")
-    
+
     router_logic = '''
 def validation_router(state):
     """Route based on tool routes after ValidationNodeV2 processing."""
@@ -181,18 +181,18 @@ def validation_router(state):
     # Default fallback
     return "agent"
     '''
-    
+
     print("Enhanced validation_router logic:")
     print(router_logic)
-    
+
     print("Flow with refactor:")
     route_flows = {
         "parse_output": "ValidationNodeV2 → validation_router → ParserNodeV2",
-        "langchain_tool": "ValidationNodeV2 → validation_router → ToolNodeConfig", 
+        "langchain_tool": "ValidationNodeV2 → validation_router → ToolNodeConfig",
         "function": "ValidationNodeV2 → validation_router → FunctionNode",
         "pydantic_model": "ValidationNodeV2 → validation_router → ValidationNode (legacy)"
     }
-    
+
     for route, flow in route_flows.items():
         tools_with_route = [name for name, r in config.tool_routes.items() if r == route]
         if tools_with_route:
@@ -204,18 +204,18 @@ def create_test_scenario():
     """Create a test scenario showing the refactor in action."""
     print("\n\n🧪 TEST SCENARIO: REFACTOR IN ACTION")
     print("=" * 40)
-    
+
     # Create config with mixed tools
     config = AugLLMConfig(
         tools=[calculator],
         structured_output_model=SearchResult
     )
-    
+
     # Add another structured output tool
     analysis_tool = ToolEngine.create_structured_output_tool(
         func=lambda text: AnalysisResult(
             input_text=text,
-            sentiment="positive", 
+            sentiment="positive",
             confidence=0.85
         ),
         name="analyze_sentiment",
@@ -224,18 +224,18 @@ def create_test_scenario():
     )
     config.add_tool(analysis_tool)
     config.set_tool_route("AnalysisResult", "pydantic_model")
-    
+
     print("BEFORE refactor - tool routes:")
     for tool_name, route in config.tool_routes.items():
         print(f"   {tool_name} → {route}")
-    
+
     # Apply refactor
     changes = apply_routing_refactor(config)
-    
+
     print("\nAFTER refactor - tool routes:")
     for tool_name, route in config.tool_routes.items():
         print(f"   {tool_name} → {route}")
-    
+
     # Test with tool calls
     print("\n🔄 PROCESSING TOOL CALLS:")
     test_tool_calls = [
@@ -243,14 +243,14 @@ def create_test_scenario():
         {"name": "SearchResult", "id": "call_2", "args": {"query": "python", "results": ["result1"], "count": 1}},
         {"name": "AnalysisResult", "id": "call_3", "args": {"input_text": "hello", "sentiment": "positive", "confidence": 0.9}}
     ]
-    
+
     for tool_call in test_tool_calls:
         tool_name = tool_call["name"]
         route = config.tool_routes.get(tool_name, "unknown")
-        
+
         print(f"   Tool call: {tool_name}")
         print(f"      Route: {route}")
-        
+
         # Show routing decision
         if route == "parse_output":
             print("      → ValidationNodeV2 skips, routes to ParserNodeV2")
@@ -260,7 +260,7 @@ def create_test_scenario():
             print("      → ValidationNodeV2 creates ToolMessage inline")
         else:
             print("      → ValidationNodeV2 creates error ToolMessage")
-    
+
     return config
 
 
@@ -268,10 +268,10 @@ def show_implementation_code():
     """Show the actual code changes needed in ValidationNodeV2."""
     print("\n\n💻 IMPLEMENTATION CODE CHANGES")
     print("=" * 38)
-    
+
     print("Changes needed in ValidationNodeV2.__call__ method (around line 320):")
-    
-    implementation = '''
+
+    implementation = """
 # CURRENT CODE (line 320):
 if route == "pydantic_model":
     # Handle Pydantic model
@@ -298,10 +298,10 @@ elif route == "pydantic_model":
         )
         new_tool_messages.append(tool_msg)
         logger.info(f"Created ToolMessage for legacy Pydantic model: {tool_name}")
-'''
-    
+"""
+
     print(implementation)
-    
+
     print("\nBenefits of this change:")
     print("   ✅ Structured output models get dedicated 'parse_output' route")
     print("   ✅ ParserNodeV2 handles all structured output parsing consistently")
@@ -315,7 +315,7 @@ if __name__ == "__main__":
     show_validation_node_v2_integration(config)
     demonstrate_router_integration(config)
     show_implementation_code()
-    
+
     print("\n\n🎯 ROUTING REFACTOR COMPLETE")
     print("=" * 35)
     print("User's request implemented: 'if tool == engine.structured_output_model -> parse output'")

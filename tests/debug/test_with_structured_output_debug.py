@@ -2,7 +2,9 @@
 """Debug with_structured_output method."""
 
 from pydantic import BaseModel, Field
+
 from haive.core.engine.aug_llm import AugLLMConfig
+
 
 class ResponseModel(BaseModel):
     """Structured output model."""

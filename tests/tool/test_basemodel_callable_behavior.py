@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 """Test what happens with callable BaseModel in different scenarios."""
 
-from pydantic import BaseModel, Field
-from haive.core.engine.tool import ToolEngine
-from haive.core.engine.aug_llm import AugLLMConfig
-from langchain_core.tools import tool
 import json
+
+from langchain_core.tools import tool
+from pydantic import BaseModel, Field
+
+from haive.core.engine.aug_llm import AugLLMConfig
+from haive.core.engine.tool import ToolEngine
+
 
 class ConfigurableTool(BaseModel):
     """A BaseModel with both fields AND __call__."""
     api_key: str = Field(description="API key for service")
     endpoint: str = Field(default="https://api.example.com", description="API endpoint")
     timeout: int = Field(default=30, description="Request timeout")
-    
+
     def __call__(self, query: str, max_results: int = 10) -> str:
         """Execute search query."""
         return f"Searching '{query}' at {self.endpoint} (max: {max_results})"
@@ -25,7 +28,7 @@ print("="*80)
 print("\n1️⃣ BaseModel Schema (all fields)")
 print("-"*40)
 schema = ConfigurableTool.model_json_schema()
-print("BaseModel fields:", list(schema['properties'].keys()))
+print("BaseModel fields:", list(schema["properties"].keys()))
 print("Full schema:", json.dumps(schema, indent=2))
 
 # Test 2: What happens when we convert it to a tool?
@@ -43,15 +46,15 @@ converted = engine._convert_model_to_tool(instance)
 if converted:
     print(f"\nConverted tool type: {type(converted)}")
     print(f"Tool name: {converted.name}")
-    
+
     # Check the tool's input schema
-    if hasattr(converted, 'args_schema'):
+    if hasattr(converted, "args_schema"):
         tool_schema = converted.args_schema.model_json_schema()
         print(f"Tool input fields: {list(tool_schema['properties'].keys())}")
         print(f"Tool schema: {json.dumps(tool_schema, indent=2)}")
-    
+
     # Test execution
-    print(f"\nExecution test:")
+    print("\nExecution test:")
     result = converted.invoke({"query": "test", "max_results": 5})
     print(f"Result: {result}")
 
@@ -84,14 +87,14 @@ print("-"*40)
 
 # With class
 config1 = AugLLMConfig(tools=[ConfigurableTool])
-print(f"Class as tool:")
+print("Class as tool:")
 print(f"  Routes: {config1.tool_routes}")
 print(f"  Tool count: {len(config1.get_tools())}")
 
 # What about with instance?
 try:
     config2 = AugLLMConfig(tools=[instance])
-    print(f"\nInstance as tool:")
+    print("\nInstance as tool:")
     print(f"  Routes: {config2.tool_routes}")
 except Exception as e:
     print(f"\nInstance as tool: ERROR - {e}")

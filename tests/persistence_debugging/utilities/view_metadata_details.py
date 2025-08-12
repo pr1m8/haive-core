@@ -3,7 +3,6 @@
 
 import json
 import os
-from datetime import datetime
 
 import psycopg
 
@@ -87,9 +86,7 @@ def view_metadata_details():
                                             for contrib in contribs:
                                                 if isinstance(contrib, list) and len(contrib) >= 3:
                                                     content = str(contrib[2])
-                                                    if "prepared statement" in content.lower():
-                                                        error_count += 1
-                                                    elif "error" in content.lower():
+                                                    if "prepared statement" in content.lower() or "error" in content.lower():
                                                         error_count += 1
 
                                             if error_count == 0:
@@ -116,7 +113,7 @@ def view_metadata_details():
                             if other_keys:
                                 pass
 
-                        except Exception as e:
+                        except Exception:
                             pass
                     else:
                         pass
@@ -136,7 +133,7 @@ def view_metadata_details():
 
                 stats = cur.fetchone()
 
-    except Exception as e:
+    except Exception:
         pass
 
 

@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """Debug BaseModel instance handling in AugLLMConfig."""
 
-from pydantic import BaseModel, Field
-from haive.core.engine.aug_llm import AugLLMConfig
 import traceback
+
+from pydantic import BaseModel, Field
+
+from haive.core.engine.aug_llm import AugLLMConfig
+
 
 class ExecutableModel(BaseModel):
     """BaseModel with __call__."""
     multiplier: int = Field(default=2)
-    
+
     def __call__(self, value: int) -> int:
         return value * self.multiplier
 
@@ -55,6 +58,7 @@ print("\n\n3️⃣ _analyze_tool Debug")
 print("-"*40)
 
 from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
+
 mixin = ToolRouteMixin()
 
 try:
@@ -66,7 +70,7 @@ except Exception as e:
     traceback.print_exc()
 
 # Test 4: Let's check what specific method is failing
-print("\n\n4️⃣ Method Call Debug")  
+print("\n\n4️⃣ Method Call Debug")
 print("-"*40)
 
 print("Testing specific method calls on instance:")
@@ -78,16 +82,16 @@ print("\nTesting minimal config creation...")
 try:
     config = AugLLMConfig()  # Empty config
     print("✅ Empty config created")
-    
+
     # Try adding tool manually
     config.tools = [instance]
     print("✅ Tools set directly")
-    
+
     # Try sync
     config._sync_tool_routes()
     print("✅ Sync completed")
     print(f"Routes: {config.tool_routes}")
-    
+
 except Exception as e:
     print(f"❌ Manual addition failed: {e}")
     traceback.print_exc()

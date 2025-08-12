@@ -67,7 +67,7 @@ async def test_async_persistence():
         else:
             pass
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -93,14 +93,12 @@ def check_langgraph_modifications():
                     # Find the line
                     for i, line in enumerate(content.split("\n")):
                         if "prepare_threshold" in line:
-                            if "prepare_threshold=0" in line:
-                                pass
-                            elif "prepare_threshold=None" in line:
+                            if "prepare_threshold=0" in line or "prepare_threshold=None" in line:
                                 pass
                 else:
                     pass
 
-            except Exception as e:
+            except Exception:
                 pass
         else:
             pass

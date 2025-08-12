@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Simple test to understand BaseModel routing."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+
 from haive.core.engine.aug_llm import AugLLMConfig
-from haive.agents.simple.agent import SimpleAgent
+
 
 # Test different scenarios
 class MyModel(BaseModel):
@@ -14,7 +15,7 @@ class MyModel(BaseModel):
 class CallableModel(BaseModel):
     """Model with __call__."""
     query: str
-    
+
     def __call__(self):
         return f"Result: {self.query}"
 
@@ -40,6 +41,6 @@ print(f"   Routes: {config4.tool_routes}")
 print("\n" + "="*50)
 print("EXPECTED BEHAVIOR:")
 print("- BaseModel as tool (no __call__) → ???")
-print("- BaseModel as tool (with __call__) → ???") 
+print("- BaseModel as tool (with __call__) → ???")
 print("- BaseModel as structured_output → 'parse_output'")
 print("\nACTUAL: All BaseModel get 'pydantic_model' by default")

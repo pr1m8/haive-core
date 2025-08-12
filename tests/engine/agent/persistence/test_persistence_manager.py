@@ -670,7 +670,7 @@ class TestPersistenceManager:
             for key, value in case.items():
                 if key.startswith("expected_"):
                     expected_key = key.replace("expected_", "")
-                    expected_value = case[key]
+                    expected_value = value
 
                     if expected_key == "host":
                         assert f"@{expected_value}:" in uri

@@ -84,7 +84,7 @@ def check_database():
                 )
                 recent_checkpoint_activity = cursor.fetchone()[0]
 
-    except Exception as e:
+    except Exception:
         pass
 
 

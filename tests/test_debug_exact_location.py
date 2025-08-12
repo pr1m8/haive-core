@@ -2,7 +2,6 @@
 """Debug script to find EXACT location of remaining serialization issues."""
 
 import logging
-import os
 import sys
 import traceback
 
@@ -20,9 +19,9 @@ def run_react_agent_with_debug():
 
     try:
         # Import and run the exact same test
-        from haive.agents.react.agent import ReactAgent
         from langchain_core.tools import tool
 
+        from haive.agents.react.agent import ReactAgent
         from haive.core.engine.aug_llm import AugLLMConfig
 
         # Create the tool
@@ -46,14 +45,14 @@ def run_react_agent_with_debug():
         def debug_run(*args, **kwargs):
             try:
                 return original_run(*args, **kwargs)
-            except Exception as e:
+            except Exception:
                 traceback.print_exc()
                 raise
 
         def debug_arun(*args, **kwargs):
             try:
                 return original_arun(*args, **kwargs)
-            except Exception as e:
+            except Exception:
                 traceback.print_exc()
                 raise
 
@@ -63,8 +62,7 @@ def run_react_agent_with_debug():
         # Now try to run
         result = agent.run("What is 2 + 2?")
 
-    except Exception as e:
-        pass
+    except Exception:
 
         # Get the full traceback
         tb = traceback.format_exc()

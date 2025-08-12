@@ -2,7 +2,9 @@
 """Test comprehensive validation and setup."""
 
 from pydantic import BaseModel, Field
+
 from haive.core.engine.aug_llm import AugLLMConfig
+
 
 class ResponseModel(BaseModel):
     """Structured output model."""
@@ -24,7 +26,7 @@ print(f"Tools in config: {config.tools}")
 print(f"structured_output_model: {config.structured_output_model}")
 
 # Try calling it manually
-print(f"\nCalling comprehensive_validation_and_setup manually...")
+print("\nCalling comprehensive_validation_and_setup manually...")
 config.comprehensive_validation_and_setup()
 print(f"After comprehensive_validation_and_setup: {config.tool_routes}")
 

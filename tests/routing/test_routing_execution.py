@@ -1,23 +1,25 @@
 #!/usr/bin/env python3
 """Test actual execution flow with tool routing."""
 
-import logging
-from pydantic import BaseModel, Field
-from haive.core.engine.aug_llm import AugLLMConfig
-from haive.agents.simple.agent import SimpleAgent
-from langchain_core.tools import tool
 import json
+import logging
+
+from langchain_core.tools import tool
+from pydantic import BaseModel, Field
+
+from haive.agents.simple.agent import SimpleAgent
+from haive.core.engine.aug_llm import AugLLMConfig
 
 # Configure logging to see the flow
 logging.basicConfig(
     level=logging.INFO,
-    format='%(name)s - %(levelname)s - %(message)s'
+    format="%(name)s - %(levelname)s - %(message)s"
 )
 
 # Enable specific loggers
-logging.getLogger('haive.core.graph.node.validation_node_v2').setLevel(logging.DEBUG)
-logging.getLogger('haive.core.common.mixins.tool_route_mixin').setLevel(logging.DEBUG)
-logging.getLogger('haive.core.engine.aug_llm').setLevel(logging.DEBUG)
+logging.getLogger("haive.core.graph.node.validation_node_v2").setLevel(logging.DEBUG)
+logging.getLogger("haive.core.common.mixins.tool_route_mixin").setLevel(logging.DEBUG)
+logging.getLogger("haive.core.engine.aug_llm").setLevel(logging.DEBUG)
 
 print("\n" + "="*80)
 print("TESTING TOOL ROUTING EXECUTION FLOW")
@@ -42,7 +44,7 @@ agent1 = SimpleAgent(
     )
 )
 
-print(f"\n📋 Tool routes in engine:")
+print("\n📋 Tool routes in engine:")
 for name, route in agent1.engine.tool_routes.items():
     print(f"   {name} → {route}")
 
@@ -70,7 +72,7 @@ agent2 = SimpleAgent(
     )
 )
 
-print(f"\n📋 Tool routes in engine:")
+print("\n📋 Tool routes in engine:")
 for name, route in agent2.engine.tool_routes.items():
     print(f"   {name} → {route}")
 
@@ -98,7 +100,7 @@ agent3 = SimpleAgent(
     )
 )
 
-print(f"\n📋 Tool routes in engine:")
+print("\n📋 Tool routes in engine:")
 for name, route in agent3.engine.tool_routes.items():
     metadata = agent3.engine.tool_route_metadata.get(name, {})
     print(f"   {name} → {route}")
@@ -112,7 +114,7 @@ print("-" * 40)
 class ExecutableQuery(BaseModel):
     """Pydantic model with __call__ method."""
     query: str
-    
+
     def __call__(self):
         return f"Executing: {self.query}"
 
@@ -125,7 +127,7 @@ agent4 = SimpleAgent(
     )
 )
 
-print(f"\n📋 Tool routes in engine:")
+print("\n📋 Tool routes in engine:")
 for name, route in agent4.engine.tool_routes.items():
     metadata = agent4.engine.tool_route_metadata.get(name, {})
     print(f"   {name} → {route}")

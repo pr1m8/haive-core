@@ -14,11 +14,10 @@ Key Source Files Examined:
 - .venv/lib/python3.12/site-packages/langchain_core/messages/tool.py
 """
 
-from langchain_core.tools import tool, StructuredTool
-from langchain_core.messages import AIMessage, ToolMessage
-from langchain_core.tools.base import BaseTool
+from langchain_core.messages import AIMessage
+from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field, ValidationError
-from typing import Dict, List, Any, Optional
+
 from haive.core.engine.aug_llm import AugLLMConfig
 
 
@@ -39,7 +38,7 @@ def analyze_tool_call_structure():
     """Analyze the ToolCall TypedDict structure from LangChain source."""
     print("📋 TOOLCALL STRUCTURE (from langchain_core.messages.tool)")
     print("=" * 60)
-    
+
     print("ToolCall is a TypedDict with structure:")
     print("""
 class ToolCall(TypedDict):
@@ -48,7 +47,7 @@ class ToolCall(TypedDict):
     id: str             # An identifier associated with the tool call
     type: Literal["tool_call"]  # Always "tool_call"
     """)
-    
+
     # Example ToolCall
     example_tool_call = {
         "name": "calculator",
@@ -56,11 +55,11 @@ class ToolCall(TypedDict):
         "id": "call_123",
         "type": "tool_call"
     }
-    
+
     print("Example ToolCall:")
     for key, value in example_tool_call.items():
-        print(f"   {key}: {repr(value)}")
-    
+        print(f"   {key}: {value!r}")
+
     return example_tool_call
 
 
@@ -68,10 +67,10 @@ def analyze_args_schema_validation():
     """Analyze how args_schema validation works in BaseTool."""
     print("\n\n🔍 ARGS_SCHEMA VALIDATION (from langchain_core.tools.base)")
     print("=" * 65)
-    
+
     print("ArgsSchema = Union[TypeBaseModel, dict[str, Any]]")
     print("\nValidation happens in BaseTool._parse_input():")
-    
+
     # Create a StructuredTool with args_schema
     calculator_tool = StructuredTool.from_function(
         func=lambda expression, precision=2: f"Result: {eval(expression):.{precision}f}",
@@ -79,17 +78,17 @@ def analyze_args_schema_validation():
         description="Calculate mathematical expressions",
         args_schema=CalculatorInput,
     )
-    
+
     print(f"\nCalculator tool args_schema: {calculator_tool.args_schema}")
     print(f"Args schema type: {type(calculator_tool.args_schema)}")
-    
+
     # Show what validation does
     print("\nValidation process:")
     print("1. If tool_input is dict and args_schema is BaseModel:")
     print("   → args_schema.model_validate(tool_input)")
     print("2. If validation passes: return validated dict")
     print("3. If ValidationError: handle based on handle_validation_error setting")
-    
+
     # Test valid input
     valid_input = {"expression": "10 + 5", "precision": 3}
     print(f"\nValid input: {valid_input}")
@@ -99,7 +98,7 @@ def analyze_args_schema_validation():
         print("✅ Validation passed")
     except ValidationError as e:
         print(f"❌ Validation failed: {e}")
-    
+
     # Test invalid input
     invalid_input = {"expression": "10 + 5", "precision": -1}  # precision has ge=1 constraint
     print(f"\nInvalid input: {invalid_input}")
@@ -110,7 +109,7 @@ def analyze_args_schema_validation():
     except ValidationError as e:
         print(f"❌ Validation failed: {e}")
         print(f"Error details: {e.errors()}")
-    
+
     return calculator_tool
 
 
@@ -118,29 +117,29 @@ def analyze_tool_invoke_flow():
     """Analyze the tool invocation flow from source code."""
     print("\n\n⚙️ TOOL INVOKE FLOW (from BaseTool.invoke)")
     print("=" * 48)
-    
+
     print("BaseTool.invoke() flow:")
     print("1. _prep_run_args(input, config, **kwargs)")
     print("   • If input is ToolCall: extract args dict")
     print("   • If input is dict/str: use directly")
-    print("2. Call self.run(tool_input, **kwargs)")  
+    print("2. Call self.run(tool_input, **kwargs)")
     print("3. self._parse_input(tool_input, tool_call_id)")
-    print("   • Validate against args_schema")  
+    print("   • Validate against args_schema")
     print("   • Handle ValidationError if occurs")
     print("4. Execute tool function")
     print("5. Return result or raise error")
-    
+
     # Demonstrate with StructuredTool
     calculator = analyze_args_schema_validation()
-    
-    print(f"\nDemonstrating invoke with ToolCall input:")
+
+    print("\nDemonstrating invoke with ToolCall input:")
     tool_call_input = {
         "name": "calculator",
-        "args": {"expression": "7 * 8", "precision": 1}, 
+        "args": {"expression": "7 * 8", "precision": 1},
         "id": "call_demo",
         "type": "tool_call"
     }
-    
+
     try:
         result = calculator.invoke(tool_call_input)
         print(f"Tool call input: {tool_call_input}")
@@ -148,7 +147,7 @@ def analyze_tool_invoke_flow():
         print("✅ Tool invocation successful")
     except Exception as e:
         print(f"❌ Tool invocation failed: {e}")
-    
+
     return calculator
 
 
@@ -156,17 +155,17 @@ def analyze_validation_error_handling():
     """Analyze ValidationError handling in tools."""
     print("\n\n🚨 VALIDATION ERROR HANDLING")
     print("=" * 35)
-    
+
     print("BaseTool has handle_validation_error setting:")
     print("• False (default): Raise ValidationError")
-    print("• True: Return str(ValidationError)")  
+    print("• True: Return str(ValidationError)")
     print("• str: Return custom error message")
     print("• Callable: Call function with ValidationError")
-    
+
     # Create tools with different error handling
     def custom_error_handler(error: ValidationError) -> str:
         return f"Custom error: {len(error.errors())} validation issues found"
-    
+
     tools = {
         "default": StructuredTool.from_function(
             func=lambda query, max_results=10: f"Search: {query}",
@@ -176,7 +175,7 @@ def analyze_validation_error_handling():
         ),
         "simple": StructuredTool.from_function(
             func=lambda query, max_results=10: f"Search: {query}",
-            name="search_simple", 
+            name="search_simple",
             args_schema=SearchInput,
             handle_validation_error=True  # Returns error as string
         ),
@@ -193,12 +192,12 @@ def analyze_validation_error_handling():
             handle_validation_error=custom_error_handler
         )
     }
-    
+
     # Test with invalid input
     invalid_search = {"query": "python", "max_results": 150}  # max_results > 100
-    
+
     print(f"\nTesting with invalid input: {invalid_search}")
-    
+
     for name, tool in tools.items():
         print(f"\n{name} tool (handle_validation_error={tool.handle_validation_error}):")
         try:
@@ -214,37 +213,37 @@ def analyze_ai_message_tool_calls():
     """Analyze how AIMessage handles tool_calls and invalid_tool_calls."""
     print("\n\n💬 AI MESSAGE TOOL CALLS")
     print("=" * 30)
-    
+
     print("AIMessage attributes for tool calling:")
     print("• tool_calls: List[ToolCall] - Valid, parsed tool calls")
     print("• invalid_tool_calls: List[InvalidToolCall] - Malformed tool calls")
     print("• additional_kwargs: Dict - Raw tool calls from provider")
-    
+
     # Create AIMessage with tool calls
     ai_msg = AIMessage(
         content="I'll help you with calculations and search.",
         tool_calls=[
             {
-                "name": "calculator", 
+                "name": "calculator",
                 "args": {"expression": "15 * 23", "precision": 2},
                 "id": "call_1",
                 "type": "tool_call"
             },
             {
                 "name": "search",
-                "args": {"query": "python tutorial", "max_results": 5}, 
+                "args": {"query": "python tutorial", "max_results": 5},
                 "id": "call_2",
                 "type": "tool_call"
             }
         ]
     )
-    
-    print(f"\nAIMessage with tool calls:")
+
+    print("\nAIMessage with tool calls:")
     print(f"   Content: {ai_msg.content}")
     print(f"   Tool calls: {len(ai_msg.tool_calls)}")
     for i, call in enumerate(ai_msg.tool_calls):
         print(f"   [{i+1}] {call['name']}({call['args']}) [ID: {call['id']}]")
-    
+
     return ai_msg
 
 
@@ -252,12 +251,12 @@ def analyze_validation_node_integration():
     """Analyze how ValidationNodeConfigV2 integrates with this system."""
     print("\n\n🔗 VALIDATION NODE INTEGRATION")
     print("=" * 38)
-    
+
     print("ValidationNodeConfigV2 process:")
     print("1. Receives AIMessage with tool_calls")
     print("2. For each tool_call:")
     print("   • Gets tool.args_schema from engine")
-    print("   • Creates LangGraph ValidationNode with schemas") 
+    print("   • Creates LangGraph ValidationNode with schemas")
     print("   • ValidationNode.invoke(state) validates tool_calls")
     print("   • Validation uses the same BaseTool._parse_input logic")
     print("3. ValidationNode creates ToolMessages:")
@@ -266,34 +265,34 @@ def analyze_validation_node_integration():
     print("4. Routes based on tool routes:")
     print("   • langchain_tool → tool_node (with validated tool_calls in AIMessage)")
     print("   • pydantic_model → parse_output (with ToolMessages)")
-    
+
     print("\nKey insight: ValidationNode uses the SAME validation logic")
     print("as BaseTool.invoke() - it's calling the same _parse_input method!")
-    
+
     # Show what AugLLMConfig provides
     calculator = StructuredTool.from_function(
         func=lambda expression, precision=2: f"Result: {eval(expression):.{precision}f}",
         name="calculator",
         args_schema=CalculatorInput,
     )
-    
+
     config = AugLLMConfig(tools=[calculator])
     print(f"\nAugLLMConfig tool routes: {config.tool_routes}")
-    
+
     # The args_schema is available through the tool
     for tool in config.tools:
-        if hasattr(tool, 'args_schema'):
+        if hasattr(tool, "args_schema"):
             print(f"Tool {tool.name} args_schema: {tool.args_schema}")
 
 
 if __name__ == "__main__":
     analyze_tool_call_structure()
     analyze_args_schema_validation()
-    analyze_tool_invoke_flow() 
+    analyze_tool_invoke_flow()
     analyze_validation_error_handling()
     analyze_ai_message_tool_calls()
     analyze_validation_node_integration()
-    
+
     print("\n\n🎯 KEY INSIGHTS FROM LANGCHAIN SOURCE")
     print("=" * 45)
     print("• ToolCall is a TypedDict: {name, args, id, type}")

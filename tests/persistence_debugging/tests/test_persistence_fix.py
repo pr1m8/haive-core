@@ -51,7 +51,7 @@ def test_persistence_fix():
                 pass
             else:
                 pass
-        except Exception as e:
+        except Exception:
             pass
     else:
         pass
@@ -89,7 +89,7 @@ def test_persistence_fix():
         else:
             pass
 
-    except Exception as e:
+    except Exception:
         pass
 
 

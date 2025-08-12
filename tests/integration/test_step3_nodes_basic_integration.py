@@ -12,18 +12,18 @@ Key Integration Points:
 - All work with AugLLMConfig's fixed tool routes (no duplication)
 """
 
+
 import pytest
-from typing import List, Dict, Any
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_core.tools import tool
-from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 from langgraph.types import Command
 from pydantic import BaseModel, Field
 
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.engine.tool import ToolEngine
-from haive.core.graph.node.validation_node_v2 import ValidationNodeV2
-from haive.core.graph.node.tool_node_config_v2 import ToolNodeConfig
 from haive.core.graph.node.parser_node_config_v2 import ParserNodeConfigV2
+from haive.core.graph.node.tool_node_config_v2 import ToolNodeConfig
+from haive.core.graph.node.validation_node_v2 import ValidationNodeV2
 from haive.core.schema.prebuilt.tool_state import ToolState
 
 
@@ -43,30 +43,30 @@ class TestResult(BaseModel):
 
 class TestBasicNodeIntegration:
     """Basic integration tests for V2 nodes with fixed tool system."""
-    
+
     def test_aug_llm_config_no_duplication_baseline(self):
         """Baseline test: Verify AugLLMConfig works without duplication."""
         config = AugLLMConfig(tools=[simple_calculator])
-        
+
         # Fixed tool duplication bug - should have exactly 1 tool
         assert len(config.tools) == 1
         assert len(config.tool_routes) == 1
         assert "simple_calculator" in config.tool_routes
         assert config.tool_routes["simple_calculator"] == "langchain_tool"
-    
+
     def test_tool_node_config_basic_execution(self):
-        """Test ToolNodeConfig executes tools from AugLLMConfig correctly.""" 
+        """Test ToolNodeConfig executes tools from AugLLMConfig correctly."""
         # Create AugLLMConfig (no duplication)
         config = AugLLMConfig(tools=[simple_calculator])
         assert len(config.tools) == 1  # Verify fix
-        
+
         # Create ToolNodeConfig
         tool_node = ToolNodeConfig(
             name="basic_tool_node",
             engine_name="test_engine",
             allowed_routes=["langchain_tool"]
         )
-        
+
         # Create state with tool call
         state = ToolState(
             messages=[
@@ -82,10 +82,10 @@ class TestBasicNodeIntegration:
             engines={"test_engine": config},
             tool_routes=config.tool_routes
         )
-        
+
         # Execute tool node
         result = tool_node(state, {})
-        
+
         # Should successfully execute tool
         assert isinstance(result, dict) or isinstance(result, Command)
         if isinstance(result, dict):
@@ -94,7 +94,7 @@ class TestBasicNodeIntegration:
             tool_messages = [m for m in messages if isinstance(m, ToolMessage)]
             assert len(tool_messages) >= 1
             assert "Result: 8" in tool_messages[0].content
-    
+
     def test_validation_node_route_detection(self):
         """Test ValidationNodeV2 correctly detects tool routes."""
         # Create config with multiple tool types
@@ -108,28 +108,28 @@ class TestBasicNodeIntegration:
             description="Process with structured output",
             output_model=TestResult
         )
-        
+
         config = AugLLMConfig(
             tools=[simple_calculator, structured_tool],
             structured_output_model=TestResult
         )
-        
+
         # Verify mixed routes (no duplication)
         assert len(config.tools) >= 2  # At least calculator + structured
         assert "simple_calculator" in config.tool_routes
         assert config.tool_routes["simple_calculator"] == "langchain_tool"
-        
+
         # ValidationNodeV2 should handle Pydantic models
         validation_node = ValidationNodeV2(
             name="route_detection",
             engine_name="test_engine"
         )
-        
+
         # Set up tool routes
         validation_node.clear_tool_routes()
         for tool_name, route in config.tool_routes.items():
             validation_node.set_tool_route(tool_name, route)
-        
+
         # Test state with Pydantic model tool call
         state = ToolState(
             messages=[
@@ -139,7 +139,7 @@ class TestBasicNodeIntegration:
                         "name": "TestResult",
                         "args": {
                             "input": "test input",
-                            "output": "test output",  
+                            "output": "test output",
                             "success": True
                         },
                         "id": "call_1"
@@ -150,13 +150,13 @@ class TestBasicNodeIntegration:
             tool_routes=config.tool_routes,
             engine_name="test_engine"
         )
-        
+
         # Execute validation node
         result = validation_node(state, {})
-        
+
         # Should return Command to route to next node
         assert isinstance(result, Command)
-    
+
     def test_parser_node_config_basic_functionality(self):
         """Test ParserNodeConfigV2 basic parsing capabilities."""
         # Create ParserNodeConfigV2
@@ -165,7 +165,7 @@ class TestBasicNodeIntegration:
             output_model=TestResult,
             add_tool_message_safety_net=True
         )
-        
+
         # Create state with structured output
         state = ToolState(
             messages=[
@@ -173,13 +173,13 @@ class TestBasicNodeIntegration:
                 AIMessage(content='{"input": "test", "output": "processed", "success": true}')
             ]
         )
-        
-        # Execute parser node 
+
+        # Execute parser node
         result = parser_node(state, {})
-        
+
         # Should successfully parse and continue
         assert isinstance(result, Command) or isinstance(result, dict)
-    
+
     def test_comprehensive_node_workflow_success_path(self):
         """Test successful workflow: ToolNode → ValidationNode → ParserNode."""
         # Create comprehensive setup
@@ -187,31 +187,31 @@ class TestBasicNodeIntegration:
             tools=[simple_calculator],
             structured_output_model=TestResult
         )
-        
+
         # Verify setup (no duplication)
         assert len(config.tools) >= 1
         assert len(config.tool_routes) >= 1
-        
+
         # Create all three node types
         tool_node = ToolNodeConfig(
             name="workflow_tool",
             engine_name="workflow_engine",
             allowed_routes=["langchain_tool"]
         )
-        
+
         validation_node = ValidationNodeV2(
             name="workflow_validation",
-            engine_name="workflow_engine"  
+            engine_name="workflow_engine"
         )
         validation_node.clear_tool_routes()
         for tool_name, route in config.tool_routes.items():
             validation_node.set_tool_route(tool_name, route)
-        
+
         parser_node = ParserNodeConfigV2(
             name="workflow_parser",
             output_model=TestResult
         )
-        
+
         # Test initial state
         initial_state = ToolState(
             messages=[
@@ -228,10 +228,10 @@ class TestBasicNodeIntegration:
             engines={"workflow_engine": config},
             tool_routes=config.tool_routes
         )
-        
+
         # Step 1: Execute tool node (should create ToolMessage)
         tool_result = tool_node(initial_state, {})
-        
+
         # Verify tool execution
         if isinstance(tool_result, dict) and "messages" in tool_result:
             # Tool node succeeded - check for ToolMessage
@@ -241,7 +241,7 @@ class TestBasicNodeIntegration:
                 print(f"✅ Tool execution successful: {tool_messages[0].content}")
             else:
                 print("ℹ️  Tool node completed but no ToolMessage in result")
-        
+
         # Step 2: Test validation node with a Pydantic tool call
         pydantic_state = ToolState(
             messages=[
@@ -262,11 +262,11 @@ class TestBasicNodeIntegration:
             tool_routes=config.tool_routes,
             engine_name="workflow_engine"
         )
-        
+
         validation_result = validation_node(pydantic_state, {})
         assert isinstance(validation_result, Command)
         print("✅ Validation node handled Pydantic model successfully")
-        
+
         # Step 3: Test parser node
         parser_state = ToolState(
             messages=[
@@ -274,13 +274,13 @@ class TestBasicNodeIntegration:
                 AIMessage(content='{"input": "final test", "output": "final result", "success": true}')
             ]
         )
-        
+
         parser_result = parser_node(parser_state, {})
         print("✅ Parser node completed successfully")
-        
+
         # All nodes executed successfully
         assert True  # If we reach here, all nodes worked
-    
+
     def test_node_integration_with_store_tools(self):
         """Test nodes work with store tools from ToolEngine."""
         # Create store tools
@@ -291,22 +291,22 @@ class TestBasicNodeIntegration:
             namespace=("test", "nodes"),
             include_tools=["store"]
         )
-        
+
         # Create AugLLMConfig with store tools
         config = AugLLMConfig(tools=store_tools)
-        
+
         # Verify store tools integration (no duplication)
         assert len(config.tool_routes) >= 1
         store_tool_names = [name for name in config.tool_routes.keys() if "store" in name]
         assert len(store_tool_names) >= 1
-        
+
         # Create ToolNodeConfig for store tools
         tool_node = ToolNodeConfig(
             name="store_tool_node",
             engine_name="store_engine",
             allowed_routes=["langchain_tool"]
         )
-        
+
         # Test with store tool call
         store_tool_name = store_tool_names[0]
         state = ToolState(
@@ -323,43 +323,43 @@ class TestBasicNodeIntegration:
             engines={"store_engine": config},
             tool_routes=config.tool_routes
         )
-        
+
         # Execute store tool
         result = tool_node(state, {})
-        
+
         # Store operation should succeed
         if isinstance(result, dict) and "messages" in result:
             tool_messages = [m for m in result["messages"] if isinstance(m, ToolMessage)]
             if len(tool_messages) > 0:
                 assert len(tool_messages[0].content) > 0  # Got some response
-                print(f"✅ Store tool integration successful")
-    
+                print("✅ Store tool integration successful")
+
     def test_dynamic_tool_addition_with_nodes(self):
         """Test nodes handle dynamic tool updates from AugLLMConfig."""
         # Start with one tool
         config = AugLLMConfig(tools=[simple_calculator])
         assert len(config.tools) == 1  # Verify no duplication
-        
-        # Add tool dynamically 
+
+        # Add tool dynamically
         @tool
         def text_processor(text: str) -> str:
             return f"Processed: {text}"
-        
+
         config.add_tool(text_processor)
-        
+
         # Verify dynamic addition (no duplication bug)
         assert len(config.tools) == 2
         assert len(config.tool_routes) == 2
         assert "simple_calculator" in config.tool_routes
         assert "text_processor" in config.tool_routes
-        
+
         # Create ToolNodeConfig with updated tools
         tool_node = ToolNodeConfig(
             name="dynamic_tool_node",
             engine_name="dynamic_engine",
             allowed_routes=["langchain_tool"]
         )
-        
+
         # Test with new tool
         state = ToolState(
             messages=[
@@ -375,10 +375,10 @@ class TestBasicNodeIntegration:
             engines={"dynamic_engine": config},
             tool_routes=config.tool_routes
         )
-        
+
         # Execute with dynamically added tool
         result = tool_node(state, {})
-        
+
         # Should handle dynamic tool successfully
         if isinstance(result, dict) and "messages" in result:
             tool_messages = [m for m in result["messages"] if isinstance(m, ToolMessage)]

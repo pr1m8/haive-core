@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """Simple test to show BaseModel tool schema behavior."""
 
-from pydantic import BaseModel, Field
-from langchain_core.tools import tool
 import inspect
+
+from langchain_core.tools import tool
+from pydantic import BaseModel, Field
+
 
 class ConfigurableTool(BaseModel):
     """A tool with configuration state."""
     prefix: str = Field(default="Result", description="Output prefix")
     suffix: str = Field(default="!", description="Output suffix")
-    
+
     def __call__(self, query: str) -> str:
         """Process query with configuration."""
         return f"{self.prefix}: {query}{self.suffix}"
@@ -24,13 +26,13 @@ tool2 = ConfigurableTool(prefix="Response", suffix="!!!")
 
 print("\n1️⃣ BaseModel Schema (configuration fields):")
 print(f"Fields: {list(ConfigurableTool.model_fields.keys())}")
-print(f"Schema includes: prefix, suffix")
+print("Schema includes: prefix, suffix")
 
 print("\n2️⃣ __call__ Method Signature (tool input):")
 sig = inspect.signature(ConfigurableTool.__call__)
-params = [p for p in sig.parameters.keys() if p != 'self']
+params = [p for p in sig.parameters.keys() if p != "self"]
 print(f"Parameters: {params}")
-print(f"Schema includes: query")
+print("Schema includes: query")
 
 print("\n3️⃣ Instance State:")
 print(f"tool1.prefix = '{tool1.prefix}', tool1.suffix = '{tool1.suffix}'")
@@ -47,7 +49,7 @@ def wrapped_tool1(query: str) -> str:
     """Tool 1 with custom config."""
     return tool1(query)
 
-@tool  
+@tool
 def wrapped_tool2(query: str) -> str:
     """Tool 2 with custom config."""
     return tool2(query)

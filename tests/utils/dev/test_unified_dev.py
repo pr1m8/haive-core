@@ -6,22 +6,21 @@ utilities system including configuration, analysis, instrumentation, and
 integration between components.
 """
 
-import pytest
 import tempfile
 import time
 from pathlib import Path
-from typing import List, Dict, Optional
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from haive.core.utils.dev import (
-    dev,
-    UnifiedDev,
+    CodeAnalysisReport,
     DevConfig,
     DevContext,
-    CodeAnalysisReport,
     Environment,
     LogLevel,
     StorageBackend,
+    UnifiedDev,
 )
 
 
@@ -247,7 +246,7 @@ class TestCodeAnalysisIntegration:
     def create_test_function(self):
         """Create a test function for analysis."""
 
-        def test_function(data: List[str], config: Optional[Dict] = None) -> Dict[str, int]:
+        def test_function(data: list[str], config: dict | None = None) -> dict[str, int]:
             """Test function with type hints for analysis."""
             result = {}
             for item in data:
@@ -442,7 +441,7 @@ class TestIntegrationScenarios:
         )
 
         @dev_instance.instrument(profile=True, log=True)
-        def example_workflow(data: List[str]) -> Dict[str, int]:
+        def example_workflow(data: list[str]) -> dict[str, int]:
             """Example function with full instrumentation."""
             with dev_instance.context("processing") as ctx:
                 ctx.info("Starting data processing", count=len(data))
@@ -502,8 +501,8 @@ class TestIntegrationScenarios:
         dev_instance = UnifiedDev()
 
         def complex_function(
-            items: List[Dict[str, str]], config: Optional[Dict] = None
-        ) -> List[str]:
+            items: list[dict[str, str]], config: dict | None = None
+        ) -> list[str]:
             """Function with some complexity for analysis."""
             result = []
 

@@ -15,9 +15,9 @@ sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agent
 def test_sync_conversation():
     """Test synchronous conversation with content verification."""
 
-    from haive.agents.conversation.collaberative.agent import CollaborativeConversation
     from langchain_core.messages import HumanMessage
 
+    from haive.agents.conversation.collaberative.agent import CollaborativeConversation
     from haive.core.engine.aug_llm import AugLLMConfig
 
     timestamp = datetime.now().strftime("%H%M%S")
@@ -137,7 +137,7 @@ async def test_async_persistence():
         else:
             pass
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -191,7 +191,7 @@ def verify_database_content(thread_id: str):
                                 for _i, msg in enumerate(messages[-3:]):  # Last 3
                                     if isinstance(msg, dict) and "content" in msg:
                                         pass
-                        except Exception as e:
+                        except Exception:
                             pass
 
                     # Check metadata
@@ -217,7 +217,7 @@ def verify_database_content(thread_id: str):
                 )
                 ps_count = cur.fetchone()[0]
 
-    except Exception as e:
+    except Exception:
         pass
 
 

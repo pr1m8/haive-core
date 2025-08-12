@@ -44,7 +44,7 @@ def check_prepared_statements():
 
             return len(prepared_stmts)
 
-    except Exception as e:
+    except Exception:
         return -1
 
 
@@ -52,7 +52,6 @@ def test_conversation_agent():
     """Test a conversation agent to see if it creates prepared statements."""
 
     from haive.agents.conversation.collaberative.agent import CollaborativeConversation
-
     from haive.core.engine.aug_llm import AugLLMConfig
 
     timestamp = datetime.now().strftime("%H%M%S")
@@ -96,7 +95,7 @@ def test_conversation_agent():
 
     if after_count > before_count:
         return False
-    print(f"\n✅ SUCCESS: No new prepared statements created!")
+    print("\n✅ SUCCESS: No new prepared statements created!")
     return True
 
 

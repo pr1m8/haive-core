@@ -6,7 +6,6 @@ import json
 import os
 import sys
 from datetime import datetime
-from pathlib import Path
 
 
 def setup_paths():
@@ -65,7 +64,7 @@ async def test_async_postgresql_setup():
 
         return True
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -75,10 +74,9 @@ async def test_async_postgresql_setup():
 def test_thread_continuation():
     """Test continuing conversations on existing thread IDs."""
     try:
-        from haive.agents.simple.agent import SimpleAgent
         from langchain_core.messages import HumanMessage
 
-        from haive.core.engine.aug_llm import AugLLMConfig
+        from haive.agents.simple.agent import SimpleAgent
 
         # Create a simple agent with persistence
         agent = SimpleAgent(
@@ -113,7 +111,7 @@ def test_thread_continuation():
         else:
             return False
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -123,10 +121,9 @@ def test_thread_continuation():
 def test_react_agent_persistence():
     """Test React agent with persistence and tool usage."""
     try:
-        from haive.agents.react.agent import ReactAgent
         from langchain_core.messages import HumanMessage
 
-        from haive.core.engine.aug_llm import AugLLMConfig
+        from haive.agents.react.agent import ReactAgent
 
         # Create React agent with basic tools
         react_agent = ReactAgent(
@@ -159,7 +156,7 @@ def test_react_agent_persistence():
         print("❌ No messages in result")
         return False
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -225,7 +222,7 @@ def check_database_health():
         conn.close()
         return True
 
-    except Exception as e:
+    except Exception:
         return False
 
 
