@@ -86,7 +86,7 @@ See Also:
     - Plugin development guides
 """
 
-from typing import Any, Dict
+from typing import Any
 
 from haive.core.registry.base import AbstractRegistry
 from haive.core.registry.decorators import register_component

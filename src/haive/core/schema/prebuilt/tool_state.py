@@ -161,7 +161,13 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
                     logger.debug(
                         f"Syncing tool routes from instance engine '{field_name}': {field_value.tool_routes}"
                     )
+                    print(
+                        f"🔄 DEBUG: Before update - state tool_routes: {self.tool_routes}"
+                    )
                     self.tool_routes.update(field_value.tool_routes)
+                    print(
+                        f"🔄 DEBUG: After update - state tool_routes: {self.tool_routes}"
+                    )
                 if hasattr(field_value, "tool_metadata") and field_value.tool_metadata:
                     logger.debug(
                         f"Syncing tool metadata from instance engine '{field_name}': {field_value.tool_metadata}"
@@ -307,12 +313,31 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
 
     def _sync_tool_routes(self) -> None:
         """Synchronize tool_routes with current tools - matches AugLLMConfig pattern."""
+        print(
+            f"🔄 DEBUG: _sync_tool_routes starting - current tool_routes: {self.tool_routes}"
+        )
         new_routes = {}
         for i, tool in enumerate(self.tools):
             tool_name = self._get_tool_name(tool, i)
-            route = self._get_tool_route(tool)
+
+            # Preserve existing routes from engines (especially parse_output for structured output)
+            existing_route = self.tool_routes.get(tool_name)
+            if existing_route:
+                route = existing_route
+                print(
+                    f"🔄 DEBUG: Preserved existing route '{route}' for tool '{tool_name}'"
+                )
+                logger.debug(
+                    f"Preserved existing route '{route}' for tool '{tool_name}'"
+                )
+            else:
+                # Only compute new route if one doesn't exist
+                route = self._get_tool_route(tool)
+                print(f"🔄 DEBUG: Computed new route '{route}' for tool '{tool_name}'")
+                logger.debug(f"Computed new route '{route}' for tool '{tool_name}'")
+
             new_routes[tool_name] = route
-            logger.debug(f"Mapped tool '{tool_name}' to route '{route}'")
+        print(f"🔄 DEBUG: _sync_tool_routes ending - new tool_routes: {new_routes}")
         self.tool_routes = new_routes
 
     def _get_tool_name(self, tool: Any, index: int) -> str:

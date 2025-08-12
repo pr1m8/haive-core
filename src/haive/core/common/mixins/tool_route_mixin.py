@@ -370,7 +370,7 @@ class ToolRouteMixin(BaseModel):
 
             # Check all engines on self (for state schemas)
             if not is_structured_output:
-                for field_name, field_value in self.__dict__.items():
+                for _field_name, field_value in self.__dict__.items():
                     if (
                         hasattr(field_value, "structured_output_model")
                         and field_value.structured_output_model is tool

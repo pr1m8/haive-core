@@ -826,7 +826,9 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
         description = call_method.__doc__ or f"Tool for {name}"
 
         # Ensure function has docstring
-        model_tool = lambda *args, **kwargs: call_method(*args, **kwargs)
+        def model_tool(*args, **kwargs):
+            return call_method(*args, **kwargs)
+
         model_tool.__name__ = name
         model_tool.__doc__ = description
 
