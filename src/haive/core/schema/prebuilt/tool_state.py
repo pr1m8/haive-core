@@ -161,12 +161,12 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
                     logger.debug(
                         f"Syncing tool routes from instance engine '{field_name}': {field_value.tool_routes}"
                     )
-                    print(
-                        f"🔄 DEBUG: Before update - state tool_routes: {self.tool_routes}"
+                    logger.debug(
+                        f"Before update - state tool_routes: {self.tool_routes}"
                     )
                     self.tool_routes.update(field_value.tool_routes)
-                    print(
-                        f"🔄 DEBUG: After update - state tool_routes: {self.tool_routes}"
+                    logger.debug(
+                        f"After update - state tool_routes: {self.tool_routes}"
                     )
                 if hasattr(field_value, "tool_metadata") and field_value.tool_metadata:
                     logger.debug(
@@ -313,19 +313,71 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
 
     def _sync_tool_routes(self) -> None:
         """Synchronize tool_routes with current tools - matches AugLLMConfig pattern."""
-        print(
-            f"🔄 DEBUG: _sync_tool_routes starting - current tool_routes: {self.tool_routes}"
+        logger.debug(
+            f"_sync_tool_routes starting - current tool_routes: {self.tool_routes}"
         )
         new_routes = {}
         for i, tool in enumerate(self.tools):
             tool_name = self._get_tool_name(tool, i)
 
-            # Preserve existing routes from engines (especially parse_output for structured output)
+            # Check for existing routes with both sanitized and original names
+            # This handles cases where engines set sanitized names but tools have original names
             existing_route = self.tool_routes.get(tool_name)
+
+            # Check if this tool has both sanitized and original routes
+            # If so, prefer parse_output over pydantic_model for structured output models
+            original_tool_name = None
+            if isinstance(tool, type) and hasattr(tool, "__name__"):
+                original_tool_name = tool.__name__
+                if original_tool_name != tool_name:
+                    # Check for route conflict and resolve it
+                    sanitized_route = self.tool_routes.get(
+                        tool_name
+                    )  # e.g., "simple_result": "parse_output"
+                    original_route = self.tool_routes.get(
+                        original_tool_name
+                    )  # e.g., "SimpleResult": "pydantic_model"
+
+                    if sanitized_route and original_route:
+                        # Both routes exist - prefer parse_output for structured output
+                        if (
+                            sanitized_route == "parse_output"
+                            and original_route == "pydantic_model"
+                        ):
+                            existing_route = (
+                                sanitized_route  # Use the correct parse_output route
+                            )
+                            logger.debug(
+                                f"Preferring parse_output route for '{tool_name}' over pydantic_model for '{original_tool_name}'"
+                            )
+                        elif (
+                            sanitized_route == "pydantic_model"
+                            and original_route == "parse_output"
+                        ):
+                            existing_route = (
+                                original_route  # Use the correct parse_output route
+                            )
+                            logger.debug(
+                                f"Preferring parse_output route from '{original_tool_name}' for tool '{tool_name}'"
+                            )
+                        else:
+                            # Use sanitized route by default
+                            existing_route = sanitized_route
+                            logger.debug(
+                                f"Route conflict resolved: using sanitized '{sanitized_route}' for '{tool_name}' (original: '{original_route}')"
+                            )
+                    elif sanitized_route:
+                        existing_route = sanitized_route
+                    elif original_route:
+                        existing_route = original_route
+                        logger.debug(
+                            f"Using original route '{original_route}' from '{original_tool_name}' for sanitized name '{tool_name}'"
+                        )
+
             if existing_route:
                 route = existing_route
-                print(
-                    f"🔄 DEBUG: Preserved existing route '{route}' for tool '{tool_name}'"
+                logger.debug(
+                    f"Preserved existing route '{route}' for tool '{tool_name}'"
                 )
                 logger.debug(
                     f"Preserved existing route '{route}' for tool '{tool_name}'"
@@ -333,11 +385,11 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
             else:
                 # Only compute new route if one doesn't exist
                 route = self._get_tool_route(tool)
-                print(f"🔄 DEBUG: Computed new route '{route}' for tool '{tool_name}'")
+                logger.debug(f"Computed new route '{route}' for tool '{tool_name}'")
                 logger.debug(f"Computed new route '{route}' for tool '{tool_name}'")
 
             new_routes[tool_name] = route
-        print(f"🔄 DEBUG: _sync_tool_routes ending - new tool_routes: {new_routes}")
+        logger.debug(f"_sync_tool_routes ending - new tool_routes: {new_routes}")
         self.tool_routes = new_routes
 
     def _get_tool_name(self, tool: Any, index: int) -> str:
@@ -349,7 +401,13 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         if (isinstance(tool, type) and hasattr(tool, "__name__")) or hasattr(
             tool, "__name__"
         ):
-            return tool.__name__
+            # Use sanitized tool name to match what LangChain bind_tools produces
+            # and what engines set in tool routes
+            from haive.core.utils.naming import sanitize_tool_name
+
+            sanitized_name = sanitize_tool_name(tool.__name__)
+            logger.debug(f"Tool name sanitization: {tool.__name__} -> {sanitized_name}")
+            return sanitized_name
         return f"tool_{index}"
 
     def _get_tool_route(self, tool: Any) -> str:

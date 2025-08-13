@@ -350,12 +350,17 @@ class AugLLMConfig(*_get_augllm_base_classes()):
             return
         self.sync_tool_routes_from_tools(self.tools)
         if self.structured_output_model:
+            # Use sanitized name for comparison to match actual tool names
+            from haive.core.utils.naming import sanitize_tool_name
+
+            sanitized_model_name = sanitize_tool_name(
+                self.structured_output_model.__name__
+            )
+
             for tool_name, route in self.tool_routes.items():
                 if route == "parse_output":
                     metadata = self.get_tool_metadata(tool_name) or {}
-                    metadata["is_structured_output"] = (
-                        tool_name == self.structured_output_model.__name__
-                    )
+                    metadata["is_structured_output"] = tool_name == sanitized_model_name
                     self.set_tool_route(tool_name, route, metadata)
 
     def _debug_initialization_summary(self):
@@ -519,7 +524,13 @@ class AugLLMConfig(*_get_augllm_base_classes()):
                 # Set the correct route for structured output model
                 tool_routes = data.get("tool_routes", {})
                 if hasattr(structured_output_model, "__name__"):
-                    tool_routes[structured_output_model.__name__] = "parse_output"
+                    # Use sanitized tool name to match what LangChain bind_tools produces
+                    from haive.core.utils.naming import sanitize_tool_name
+
+                    sanitized_name = sanitize_tool_name(
+                        structured_output_model.__name__
+                    )
+                    tool_routes[sanitized_name] = "parse_output"
                     data["tool_routes"] = tool_routes
             if structured_output_version == "v2":
                 data["force_tool_use"] = True

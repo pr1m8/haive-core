@@ -597,7 +597,10 @@ class ToolRouteMixin(BaseModel):
             if hasattr(tool, "name"):
                 tool_name = tool.name
             elif isinstance(tool, type) and hasattr(tool, "__name__"):
-                tool_name = tool.__name__
+                # Use sanitized tool name to match what LangChain bind_tools produces
+                from haive.core.utils.naming import sanitize_tool_name
+
+                tool_name = sanitize_tool_name(tool.__name__)
             else:
                 tool_name = f"tool_{i}"
 
@@ -943,5 +946,8 @@ class ToolRouteMixin(BaseModel):
         if hasattr(tool, "name") and tool.name:
             return tool.name
         if isinstance(tool, type) and hasattr(tool, "__name__"):
-            return tool.__name__
+            # Use sanitized tool name to match what LangChain bind_tools produces
+            from haive.core.utils.naming import sanitize_tool_name
+
+            return sanitize_tool_name(tool.__name__)
         return f"tool_{index}"

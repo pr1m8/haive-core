@@ -156,12 +156,17 @@ class StructuredOutputMixin:
 
         # Add metadata if subclass has set_tool_route method
         if hasattr(self, "set_tool_route"):
+            # Use sanitized tool name to match what LangChain bind_tools produces
+            from haive.core.utils.naming import sanitize_tool_name
+
+            sanitized_name = sanitize_tool_name(name)
+
             metadata = {
                 "llm_config": getattr(self, "name", "anonymous"),
                 "version": self.structured_output_version,
                 "tool_type": "structured_output",
             }
-            self.set_tool_route(name, "parse_output", metadata)
+            self.set_tool_route(sanitized_name, "parse_output", metadata)
 
         return tool_class
 
@@ -176,8 +181,13 @@ class StructuredOutputMixin:
             if hasattr(tool, "__name__") and tool.__name__ == structured_model_name:
                 # Add metadata if this is the subclass's set_tool_route method
                 if hasattr(self, "set_tool_route"):
+                    # Use sanitized tool name to match what LangChain bind_tools produces
+                    from haive.core.utils.naming import sanitize_tool_name
+
+                    sanitized_tool_name = sanitize_tool_name(tool.__name__)
+
                     metadata = {
                         "is_structured_output": True,
                         "version": self.structured_output_version,
                     }
-                    self.set_tool_route(tool.__name__, "parse_output", metadata)
+                    self.set_tool_route(sanitized_tool_name, "parse_output", metadata)
