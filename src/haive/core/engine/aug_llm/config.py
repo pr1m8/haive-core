@@ -594,16 +594,17 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         Extends ToolRouteMixin's analysis with structured output detection.
         """
         if self.structured_output_model and tool == self.structured_output_model:
-            route = (
-                "structured_output_tool"
-                if self.structured_output_version == "v2"
-                else "parser"
-            )
+            # Always use "parse_output" route for structured output models
+            # This is what the validation router expects for structured output
+            route = "parse_output"
             metadata = {
                 "purpose": "structured_output",
                 "version": self.structured_output_version,
                 "force_choice": self.structured_output_version == "v2",
                 "class_name": tool.__name__ if hasattr(tool, "__name__") else str(tool),
+                "implementation": (
+                    "tool" if self.structured_output_version == "v2" else "parser"
+                ),
             }
             return (route, metadata)
         return super()._analyze_tool(tool)
