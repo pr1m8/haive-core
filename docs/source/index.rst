@@ -7,6 +7,16 @@ Welcome to haive-core's documentation!
 
    autoapi/index
 
+
+Changelog
+---------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Changelog
+   
+   changelog
+
 Indices and tables
 ==================
 
