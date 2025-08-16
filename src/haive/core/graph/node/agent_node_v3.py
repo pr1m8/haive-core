@@ -69,7 +69,7 @@ from __future__ import annotations
 
 import contextlib
 import logging
-from typing import TYPE_CHECKING, Any, Self, TypeVar
+from typing import TYPE_CHECKING, Any, Self, TypeVar, Union
 
 from langchain_core.messages import BaseMessage
 from langgraph.types import Command
@@ -86,10 +86,8 @@ from haive.core.schema.field_registry import StandardFields
 if TYPE_CHECKING:
     from haive.agents.base.agent import Agent
 else:
-    try:
-        from haive.agents.base.agent import Agent
-    except ImportError:
-        from typing import Any as Agent
+    # Use string literal for forward reference at runtime
+    Agent = "Agent"
 logger = logging.getLogger(__name__)
 console = Console()
 TInput = TypeVar("TInput", bound=BaseModel)
@@ -212,7 +210,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
     agent_name: str = Field(
         description="Name of agent to execute (key in container's agents dict)"
     )
-    agent: Agent | None = Field(
+    agent: Union["Agent", None] = Field(
         default=None,
         description="Agent instance (extracted from state if not provided)",
     )
@@ -441,7 +439,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             state.active_agent = self.agent_name
 
     def _project_state_for_agent(
-        self, state: StateLike, agent: Agent
+        self, state: StateLike, agent: "Agent"
     ) -> dict[str, Any]:
         """Project container state to agent's expected schema.
 
@@ -562,7 +560,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             return []
 
     def _process_agent_output(
-        self, result: Any, state: StateLike, agent: Agent
+        self, result: Any, state: StateLike, agent: "Agent"
     ) -> dict[str, Any]:
         """Process agent output and prepare state update.
 
@@ -748,7 +746,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
                     state_update[field] = result_dict[field]
         return state_update
 
-    def _check_recompilation(self, state: StateLike, agent: Agent) -> None:
+    def _check_recompilation(self, state: StateLike, agent: "Agent") -> None:
         """Check and track recompilation needs."""
         if hasattr(agent, "graph") and hasattr(agent.graph, "needs_recompile"):
             if agent.graph.needs_recompile():
@@ -930,7 +928,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
                 )
                 branch.add(f"📝 {key}: {value_str}")
 
-    def _display_agent_input(self, agent_input: dict[str, Any], agent: Agent) -> None:
+    def _display_agent_input(self, agent_input: dict[str, Any], agent: "Agent") -> None:
         """Display agent input projection with rich visualization."""
         input_tree = Tree(
             f"📥 Projected Input for '{self.agent_name}'", style="bold cyan"
@@ -990,7 +988,10 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
 
 
 def create_agent_node_v3(
-    agent_name: str, agent: Agent | None = None, name: str | None = None, **kwargs
+    agent_name: str,
+    agent: Union["Agent", None] = None,
+    name: str | None = None,
+    **kwargs,
 ) -> AgentNodeV3Config:
     """Create an agent node V3 configuration.
 

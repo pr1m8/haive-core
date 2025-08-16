@@ -16,7 +16,9 @@ class OllamaEmbeddingConfig(BaseEmbeddingConfig):
     including nomic-embed-text, mxbai-embed-large, and other supported models.
 
     Examples:
-        Basic usage::
+        Basic usage:
+
+        .. code-block:: python
 
             config = OllamaEmbeddingConfig(
                 name="ollama_embeddings",

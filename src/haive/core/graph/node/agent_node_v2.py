@@ -1,7 +1,12 @@
 import logging
-from typing import Any, Literal, Optional, Self, TypeVar
+from typing import TYPE_CHECKING, Any, Literal, Optional, Self, TypeVar, Union
 
-from haive.agents.base.agent import Agent
+if TYPE_CHECKING:
+    from haive.agents.base.agent import Agent
+else:
+    # Placeholder for runtime
+    Agent = Any
+
 from langchain_core.messages import BaseMessage
 from langgraph.types import Command
 from pydantic import BaseModel, Field, model_validator
@@ -40,7 +45,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
     node_type: NodeType = Field(
         default=NodeType.AGENT, description="Node type for agents"
     )
-    agent: Agent = Field(description="The agent to execute")
+    agent: "Agent" = Field(description="The agent to execute")
     agent_state_schema: type[BaseModel] | None = Field(
         default=None,
         description="Agent's expected state schema (if different from global)",

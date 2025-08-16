@@ -7,7 +7,9 @@ The provider handles Azure-specific authentication, endpoint configuration, and 
 deployment access through the langchain-openai package dependencies.
 
 Examples:
-    Basic usage::
+    Basic usage:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers.azure import AzureOpenAIProvider
 
@@ -60,7 +62,9 @@ class AzureOpenAIProvider(BaseLLMProvider):
         presence_penalty (float): Presence penalty parameter
 
     Examples:
-        Standard deployment::
+        Standard deployment:
+
+        .. code-block:: python
 
             provider = AzureOpenAIProvider(
                 deployment_name="gpt-4",

@@ -7,7 +7,9 @@ The provider handles API key management, model configuration, and safe imports o
 the langchain-mistralai package dependencies.
 
 Examples:
-    Basic usage::
+    Basic usage:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers.mistral import MistralProvider
 
@@ -56,7 +58,9 @@ class MistralProvider(BaseLLMProvider):
         safe_mode (bool): Enable content filtering
 
     Examples:
-        Large model for complex tasks::
+        Large model for complex tasks:
+
+        .. code-block:: python
 
             provider = MistralProvider(
                 model="mistral-large-latest",

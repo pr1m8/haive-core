@@ -16,7 +16,9 @@ class EmbeddingConfigFactory:
     without needing to import specific provider classes.
 
     Examples:
-        Create OpenAI configuration::
+        Create OpenAI configuration:
+
+        .. code-block:: python
 
             factory = EmbeddingConfigFactory()
             config = factory.create(
@@ -59,7 +61,9 @@ class EmbeddingConfigFactory:
             ValueError: If provider is not found or configuration is invalid
 
         Examples:
-            Create OpenAI config::
+            Create OpenAI config:
+
+            .. code-block:: python
 
                 config = EmbeddingConfigFactory.create(
                     provider="OpenAI",
@@ -221,7 +225,9 @@ def create_embedding_config(
         Configured embedding instance
 
     Examples:
-        Create OpenAI config::
+        Create OpenAI config:
+
+        .. code-block:: python
 
             config = create_embedding_config(
                 provider="OpenAI",
@@ -250,7 +256,9 @@ def list_embedding_providers() -> list[str]:
         List of provider names
 
     Examples:
-        List providers::
+        List providers:
+
+        .. code-block:: python
 
             providers = list_embedding_providers()
             print(f"Available: {providers}")

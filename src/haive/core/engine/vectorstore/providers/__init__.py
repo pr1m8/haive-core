@@ -55,7 +55,9 @@ Available Providers:
     - **Zilliz**: Cloud service for Milvus vector database
 
 Examples:
-    Basic Chroma vector store setup::
+    Basic Chroma vector store setup:
+
+    .. code-block:: python
 
         from haive.core.engine.vectorstore.providers import ChromaVectorStoreConfig
         from haive.core.engine.embedding.providers import OpenAIEmbeddingConfig

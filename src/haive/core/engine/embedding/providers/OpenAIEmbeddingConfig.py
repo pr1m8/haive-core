@@ -16,7 +16,9 @@ class OpenAIEmbeddingConfig(BaseEmbeddingConfig):
     the latest text-embedding-3-large and text-embedding-3-small models.
 
     Examples:
-        Basic usage::
+        Basic usage:
+
+        .. code-block:: python
 
             config = OpenAIEmbeddingConfig(
                 name="openai_embeddings",

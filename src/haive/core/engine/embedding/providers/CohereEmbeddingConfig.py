@@ -16,7 +16,9 @@ class CohereEmbeddingConfig(BaseEmbeddingConfig):
     embed-english-v3.0, embed-multilingual-v3.0, and other specialized models.
 
     Examples:
-        Basic usage::
+        Basic usage:
+
+        .. code-block:: python
 
             config = CohereEmbeddingConfig(
                 name="cohere_embeddings",

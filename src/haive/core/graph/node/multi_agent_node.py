@@ -5,9 +5,14 @@ handle state projection between the container state and individual agent states.
 """
 
 import logging
-from typing import Any, Self, TypeVar
+from typing import TYPE_CHECKING, Any, Self, TypeVar, Union
 
-from haive.agents.base.agent import Agent
+if TYPE_CHECKING:
+    from haive.agents.base.agent import Agent
+else:
+    # Placeholder for runtime
+    Agent = "Agent"
+
 from langgraph.types import Command
 from pydantic import BaseModel, Field, model_validator
 
@@ -39,7 +44,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
     agent_name: str = Field(
         description="Name of the agent to execute (key in agents dict)"
     )
-    agent: Agent | None = Field(
+    agent: Union["Agent", None] = Field(
         default=None,
         description="Agent instance (extracted from state if not provided)",
     )
@@ -103,7 +108,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
         return state.get_agent(self.agent_name)
 
     def _project_state_for_agent(
-        self, state: MultiAgentState, agent: Agent
+        self, state: MultiAgentState, agent: "Agent"
     ) -> dict[str, Any]:
         """Project container state to agent's expected schema.
 
@@ -173,7 +178,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
                     state_update[field] = result_dict[field]
         return state_update
 
-    def _needs_recompilation(self, agent: Agent) -> bool:
+    def _needs_recompilation(self, agent: "Agent") -> bool:
         """Check if agent needs recompilation."""
         if hasattr(agent, "graph") and hasattr(agent.graph, "needs_recompile"):
             return agent.graph.needs_recompile()

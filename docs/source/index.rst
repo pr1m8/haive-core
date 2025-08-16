@@ -1,20 +1,12 @@
-Welcome to haive-core's documentation!
-======================================
+
+Welcome to haive-core Documentation
+===================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    autoapi/index
-
-
-Changelog
----------
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Changelog
-   
    changelog
 
 Indices and tables

@@ -17,7 +17,9 @@ class AzureOpenAIEmbeddingConfig(BaseEmbeddingConfig):
     on Azure OpenAI Service. It supports both standard and data zone deployments.
 
     Examples:
-        Basic usage::
+        Basic usage:
+
+        .. code-block:: python
 
             config = AzureOpenAIEmbeddingConfig(
                 name="azure_embeddings",

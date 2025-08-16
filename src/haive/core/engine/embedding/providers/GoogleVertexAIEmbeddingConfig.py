@@ -16,7 +16,9 @@ class GoogleVertexAIEmbeddingConfig(BaseEmbeddingConfig):
     including text-embedding-004, text-multilingual-embedding-002, and others.
 
     Examples:
-        Basic usage::
+        Basic usage:
+
+        .. code-block:: python
 
             config = GoogleVertexAIEmbeddingConfig(
                 name="vertex_embeddings",

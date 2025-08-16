@@ -92,7 +92,9 @@ Available Retriever Implementations:
         - **Metal**: Managed vector search platform
 
 Examples:
-    Basic vector store retriever setup::
+    Basic vector store retriever setup:
+
+    .. code-block:: python
 
         from haive.core.engine.retriever.providers import VectorStoreRetrieverConfig
         from haive.core.engine.vectorstore.providers import ChromaVectorStoreConfig

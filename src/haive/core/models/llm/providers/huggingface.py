@@ -61,7 +61,9 @@ class HuggingFaceProvider(BaseLLMProvider):
         trust_remote_code (bool): Trust remote code execution
 
     Examples:
-        Popular conversational model::
+        Popular conversational model:
+
+        .. code-block:: python
 
             provider = HuggingFaceProvider(
                 model="microsoft/DialoGPT-medium",

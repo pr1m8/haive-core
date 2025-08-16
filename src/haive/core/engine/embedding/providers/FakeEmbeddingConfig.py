@@ -16,7 +16,9 @@ class FakeEmbeddingConfig(BaseEmbeddingConfig):
     purposes. It generates random embeddings without requiring external APIs.
 
     Examples:
-        Basic usage::
+        Basic usage:
+
+        .. code-block:: python
 
             config = FakeEmbeddingConfig(
                 name="fake_embeddings",

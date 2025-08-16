@@ -8,9 +8,14 @@ This module provides node configurations that properly handle:
 """
 
 import logging
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, Union
 
-from haive.agents.base.agent import Agent
+if TYPE_CHECKING:
+    from haive.agents.base.agent import Agent
+else:
+    # Placeholder for runtime
+    Agent = Any
+
 from langchain_core.messages import BaseMessage, ToolMessage
 from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, Field
@@ -34,7 +39,7 @@ class AgentNodeConfig(EngineNodeConfig):
     """
 
     # Override engine to be agent
-    engine: Agent = Field(description="The agent to execute")
+    engine: "Agent" = Field(description="The agent to execute")
 
     # Agent-specific fields
     private_state_schema: type[BaseModel] | None = Field(
@@ -463,7 +468,7 @@ class AgentNodeConfig(EngineNodeConfig):
 
             raise
 
-    def _prepare_agent_input(self, state: dict[str, Any], agent: Agent) -> dict[str, Any]:
+    def _prepare_agent_input(self, state: dict[str, Any], agent: "Agent") -> dict[str, Any]:
         """Prepare input for agent execution.
 
         If agent has a private state schema, extract only relevant fields.
@@ -538,7 +543,7 @@ class AgentNodeConfig(EngineNodeConfig):
         return default_input if default_input else state
 
     def _process_agent_output(
-        self, result: Any, state: dict[str, Any], agent: Agent
+        self, result: Any, state: dict[str, Any], agent: "Agent"
     ) -> dict[str, Any]:
         """Process agent output and merge with global state.
 
@@ -683,8 +688,8 @@ class CoordinatorNodeConfig(NodeConfig):
 
 # Update engine_node.py to route agents to AgentNodeConfig
 def create_node_for_engine(
-    engine: Agent | Any, name: str, **kwargs
-) -> AgentNodeConfig | EngineNodeConfig:
+    engine: Union["Agent", Any], name: str, **kwargs
+) -> Union[AgentNodeConfig, EngineNodeConfig]:
     """Factory function to create appropriate node config for an engine/agent.
 
     Routes agents to AgentNodeConfig, others to EngineNodeConfig.

@@ -8,7 +8,9 @@ external services, making it ideal for privacy-sensitive applications and
 offline deployments.
 
 Examples:
-    Basic usage::
+    Basic usage:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers.ollama import OllamaProvider
 
@@ -75,7 +77,9 @@ class OllamaProvider(BaseLLMProvider):
         - qwen: Alibaba's Qwen
 
     Examples:
-        Running Llama 3 locally::
+        Running Llama 3 locally:
+
+        .. code-block:: python
 
             provider = OllamaProvider(
                 model="llama3:70b",

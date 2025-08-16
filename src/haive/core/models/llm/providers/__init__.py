@@ -31,7 +31,9 @@ Available Providers:
     - And many more...
 
 Examples:
-    Safe import with error handling::
+    Safe import with error handling:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers import get_provider
         from haive.core.models.llm.provider_types import LLMProvider

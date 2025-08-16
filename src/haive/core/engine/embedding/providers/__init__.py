@@ -13,7 +13,9 @@ Available Providers:
     - Fake: Fake embeddings for testing
 
 Examples:
-    Basic usage::
+    Basic usage:
+
+    .. code-block:: python
 
         from haive.core.engine.embedding.providers import OpenAIEmbeddingConfig
 
@@ -148,7 +150,9 @@ def get_provider_info(provider_name: str | None = None) -> dict:
         Provider information dictionary
 
     Examples:
-        Get all provider info::
+        Get all provider info:
+
+        .. code-block:: python
 
             info = get_provider_info()
             for name, details in info.items():
@@ -172,7 +176,9 @@ def list_providers() -> list[str]:
         List of provider names
 
     Examples:
-        List providers::
+        List providers:
+
+        .. code-block:: python
 
             providers = list_providers()
             print(f"Available providers: {providers}")
@@ -227,7 +233,9 @@ def get_installation_requirements(provider_name: str) -> list[str]:
         List of required packages
 
     Examples:
-        Get requirements::
+        Get requirements:
+
+        .. code-block:: python
 
             reqs = get_installation_requirements("OpenAI")
             print(f"Install: pip install {' '.join(reqs)}")

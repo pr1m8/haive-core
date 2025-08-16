@@ -7,7 +7,9 @@ The provider handles API key management, model configuration, and safe imports o
 the langchain-fireworks package dependencies.
 
 Examples:
-    Basic usage::
+    Basic usage:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers.fireworks import FireworksProvider
 
@@ -58,7 +60,9 @@ class FireworksProvider(BaseLLMProvider):
         stop (list): Stop sequences for generation
 
     Examples:
-        Mixtral for reasoning::
+        Mixtral for reasoning:
+
+        .. code-block:: python
 
             provider = FireworksProvider(
                 model="accounts/fireworks/models/mixtral-8x7b-instruct",

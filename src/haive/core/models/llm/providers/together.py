@@ -7,7 +7,9 @@ The provider handles API key management, model configuration, and safe imports o
 the langchain-together package dependencies.
 
 Examples:
-    Basic usage::
+    Basic usage:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers.together import TogetherProvider
 
@@ -59,7 +61,9 @@ class TogetherProvider(BaseLLMProvider):
         stop (list): Stop sequences for generation
 
     Examples:
-        Mixtral model for reasoning::
+        Mixtral model for reasoning:
+
+        .. code-block:: python
 
             provider = TogetherProvider(
                 model="mistralai/Mixtral-8x7B-Instruct-v0.1",

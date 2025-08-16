@@ -12,7 +12,9 @@ Classes:
     ProviderImportError: Custom exception for provider import failures
 
 Examples:
-    Creating a custom provider::
+    Creating a custom provider:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers.base import BaseLLMProvider
         from haive.core.models.llm.provider_types import LLMProvider
@@ -107,7 +109,9 @@ class BaseLLMProvider(
         debug: Enable detailed debug output
 
     Examples:
-        Creating a provider configuration::
+        Creating a provider configuration:
+
+        .. code-block:: python
 
             from haive.core.models.llm.providers.openai import OpenAIProvider
 

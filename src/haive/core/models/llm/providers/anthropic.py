@@ -7,7 +7,9 @@ The provider handles API key management, model configuration, and safe imports o
 the langchain-anthropic package dependencies.
 
 Examples:
-    Basic usage::
+    Basic usage:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers.anthropic import AnthropicProvider
 
@@ -71,7 +73,9 @@ class AnthropicProvider(BaseLLMProvider):
         - claude-2.0: Previous generation, 100K context
 
     Examples:
-        Using Claude 3 Opus::
+        Using Claude 3 Opus:
+
+        .. code-block:: python
 
             provider = AnthropicProvider(
                 model="claude-3-opus-20240229",

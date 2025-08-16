@@ -7,7 +7,9 @@ The provider handles API key management, model configuration, and safe imports o
 the langchain-nvidia-ai-endpoints package dependencies.
 
 Examples:
-    Basic usage::
+    Basic usage:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers.nvidia import NVIDIAProvider
 
@@ -56,7 +58,9 @@ class NVIDIAProvider(BaseLLMProvider):
         stop (list): Stop sequences for generation
 
     Examples:
-        Llama 3 for reasoning::
+        Llama 3 for reasoning:
+
+        .. code-block:: python
 
             provider = NVIDIAProvider(
                 model="meta/llama3-70b-instruct",

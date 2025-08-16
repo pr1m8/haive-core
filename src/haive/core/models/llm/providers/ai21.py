@@ -7,7 +7,9 @@ The provider handles API key management, model configuration, and safe imports o
 the langchain-ai21 package dependencies.
 
 Examples:
-    Basic usage::
+    Basic usage:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers.ai21 import AI21Provider
 
@@ -18,7 +20,9 @@ Examples:
         )
         llm = provider.instantiate()
 
-    With custom parameters::
+    With custom parameters:
+
+    .. code-block:: python
 
         provider = AI21Provider(
             model="j2-grande-instruct",
@@ -59,7 +63,9 @@ class AI21Provider(BaseLLMProvider):
         count_penalty (dict): Count penalty settings
 
     Examples:
-        Ultra model for complex tasks::
+        Ultra model for complex tasks:
+
+        .. code-block:: python
 
             provider = AI21Provider(
                 model="j2-ultra",
@@ -67,7 +73,9 @@ class AI21Provider(BaseLLMProvider):
                 max_tokens=2000
             )
 
-        Instruct model with penalties::
+        Instruct model with penalties:
+
+        .. code-block:: python
 
             provider = AI21Provider(
                 model="j2-grande-instruct",

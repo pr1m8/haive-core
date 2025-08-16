@@ -7,7 +7,9 @@ The provider handles AWS credentials, region configuration, and safe imports of
 the langchain-aws package dependencies.
 
 Examples:
-    Basic usage::
+    Basic usage:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers.bedrock import BedrockProvider
 
@@ -61,7 +63,9 @@ class BedrockProvider(BaseLLMProvider):
         top_p (float): Nucleus sampling parameter
 
     Examples:
-        Claude 3 on Bedrock::
+        Claude 3 on Bedrock:
+
+        .. code-block:: python
 
             provider = BedrockProvider(
                 model="anthropic.claude-3-sonnet-20240229-v1:0",

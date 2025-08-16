@@ -17,7 +17,9 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
     sentence transformers and other transformer-based embedding models.
 
     Examples:
-        Basic usage::
+        Basic usage:
+
+        .. code-block:: python
 
             config = HuggingFaceEmbeddingConfig(
                 name="hf_embeddings",

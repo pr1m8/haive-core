@@ -114,7 +114,9 @@ class DevConfig:
         excluded_tools: Static analysis tools to exclude
 
     Examples:
-        Basic usage with defaults::
+        Basic usage with defaults:
+
+        .. code-block:: python
 
             config = DevConfig()
             print(f"Environment: {config.environment}")
@@ -285,7 +287,9 @@ class DevConfig:
             HAIVE_VERBOSE: Enable verbose output (true/false)
 
         Examples:
-            Load from environment::
+            Load from environment:
+
+            .. code-block:: python
 
                 # Set environment variables
                 os.environ["HAIVE_ENV"] = "production"

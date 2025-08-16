@@ -7,7 +7,9 @@ The provider handles API key management, model configuration, and safe imports o
 the langchain-xai package dependencies.
 
 Examples:
-    Basic usage::
+    Basic usage:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers.xai import XAIProvider
 
@@ -57,7 +59,9 @@ class XAIProvider(BaseLLMProvider):
         stop (list): Stop sequences for generation
 
     Examples:
-        Grok Beta for general conversation::
+        Grok Beta for general conversation:
+
+        .. code-block:: python
 
             provider = XAIProvider(
                 model="grok-beta",

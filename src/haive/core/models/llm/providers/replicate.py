@@ -7,7 +7,9 @@ The provider handles API key management, model configuration, and safe imports o
 the langchain-community package dependencies for Replicate integration.
 
 Examples:
-    Basic usage::
+    Basic usage:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers.replicate import ReplicateProvider
 
@@ -58,7 +60,9 @@ class ReplicateProvider(BaseLLMProvider):
         stop_sequences (list): Stop sequences for generation
 
     Examples:
-        Llama 2 70B model::
+        Llama 2 70B model:
+
+        .. code-block:: python
 
             provider = ReplicateProvider(
                 model="meta/llama-2-70b-chat",

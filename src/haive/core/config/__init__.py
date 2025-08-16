@@ -22,7 +22,9 @@ Features:
     - Configuration validation
 
 Examples:
-    Basic configuration creation::
+    Basic configuration creation:
+
+    .. code-block:: python
 
         from haive.core.config import RunnableConfigManager
 

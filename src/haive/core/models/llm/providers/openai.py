@@ -7,7 +7,9 @@ The provider handles API key management, model configuration, and safe imports o
 the langchain-openai package dependencies.
 
 Examples:
-    Basic usage::
+    Basic usage:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers.openai import OpenAIProvider
 

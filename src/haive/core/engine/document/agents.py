@@ -17,20 +17,26 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from langgraph.graph import END, START
-from pydantic import Field
+from pydantic import BaseModel, Field
 
-# Conditional import for agents - only needed if agents package is available
+# Forward reference for agents - only import during type checking
 if TYPE_CHECKING:
     from haive.agents.base.agent import Agent
 else:
-    try:
-        from haive.agents.base.agent import Agent
-    except ImportError:
-        # Create a placeholder base class if agents package not available
-        from pydantic import BaseModel
+    # Create a placeholder base class for runtime when agents package not available
+    class Agent(BaseModel):
+        """Placeholder Agent class when haive-agents package not available."""
 
-        class Agent(BaseModel):
-            """Placeholder Agent class when haive-agents package not available."""
+        name: str = "Placeholder Agent"
+        engines: dict[str, Any] = Field(default_factory=dict)
+
+        def setup_agent(self) -> None:
+            """Placeholder setup method."""
+            pass
+
+        def build_graph(self) -> Any:
+            """Placeholder build_graph method."""
+            raise NotImplementedError("Agent package required for full functionality")
 
 
 from haive.core.engine.document.config import DocumentOutput

@@ -8,7 +8,9 @@ The providers handle API key management, model configuration, and safe imports o
 the langchain-google packages.
 
 Examples:
-    Using Gemini::
+    Using Gemini:
+
+    .. code-block:: python
 
         from haive.core.models.llm.providers.google import GeminiProvider
 
@@ -71,7 +73,9 @@ class GeminiProvider(BaseLLMProvider):
         - gemini-pro-vision: Multimodal support
 
     Examples:
-        Basic usage::
+        Basic usage:
+
+        .. code-block:: python
 
             provider = GeminiProvider(
                 model="gemini-1.5-pro",
@@ -222,7 +226,9 @@ class VertexAIProvider(BaseLLMProvider):
         3. Running on Google Cloud with appropriate IAM roles
 
     Examples:
-        Basic usage::
+        Basic usage:
+
+        .. code-block:: python
 
             provider = VertexAIProvider(
                 model="gemini-1.5-pro",
