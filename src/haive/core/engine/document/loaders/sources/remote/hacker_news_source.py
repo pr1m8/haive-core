@@ -2,8 +2,8 @@ from typing import Any
 
 from pydantic import Field, HttpUrl, field_validator
 
-from haive.core.engine.loaders.sources.remote.base import URLSource
-from haive.core.engine.loaders.sources.types import SourceType
+from haive.core.engine.document.loaders.sources.remote.base import URLSource
+from haive.core.engine.document.loaders.sources.types import SourceType
 
 
 class HackerNewsSource(URLSource):

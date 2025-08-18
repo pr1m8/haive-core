@@ -11,7 +11,7 @@ from pydantic import (
     HttpUrl,
 )
 
-from haive.core.engine.loaders.sources.types import SourceType
+from haive.core.engine.document.loaders.sources.types import SourceType
 
 
 # from langchain_core.documents import Document

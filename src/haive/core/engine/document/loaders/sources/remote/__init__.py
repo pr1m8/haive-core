@@ -1,7 +1,7 @@
 from pydantic import Field, HttpUrl, field_validator
 
-from haive.core.engine.loaders.sources.base import BaseSource
-from haive.core.engine.loaders.sources.types import SourceType
+from haive.core.engine.document.loaders.sources.base import BaseSource
+from haive.core.engine.document.loaders.sources.types import SourceType
 
 
 class RemoteSource(BaseSource):

@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from haive.core.engine.loaders.sources.types import SourceType
+from haive.core.engine.document.loaders.sources.types import SourceType
 
 
 class GitSource(BaseSource):

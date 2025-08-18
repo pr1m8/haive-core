@@ -49,7 +49,7 @@ extensions = [
 ]
 
 # AutoAPI Configuration
-autoapi_dirs = ["../../src/haive"]  # Point directly to haive to remove src prefix
+autoapi_dirs = ["../../src/haive"]  # Point directly to haive package to avoid src prefix
 autoapi_type = "python"
 autoapi_add_toctree_entry = False  # We'll add manually for better control
 autoapi_keep_files = True
@@ -214,7 +214,12 @@ templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = []
+exclude_patterns = [
+    "*.md",  # Exclude any remaining markdown files
+    "*.tmp",  # Exclude temporary files
+    "*.backup",  # Exclude backup files
+    "_autosummary",  # Exclude autosummary cache
+]
 
 # TOC Configuration - Enhanced nesting and presentation
 toc_object_entries_show_parents = "hide"
@@ -434,8 +439,7 @@ tippy_props = {
     "delay": [200, 100],  # Show/hide delays
     "duration": [200, 100],  # Animation duration
     "interactive": True,  # Allow interaction with tooltip
-    "arrow": True,  # Show arrow
-    "animation": "shift-away",  # Animation style
+    # Removed invalid props: arrow, animation
 }
 
 # Enable various tooltip types

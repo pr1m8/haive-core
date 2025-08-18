@@ -1,8 +1,8 @@
 from pydantic import Field
 
-from haive.core.engine.loaders.sources.local.base import FileSource
-from haive.core.engine.loaders.sources.local.types import LocalSourceFileType
-from haive.core.engine.loaders.sources.types import SourceType
+from haive.core.engine.document.loaders.sources.local.base import FileSource
+from haive.core.engine.document.loaders.sources.local.types import LocalSourceFileType
+from haive.core.engine.document.loaders.sources.types import SourceType
 
 
 class SrtSource(FileSource):

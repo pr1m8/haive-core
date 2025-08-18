@@ -6,9 +6,19 @@ echo "================================================"
 
 # Colors for output
 GREEN='\033[0;32m'
+RED='\033[0;31m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 NC='\033[0m' # No Color
+
+# Export Poetry dependencies to requirements.txt
+echo -e "${BLUE}📦 Exporting Poetry dependencies to requirements.txt...${NC}"
+cd docs && python export_requirements.py
+if [ $? -ne 0 ]; then
+    echo -e "${RED}❌ Failed to export requirements!${NC}"
+    exit 1
+fi
+cd ..
 
 # Clean previous build
 echo -e "${BLUE}📧 Cleaning previous build...${NC}"
