@@ -1,7 +1,7 @@
 from typing import Any
 
-from haive.core.graph.models.graph_model import GraphModel
-from haive.core.graph.models.type_ref import TypeReference
+from haive.core.graph.state_graph.models.state_graph_model import GraphModel
+from haive.core.graph.state_graph.models.type_ref import TypeReference
 from haive.core.graph.state_graph.pattern_registry import PatternRegistry
 
 

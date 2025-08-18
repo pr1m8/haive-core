@@ -45,7 +45,11 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from langchain_core.runnables import RunnableConfig
+try:
+    from langchain_core.runnables import RunnableConfig
+except ImportError:
+    # Fallback for documentation builds
+    class RunnableConfig: pass
 
 from haive.core.config.runnable import RunnableConfigManager
 

@@ -1,7 +1,7 @@
 from langchain_community.document_loaders import VsdxLoader
 from pydantic import Field
 
-from haive.core.engine.loaders.base.schema import LoaderOutputSchema
+from haive.core.engine.document.loaders.base.schema import LoaderOutputSchema
 from haive.core.engine.document.loaders.sources.local.base import FileSource
 from haive.core.engine.document.loaders.sources.local.types import LocalSourceFileType
 from haive.core.engine.document.loaders.sources.types import SourceType

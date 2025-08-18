@@ -44,6 +44,9 @@ from haive.core.engine.retriever.retriever import (
 )
 from haive.core.engine.retriever.types import RetrieverType
 
+# Alias for backward compatibility and documentation
+create_retriever = create_retriever_from_vectorstore
+
 
 def __getattr__(name: str):
     """Lazy load VectorStoreRetrieverConfig to avoid registration overhead."""
@@ -58,6 +61,7 @@ __all__ = [
     "BaseRetrieverConfig",
     "RetrieverType",
     "VectorStoreRetrieverConfig",
+    "create_retriever",
     "create_retriever_config",
     "create_retriever_from_vectorstore",
 ]

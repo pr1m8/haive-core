@@ -6,7 +6,7 @@ in the Haive framework.
 
 from typing import Any, ClassVar, Optional
 
-from haive.core.graph.models.graph_model import GraphModel
+from haive.core.graph.state_graph.models.state_graph_model import GraphModel
 from haive.core.registry.base import AbstractRegistry
 
 

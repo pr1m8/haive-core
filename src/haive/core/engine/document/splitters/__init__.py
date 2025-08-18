@@ -77,28 +77,52 @@ See Also:
     - LangChain text splitters documentation
 """
 
-from haive.core.engine.document.splitters.base import (  # Core splitters; Token-based splitters; Language-specific splitters; NLP-based splitters; Types and utilities
-    CharacterTextSplitter,
-    ElementType,
-    HeaderType,
-    HTMLHeaderTextSplitter,
-    KonlpyTextSplitter,
-    Language,
-    LatexTextSplitter,
-    LineType,
-    MarkdownHeaderTextSplitter,
-    MarkdownTextSplitter,
-    NLTKTextSplitter,
-    PythonCodeTextSplitter,
-    RecursiveCharacterTextSplitter,
-    RecursiveJsonSplitter,
-    SentenceTransformersTokenTextSplitter,
-    SpacyTextSplitter,
-    TextSplitter,
-    Tokenizer,
-    TokenTextSplitter,
-    split_text_on_tokens,
-)
+# Import splitters with graceful fallback for missing dependencies
+try:
+    from haive.core.engine.document.splitters.base import (  # Core splitters; Token-based splitters; Language-specific splitters; NLP-based splitters; Types and utilities
+        CharacterTextSplitter,
+        ElementType,
+        HeaderType,
+        HTMLHeaderTextSplitter,
+        KonlpyTextSplitter,
+        Language,
+        LatexTextSplitter,
+        LineType,
+        MarkdownHeaderTextSplitter,
+        MarkdownTextSplitter,
+        NLTKTextSplitter,
+        PythonCodeTextSplitter,
+        RecursiveCharacterTextSplitter,
+        RecursiveJsonSplitter,
+        SentenceTransformersTokenTextSplitter,
+        SpacyTextSplitter,
+        TextSplitter,
+        Tokenizer,
+        TokenTextSplitter,
+        split_text_on_tokens,
+    )
+except ImportError:
+    # Fallback classes for documentation builds
+    class CharacterTextSplitter: pass
+    class ElementType: pass
+    class HeaderType: pass
+    class HTMLHeaderTextSplitter: pass
+    class KonlpyTextSplitter: pass
+    class Language: pass
+    class LatexTextSplitter: pass
+    class LineType: pass
+    class MarkdownHeaderTextSplitter: pass
+    class MarkdownTextSplitter: pass
+    class NLTKTextSplitter: pass
+    class PythonCodeTextSplitter: pass
+    class RecursiveCharacterTextSplitter: pass
+    class RecursiveJsonSplitter: pass
+    class SentenceTransformersTokenTextSplitter: pass
+    class SpacyTextSplitter: pass
+    class TextSplitter: pass
+    class Tokenizer: pass
+    class TokenTextSplitter: pass
+    def split_text_on_tokens(*args, **kwargs): pass
 from haive.core.engine.document.splitters.config import DocSplitterType, SplitterConfig
 from haive.core.engine.document.splitters.engine import (
     DocSplitterInputSchema,

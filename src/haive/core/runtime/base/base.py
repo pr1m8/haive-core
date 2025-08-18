@@ -3,7 +3,12 @@
 from abc import abstractmethod
 from typing import Any, Generic, TypeVar
 
-from langchain_core.runnables import Runnable, RunnableConfig
+try:
+    from langchain_core.runnables import Runnable, RunnableConfig
+except ImportError:
+    # Fallback for documentation builds
+    class Runnable: pass
+    class RunnableConfig: pass
 
 from haive.core.engine import Engine
 
