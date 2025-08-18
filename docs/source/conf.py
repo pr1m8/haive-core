@@ -59,6 +59,7 @@ autoapi_options = [
     "show-inheritance",
     "show-module-summary",
     "imported-members",
+    "special-members",  # Show __init__ and other special methods
 ]
 autoapi_template_dir = "_templates/autoapi"  # Use custom templates
 
@@ -68,6 +69,7 @@ autoapi_member_order = "groupwise"
 autoapi_python_class_content = "both"
 autoapi_python_use_implicit_namespaces = True
 autoapi_generate_api_docs = True
+autoapi_file_patterns = ["*.py"]  # Explicit pattern
 autoapi_toctree_depth = 3  # Expand toctree to show more levels by default
 
 # Ignore test files and problematic files
@@ -85,41 +87,85 @@ autoapi_ignore = [
 html_theme = "furo"
 html_static_path = ["_static"]
 
-# Furo theme configuration - Enhanced
+# Furo theme configuration - Enhanced with vibrant colors
 html_theme_options = {
-    # Light mode color customization
+    # Light mode color customization - Modern purple/violet theme
     "light_css_variables": {
-        "color-brand-primary": "#2563eb",
-        "color-brand-content": "#1d4ed8",
-        "color-background-primary": "white",
-        "color-background-secondary": "#f8f9fa",
-        "color-background-border": "#e9ecef",
-        "color-sidebar-background": "#f8f9fa",
-        "color-sidebar-background-border": "#e9ecef",
-        "color-sidebar-brand-text": "#1d4ed8",
-        "color-sidebar-item-background--current": "#e3f2fd",
-        "color-sidebar-item-background--hover": "#f5f5f5",
+        "color-brand-primary": "#8b5cf6",  # Vibrant purple
+        "color-brand-content": "#7c3aed",  # Deeper purple for content
+        "color-background-primary": "#ffffff",
+        "color-background-secondary": "#faf5ff",  # Very light purple tint
+        "color-background-border": "#e9d5ff",  # Light purple border
+        "color-background-hover": "#f3e8ff",  # Hover state
+        "color-sidebar-background": "#faf5ff",
+        "color-sidebar-background-border": "#e9d5ff",
+        "color-sidebar-brand-text": "#7c3aed",
+        "color-sidebar-item-background--current": "#ede9fe",
+        "color-sidebar-item-background--hover": "#f3e8ff",
+        "color-sidebar-search-background": "#ffffff",
+        "color-sidebar-search-border": "#e9d5ff",
+        "color-sidebar-search-icon": "#8b5cf6",
         "color-admonition-background": "transparent",
-        "color-code-background": "#f8f9fa",
+        "color-admonition-title-background--note": "#dbeafe",
+        "color-admonition-title-background--tip": "#d1fae5",
+        "color-admonition-title-background--important": "#fee2e2",
+        "color-admonition-title-background--warning": "#fef3c7",
+        "color-admonition-title--note": "#1e40af",
+        "color-admonition-title--tip": "#047857",
+        "color-admonition-title--important": "#b91c1c",
+        "color-admonition-title--warning": "#92400e",
+        "color-code-background": "#f8f4ff",  # Light purple code bg
         "color-code-foreground": "#1f2937",
+        "color-inline-code-background": "#ede9fe",
+        "color-highlight-on-target": "#8b5cf640",
+        "color-link": "#8b5cf6",
+        "color-link--hover": "#7c3aed",
+        "color-link-underline": "#8b5cf640",
+        "color-link-underline--hover": "#7c3aed80",
         "font-stack": "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif",
         "font-stack--monospace": "JetBrains Mono, Consolas, Monaco, Courier, monospace",
     },
-    # Dark mode color customization
+    # Dark mode color customization - Cyberpunk neon theme
     "dark_css_variables": {
-        "color-brand-primary": "#60a5fa",
-        "color-brand-content": "#3b82f6",
-        "color-background-primary": "#131416",
-        "color-background-secondary": "#1a1c1e",
-        "color-background-border": "#2d2f33",
-        "color-sidebar-background": "#1a1c1e",
-        "color-sidebar-background-border": "#2d2f33",
-        "color-sidebar-brand-text": "#60a5fa",
-        "color-sidebar-item-background--current": "#1e3a5f",
-        "color-sidebar-item-background--hover": "#242629",
+        "color-brand-primary": "#a78bfa",  # Bright violet
+        "color-brand-content": "#c084fc",  # Bright purple
+        "color-background-primary": "#0f0f23",  # Deep dark blue
+        "color-background-secondary": "#1a1a2e",  # Slightly lighter
+        "color-background-border": "#2e2e4e",  # Purple-tinted border
+        "color-background-hover": "#16213e",
+        "color-sidebar-background": "#16162d",
+        "color-sidebar-background-border": "#2e2e4e",
+        "color-sidebar-brand-text": "#c084fc",
+        "color-sidebar-item-background--current": "#312e81",
+        "color-sidebar-item-background--hover": "#1e1e3f",
+        "color-sidebar-search-background": "#1a1a2e",
+        "color-sidebar-search-border": "#2e2e4e",
+        "color-sidebar-search-icon": "#a78bfa",
         "color-admonition-background": "transparent",
-        "color-code-background": "#1a1c1e",
-        "color-code-foreground": "#e5e7eb",
+        "color-admonition-title-background--note": "#1e3a8a20",
+        "color-admonition-title-background--tip": "#047857​20",
+        "color-admonition-title-background--important": "#991b1b20",
+        "color-admonition-title-background--warning": "#92400e20",
+        "color-admonition-title--note": "#60a5fa",
+        "color-admonition-title--tip": "#34d399",
+        "color-admonition-title--important": "#f87171",
+        "color-admonition-title--warning": "#fbbf24",
+        "color-code-background": "#1a1a2e",
+        "color-code-foreground": "#e0e7ff",
+        "color-inline-code-background": "#312e81",
+        "color-highlight-on-target": "#a78bfa40",
+        "color-link": "#a78bfa",
+        "color-link--hover": "#c084fc",
+        "color-link-underline": "#a78bfa40",
+        "color-link-underline--hover": "#c084fc80",
+        # API doc specific colors
+        "color-api-background": "#1a1a2e",
+        "color-api-background--hover": "#312e81",
+        "color-api-overall": "#e0e7ff",
+        "color-api-name": "#c084fc",
+        "color-api-pre-name": "#a78bfa",
+        "color-api-paren": "#6366f1",
+        "color-api-keyword": "#f472b6",
     },
     # Navigation and UI options
     "sidebar_hide_name": False,

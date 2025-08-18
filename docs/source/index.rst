@@ -66,8 +66,10 @@ haive-core Documentation
 
 .. toctree::
    :maxdepth: 2
-   :caption: Getting Started:
+   :caption: Documentation:
+   :hidden:
 
+   overview
    installation
    getting_started
    concepts
@@ -75,6 +77,7 @@ haive-core Documentation
 .. toctree::
    :maxdepth: 2
    :caption: User Guide:
+   :hidden:
 
    configuration
    examples
@@ -82,49 +85,83 @@ haive-core Documentation
 .. toctree::
    :maxdepth: 2
    :caption: Project:
+   :hidden:
 
    changelog
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: API Reference:
+   :titlesonly:
+   :hidden:
 
-   autoapi/haive/index
+   API Overview <autoapi/index>
+   Core Engine <autoapi/haive/core/engine/index>
+   State & Schema <autoapi/haive/core/schema/index>
+   Graph System <autoapi/haive/core/graph/index>
+   Persistence <autoapi/haive/core/persistence/index>
+   Tools & Retrievers <autoapi/haive/core/tools/index>
+   Common Utilities <autoapi/haive/core/common/index>
+   Configuration <autoapi/haive/core/config/index>
+   Full API <autoapi/haive/core/index>
 
-Quick Start
------------
+Quick Navigation
+----------------
 
-Install haive-core::
+.. grid:: 3
+   :gutter: 3
 
-    pip install haive-core
+   .. grid-item-card:: 📚 **Overview**
+      :link: overview
+      :link-type: doc
 
-Basic usage::
+      Get started with haive-core's comprehensive overview, architecture, and key features
 
-    from haive.core.engine.aug_llm import AugLLMConfig
-    from haive.core.schema.prebuilt.messages_state import MessagesState
-    
-    # Configure the LLM engine
-    config = AugLLMConfig(
-        model="gpt-4",
-        temperature=0.7
-    )
+   .. grid-item-card:: 🚀 **Quick Start**
+      :link: getting_started
+      :link-type: doc
 
-Features
---------
+      Jump right in with installation instructions and your first haive-core agent
 
-* Core agent engine and infrastructure
-* State management and schema composition  
-* Graph-based workflow orchestration
-* Tool and retriever integration
-* Vector stores and embeddings
-* Persistence and checkpointing
+   .. grid-item-card:: 🔍 **API Reference**
+      :link: autoapi/index
+      :link-type: doc
 
-API Reference
--------------
+      Explore the complete API documentation with interactive examples
 
-The complete API documentation is automatically generated from the source code.
+Key Features
+------------
 
-See :doc:`API Reference <autoapi/index>` for detailed documentation of all modules, classes, and functions.
+.. grid:: 2
+   :gutter: 3
+
+   .. grid-item-card:: **🧠 Advanced Agent Engine**
+
+      * Multi-provider LLM support (OpenAI, Anthropic, Google, AWS)
+      * Structured output with Pydantic models
+      * Tool integration and execution
+      * Async and streaming support
+
+   .. grid-item-card:: **📊 Graph-Based Workflows**
+
+      * Visual workflow orchestration
+      * State management with checkpointing
+      * Conditional routing and branching
+      * LangGraph integration
+
+   .. grid-item-card:: **🗃️ Type-Safe State Management**
+
+      * Pydantic-based state schemas
+      * Schema composition and inheritance
+      * Automatic validation and serialization
+      * Meta-state patterns for complex agents
+
+   .. grid-item-card:: **🛠️ Rich Tool Ecosystem**
+
+      * Built-in tools (calculator, search, etc.)
+      * Custom tool creation interface
+      * Tool routing and validation
+      * Agent-as-tool pattern
 
 Indices and tables
 ==================

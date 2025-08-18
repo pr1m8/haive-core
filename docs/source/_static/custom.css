@@ -20,28 +20,71 @@ samp {
   font-variant-ligatures: contextual;
 }
 
-/* Enhanced sidebar styling */
+/* Enhanced sidebar styling with new colors */
 .sidebar-container {
   background: var(--color-sidebar-background);
   border-right: 1px solid var(--color-sidebar-background-border);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.05);
 }
 
 .sidebar-brand {
   padding: 1.5rem 1rem;
   border-bottom: 1px solid var(--color-sidebar-background-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-brand::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(139, 92, 246, 0.1),
+    transparent
+  );
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 .sidebar-brand-text {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 700;
   background: linear-gradient(
     135deg,
     var(--color-brand-primary) 0%,
-    var(--color-brand-content) 100%
+    var(--color-brand-content) 60%,
+    var(--color-brand-primary) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  background-size: 200% auto;
+  animation: gradient 3s ease-in-out infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Navigation improvements */
@@ -111,37 +154,66 @@ samp {
   color: var(--color-foreground-secondary);
 }
 
-/* Admonition styling */
+/* Admonition styling with gradient borders */
 .admonition {
-  border-radius: 0.5rem;
-  border-left: 4px solid;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-background-border);
   padding: 1rem 1.25rem;
   margin: 1.5rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.admonition::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(
+    to bottom,
+    var(--gradient-start),
+    var(--gradient-end)
+  );
 }
 
 .admonition.note {
-  background-color: rgba(37, 99, 235, 0.1);
-  border-left-color: #2563eb;
+  background-color: var(--color-admonition-title-background--note);
+  --gradient-start: #3b82f6;
+  --gradient-end: #2563eb;
 }
 
 .admonition.warning {
-  background-color: rgba(245, 158, 11, 0.1);
-  border-left-color: #f59e0b;
+  background-color: var(--color-admonition-title-background--warning);
+  --gradient-start: #fbbf24;
+  --gradient-end: #f59e0b;
 }
 
 .admonition.tip {
-  background-color: rgba(16, 185, 129, 0.1);
-  border-left-color: #10b981;
+  background-color: var(--color-admonition-title-background--tip);
+  --gradient-start: #34d399;
+  --gradient-end: #10b981;
 }
 
 .admonition.important {
-  background-color: rgba(239, 68, 68, 0.1);
-  border-left-color: #ef4444;
+  background-color: var(--color-admonition-title-background--important);
+  --gradient-start: #f87171;
+  --gradient-end: #ef4444;
 }
 
 .admonition-title {
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 0.5rem;
+  color: var(--gradient-start);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admonition-title::before {
+  content: "●";
+  font-size: 0.8rem;
 }
 
 /* Code block enhancements */
@@ -385,4 +457,178 @@ table.docutils tr:hover {
   margin: 0 0 0.5rem 0;
   font-size: 1rem;
   color: var(--color-brand-primary);
+}
+
+/* Sphinx Design Cards - Enhanced styling */
+.sd-card {
+  border-radius: 0.75rem !important;
+  transition: all 0.3s ease !important;
+  border: 1px solid var(--color-background-border) !important;
+  background: var(--color-background-secondary) !important;
+}
+
+.sd-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.15) !important;
+  border-color: var(--color-brand-primary) !important;
+}
+
+.sd-card-header {
+  background: transparent !important;
+  border-bottom: 1px solid var(--color-background-border) !important;
+  padding: 1rem !important;
+  font-weight: 600 !important;
+  color: var(--color-brand-primary) !important;
+}
+
+.sd-card-body {
+  padding: 1rem !important;
+}
+
+/* Card hover effects */
+.sd-card-hover:hover {
+  border-color: var(--color-brand-primary) !important;
+  background: var(--color-background-hover) !important;
+}
+
+/* Grid item cards with gradient borders */
+.sd-border-1 {
+  position: relative;
+  overflow: hidden;
+}
+
+.sd-border-1::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 0.75rem;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    var(--color-brand-primary),
+    var(--color-brand-content)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sd-border-1:hover::after {
+  opacity: 1;
+}
+
+/* Button styling */
+.sd-btn {
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+}
+
+.sd-btn-primary {
+  background: var(--color-brand-primary) !important;
+  border: none !important;
+  color: white !important;
+}
+
+.sd-btn-primary:hover {
+  background: var(--color-brand-content) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3) !important;
+}
+
+.sd-btn-outline-primary {
+  color: var(--color-brand-primary) !important;
+  border: 1px solid var(--color-brand-primary) !important;
+  background: transparent !important;
+}
+
+.sd-btn-outline-primary:hover {
+  background: var(--color-brand-primary) !important;
+  color: white !important;
+}
+
+/* Tab styling for sphinx-tabs */
+.sd-tab-set > input:checked + label {
+  border-bottom: 2px solid var(--color-brand-primary) !important;
+  color: var(--color-brand-primary) !important;
+}
+
+.sd-tab-set > label {
+  padding: 0.5rem 1rem !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.sd-tab-set > label:hover {
+  color: var(--color-brand-primary) !important;
+  background: var(--color-background-hover) !important;
+}
+
+/* Sphinx-design grid enhancements */
+.sd-row {
+  margin-left: -0.5rem !important;
+  margin-right: -0.5rem !important;
+}
+
+.sd-col {
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}
+
+/* Reading progress bar styling */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--color-background-border);
+  z-index: 9999;
+}
+
+.reading-progress-bar {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--color-brand-primary),
+    var(--color-brand-content)
+  );
+  width: 0%;
+  transition: width 0.2s ease;
+  box-shadow: 0 0 10px var(--color-brand-primary);
+}
+
+/* Dark mode specific enhancements */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: var(--color-background-primary);
+  }
+
+  .sd-card {
+    background: rgba(26, 26, 46, 0.8) !important;
+    backdrop-filter: blur(10px);
+  }
+
+  .sd-card:hover {
+    box-shadow: 0 8px 30px rgba(167, 139, 250, 0.2) !important;
+  }
+
+  /* Glow effects in dark mode */
+  .sidebar-brand-text {
+    text-shadow: 0 0 20px rgba(192, 132, 252, 0.5);
+  }
+
+  .sd-btn-primary {
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.3) !important;
+  }
+
+  .sd-btn-primary:hover {
+    box-shadow: 0 0 30px rgba(192, 132, 252, 0.5) !important;
+  }
 }
