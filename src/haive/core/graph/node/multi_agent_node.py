@@ -5,7 +5,7 @@ handle state projection between the container state and individual agent states.
 """
 
 import logging
-from typing import TYPE_CHECKING, Any, Self, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Optional, Self, TypeVar, Union
 
 if TYPE_CHECKING:
     from haive.agents.base.agent import Agent
@@ -44,7 +44,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
     agent_name: str = Field(
         description="Name of the agent to execute (key in agents dict)"
     )
-    agent: Union["Agent", None] = Field(
+    agent: Optional["Agent"] = Field(
         default=None,
         description="Agent instance (extracted from state if not provided)",
     )
@@ -67,7 +67,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
         return self
 
     def __call__(
-        self, state: MultiAgentState, config: ConfigLike | None = None
+        self, state: MultiAgentState, config: Optional[ConfigLike] = None
     ) -> Command:
         """Execute agent with state projection."""
         logger.info(f"{'=' * 60}")
@@ -101,7 +101,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
             }
             return Command(update=state_update, goto=self._get_goto_node())
 
-    def _get_agent(self, state: MultiAgentState) -> Agent | None:
+    def _get_agent(self, state: MultiAgentState) -> Optional["Agent"]:
         """Get agent from state or use provided agent."""
         if self.agent:
             return self.agent
@@ -184,7 +184,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
             return agent.graph.needs_recompile()
         return False
 
-    def _get_goto_node(self) -> str | None:
+    def _get_goto_node(self) -> Optional[str]:
         """Get next node to execute."""
         return self.command_goto
 
@@ -208,7 +208,9 @@ class StateProjectionNode(BaseNodeConfig[TInput, TOutput]):
         default_factory=dict, description="Default values for output fields"
     )
 
-    def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
+    def __call__(
+        self, state: StateLike, config: Optional[ConfigLike] = None
+    ) -> Command:
         """Project state from input to output schema."""
         logger.info(
             f"Projecting state: {self.input_schema.__name__} → {self.output_schema.__name__}"
@@ -239,7 +241,7 @@ class StateProjectionNode(BaseNodeConfig[TInput, TOutput]):
 
 
 def create_multi_agent_node(
-    agent_name: str, name: str | None = None, **kwargs
+    agent_name: str, name: Optional[str] = None, **kwargs
 ) -> MultiAgentNode:
     """Create a multi-agent node for executing an agent from MultiAgentState."""
     if not name:
@@ -250,7 +252,7 @@ def create_multi_agent_node(
 def create_projection_node(
     input_schema: type[BaseModel],
     output_schema: type[BaseModel],
-    name: str | None = None,
+    name: Optional[str] = None,
     **kwargs,
 ) -> StateProjectionNode:
     """Create a state projection node."""

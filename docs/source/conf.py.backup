@@ -1,0 +1,222 @@
+# Configuration file for the Sphinx documentation builder.
+
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../src'))
+
+# -- Project information -----------------------------------------------------
+project = 'haive-core'
+copyright = '2025, Haive Team'
+author = 'Haive Team'
+release = '0.1.0'
+
+# -- General configuration ---------------------------------------------------
+extensions = [
+    'autoapi.extension',  # Must be first
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.mathjax',
+    'sphinx_autodoc_typehints',
+    'sphinx_copybutton',
+    'sphinx_togglebutton',
+    'sphinx_design',
+    'sphinxcontrib.mermaid',
+    'sphinx_sitemap',
+    'sphinxext.opengraph',
+    'myst_parser',
+]
+
+# AutoAPI Configuration
+autoapi_dirs = ['../../src/haive']  # Point directly to haive to remove src prefix
+autoapi_type = 'python'
+autoapi_add_toctree_entry = False  # We'll add manually for better control
+autoapi_keep_files = True
+autoapi_root = 'autoapi'
+autoapi_include_inheritance_diagram = False  # Disable for now
+autoapi_options = [
+    'members',
+    'undoc-members',
+    'show-inheritance',
+    'show-module-summary',
+    'imported-members',
+]
+
+# CRITICAL: Use module-level pages for hierarchical organization
+autoapi_own_page_level = 'module'
+autoapi_member_order = 'groupwise'
+autoapi_python_class_content = 'both'
+autoapi_python_use_implicit_namespaces = True
+autoapi_generate_api_docs = True
+
+# Ignore test files and problematic files
+autoapi_ignore = [
+    '**/test_*.py',
+    '**/tests/*',
+    '**/*_test.py',
+    '**/conftest.py',
+    '**/engine_node_test/**',
+    '**/engine_node_test.py',
+    '**/graph/state_graph/base.py',  # Metaclass issues
+]
+
+# -- Options for HTML output -------------------------------------------------
+html_theme = 'furo'
+html_static_path = ['_static']
+
+# Furo theme configuration
+html_theme_options = {
+    "light_css_variables": {
+        "color-brand-primary": "#2563eb",
+        "color-brand-content": "#1d4ed8",
+        "color-background-primary": "white",
+        "color-background-secondary": "#f8f9fa",
+        "color-sidebar-background": "#f8f9fa",
+        "color-sidebar-background-border": "#e9ecef",
+        "font-stack": "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif",
+    },
+    "dark_css_variables": {
+        "color-brand-primary": "#60a5fa",
+        "color-brand-content": "#3b82f6",
+        "color-background-primary": "#131416",
+        "color-background-secondary": "#1a1c1e",
+        "color-sidebar-background": "#1a1c1e",
+    },
+    "sidebar_hide_name": False,
+    "navigation_with_keys": True,
+    "announcement": "🚀 <b>haive-core</b> - The foundation of the Haive AI Agent Framework",
+    "source_repository": "https://github.com/haive-ai/haive",
+    "source_branch": "main",
+    "source_directory": "packages/haive-core/docs/",
+}
+
+# Additional HTML configuration
+html_title = "haive-core"
+html_short_title = "haive-core"
+html_favicon = "_static/favicon.ico"
+html_logo = "_static/logo.png"
+html_show_sourcelink = True
+html_copy_source = True
+html_last_updated_fmt = "%b %d, %Y"  # Add last updated date
+html_use_index = True  # Generate index pages
+
+# CSS files
+html_css_files = [
+    'custom.css',
+]
+
+# Add any paths that contain templates here, relative to this directory.
+templates_path = ['_templates']
+
+# List of patterns, relative to source directory, that match files and
+# directories to ignore when looking for source files.
+exclude_patterns = []
+
+# Custom sidebar configuration for Furo
+html_sidebars = {
+    "**": [
+        "sidebar/brand.html",
+        "sidebar/search.html", 
+        "sidebar/scroll-start.html",
+        "sidebar/navigation.html",
+        "sidebar/ethical-ads.html",
+        "sidebar/scroll-end.html",
+    ]
+}
+
+# Napoleon settings
+napoleon_google_docstring = True
+napoleon_numpy_docstring = True
+napoleon_include_init_with_doc = False
+napoleon_include_private_with_doc = False
+napoleon_include_special_with_doc = True
+napoleon_use_admonition_for_examples = True
+napoleon_use_admonition_for_notes = True
+napoleon_use_admonition_for_references = False
+napoleon_use_ivar = False
+napoleon_use_param = True
+napoleon_use_rtype = True
+napoleon_use_keyword = True
+napoleon_type_aliases = None
+
+# Intersphinx
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'sphinx': ('https://www.sphinx-doc.org/en/master', None),
+    'pydantic': ('https://docs.pydantic.dev/latest', None),
+    'langchain': ('https://api.python.langchain.com/en/latest/', None),
+}
+
+# Autodoc typehints configuration
+autodoc_typehints = 'description'
+autodoc_typehints_format = 'short'
+autodoc_typehints_description_target = 'documented'
+typehints_fully_qualified = False
+typehints_use_signature = True
+typehints_use_signature_return = True
+always_use_bars_union = True
+
+# MyST Parser
+myst_enable_extensions = [
+    "deflist",
+    "tasklist",
+    "html_image",
+    "colon_fence",
+    "smartquotes",
+    "replacements",
+    "linkify",
+    "strikethrough",
+]
+myst_heading_anchors = 3
+
+# Copybutton
+copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
+copybutton_prompt_is_regexp = True
+copybutton_remove_prompts = True
+
+# Togglebutton
+togglebutton_hint = "Click to show"
+togglebutton_hint_hide = "Click to hide"
+
+# Sitemap
+html_baseurl = 'https://docs.haive.ai/packages/haive-core/'
+sitemap_url_scheme = "{link}"
+sitemap_filename = "sitemap.xml"
+sitemap_locales = [None]
+sitemap_excludes = [
+    "search",
+    "genindex",
+]
+
+# OpenGraph
+ogp_site_url = "https://docs.haive.ai/packages/haive-core/"
+ogp_site_name = "haive-core Documentation"
+ogp_social_cards = {
+    "enable": True,
+}
+
+# Todo extension
+todo_include_todos = True
+
+# Coverage extension
+coverage_show_missing_items = True
+
+# Mermaid
+mermaid_output_format = "svg"
+mermaid_params = ['--theme', 'default', '--width', '100%', '--backgroundColor', 'transparent']
+
+# Viewcode extension settings
+viewcode_enable_epub = False
+viewcode_follow_imported_members = True
+
+# Add source link prefix for GitHub
+html_context = {
+    "display_github": True,
+    "github_user": "haive-ai",
+    "github_repo": "haive",
+    "github_version": "main",
+    "conf_py_path": "/packages/haive-core/docs/source/",
+}
