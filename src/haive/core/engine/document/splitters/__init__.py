@@ -123,7 +123,7 @@ except ImportError:
     class Tokenizer: pass
     class TokenTextSplitter: pass
     def split_text_on_tokens(*args, **kwargs): pass
-from haive.core.engine.document.splitters.config import DocSplitterType, SplitterConfig
+from haive.core.engine.document.splitters.config import DocSplitterType
 from haive.core.engine.document.splitters.engine import (
     DocSplitterInputSchema,
     DocSplitterOutputSchema,
@@ -156,7 +156,6 @@ __all__ = [
     "SentenceTransformersTokenTextSplitter",
     # NLP-based Splitters
     "SpacyTextSplitter",
-    "SplitterConfig",
     # Core Splitters
     "TextSplitter",
     # Token-based Splitters

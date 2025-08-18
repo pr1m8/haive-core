@@ -47,21 +47,36 @@ except ImportError:
     class LocalFileStore: pass
     class AnyscaleEmbeddings: pass
     class BedrockEmbeddings: pass
-from langchain_community.embeddings.cloudflare_workersai import (
-    CloudflareWorkersAIEmbeddings,
-)
-from langchain_community.embeddings.cohere import CohereEmbeddings
-from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
-from langchain_community.embeddings.jina import JinaEmbeddings
-from langchain_community.embeddings.llamacpp import LlamaCppEmbeddings
-from langchain_community.embeddings.ollama import OllamaEmbeddings
-from langchain_community.embeddings.sentence_transformer import (
-    SentenceTransformerEmbeddings,
-)
-from langchain_community.embeddings.voyageai import VoyageEmbeddings
-from langchain_google_vertexai import VertexAIEmbeddings
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_openai import AzureOpenAIEmbeddings, OpenAIEmbeddings
+try:
+    from langchain_community.embeddings.cloudflare_workersai import (
+        CloudflareWorkersAIEmbeddings,
+    )
+    from langchain_community.embeddings.cohere import CohereEmbeddings
+    from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
+    from langchain_community.embeddings.jina import JinaEmbeddings
+    from langchain_community.embeddings.llamacpp import LlamaCppEmbeddings
+    from langchain_community.embeddings.ollama import OllamaEmbeddings
+    from langchain_community.embeddings.sentence_transformer import (
+        SentenceTransformerEmbeddings,
+    )
+    from langchain_community.embeddings.voyageai import VoyageEmbeddings
+    from langchain_google_vertexai import VertexAIEmbeddings
+    from langchain_huggingface import HuggingFaceEmbeddings
+    from langchain_openai import AzureOpenAIEmbeddings, OpenAIEmbeddings
+except ImportError:
+    # Fallback classes for documentation builds
+    class CloudflareWorkersAIEmbeddings: pass
+    class CohereEmbeddings: pass
+    class FastEmbedEmbeddings: pass
+    class JinaEmbeddings: pass
+    class LlamaCppEmbeddings: pass
+    class OllamaEmbeddings: pass
+    class SentenceTransformerEmbeddings: pass
+    class VoyageEmbeddings: pass
+    class VertexAIEmbeddings: pass
+    class HuggingFaceEmbeddings: pass
+    class AzureOpenAIEmbeddings: pass
+    class OpenAIEmbeddings: pass
 from pydantic import BaseModel, Field, SecretStr, ValidationInfo, field_validator
 
 from haive.core.config.constants import EMBEDDINGS_CACHE_DIR
