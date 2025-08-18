@@ -90,7 +90,12 @@ docs/build/
 docs/_build/
 docs/logs/
 docs/autoapi/
-docs/source/_static/
+# Allow custom static files but ignore auto-generated ones
+docs/source/_static/*
+!docs/source/_static/custom.css
+!docs/source/_static/custom.js
+!docs/source/_static/favicon.ico
+!docs/source/_static/logo.png
 docs/source/_tags/
 docs/source/autoapi/
 docs/source/changelog.rst
