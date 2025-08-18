@@ -4,8 +4,8 @@ from urllib.parse import parse_qs, urlparse
 
 from pydantic import Field, HttpUrl, computed_field, model_validator
 
-from haive.core.engine.loaders.sources.base import BaseSource
-from haive.core.engine.loaders.sources.types import SourceType
+from haive.core.engine.document.loaders.sources.base import BaseSource
+from haive.core.engine.document.loaders.sources.types import SourceType
 
 
 class WebSource(BaseSource):

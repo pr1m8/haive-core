@@ -5,7 +5,7 @@ from typing import Any, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
-from haive.core.engine.loaders.sources.types import SourceType
+from haive.core.engine.document.loaders.sources.types import SourceType
 
 
 class SourceInterface(Protocol):
@@ -49,7 +49,7 @@ class BaseSource(BaseModel, ABC):
     @computed_field
     def source_category(self) -> str:
         """Category of the source (web, file, etc.)."""
-        from haive.core.engine.loaders.sources.groups import SOURCE_TO_GROUP
+        from haive.core.engine.document.loaders.sources.groups import SOURCE_TO_GROUP
 
         return SOURCE_TO_GROUP.get(self.source_type, "OTHER")
 

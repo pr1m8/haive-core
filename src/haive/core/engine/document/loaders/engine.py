@@ -11,7 +11,7 @@ from typing import Any, Union
 from langchain.schema import Document
 from pydantic import BaseModel, Field
 
-from haive.core.common.config.runnable import RunnableConfig
+from haive.core.config.runnable import RunnableConfig
 from haive.core.engine.base.base import InvokableEngine
 from haive.core.engine.base.types import EngineType
 from haive.core.engine.document.config import (

@@ -35,8 +35,8 @@ Examples:
         ... )
 """
 
-from haive.core.utils.dev.benchmark_load import load_tester
-from haive.core.utils.dev.benchmark_timing import timing_benchmark
+from haive.core.utils.debugkit.benchmarking.load import load_tester
+from haive.core.utils.debugkit.benchmarking.timing import timing_benchmark
 
 
 class BenchmarkUtilities:

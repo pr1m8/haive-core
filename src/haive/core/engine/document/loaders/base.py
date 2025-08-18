@@ -12,8 +12,8 @@ from haive.core.engine.base import InvokableEngine
 from haive.core.engine.base.types import EngineType
 from haive.core.engine.loaders.base import BaseDocumentLoader
 from haive.core.engine.loaders.source_factory import SourceFactory
-from haive.core.engine.loaders.sources.base import BaseSource
-from haive.core.engine.loaders.sources.types import SourceType
+from haive.core.engine.document.loaders.sources.base import BaseSource
+from haive.core.engine.document.loaders.sources.types import SourceType
 
 
 class DocumentLoaderEngine(

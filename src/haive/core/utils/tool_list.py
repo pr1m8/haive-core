@@ -10,7 +10,7 @@ from typing import Any
 from langchain_core.tools import BaseTool, BaseToolkit, StructuredTool
 from pydantic import BaseModel, Field, model_validator
 
-from haive.core.utils.collections import NamedDict
+from haive.core.utils.haive_collections import NamedDict
 
 
 class ToolList(NamedDict):

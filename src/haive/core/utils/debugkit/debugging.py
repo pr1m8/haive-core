@@ -31,10 +31,10 @@ Examples:
         >>> debug.stack_trace()     # See call stack
 """
 
-from haive.core.utils.dev.debug_decorators import debug_decorators
-from haive.core.utils.dev.debug_enhanced import enhanced_debugger
-from haive.core.utils.dev.debug_inspection import debug_inspector
-from haive.core.utils.dev.debug_interactive import interactive_debugger
+from haive.core.utils.debugkit.debug.decorators import debug_decorators
+from haive.core.utils.debugkit.debug.enhanced import enhanced_debugger
+from haive.core.utils.debugkit.debug.inspection import debug_inspector
+from haive.core.utils.debugkit.debug.interactive import interactive_debugger
 
 
 class DebugUtilities:
