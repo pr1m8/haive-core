@@ -20,7 +20,7 @@ from haive.core.schema.prebuilt.messages.utils import (
 
 
 class MessagesStateAdapter:
-    """Adapter that enables old MessagesState instances to use new features
+    """Adapter that enables old MessagesState instances to use new features.
     with minimal changes to their API.
 
     This adapter wraps an existing MessagesState instance and provides

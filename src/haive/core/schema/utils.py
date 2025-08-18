@@ -16,25 +16,23 @@ Key capabilities include:
 - Support for special types like Optional, Union, and generics
 - Helper functions for schema display and debug visualization
 
-Example:
-    ```python
-    from haive.core.schema.utils import SchemaUtils
-    from typing import List, Optional
+Examples:
+            from haive.core.schema.utils import SchemaUtils
+            from typing import List, Optional
 
-    # Format a type annotation
-    type_str = SchemaUtils.format_type_annotation(List[Optional[str]])
-    print(type_str)  # "List[Optional[str]]"
+            # Format a type annotation
+            type_str = SchemaUtils.format_type_annotation(List[Optional[str]])
+            print(type_str)  # "List[Optional[str]]"
 
-    # Extract field info from a Pydantic model
-    from pydantic import BaseModel, Field
+            # Extract field info from a Pydantic model
+            from pydantic import BaseModel, Field
 
-    class MyModel(BaseModel):
-        name: str = Field(default="default", description="User name")
+            class MyModel(BaseModel):
+                name: str = Field(default="default", description="User name")
 
-    field_info = MyModel.model_fields["name"]
-    default, default_repr, desc = SchemaUtils.extract_field_info(field_info)
-    # default = "default", desc = "User name"
-    ```
+            field_info = MyModel.model_fields["name"]
+            default, default_repr, desc = SchemaUtils.extract_field_info(field_info)
+            # default = "default", desc = "User name"
 """
 
 import logging

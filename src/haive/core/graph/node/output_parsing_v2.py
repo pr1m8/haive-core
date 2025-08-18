@@ -282,6 +282,11 @@ class JsonParserNodeConfig(OutputParserNodeConfig):
     """Specialized node for JSON parsing."""
 
     def __init__(self, **kwargs) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         from langchain_core.output_parsers import JsonOutputParser
 
         if "output_parser" not in kwargs:
@@ -323,6 +328,11 @@ class PydanticParserNodeConfig(OutputParserNodeConfig):
     )
 
     def __init__(self, **kwargs) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         from langchain_core.output_parsers import PydanticOutputParser
 
         # Extract pydantic_model before super().__init__
@@ -369,6 +379,11 @@ class ListParserNodeConfig(OutputParserNodeConfig):
     )
 
     def __init__(self, **kwargs) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         list_type = kwargs.get("list_type", "comma_separated")
 
         if "output_parser" not in kwargs:

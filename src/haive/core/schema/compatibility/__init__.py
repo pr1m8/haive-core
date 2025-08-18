@@ -1,4 +1,4 @@
-"""Haive Schema Compatibility Module
+"""Haive Schema Compatibility Module.
 
 A comprehensive type checking, compatibility analysis, and schema transformation system.
 """

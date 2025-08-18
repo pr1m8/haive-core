@@ -211,6 +211,11 @@ class DiscordSource(MessagingSource):
     bot_token: str | None = Field(None, description="Discord bot token")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -270,6 +275,11 @@ class SlackSource(MessagingSource):
     zip_path: str | None = Field(None, description="Path to Slack export ZIP file")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         if self.zip_path:
@@ -324,6 +334,11 @@ class MicrosoftTeamsSource(MessagingSource):
     team_id: str | None = Field(None, description="Specific team ID")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"tenant_id": self.tenant_id, "team_id": self.team_id})
@@ -377,6 +392,11 @@ class TwitterSource(MessagingSource):
     include_replies: bool = Field(False, description="Include replies")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -440,6 +460,11 @@ class RedditSource(MessagingSource):
     max_comments: int = Field(100, ge=1, description="Maximum comments per post")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -492,6 +517,11 @@ class MastodonSource(MessagingSource):
     )
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -555,6 +585,11 @@ class IMAPEmailSource(MessagingSource):
     max_emails: int | None = Field(None, ge=1, description="Maximum emails to process")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -620,6 +655,11 @@ class GmailSource(MessagingSource):
     label_ids: list[str] | None = Field(None, description="Gmail label IDs to filter")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -665,6 +705,11 @@ class WhatsAppSource(MessagingSource):
     chat_export_path: str = Field(..., description="Path to WhatsApp chat export file")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"path": self.chat_export_path})
@@ -698,6 +743,11 @@ class TelegramSource(MessagingSource):
     chat_export_path: str = Field(..., description="Path to Telegram chat export JSON")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"chat_file": self.chat_export_path})
@@ -746,6 +796,11 @@ class MultiChatExportSource(MessagingSource):
     )
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(

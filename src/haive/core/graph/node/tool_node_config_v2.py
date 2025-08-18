@@ -309,6 +309,11 @@ class LangChainToolNode(ToolNodeConfig):
     """Tool node specifically for LangChain tools."""
 
     def __init__(self, **kwargs) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         if "allowed_routes" not in kwargs:
             kwargs["allowed_routes"] = ["langchain_tool", "tool_node"]
         super().__init__(**kwargs)
@@ -318,6 +323,11 @@ class FunctionToolNode(ToolNodeConfig):
     """Tool node specifically for function tools."""
 
     def __init__(self, **kwargs) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         if "allowed_routes" not in kwargs:
             kwargs["allowed_routes"] = ["function"]
         super().__init__(**kwargs)
@@ -327,6 +337,11 @@ class PydanticToolNode(ToolNodeConfig):
     """Tool node specifically for Pydantic model tools."""
 
     def __init__(self, **kwargs) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         if "allowed_routes" not in kwargs:
             kwargs["allowed_routes"] = ["pydantic_model", "parse_output"]
         super().__init__(**kwargs)

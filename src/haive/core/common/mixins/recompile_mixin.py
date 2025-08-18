@@ -26,21 +26,19 @@ class RecompileMixin:
     to be recompiled due to changes in tools, schemas, or other
     configuration updates.
 
-    Example:
-        ```python
-        from haive.core.mixins.recompile_mixin import RecompileMixin
-        from haive.agents.base.agent import Agent
+    Examples:
+                from haive.core.mixins.recompile_mixin import RecompileMixin
+                from haive.agents.base.agent import Agent
 
-        class MyAgent(Agent, RecompileMixin):
-            def update_tools(self, new_tools):
-                self.tools = new_tools
-                self.mark_for_recompile("Tools updated")
+                class MyAgent(Agent, RecompileMixin):
+                    def update_tools(self, new_tools):
+                        self.tools = new_tools
+                        self.mark_for_recompile("Tools updated")
 
-            def compile_if_needed(self):
-                if self.needs_recompile:
-                    self.rebuild_graph()
-                    self.resolve_recompile()
-        ```
+                    def compile_if_needed(self):
+                        if self.needs_recompile:
+                            self.rebuild_graph()
+                            self.resolve_recompile()
     """
 
     # Recompilation state

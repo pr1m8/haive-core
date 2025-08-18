@@ -26,7 +26,7 @@ def register_pattern(name: str, pattern_type: str, **parameters):
     Returns:
         Decorator function that registers the pattern and preserves original function.
 
-    Example:
+    Examples:
         >>> @register_pattern(name="my_pattern", pattern_type="sequential")
         ... def my_processing_pattern():
         ...     '''Process data sequentially.'''
@@ -34,6 +34,11 @@ def register_pattern(name: str, pattern_type: str, **parameters):
     """
 
     def decorator(func: Callable):
+        """Decorator.
+
+        Args:
+            func: [TODO: Add description]
+        """
         # Create pattern definition
         pattern = PatternDefinition(
             name=name,

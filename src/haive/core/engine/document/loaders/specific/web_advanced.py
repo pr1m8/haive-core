@@ -28,6 +28,14 @@ class HuggingFaceSource(WebUrlSource):
         use_auth_token: bool | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            repo_id: [TODO: Add description]
+            repo_type: [TODO: Add description]
+            revision: [TODO: Add description]
+            use_auth_token: [TODO: Add description]
+        """
         hf_url = f"https://huggingface.co/{repo_type}s/{repo_id}"
         super().__init__(source_path=hf_url, **kwargs)
         self.repo_id = repo_id
@@ -107,6 +115,12 @@ class PubMedSource(WebUrlSource):
     """PubMed medical research paper source."""
 
     def __init__(self, query: str, max_results: int = 10, **kwargs):
+        """Init  .
+
+        Args:
+            query: [TODO: Add description]
+            max_results: [TODO: Add description]
+        """
         source_path = f"pubmed:search:{query}"
         super().__init__(source_path=source_path, **kwargs)
         self.query = query
@@ -152,6 +166,12 @@ class RSSFeedSource(WebUrlSource):
     """RSS/Atom feed source."""
 
     def __init__(self, feed_urls: list[str], max_items: int | None = None, **kwargs):
+        """Init  .
+
+        Args:
+            feed_urls: [TODO: Add description]
+            max_items: [TODO: Add description]
+        """
         super().__init__(source_path=feed_urls[0] if feed_urls else "", **kwargs)
         self.feed_urls = feed_urls
         self.max_items = max_items
@@ -197,6 +217,11 @@ class NewsURLSource(WebUrlSource):
     """News article source with specialized extraction."""
 
     def __init__(self, urls: list[str], **kwargs):
+        """Init  .
+
+        Args:
+            urls: [TODO: Add description]
+        """
         super().__init__(source_path=urls[0] if urls else "", **kwargs)
         self.urls = urls
 
@@ -245,6 +270,13 @@ class SeleniumWebSource(WebUrlSource):
     """Web source using Selenium for complex JavaScript sites."""
 
     def __init__(self, url: str, wait_time: int = 10, headless: bool = True, **kwargs):
+        """Init  .
+
+        Args:
+            url: [TODO: Add description]
+            wait_time: [TODO: Add description]
+            headless: [TODO: Add description]
+        """
         super().__init__(source_path=url, **kwargs)
         self.url = url
         self.wait_time = wait_time
@@ -294,6 +326,13 @@ class RecursiveURLSource(WebUrlSource):
         exclude_patterns: list[str] | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            url: [TODO: Add description]
+            max_depth: [TODO: Add description]
+            exclude_patterns: [TODO: Add description]
+        """
         super().__init__(source_path=url, **kwargs)
         self.url = url
         self.max_depth = max_depth
@@ -338,6 +377,12 @@ class SitemapSource(WebUrlSource):
     def __init__(
         self, sitemap_url: str, filter_urls: list[str] | None = None, **kwargs
     ):
+        """Init  .
+
+        Args:
+            sitemap_url: [TODO: Add description]
+            filter_urls: [TODO: Add description]
+        """
         super().__init__(source_path=sitemap_url, **kwargs)
         self.sitemap_url = sitemap_url
         self.filter_urls = filter_urls

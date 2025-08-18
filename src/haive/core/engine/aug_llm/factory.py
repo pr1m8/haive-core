@@ -48,6 +48,11 @@ class SanitizedBaseModelTool:
     """
 
     def __init__(self, base_model_class: type[BaseModel]):
+        """Init  .
+
+        Args:
+            base_model_class: [TODO: Add description]
+        """
         self.base_model_class = base_model_class
         self.original_name = base_model_class.__name__
         self.sanitized_name = sanitize_tool_name(self.original_name)
@@ -828,6 +833,11 @@ The output should be valid JSON that conforms to the {model.__name__} schema.
 
         # Define a function that will validate against the model
         def model_func(**kwargs) -> Any:
+            """Model Func.
+
+            Returns:
+                [TODO: Add return description]
+            """
             try:
                 # Validate with the model
                 result = model(**kwargs)

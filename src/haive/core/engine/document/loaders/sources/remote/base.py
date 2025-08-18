@@ -16,6 +16,14 @@ class URLSource(BaseSource):
     @field_validator("url")
     @classmethod
     def validate_url(cls, v) -> Any:
+        """Validate Url.
+
+        Args:
+            v: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         if not v.is_valid():
             raise ValueError(f"Invalid url: {v}")
         return v

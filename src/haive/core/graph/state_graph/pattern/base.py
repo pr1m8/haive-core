@@ -204,6 +204,14 @@ class GraphPattern(BaseGraph, ABC):
         """
 
         def decorator(pattern_class) -> Any:
+            """Decorator.
+
+            Args:
+                pattern_class: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             name = pattern_name or pattern_class.__name__
             cls._registry[name] = pattern_class
             logger.info(f"Registered pattern: {name}")

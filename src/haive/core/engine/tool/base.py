@@ -174,6 +174,11 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
 
         @tool(name=name, description=description)
         def model_tool(*args, **kwargs) -> Any:
+            """Model Tool.
+
+            Returns:
+                [TODO: Add return description]
+            """
             return call_method(*args, **kwargs)
 
         return model_tool

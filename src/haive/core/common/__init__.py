@@ -12,20 +12,18 @@ Key Components:
     - Logging: Centralized logging configuration
 
 Typical usage example:
-    ```python
-    from haive.core.common.mixins import IdentifierMixin, TimestampMixin
-    from haive.core.common.types import JsonType, DictStrAny
-    from haive.core.common.logging_config import configure_logging
+            from haive.core.common.mixins import IdentifierMixin, TimestampMixin
+            from haive.core.common.types import JsonType, DictStrAny
+            from haive.core.common.logging_config import configure_logging
 
-    # Use mixins in your class
-    class MyComponent(IdentifierMixin, TimestampMixin):
-        def __init__(self, name: str):
-            super().__init__()
-            self.name = name
+            # Use mixins in your class
+            class MyComponent(IdentifierMixin, TimestampMixin):
+                def __init__(self, name: str):
+                    super().__init__()
+                    self.name = name
 
-    # Configure logging
-    configure_logging(level="INFO")
-    ```
+            # Configure logging
+            configure_logging(level="INFO")
 """
 
 # Import common mixins

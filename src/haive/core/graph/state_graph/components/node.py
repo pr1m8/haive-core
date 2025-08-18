@@ -8,21 +8,19 @@ Classes:
     Node: Base node class for state processing in a graph
 
 Typical usage:
-    ```python
-    from haive.core.graph.state_graph.components import Node
-    from haive.core.graph.common.types import NodeType
+            from haive.core.graph.state_graph.components import Node
+            from haive.core.graph.common.types import NodeType
 
-    # Create a simple processing node
-    node = Node(
-        name="transform_data",
-        node_type=NodeType.CALLABLE,
-        metadata={"callable": lambda state: {"output": state["input"] * 2}}
-    )
+            # Create a simple processing node
+            node = Node(
+                name="transform_data",
+                node_type=NodeType.CALLABLE,
+                metadata={"callable": lambda state: {"output": state["input"] * 2}}
+            )
 
-    # Process state through the node
-    result = node.process({"input": 5})
-    assert result["output"] == 10
-    ```
+            # Process state through the node
+            result = node.process({"input": 5})
+            assert result["output"] == 10
 """
 
 import uuid
@@ -59,15 +57,13 @@ class Node(BaseModel, Generic[T, C, O]):
         metadata: Additional metadata for the node
         created_at: Creation timestamp
 
-    Example:
-        ```python
-        node = Node(
-            name="process_data",
-            node_type=NodeType.CALLABLE,
-            description="Processes input data by doubling it",
-            metadata={"callable": lambda state: {"output": state["input"] * 2}}
-        )
-        ```
+    Examples:
+                node = Node(
+                    name="process_data",
+                    node_type=NodeType.CALLABLE,
+                    description="Processes input data by doubling it",
+                    metadata={"callable": lambda state: {"output": state["input"] * 2}}
+                )
     """
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))

@@ -11,23 +11,21 @@ The meta agent node can:
 - Handle agent output and update meta state
 - Manage execution context and error handling
 
-Example:
-    ```python
-    from haive.core.graph.node.meta_agent_node import MetaAgentNodeConfig
-    from haive.core.schema.prebuilt.meta_state import MetaStateSchema
-    from haive.agents.simple.agent import SimpleAgent
+Examples:
+            from haive.core.graph.node.meta_agent_node import MetaAgentNodeConfig
+            from haive.core.schema.prebuilt.meta_state import MetaStateSchema
+            from haive.agents.simple.agent import SimpleAgent
 
-    # Create a meta agent node
-    meta_node = MetaAgentNodeConfig(
-        name="execute_embedded_agent",
-        input_preparation="auto",  # Automatically prepare input
-        output_handling="merge",   # Merge output back to meta state
-        error_handling="capture"   # Capture errors in meta state
-    )
+            # Create a meta agent node
+            meta_node = MetaAgentNodeConfig(
+                name="execute_embedded_agent",
+                input_preparation="auto",  # Automatically prepare input
+                output_handling="merge",   # Merge output back to meta state
+                error_handling="capture"   # Capture errors in meta state
+            )
 
-    # Use in a graph with meta state
-    # The node will automatically execute the embedded agent
-    ```
+            # Use in a graph with meta state
+            # The node will automatically execute the embedded agent
 """
 
 from __future__ import annotations

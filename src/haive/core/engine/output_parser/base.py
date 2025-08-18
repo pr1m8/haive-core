@@ -63,17 +63,15 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
     - Specialized types (pandas.DataFrame, Enum values)
     - Custom structured types
 
-    Example:
-        ```python
-        # Create a JSON parser
-        json_parser = create_output_parser_engine(
-            OutputParserType.JSON,
-            name="my_json_parser"
-        )
+    Examples:
+                # Create a JSON parser
+                json_parser = create_output_parser_engine(
+                    OutputParserType.JSON,
+                    name="my_json_parser"
+                )
 
-        # Use in a graph
-        graph.add_node("parse_json", json_parser)
-        ```
+                # Use in a graph
+                graph.add_node("parse_json", json_parser)
     """
 
     engine_type: EngineType = Field(default=EngineType.OUTPUT_PARSER)

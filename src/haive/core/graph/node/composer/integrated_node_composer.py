@@ -286,6 +286,16 @@ class SchemaAwareComposedNode:
         name: str,
         composer: IntegratedNodeComposer,
     ):
+        """Init  .
+
+        Args:
+            base_node: [TODO: Add description]
+            input_mappings: [TODO: Add description]
+            output_mappings: [TODO: Add description]
+            state_schema: [TODO: Add description]
+            name: [TODO: Add description]
+            composer: [TODO: Add description]
+        """
         self.base_node = base_node
         self.input_mappings = input_mappings
         self.output_mappings = output_mappings
@@ -405,6 +415,17 @@ class StateSchemaAdapter:
         name: str,
         composer: IntegratedNodeComposer,
     ):
+        """Init  .
+
+        Args:
+            source_schema: [TODO: Add description]
+            target_schema: [TODO: Add description]
+            field_mappings: [TODO: Add description]
+            preserve_reducers: [TODO: Add description]
+            preserve_sharing: [TODO: Add description]
+            name: [TODO: Add description]
+            composer: [TODO: Add description]
+        """
         self.source_schema = source_schema
         self.target_schema = target_schema
         self.field_mappings = field_mappings
@@ -518,6 +539,14 @@ def with_state_schema(
     """
 
     def decorator(func: Callable) -> SchemaAwareComposedNode:
+        """Decorator.
+
+        Args:
+            func: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         composer = IntegratedNodeComposer()
         return composer.from_callable_with_schema(
             func=func,

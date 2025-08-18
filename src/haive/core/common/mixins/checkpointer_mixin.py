@@ -6,31 +6,29 @@ synchronous and asynchronous checkpointing patterns, state restoration, and
 runtime configuration management.
 
 Usage:
-    ```python
-    from pydantic import BaseModel, Field
-    from langgraph.graph import StateGraph
-    from haive.core.common.mixins import CheckpointerMixin
-    from haive.core.persistence.config import CheckpointerConfig
+            from pydantic import BaseModel, Field
+            from langgraph.graph import StateGraph
+            from haive.core.common.mixins import CheckpointerMixin
+            from haive.core.persistence.config import CheckpointerConfig
 
-    class MyAgent(CheckpointerMixin, BaseModel):
-        # Define the required fields
-        persistence: Optional[CheckpointerConfig] = Field(default=None)
-        checkpoint_mode: str = Field(default="sync")
+            class MyAgent(CheckpointerMixin, BaseModel):
+                # Define the required fields
+                persistence: Optional[CheckpointerConfig] = Field(default=None)
+                checkpoint_mode: str = Field(default="sync")
 
-        def __init__(self, **data):
-            super().__init__(**data)
-            # Create graph
-            builder = StateGraph(...)
-            self.app = builder.compile()
+                def __init__(self, **data):
+                    super().__init__(**data)
+                    # Create graph
+                    builder = StateGraph(...)
+                    self.app = builder.compile()
 
-        # Use run with automatic checkpointing
-        def process(self, input_data, thread_id=None):
-            return self.run(input_data, thread_id=thread_id)
+                # Use run with automatic checkpointing
+                def process(self, input_data, thread_id=None):
+                    return self.run(input_data, thread_id=thread_id)
 
-        # Use streaming with automatic checkpointing
-        def process_stream(self, input_data, thread_id=None):
-            return self.stream(input_data, thread_id=thread_id)
-    ```
+                # Use streaming with automatic checkpointing
+                def process_stream(self, input_data, thread_id=None):
+                    return self.stream(input_data, thread_id=thread_id)
 """
 
 import asyncio

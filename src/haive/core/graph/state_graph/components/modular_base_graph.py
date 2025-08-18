@@ -41,7 +41,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         state_schema: Schema for graph state
         metadata: Additional graph metadata
 
-    Example:
+    Examples:
         Creating and using a modular graph::
 
             graph = ModularBaseGraph(name="my_workflow")

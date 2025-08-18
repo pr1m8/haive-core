@@ -187,12 +187,30 @@ class NamedList(BaseModel, Generic[T]):
     # ========================================================================
 
     def __len__(self) -> int:
+        """Len  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         return len([item for item in self.items if item is not None])
 
     def __iter__(self) -> Iterator[T]:
+        """Iter  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         return iter([item for item in self.items if item is not None])
 
     def __getitem__(self, key: int | str) -> T:
+        """Getitem  .
+
+        Args:
+            key: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         if isinstance(key, str):
             # Access by name
             if key in self.name_map:
@@ -203,6 +221,15 @@ class NamedList(BaseModel, Generic[T]):
         return valid_items[key]
 
     def __setitem__(self, key: int | str, value: T) -> None:
+        """Setitem  .
+
+        Args:
+            key: [TODO: Add description]
+            value: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         if isinstance(key, str):
             # Set by name
             if key in self.names:

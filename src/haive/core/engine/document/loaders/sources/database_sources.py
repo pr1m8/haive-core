@@ -349,6 +349,11 @@ class PostgreSQLSource(DatabaseSource):
     use_prepared_statements: bool = Field(True, description="Use prepared statements")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         if self.schema_name:
@@ -384,6 +389,11 @@ class MySQLSource(DatabaseSource):
     autocommit: bool = Field(True, description="Auto-commit transactions")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update({"charset": self.charset, "autocommit": self.autocommit})
         return kwargs
@@ -413,6 +423,11 @@ class SQLiteSource(DatabaseSource):
     isolation_level: str | None = Field(None, description="Isolation level")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -462,6 +477,11 @@ class MongoDBSource(DatabaseSource):
     field_names: list[str] | None = Field(None, description="Fields to include")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         # Replace generic query with MongoDB-specific parameters
@@ -504,6 +524,11 @@ class CassandraSource(DatabaseSource):
     consistency_level: str = Field("ONE", description="Consistency level")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {"keyspace": self.keyspace, "consistency_level": self.consistency_level}
@@ -543,6 +568,11 @@ class ElasticsearchSource(DatabaseSource):
     scroll_size: int = Field(1000, ge=1, description="Scroll size for pagination")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         # Replace generic query with Elasticsearch-specific parameters
@@ -591,6 +621,11 @@ class Neo4jSource(DatabaseSource):
     relationship_type: str | None = Field(None, description="Relationship type")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         # Use Cypher query if provided, otherwise generic query
@@ -628,6 +663,11 @@ class ArangoDBSource(DatabaseSource):
     aql_query: str | None = Field(None, description="AQL query")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -678,6 +718,11 @@ class BigQuerySource(DatabaseSource):
     use_legacy_sql: bool = Field(False, description="Use legacy SQL")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -719,6 +764,11 @@ class SnowflakeSource(DatabaseSource):
     role: str | None = Field(None, description="Role name")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(

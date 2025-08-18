@@ -29,11 +29,9 @@ class TokenUsageMixin(BaseModel):
 
     To use this mixin, simply inherit from it in your schema:
 
-    Example:
-        ```python
-        class MyMessagesState(MessagesState, TokenUsageMixin):
-            pass
-        ```
+    Examples:
+                class MyMessagesState(MessagesState, TokenUsageMixin):
+                    pass
     """
 
     # Token usage tracking fields

@@ -1,44 +1,43 @@
 #!/bin/bash
-# Script to clean and rebuild haive-core documentation
+# Enhanced documentation build script for haive-core
+
+echo "🚀 Building enhanced haive-core documentation..."
+echo "================================================"
 
 # Colors for output
 GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
 NC='\033[0m' # No Color
 
-# Get the directory where the script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
-
-echo -e "${YELLOW}🧹 Cleaning old documentation build...${NC}"
-echo "Removing docs/build/"
+# Clean previous build
+echo -e "${BLUE}📧 Cleaning previous build...${NC}"
 rm -rf docs/build/
-echo "Removing docs/source/autoapi/"
 rm -rf docs/source/autoapi/
-echo -e "${GREEN}✓ Clean complete${NC}\n"
 
-echo -e "${YELLOW}🔨 Building documentation...${NC}"
-poetry run sphinx-build -b html docs/source docs/build/html
+# Build documentation
+echo -e "${PURPLE}🔨 Building documentation with Sphinx...${NC}"
+poetry run sphinx-build -b html docs/source docs/build
 
 # Check if build was successful
 if [ $? -eq 0 ]; then
-	echo -e "\n${GREEN}✓ Documentation built successfully!${NC}"
-
-	# Check if port 8005 is already in use
-	if lsof -Pi :8005 -sTCP:LISTEN -t >/dev/null; then
-		echo -e "\n${YELLOW}⚠️  Port 8005 is already in use${NC}"
-		echo 'Kill the existing server with: kill $(lsof -t -i:8005)'
-		echo "Or use a different port with: python -m http.server 8006 --directory docs/build/html"
-	else
-		echo -e "\n${GREEN}📡 Starting documentation server on port 8005...${NC}"
-		echo "Documentation will be available at: http://localhost:8005"
-		echo "Press Ctrl+C to stop the server"
-		echo ""
-		python -m http.server 8005 --directory docs/build/html
-	fi
+	echo -e "${GREEN}✅ Documentation built successfully!${NC}"
+	echo ""
+	echo -e "${PURPLE}🎨 Features included:${NC}"
+	echo "  - 🎨 Purple/violet Furo theme (light & dark modes)"
+	echo "  - 📇 Sphinx-design cards with emojis"
+	echo "  - 🔧 Enhanced AutoAPI with better organization"
+	echo "  - 💫 Interactive tooltips with sphinx-tippy"
+	echo "  - 📊 Mermaid diagrams support"
+	echo "  - 🔍 36+ Sphinx extensions integrated"
+	echo ""
+	echo -e "${GREEN}📂 Documentation location:${NC}"
+	echo "  file://$PWD/docs/build/index.html"
+	echo ""
+	echo -e "${BLUE}🌐 To serve locally:${NC}"
+	echo "  cd docs/build && python -m http.server 8000"
+	echo "  Then visit: http://localhost:8000"
 else
-	echo -e "\n${RED}✗ Documentation build failed!${NC}"
-	echo "Check the error messages above for details."
+	echo -e "${RED}❌ Documentation build failed!${NC}"
 	exit 1
 fi

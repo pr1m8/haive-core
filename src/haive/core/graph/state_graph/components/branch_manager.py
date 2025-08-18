@@ -35,7 +35,7 @@ class BranchManager(BaseGraphComponent):
     Attributes:
         component_name: Always "branch_manager"
 
-    Example:
+    Examples:
         Using the BranchManager::
 
             branch_manager = BranchManager(graph)
@@ -104,7 +104,7 @@ class BranchManager(BaseGraphComponent):
         Raises:
             ValueError: If source node doesn't exist or destinations are invalid
 
-        Example:
+        Examples:
             Simple boolean routing::
 
                 def is_complete(state):
@@ -177,7 +177,7 @@ class BranchManager(BaseGraphComponent):
         Returns:
             Reference to parent graph for method chaining
 
-        Example:
+        Examples:
             Complex routing function::
 
                 def complex_router(state):
@@ -219,7 +219,7 @@ class BranchManager(BaseGraphComponent):
         Returns:
             Reference to parent graph for method chaining
 
-        Example:
+        Examples:
             Status-based routing::
 
                 branch_manager.add_key_value_branch(
@@ -260,7 +260,7 @@ class BranchManager(BaseGraphComponent):
         Returns:
             Reference to parent graph for method chaining
 
-        Example:
+        Examples:
             Parallel processing branch::
 
                 def create_parallel_tasks(state):

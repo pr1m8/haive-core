@@ -17,41 +17,37 @@ features like connection pooling, automatic retry with exponential backoff, and
 thread registration for tracking agent sessions.
 
 Usage:
-    ```python
-    from haive.core.persistence import MemoryCheckpointerConfig
+            from haive.core.persistence import MemoryCheckpointerConfig
 
-    # Create a memory-based checkpointer
-    config = MemoryCheckpointerConfig()
-    checkpointer = config.create_checkpointer()
+            # Create a memory-based checkpointer
+            config = MemoryCheckpointerConfig()
+            checkpointer = config.create_checkpointer()
 
-    # Use in an agent configuration
-    agent_config = AgentConfig(
-        persistence=config,
-        # other configuration...
-    )
-    ```
+            # Use in an agent configuration
+            agent_config = AgentConfig(
+                persistence=config,
+                # other configuration...
+            )
 
 For more advanced usage with PostgreSQL:
-    ```python
-    from haive.core.persistence import PostgresCheckpointerConfig
-    from haive.core.persistence.types import CheckpointerMode, CheckpointStorageMode
+            from haive.core.persistence import PostgresCheckpointerConfig
+            from haive.core.persistence.types import CheckpointerMode, CheckpointStorageMode
 
-    # Create a PostgreSQL checkpointer
-    postgres_config = PostgresCheckpointerConfig(
-        mode=CheckpointerMode.ASYNC,  # Use async operations
-        storage_mode=CheckpointStorageMode.SHALLOW,  # Only store latest state
-        db_host="localhost",
-        db_port=5432,
-        db_name="haive",
-        db_user="postgres",
-        db_pass="password"
-    )
+            # Create a PostgreSQL checkpointer
+            postgres_config = PostgresCheckpointerConfig(
+                mode=CheckpointerMode.ASYNC,  # Use async operations
+                storage_mode=CheckpointStorageMode.SHALLOW,  # Only store latest state
+                db_host="localhost",
+                db_port=5432,
+                db_name="haive",
+                db_user="postgres",
+                db_pass="password"
+            )
 
-    # For async usage
-    async def setup():
-        async_checkpointer = await postgres_config.create_async_checkpointer()
-        # Use the checkpointer...
-    ```
+            # For async usage
+            async def setup():
+                async_checkpointer = await postgres_config.create_async_checkpointer()
+                # Use the checkpointer...
 
 This module is designed to work seamlessly with both synchronous and asynchronous
 code, providing appropriate interfaces for each context.

@@ -42,12 +42,27 @@ def demo_recompilation_tracking() -> Any:
     # Add some nodes - should mark as needing recompilation
 
     def start_func(state: Dict[str, Any]):
+        """Start Func.
+
+        Args:
+            state: [TODO: Add description]
+        """
         return {"status": "started"}
 
     def process_func(state: Dict[str, Any]):
+        """Process Func.
+
+        Args:
+            state: [TODO: Add description]
+        """
         return {"status": "processed"}
 
     def finish_func(state: Dict[str, Any]):
+        """Finish Func.
+
+        Args:
+            state: [TODO: Add description]
+        """
         return {"status": "finished"}
 
     graph.add_node("start", start_func)
@@ -64,6 +79,11 @@ def demo_recompilation_tracking() -> Any:
     # Add conditional routing - should mark as needing recompilation
 
     def router(state: Dict[str, Any]):
+        """Router.
+
+        Args:
+            state: [TODO: Add description]
+        """
         return "continue" if state.get("count", 0) < 5 else "finish"
 
     destinations = {"continue": "process", "finish": "finish"}
@@ -89,6 +109,11 @@ def demo_recompilation_tracking() -> Any:
     # Now make changes that require recompilation
 
     def validate_func(state: Dict[str, Any]):
+        """Validate Func.
+
+        Args:
+            state: [TODO: Add description]
+        """
         return {"status": "validated"}
 
     graph.add_node("validate", validate_func)

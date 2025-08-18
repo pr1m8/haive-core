@@ -131,6 +131,12 @@ def extract_callable(node: Any, node_name: str) -> Any:
         )
 
         def action(state: Dict[str, Any], config: Dict[str, Any] = None):
+            """Action.
+
+            Args:
+                state: [TODO: Add description]
+                config: [TODO: Add description]
+            """
             return state
 
     # Create parameter-aware wrapper
@@ -151,6 +157,12 @@ def create_parameter_aware_wrapper(func: Any) -> Any:
     param_count = len(sig.parameters)
 
     def wrapper(state: Dict[str, Any], config: Dict[str, Any] = None):
+        """Wrapper.
+
+        Args:
+            state: [TODO: Add description]
+            config: [TODO: Add description]
+        """
         try:
             # Call with appropriate number of parameters
             result = func(state) if param_count == 1 else func(state, config)

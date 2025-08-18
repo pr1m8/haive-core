@@ -17,30 +17,28 @@ FieldDefinition objects are used extensively by SchemaComposer and StateSchemaMa
 when building dynamic schemas at runtime, providing a complete representation of
 each field's characteristics and relationships.
 
-Example:
-    ```python
-    from haive.core.schema import FieldDefinition
-    from typing import List
-    import operator
+Examples:
+            from haive.core.schema import FieldDefinition
+            from typing import List
+            import operator
 
-    # Create a field definition for a context field
-    field_def = FieldDefinition(
-        name="context",
-        field_type=List[str],
-        default_factory=list,
-        description="Retrieved document contexts",
-        shared=True,
-        reducer=operator.add,  # Concatenate lists when combining values
-        input_for=["llm_engine"],  # This field is input for the LLM engine
-        output_from=["retriever_engine"]  # This field is output from the retriever
-    )
+            # Create a field definition for a context field
+            field_def = FieldDefinition(
+                name="context",
+                field_type=List[str],
+                default_factory=list,
+                description="Retrieved document contexts",
+                shared=True,
+                reducer=operator.add,  # Concatenate lists when combining values
+                input_for=["llm_engine"],  # This field is input for the LLM engine
+                output_from=["retriever_engine"]  # This field is output from the retriever
+            )
 
-    # Get field info for model creation
-    field_type, field_info = field_def.to_field_info()
+            # Get field info for model creation
+            field_type, field_info = field_def.to_field_info()
 
-    # Get annotated field with embedded metadata
-    field_type, field_info = field_def.to_annotated_field()
-    ```
+            # Get annotated field with embedded metadata
+            field_type, field_info = field_def.to_annotated_field()
 """
 
 import logging
@@ -161,27 +159,25 @@ class FieldDefinition:
             FieldDefinition: A new FieldDefinition instance containing all the
                 extracted information from the model field.
 
-        Example:
-            ```python
-            # Extract field from an existing model
-            from pydantic import BaseModel, Field
+        Examples:
+                    # Extract field from an existing model
+                    from pydantic import BaseModel, Field
 
-            class MyModel(BaseModel):
-                items: List[str] = Field(
-                    default_factory=list,
-                    description="List of items"
-                )
+                    class MyModel(BaseModel):
+                        items: List[str] = Field(
+                            default_factory=list,
+                            description="List of items"
+                        )
 
-            # Get model field info
-            field_name = "items"
-            field_type = MyModel.model_fields[field_name].annotation
-            field_info = MyModel.model_fields[field_name]
+                    # Get model field info
+                    field_name = "items"
+                    field_type = MyModel.model_fields[field_name].annotation
+                    field_info = MyModel.model_fields[field_name]
 
-            # Extract field definition
-            field_def = FieldDefinition.extract_from_model_field(
-                field_name, field_type, field_info
-            )
-            ```
+                    # Extract field definition
+                    field_def = FieldDefinition.extract_from_model_field(
+                        field_name, field_type, field_info
+                    )
         """
         # Extract basic properties
         default = field_info.default if hasattr(field_info, "default") else None
@@ -229,28 +225,26 @@ class FieldDefinition:
                 - field_type: The Python type annotation for the field
                 - field_info: The Pydantic FieldInfo object with field metadata
 
-        Example:
-            ```python
-            from pydantic import create_model
+        Examples:
+                    from pydantic import create_model
 
-            # Create a field definition
-            field_def = FieldDefinition(
-                name="count",
-                field_type=int,
-                default=0,
-                description="Counter value"
-            )
+                    # Create a field definition
+                    field_def = FieldDefinition(
+                        name="count",
+                        field_type=int,
+                        default=0,
+                        description="Counter value"
+                    )
 
-            # Get field info for model creation
-            field_type, field_info = field_def.to_field_info()
+                    # Get field info for model creation
+                    field_type, field_info = field_def.to_field_info()
 
-            # Use in model creation
-            MyModel = create_model(
-                "MyModel",
-                count=(field_type, field_info),
-                __module__=__name__
-            )
-            ```
+                    # Use in model creation
+                    MyModel = create_model(
+                        "MyModel",
+                        count=(field_type, field_info),
+                        __module__=__name__
+                    )
         """
         logger.debug(
             f"🔍 TO_FIELD_INFO DEBUG {self.name}: default={self.default}, factory={
@@ -306,29 +300,27 @@ class FieldDefinition:
                 - annotated_field_type: Python type wrapped in Annotated with metadata
                 - field_info: Pydantic FieldInfo object with standard field properties
 
-        Example:
-            ```python
-            from pydantic import create_model
+        Examples:
+                    from pydantic import create_model
 
-            # Create a field definition with reducer
-            field_def = FieldDefinition(
-                name="items",
-                field_type=List[str],
-                default_factory=list,
-                description="Collection of items",
-                reducer=operator.add  # Will be embedded in the annotation
-            )
+                    # Create a field definition with reducer
+                    field_def = FieldDefinition(
+                        name="items",
+                        field_type=List[str],
+                        default_factory=list,
+                        description="Collection of items",
+                        reducer=operator.add  # Will be embedded in the annotation
+                    )
 
-            # Get annotated field
-            field_type, field_info = field_def.to_annotated_field()
+                    # Get annotated field
+                    field_type, field_info = field_def.to_annotated_field()
 
-            # Use in model creation - metadata persists in the type annotation
-            MyModel = create_model(
-                "MyModel",
-                items=(field_type, field_info),
-                __module__=__name__
-            )
-            ```
+                    # Use in model creation - metadata persists in the type annotation
+                    MyModel = create_model(
+                        "MyModel",
+                        items=(field_type, field_info),
+                        __module__=__name__
+                    )
         """
         # Create annotated field using utility function
         field_type, field_info = create_annotated_field(
@@ -360,20 +352,18 @@ class FieldDefinition:
             Optional[str]: String representation of the reducer function that can
                 be used for serialization, or None if no reducer is defined.
 
-        Example:
-            ```python
-            import operator
+        Examples:
+                    import operator
 
-            field_def = FieldDefinition(
-                name="count",
-                field_type=int,
-                default=0,
-                reducer=operator.add
-            )
+                    field_def = FieldDefinition(
+                        name="count",
+                        field_type=int,
+                        default=0,
+                        reducer=operator.add
+                    )
 
-            reducer_name = field_def.get_reducer_name()
-            # Returns: "operator.add"
-            ```
+                    reducer_name = field_def.get_reducer_name()
+                    # Returns: "operator.add"
         """
         if not self.reducer:
             return None
@@ -408,33 +398,31 @@ class FieldDefinition:
             Dict[str, Any]: Dictionary representation of the field definition with
                 all properties and metadata.
 
-        Example:
-            ```python
-            field_def = FieldDefinition(
-                name="items",
-                field_type=List[str],
-                default_factory=list,
-                description="Collection of items",
-                shared=True,
-                reducer=operator.add
-            )
+        Examples:
+                    field_def = FieldDefinition(
+                        name="items",
+                        field_type=List[str],
+                        default_factory=list,
+                        description="Collection of items",
+                        shared=True,
+                        reducer=operator.add
+                    )
 
-            data = field_def.to_dict()
-            # Returns a dictionary with all field properties
-            # {
-            #   "name": "items",
-            #   "field_type": "typing.List[str]",
-            #   "default": None,
-            #   "default_factory": "<built-in function list>",
-            #   "description": "Collection of items",
-            #   "shared": True,
-            #   "reducer": "operator.add",
-            #   "source": None,
-            #   "input_for": [],
-            #   "output_from": [],
-            #   "structured_model": None
-            # }
-            ```
+                    data = field_def.to_dict()
+                    # Returns a dictionary with all field properties
+                    # {
+                    #   "name": "items",
+                    #   "field_type": "typing.List[str]",
+                    #   "default": None,
+                    #   "default_factory": "<built-in function list>",
+                    #   "description": "Collection of items",
+                    #   "shared": True,
+                    #   "reducer": "operator.add",
+                    #   "source": None,
+                    #   "input_for": [],
+                    #   "output_from": [],
+                    #   "structured_model": None
+                    # }
         """
         result = {
             "name": self.name,

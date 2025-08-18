@@ -73,6 +73,11 @@ class EnhancedSourceRegistry:
     """Enhanced registry supporting all langchain_community loaders."""
 
     def __init__(self) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         # Core registry data
         self._sources: dict[str, EnhancedSourceRegistration] = {}
 
@@ -403,6 +408,14 @@ def register_source(
     """Enhanced decorator for registering source types."""
 
     def decorator(source_class: type[TSource]) -> type[TSource]:
+        """Decorator.
+
+        Args:
+            source_class: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         # Create capabilities
         source_capabilities = SourceCapabilities(
             is_bulk_loader=is_bulk_loader,

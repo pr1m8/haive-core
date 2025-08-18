@@ -238,7 +238,7 @@ def wrap_callable(
     Returns:
         Configured CallableNodeConfig
 
-    Example:
+    Examples:
         node = wrap_callable(
             check_threshold,
             goto_on_true="summarize",
@@ -253,13 +253,21 @@ def wrap_callable(
 def as_node(**kwargs) -> Any:
     """Decorator to turn a function into a node.
 
-    Example:
+    Examples:
         @as_node(goto_on_true="next", goto_on_false="retry")
         def should_continue(messages: List[BaseMessage]) -> bool:
             return len(messages) > 5
     """
 
     def decorator(func: Callable) -> CallableNodeConfig:
+        """Decorator.
+
+        Args:
+            func: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         return wrap_callable(func, **kwargs)
 
     return decorator

@@ -78,16 +78,14 @@ class CheckpointerConfig(BaseModel, ABC, Generic[T]):
         Returns:
             bool: True if configured for async operations, False for synchronous
 
-        Example:
-            ```python
-            config = PostgresCheckpointerConfig(mode=CheckpointerMode.ASYNC)
-            if config.is_async_mode():
-                # Use async methods
-                checkpointer = await config.create_async_checkpointer()
-            else:
-                # Use sync methods
-                checkpointer = config.create_checkpointer()
-            ```
+        Examples:
+                    config = PostgresCheckpointerConfig(mode=CheckpointerMode.ASYNC)
+                    if config.is_async_mode():
+                        # Use async methods
+                        checkpointer = await config.create_async_checkpointer()
+                    else:
+                        # Use sync methods
+                        checkpointer = config.create_checkpointer()
         """
         return self.mode == CheckpointerMode.ASYNC
 
@@ -110,13 +108,11 @@ class CheckpointerConfig(BaseModel, ABC, Generic[T]):
             RuntimeError: If the checkpointer cannot be created due to missing
                 dependencies or connection issues
 
-        Example:
-            ```python
-            config = MemoryCheckpointerConfig()
-            checkpointer = config.create_checkpointer()
-            # Use checkpointer with a graph
-            graph = Graph(checkpointer=checkpointer)
-            ```
+        Examples:
+                    config = MemoryCheckpointerConfig()
+                    checkpointer = config.create_checkpointer()
+                    # Use checkpointer with a graph
+                    graph = Graph(checkpointer=checkpointer)
         """
 
     @abstractmethod
@@ -138,13 +134,11 @@ class CheckpointerConfig(BaseModel, ABC, Generic[T]):
             RuntimeError: If the async checkpointer cannot be created due to
                 missing dependencies or connection issues
 
-        Example:
-            ```python
-            config = PostgresCheckpointerConfig(mode=CheckpointerMode.ASYNC)
-            async_checkpointer = await config.create_async_checkpointer()
-            # Use with async graph
-            graph = AsyncGraph(checkpointer=async_checkpointer)
-            ```
+        Examples:
+                    config = PostgresCheckpointerConfig(mode=CheckpointerMode.ASYNC)
+                    async_checkpointer = await config.create_async_checkpointer()
+                    # Use with async graph
+                    graph = AsyncGraph(checkpointer=async_checkpointer)
         """
 
     @abstractmethod
@@ -163,13 +157,11 @@ class CheckpointerConfig(BaseModel, ABC, Generic[T]):
             Any: An async context manager or the checkpointer itself, depending
                 on implementation requirements
 
-        Example:
-            ```python
-            config = PostgresCheckpointerConfig(mode=CheckpointerMode.ASYNC)
-            async with await config.initialize_async_checkpointer() as checkpointer:
-                # Use checkpointer with async code
-                # Resources will be properly closed after this block
-            ```
+        Examples:
+                    config = PostgresCheckpointerConfig(mode=CheckpointerMode.ASYNC)
+                    async with await config.initialize_async_checkpointer() as checkpointer:
+                        # Use checkpointer with async code
+                        # Resources will be properly closed after this block
         """
 
     def to_dict(self) -> dict[str, Any]:
@@ -183,12 +175,10 @@ class CheckpointerConfig(BaseModel, ABC, Generic[T]):
         Returns:
             Dict[str, Any]: Dictionary representation of this configuration
 
-        Example:
-            ```python
-            config = PostgresCheckpointerConfig(db_host="localhost")
-            config_dict = config.to_dict()
-            print(config_dict)  # {'type': 'postgres', 'db_host': 'localhost', ...}
-            ```
+        Examples:
+                    config = PostgresCheckpointerConfig(db_host="localhost")
+                    config_dict = config.to_dict()
+                    print(config_dict)  # {'type': 'postgres', 'db_host': 'localhost', ...}
         """
         # Use Pydantic v2 serialization if available
         if hasattr(self, "model_dump"):
@@ -222,16 +212,14 @@ class CheckpointerConfig(BaseModel, ABC, Generic[T]):
             ValueError: If the 'type' field is missing or specifies an unsupported
                 checkpointer type
 
-        Example:
-            ```python
-            config_dict = {
-                "type": "postgres",
-                "db_host": "localhost",
-                "db_port": 5432
-            }
-            config = CheckpointerConfig.from_dict(config_dict)
-            # Returns a PostgresCheckpointerConfig instance
-            ```
+        Examples:
+                    config_dict = {
+                        "type": "postgres",
+                        "db_host": "localhost",
+                        "db_port": 5432
+                    }
+                    config = CheckpointerConfig.from_dict(config_dict)
+                    # Returns a PostgresCheckpointerConfig instance
         """
         # Ensure type is specified
         if "type" not in data:

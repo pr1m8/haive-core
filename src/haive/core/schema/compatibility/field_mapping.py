@@ -154,6 +154,11 @@ class FieldMapper:
     """Manages field mappings between schemas."""
 
     def __init__(self) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         self.mappings: dict[str, FieldMapping] = {}
         self._source_index: dict[str, set[str]] = {}  # source -> targets
 

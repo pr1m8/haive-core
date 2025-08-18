@@ -126,6 +126,11 @@ class SmartSourceRegistry:
     """Enhanced source registry with intelligent matching."""
 
     def __init__(self) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         self._sources: list[tuple[type, float, list[str]]] = []
         self._domain_patterns: dict[str, list[tuple[type, float]]] = {}
         self._extension_patterns: dict[str, list[tuple[type, float]]] = {}

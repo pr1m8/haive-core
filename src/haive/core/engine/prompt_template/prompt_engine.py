@@ -134,38 +134,34 @@ class PromptTemplateEngine(InvokableEngine[dict[str, Any], FormatOutputType]):
     Examples:
         Basic text template usage:
 
-        ```python
-        from langchain_core.prompts import PromptTemplate
+                from langchain_core.prompts import PromptTemplate
 
-        template = PromptTemplate.from_template("Hello {name}, you are {age} years old")
-        engine = PromptTemplateEngine(name="greeting", prompt_template=template)
+                template = PromptTemplate.from_template("Hello {name}, you are {age} years old")
+                engine = PromptTemplateEngine(name="greeting", prompt_template=template)
 
-        # Input schema automatically includes 'name' and 'age' fields
-        result = engine.invoke({"name": "Alice", "age": 30})
-        # Returns: "Hello Alice, you are 30 years old"
-        ```
+                # Input schema automatically includes 'name' and 'age' fields
+                result = engine.invoke({"name": "Alice", "age": 30})
+                # Returns: "Hello Alice, you are 30 years old"
 
         Chat template with message placeholders:
 
-        ```python
-        from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+                from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-        template = ChatPromptTemplate.from_messages([
-            ("system", "You are {role}"),
-            MessagesPlaceholder("history", optional=True),
-            ("human", "{question}")
-        ])
+                template = ChatPromptTemplate.from_messages([
+                    ("system", "You are {role}"),
+                    MessagesPlaceholder("history", optional=True),
+                    ("human", "{question}")
+                ])
 
-        engine = PromptTemplateEngine(name="chat", prompt_template=template)
+                engine = PromptTemplateEngine(name="chat", prompt_template=template)
 
-        # Schema includes 'role', 'question', and optional 'history'
-        result = engine.invoke({
-            "role": "a helpful assistant",
-            "question": "What is AI?",
-            "history": []  # Optional
-        })
-        # Returns: List[AnyMessage] with formatted messages
-        ```
+                # Schema includes 'role', 'question', and optional 'history'
+                result = engine.invoke({
+                    "role": "a helpful assistant",
+                    "question": "What is AI?",
+                    "history": []  # Optional
+                })
+                # Returns: List[AnyMessage] with formatted messages
 
     Raises:
         ValidationError: When input data doesn't match the derived schema

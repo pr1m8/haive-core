@@ -29,6 +29,14 @@ class GitHubSource(WebUrlSource):
         include_pull_requests: bool = False,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            repo_url: [TODO: Add description]
+            file_filter: [TODO: Add description]
+            include_issues: [TODO: Add description]
+            include_pull_requests: [TODO: Add description]
+        """
         super().__init__(source_path=repo_url, **kwargs)
         self.repo_url = repo_url
         self.file_filter = file_filter or []
@@ -122,6 +130,13 @@ class ArXivSource(WebUrlSource):
         max_results: int = 10,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            query: [TODO: Add description]
+            paper_id: [TODO: Add description]
+            max_results: [TODO: Add description]
+        """
         source_path = f"arxiv:{paper_id}" if paper_id else f"arxiv:search:{query}"
         super().__init__(source_path=source_path, **kwargs)
         self.query = query
@@ -176,6 +191,14 @@ class WikipediaSource(WebUrlSource):
         load_max_docs: int = 1,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            query: [TODO: Add description]
+            page_title: [TODO: Add description]
+            lang: [TODO: Add description]
+            load_max_docs: [TODO: Add description]
+        """
         source_path = f"wikipedia:{lang}:{page_title or query}"
         super().__init__(source_path=source_path, **kwargs)
         self.query = query
@@ -234,6 +257,13 @@ class PlaywrightWebSource(WebUrlSource):
         headless: bool = True,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            urls: [TODO: Add description]
+            wait_until: [TODO: Add description]
+            headless: [TODO: Add description]
+        """
         super().__init__(source_path=urls[0] if urls else "", **kwargs)
         self.urls = urls
         self.wait_until = wait_until
@@ -284,6 +314,12 @@ class BasicWebSource(WebUrlSource):
         requests_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            web_paths: [TODO: Add description]
+            requests_kwargs: [TODO: Add description]
+        """
         super().__init__(source_path=web_paths[0] if web_paths else "", **kwargs)
         self.web_paths = web_paths
         self.requests_kwargs = requests_kwargs or {}

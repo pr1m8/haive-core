@@ -24,27 +24,25 @@ Key Components:
     - Source Integration: Seamless integration with external document sources
 
 Typical usage example:
-    ```python
-    from haive.core.common.models.documents import GithubRepo, GithubSettings
+            from haive.core.common.models.documents import GithubRepo, GithubSettings
 
-    # Configure GitHub access
-    settings = GithubSettings(
-        github_token="your_token_here",
-        default_branch="main"
-    )
+            # Configure GitHub access
+            settings = GithubSettings(
+                github_token="your_token_here",
+                default_branch="main"
+            )
 
-    # Create a GitHub repository model
-    repo = GithubRepo(
-        owner="microsoft",
-        name="TypeScript",
-        settings=settings
-    )
+            # Create a GitHub repository model
+            repo = GithubRepo(
+                owner="microsoft",
+                name="TypeScript",
+                settings=settings
+            )
 
-    # Access repository information
-    files = repo.get_files()
-    readme = repo.get_file_content("README.md")
-    metadata = repo.get_metadata()
-    ```
+            # Access repository information
+            files = repo.get_files()
+            readme = repo.get_file_content("README.md")
+            metadata = repo.get_metadata()
 
 Architecture:
     Document models in Haive follow a consistent pattern:

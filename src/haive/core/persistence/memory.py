@@ -50,18 +50,16 @@ class MemoryCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
     the same underlying implementation since the memory checkpointer is
     inherently thread-safe.
 
-    Example:
-        ```python
-        from haive.core.persistence import MemoryCheckpointerConfig
+    Examples:
+                from haive.core.persistence import MemoryCheckpointerConfig
 
-        # Create a basic memory checkpointer
-        config = MemoryCheckpointerConfig()
-        checkpointer = config.create_checkpointer()
+                # Create a basic memory checkpointer
+                config = MemoryCheckpointerConfig()
+                checkpointer = config.create_checkpointer()
 
-        # Use with a graph
-        from langgraph.graph import Graph
-        graph = Graph(checkpointer=checkpointer)
-        ```
+                # Use with a graph
+                from langgraph.graph import Graph
+                graph = Graph(checkpointer=checkpointer)
     """
 
     type: CheckpointerType = CheckpointerType.MEMORY
@@ -107,13 +105,11 @@ class MemoryCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
             RuntimeError: If the MemorySaver class cannot be imported or
                 instantiated, typically due to a missing dependency
 
-        Example:
-            ```python
-            config = MemoryCheckpointerConfig()
-            checkpointer = config.create_checkpointer()
-            # Use with a synchronous graph
-            graph = Graph(checkpointer=checkpointer)
-            ```
+        Examples:
+                    config = MemoryCheckpointerConfig()
+                    checkpointer = config.create_checkpointer()
+                    # Use with a synchronous graph
+                    graph = Graph(checkpointer=checkpointer)
         """
         try:
             # Import our secure serializer
@@ -145,13 +141,11 @@ class MemoryCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
         Returns:
             Any: A LangGraph MemorySaver instance ready for async use
 
-        Example:
-            ```python
-            config = MemoryCheckpointerConfig(mode=CheckpointerMode.ASYNC)
-            async_checkpointer = await config.create_async_checkpointer()
-            # Use with an async graph
-            graph = AsyncGraph(checkpointer=async_checkpointer)
-            ```
+        Examples:
+                    config = MemoryCheckpointerConfig(mode=CheckpointerMode.ASYNC)
+                    async_checkpointer = await config.create_async_checkpointer()
+                    # Use with an async graph
+                    graph = AsyncGraph(checkpointer=async_checkpointer)
         """
         # Force async mode for consistency
         self.mode = CheckpointerMode.ASYNC
@@ -173,13 +167,11 @@ class MemoryCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
         Returns:
             Any: A LangGraph MemorySaver instance ready for async use
 
-        Example:
-            ```python
-            config = MemoryCheckpointerConfig(mode=CheckpointerMode.ASYNC)
-            # Simple usage without context management
-            checkpointer = await config.initialize_async_checkpointer()
-            # Use the checkpointer...
-            ```
+        Examples:
+                    config = MemoryCheckpointerConfig(mode=CheckpointerMode.ASYNC)
+                    # Simple usage without context management
+                    checkpointer = await config.initialize_async_checkpointer()
+                    # Use the checkpointer...
         """
         # Simply create and return - no resource management needed
         return await self.create_async_checkpointer()

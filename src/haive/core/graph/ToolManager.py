@@ -203,6 +203,11 @@ class ToolManager:
         # Create wrapper function with state injection
         @functools.wraps(func)
         def wrapped_func(*args, **kwargs) -> Any:
+            """Wrapped Func.
+
+            Returns:
+                [TODO: Add return description]
+            """
             return func(*args, **kwargs)
 
         # Annotate the state parameter
@@ -259,6 +264,11 @@ class ToolManager:
         # Create wrapper function with store injection
         @functools.wraps(func)
         def wrapped_func(*args, **kwargs) -> Any:
+            """Wrapped Func.
+
+            Returns:
+                [TODO: Add return description]
+            """
             return func(*args, **kwargs)
 
         # Annotate the store parameter
@@ -326,6 +336,11 @@ class ToolManager:
         # Create wrapper function with injections
         @functools.wraps(func)
         def wrapped_func(*args, **kwargs) -> Any:
+            """Wrapped Func.
+
+            Returns:
+                [TODO: Add return description]
+            """
             return func(*args, **kwargs)
 
         # Annotate the parameters
@@ -876,6 +891,14 @@ def state_tool(state_field: str | None = None, **tool_kwargs):
     """
 
     def decorator(func: T) -> BaseTool:
+        """Decorator.
+
+        Args:
+            func: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         return tool_manager.create_state_tool(func, state_field, **tool_kwargs)
 
     return decorator
@@ -890,6 +913,14 @@ def store_tool(**tool_kwargs) -> Any:
     """
 
     def decorator(func: T) -> BaseTool:
+        """Decorator.
+
+        Args:
+            func: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         return tool_manager.create_store_tool(func, **tool_kwargs)
 
     return decorator
@@ -905,6 +936,14 @@ def hybrid_tool(state_field: str | None = None, **tool_kwargs):
     """
 
     def decorator(func: T) -> BaseTool:
+        """Decorator.
+
+        Args:
+            func: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         return tool_manager.create_hybrid_tool(func, state_field, **tool_kwargs)
 
     return decorator

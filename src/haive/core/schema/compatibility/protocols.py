@@ -1,4 +1,4 @@
-"""from typing import Any
+"""from typing import Any.
 Protocol definitions for extending the schema compatibility system.
 """
 
@@ -223,6 +223,11 @@ class PluginManager:
     """Manages plugins for the compatibility system."""
 
     def __init__(self) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         self._plugins: dict[str, list[Any]] = {
             "converters": [],
             "validators": [],
@@ -298,6 +303,11 @@ def compatibility_plugin(priority: int = 0):
     """Decorator to register a compatibility plugin."""
 
     def decorator(cls) -> Any:
+        """Decorator.
+
+        Returns:
+            [TODO: Add return description]
+        """
         instance = cls()
         if not hasattr(instance, "priority"):
             instance.priority = priority

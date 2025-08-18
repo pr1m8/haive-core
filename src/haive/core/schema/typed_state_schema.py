@@ -1,4 +1,4 @@
-"""from typing import Any
+"""from typing import Any.
 Typed State Schema with Generic Engine Support.
 
 This module provides enhanced state schema classes that use generics for proper
@@ -226,18 +226,16 @@ class HierarchicalStateSchema(BaseModel):
     This schema provides a hierarchical structure that prevents field
     conflicts and enables proper agent isolation.
 
-    Example:
-        ```python
-        class MultiAgentState(HierarchicalStateSchema):
-            # Shared fields accessible by all agents
-            shared = SharedState()
+    Examples:
+                class MultiAgentState(HierarchicalStateSchema):
+                    # Shared fields accessible by all agents
+                    shared = SharedState()
 
-            # Per-agent isolated state
-            agents = Dict[str, AgentState]
+                    # Per-agent isolated state
+                    agents = Dict[str, AgentState]
 
-            # Routing and control
-            routing = RoutingState()
-        ```
+                    # Routing and control
+                    routing = RoutingState()
     """
 
     class SharedState(BaseModel):
@@ -322,14 +320,12 @@ def create_typed_state_schema(
     Returns:
         New schema class with engine typing
 
-    Example:
-        ```python
-        # Take existing schema and add typing
-        TypedConversationState = create_typed_state_schema(
-            ConversationState,
-            LLMEngine
-        )
-        ```
+    Examples:
+                # Take existing schema and add typing
+                TypedConversationState = create_typed_state_schema(
+                    ConversationState,
+                    LLMEngine
+                )
     """
     if engine_type is None:
         return base_schema

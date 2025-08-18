@@ -197,6 +197,11 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
         elif self.routing_strategy == "priority":
             # Sort by priority (interruptible first, then state-aware, etc.)
             def priority_key(tool):
+                """Priority Key.
+
+                Args:
+                    tool: [TODO: Add description]
+                """
                 props = self._tool_properties.get(self._analyzer._get_tool_name(tool))
                 if not props:
                     return 999
@@ -266,6 +271,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
 
         # Create wrapper that validates output
         def structured_wrapper(*args, **kwargs):
+            """Structured Wrapper."""
             result = func(*args, **kwargs)
 
             # Validate output against model
@@ -411,6 +417,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
 
         # Add interrupt method as attribute (not field)
         def interrupt():
+            """Interrupt."""
             raise InterruptedError(interrupt_message)
 
         # Use object.__setattr__ to add attributes that aren't Pydantic fields
@@ -459,6 +466,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
             object.__setattr__(enhanced, "is_interruptible", True)
 
             def interrupt():
+                """Interrupt."""
                 raise InterruptedError(interrupt_message)
 
             object.__setattr__(enhanced, "interrupt", interrupt)
@@ -827,6 +835,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
 
         # Ensure function has docstring
         def model_tool(*args, **kwargs):
+            """Model Tool."""
             return call_method(*args, **kwargs)
 
         model_tool.__name__ = name

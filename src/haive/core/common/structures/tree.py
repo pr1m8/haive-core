@@ -9,32 +9,30 @@ in Union types) and creates child tree nodes, making it perfect for visualizing
 complex data structures like plans with mixed content types.
 
 Usage:
-    ```python
-    from pydantic import BaseModel, Field
-    from typing import List, Union
-    from haive.core.common.structures.tree import AutoTree
+            from pydantic import BaseModel, Field
+            from typing import List, Union
+            from haive.core.common.structures.tree import AutoTree
 
-    class Step(BaseModel):
-        name: str
-        duration_hours: float = 1.0
+            class Step(BaseModel):
+                name: str
+                duration_hours: float = 1.0
 
-    class Plan(BaseModel):
-        name: str
-        # Can contain either Steps OR other Plans
-        items: List[Union[Step, 'Plan']] = Field(default_factory=list)
+            class Plan(BaseModel):
+                name: str
+                # Can contain either Steps OR other Plans
+                items: List[Union[Step, 'Plan']] = Field(default_factory=list)
 
-    # Create nested structure
-    main_plan = Plan(name="Project Alpha")
-    main_plan.items.append(Step(name="Setup", duration_hours=2))
+            # Create nested structure
+            main_plan = Plan(name="Project Alpha")
+            main_plan.items.append(Step(name="Setup", duration_hours=2))
 
-    sub_plan = Plan(name="Development Phase")
-    sub_plan.items.append(Step(name="Code", duration_hours=40))
-    main_plan.items.append(sub_plan)
+            sub_plan = Plan(name="Development Phase")
+            sub_plan.items.append(Step(name="Code", duration_hours=40))
+            main_plan.items.append(sub_plan)
 
-    # Visualize as tree
-    tree = AutoTree(main_plan)
-    print(tree.visualize())
-    ```
+            # Visualize as tree
+            tree = AutoTree(main_plan)
+            print(tree.visualize())
 """
 
 from typing import (
@@ -75,7 +73,7 @@ class AutoTree(BaseModel, Generic[T]):
         parent: Optional parent AutoTree node.
         field_source: Optional name of the field this content came from.
 
-    Example:
+    Examples:
         >>> class Step(BaseModel):
         ...     name: str
         >>> class Plan(BaseModel):
@@ -100,6 +98,13 @@ class AutoTree(BaseModel, Generic[T]):
         field_source: str | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            content: [TODO: Add description]
+            parent: [TODO: Add description]
+            field_source: [TODO: Add description]
+        """
         super().__init__(content=content, **kwargs)
         self._parent = parent
         self._field_source = field_source

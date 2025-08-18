@@ -8,24 +8,22 @@ The module is designed to create a consistent logging experience across differen
 components while allowing for flexibility in output formats and verbosity levels.
 
 Typical usage example:
-    ```python
-    from haive.core.common.logging_config import get_game_logger, LogLevel
+            from haive.core.common.logging_config import get_game_logger, LogLevel
 
-    # Create a logger with default settings
-    logger = get_game_logger("my_game")
+            # Create a logger with default settings
+            logger = get_game_logger("my_game")
 
-    # Log messages at different levels
-    logger.info("Game starting")
-    logger.debug("Detailed state information")
+            # Log messages at different levels
+            logger.info("Game starting")
+            logger.debug("Detailed state information")
 
-    # Log game-specific events
-    logger.turn_start("Player 1", turn_number=1)
-    logger.dice_roll("Player 1", die1=3, die2=4, total=7)
-    logger.player_move("Player 1", from_pos=0, to_pos=7)
+            # Log game-specific events
+            logger.turn_start("Player 1", turn_number=1)
+            logger.dice_roll("Player 1", die1=3, die2=4, total=7)
+            logger.player_move("Player 1", from_pos=0, to_pos=7)
 
-    # Change log level dynamically
-    logger.setLevel(logging.DEBUG)
-    ```
+            # Change log level dynamically
+            logger.setLevel(logging.DEBUG)
 """
 
 import logging

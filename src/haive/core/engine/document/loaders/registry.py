@@ -246,6 +246,14 @@ def register_loader(
     """
 
     def decorator(loader_class: type[BaseLoader]) -> type[BaseLoader]:
+        """Decorator.
+
+        Args:
+            loader_class: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         registry = DocumentLoaderRegistry.get_instance()
 
         # Generate a name if not provided

@@ -165,6 +165,11 @@ class WebBaseSource(RemoteSource):
     user_agent: str | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         # Add web-specific configuration
@@ -212,6 +217,11 @@ class AsyncHTMLSource(RemoteSource):
     default_parser: str = "html.parser"
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -267,6 +277,11 @@ class PlaywrightWebSource(RemoteSource):
     evaluate_script: str | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -312,6 +327,11 @@ class SeleniumWebSource(RemoteSource):
     page_load_strategy: str = "normal"
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -350,6 +370,11 @@ class ChromiumAsyncSource(RemoteSource):
     viewport: dict[str, int] = {"width": 1280, "height": 720}
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -411,6 +436,11 @@ class RecursiveWebSource(RemoteSource):
     metadata_extractor: bool = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         # Build metadata extractor if enabled
@@ -473,6 +503,11 @@ class SitemapCrawlerSource(RemoteSource):
     parsing_function: str | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         # Auto-detect sitemap if not provided
@@ -532,6 +567,11 @@ class ReadTheDocsSource(RemoteSource):
     features: list[str] = ["toc"]
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         # Build RTD URL if not provided
@@ -573,6 +613,11 @@ class DocusaurusSource(RemoteSource):
     filter_directories: list[str] = []
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {"url": self.base_url, "filter_directories": self.filter_directories}
@@ -614,6 +659,11 @@ class FireCrawlSource(RemoteSource):
     params: dict[str, Any] = {}
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {

@@ -83,6 +83,11 @@ class SourceRegistry:
     """Registry for document sources and their loaders."""
 
     def __init__(self) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         self._sources: dict[str, SourceRegistration] = {}
 
         # Indexes for fast lookup
@@ -349,7 +354,7 @@ def register_source(
 ) -> Callable[[type[BaseSource]], type[BaseSource]]:
     """Decorator to register a source class.
 
-    Example:
+    Examples:
         @register_source(
             name="pdf",
             file_extensions=[".pdf"],
@@ -377,6 +382,14 @@ def register_source(
     """
 
     def decorator(source_class: type[BaseSource]) -> type[BaseSource]:
+        """Decorator.
+
+        Args:
+            source_class: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         # Use class name if no name provided
         source_name = name or source_class.__name__.lower().replace("source", "")
 

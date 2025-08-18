@@ -9,7 +9,7 @@ The AgentSchemaComposer is the cornerstone of multi-agent state management in Ha
 enabling seamless composition of schemas with proper field sharing, reducers, and
 engine I/O mappings while preserving critical message fields like tool_call_id.
 
-Example:
+Examples:
     Basic usage for composing schemas from agents::
 
         from haive.core.schema.agent_schema_composer import AgentSchemaComposer
@@ -78,7 +78,7 @@ def add_messages(
     Returns:
         Combined list of messages with BaseMessage objects preserved intact
 
-    Example:
+    Examples:
         >>> from langchain_core.messages import ToolMessage
         >>> tool_msg = ToolMessage(content="Result", tool_call_id="123")
         >>> messages = add_messages([], [tool_msg])
@@ -122,7 +122,7 @@ class AgentSchemaComposer(SchemaComposer):
     - Adds message fields with custom reducers to preserve tool_call_id
     - Includes meta state for agent coordination when needed
 
-    Example:
+    Examples:
         >>> # Compose from multiple agents
         >>> schema = AgentSchemaComposer.from_agents(
         ...     agents=[research_agent, writer_agent],
@@ -160,7 +160,7 @@ class AgentSchemaComposer(SchemaComposer):
             A StateSchema class that inherits from MultiAgentState and includes
             all composed agent fields
 
-        Example:
+        Examples:
             >>> # Self-discovery agents example
             >>> schema = AgentSchemaComposer.from_agents_with_multiagent_base(
             ...     agents=[self_discovery_agent],
@@ -253,7 +253,7 @@ class AgentSchemaComposer(SchemaComposer):
         Raises:
             ValueError: If no agents are provided or if agents have invalid schemas.
 
-        Example:
+        Examples:
             >>> # Smart separation with auto-detected build mode
             >>> schema = AgentSchemaComposer.from_agents(
             ...     agents=[agent1, agent2],
@@ -369,7 +369,7 @@ class AgentSchemaComposer(SchemaComposer):
                 - engine_io_mappings_dict: Engine routing information
                   Format: {engine_name: {"inputs": [...], "outputs": [...]}}
 
-        Example:
+        Examples:
             >>> fields, mappings = AgentSchemaComposer._collect_all_fields([agent1, agent2])
             >>> # fields["messages"] might contain multiple entries if both agents use it
             >>> # mappings["planner_engine"] contains input/output field names
@@ -504,7 +504,7 @@ class AgentSchemaComposer(SchemaComposer):
             - Fields used by all agents → shared
             - Single-agent fields → namespaced if multiple agents exist
 
-        Example:
+        Examples:
             If agent1 and agent2 both have a "context" field, it becomes shared.
             If only agent1 has "tool_results", it becomes "agent1_tool_results"
             in a multi-agent setup.
@@ -596,6 +596,14 @@ class AgentSchemaComposer(SchemaComposer):
         # Check if field exists using has_field method or by checking the
         # fields dict
         def field_exists(name: str) -> bool:
+            """Field Exists.
+
+            Args:
+                name: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             if hasattr(composer, "has_field"):
                 return composer.has_field(name)
             if hasattr(composer, "fields"):

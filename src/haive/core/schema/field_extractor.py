@@ -20,29 +20,27 @@ Key capabilities include:
 - Mapping engine I/O relationships for state management
 - Handling structured output models
 
-Example:
-    ```python
-    from haive.core.schema import FieldExtractor
+Examples:
+            from haive.core.schema import FieldExtractor
 
-    # Extract fields from a list of components
-    field_defs, engine_io_mappings, structured_model_fields, structured_models = (
-        FieldExtractor.extract_from_components([
-            retriever_engine,
-            llm_engine,
-            memory_component
-        ])
-    )
+            # Extract fields from a list of components
+            field_defs, engine_io_mappings, structured_model_fields, structured_models = (
+                FieldExtractor.extract_from_components([
+                    retriever_engine,
+                    llm_engine,
+                    memory_component
+                ])
+            )
 
-    # Fields are returned as FieldDefinition objects
-    for name, field_def in field_defs.items():
-        print(f"Field: {name}, Type: {field_def.field_type}")
+            # Fields are returned as FieldDefinition objects
+            for name, field_def in field_defs.items():
+                print(f"Field: {name}, Type: {field_def.field_type}")
 
-    # Engine I/O mappings show which fields are used by which engines
-    for engine, mapping in engine_io_mappings.items():
-        print(f"Engine: {engine}")
-        print(f"  Inputs: {mapping['inputs']}")
-        print(f"  Outputs: {mapping['outputs']}")
-    ```
+            # Engine I/O mappings show which fields are used by which engines
+            for engine, mapping in engine_io_mappings.items():
+                print(f"Engine: {engine}")
+                print(f"  Inputs: {mapping['inputs']}")
+                print(f"  Outputs: {mapping['outputs']}")
 """
 
 import logging
@@ -566,32 +564,30 @@ class FieldExtractor:
                 - Dict[str, Type]: Structured model types, mapping model names to
                   their actual class types
 
-        Example:
-            ```python
-            # Create a list of components
-            components = [
-                retriever_engine,  # Engine with get_input/output_fields
-                ConversationMemory(),  # Pydantic model instance
-                ResponseGeneratorConfig,  # Pydantic model class
-                {  # Dictionary-based field definition
-                    "custom_field": (str, "", {"description": "Custom field"}),
-                    "shared_fields": ["messages"]
-                }
-            ]
+        Examples:
+                    # Create a list of components
+                    components = [
+                        retriever_engine,  # Engine with get_input/output_fields
+                        ConversationMemory(),  # Pydantic model instance
+                        ResponseGeneratorConfig,  # Pydantic model class
+                        {  # Dictionary-based field definition
+                            "custom_field": (str, "", {"description": "Custom field"}),
+                            "shared_fields": ["messages"]
+                        }
+                    ]
 
-            # Extract field definitions
-            field_defs, io_mappings, model_fields, models = (
-                FieldExtractor.extract_from_components(components)
-            )
+                    # Extract field definitions
+                    field_defs, io_mappings, model_fields, models = (
+                        FieldExtractor.extract_from_components(components)
+                    )
 
-            # Field definitions can be used with SchemaComposer
-            composer = SchemaComposer(name="AgentState")
-            for name, field_def in field_defs.items():
-                composer.add_field_definition(field_def)
+                    # Field definitions can be used with SchemaComposer
+                    composer = SchemaComposer(name="AgentState")
+                    for name, field_def in field_defs.items():
+                        composer.add_field_definition(field_def)
 
-            # Build the schema
-            AgentState = composer.build()
-            ```
+                    # Build the schema
+                    AgentState = composer.build()
         """
         field_definitions = {}
         engine_io_mappings = {}
@@ -783,6 +779,15 @@ class FieldExtractor:
             except ImportError:
                 # Fallback to a simple list concatenation
                 def concat_lists(a, b) -> Any:
+                    """Concat Lists.
+
+Args:
+    a: [TODO: Add description]
+    b: [TODO: Add description]
+
+Returns:
+    [TODO: Add return description]
+"""
                     return (a or []) + (b or [])
 
                 reducer = concat_lists

@@ -51,6 +51,11 @@ class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
         arbitrary_types_allowed = True
 
     def __init__(self, **data) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         super().__init__(**data)
         self._regenerate_model()
         self._debug_print_initial()
@@ -99,6 +104,14 @@ class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
         valid_options = self._option_names.copy()
 
         def validate_choice_field(cls, v: str) -> str:
+            """Validate Choice Field.
+
+            Args:
+                v: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             if v not in valid_options:
                 raise ValueError(f"Choice '{v}' must be one of: {valid_options}")
             return v

@@ -31,6 +31,11 @@ def pydantic_aware_json_dumps(obj):
 
     class PydanticEncoder(json.JSONEncoder):
         def default(self, o):
+            """Default.
+
+            Args:
+                o: [TODO: Add description]
+            """
             if isinstance(o, BaseModel):
                 return o.model_dump()
             if isinstance(o, datetime):

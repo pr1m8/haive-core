@@ -31,7 +31,7 @@ class NodeManager(BaseGraphComponent):
     Attributes:
         component_name: Always "node_manager"
 
-    Example:
+    Examples:
         Using the NodeManager::
 
             node_manager = NodeManager(graph)
@@ -161,7 +161,7 @@ class NodeManager(BaseGraphComponent):
             ValueError: If node name already exists
             ValidationError: If config validation fails
 
-        Example:
+        Examples:
             Add node with engine config::
 
                 from haive.core.graph.node.engine_node import EngineNodeConfig
@@ -215,7 +215,7 @@ class NodeManager(BaseGraphComponent):
         Raises:
             ValueError: If node doesn't exist
 
-        Example:
+        Examples:
             Remove node and its edges::
 
                 node_manager.remove_node("old_node")

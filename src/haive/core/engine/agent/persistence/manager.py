@@ -41,7 +41,7 @@ except ImportError:
 
 
 class PersistenceManager:
-    """Manages state persistence for agents, abstracting the complexity of different
+    """Manages state persistence for agents, abstracting the complexity of different.
     checkpointer implementations and integrating with Supabase authentication.
 
     This manager handles:
@@ -493,7 +493,7 @@ class PersistenceManager:
     def prepare_for_agent_run(
         self, thread_id: str | None = None, user_info=None, **kwargs
     ):
-        """Comprehensive preparation for an agent run, handling thread registration,
+        """Comprehensive preparation for an agent run, handling thread registration,.
         configuration creation, and database setup.
 
         Args:

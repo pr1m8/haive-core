@@ -90,6 +90,14 @@ class EmbeddingAdapter:
                 embeddings = init_embeddings(provider)
 
                 def embed_texts(texts: list[str]) -> list[list[float]]:
+                    """Embed Texts.
+
+                    Args:
+                        texts: [TODO: Add description]
+
+                    Returns:
+                        [TODO: Add return description]
+                    """
                     return embeddings.embed_documents(texts)
 
                 return embed_texts

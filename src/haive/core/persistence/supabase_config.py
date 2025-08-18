@@ -150,6 +150,11 @@ class SupabaseSaver:
         try:
 
             def execute_sql(sql: str):
+                """Execute Sql.
+
+                Args:
+                    sql: [TODO: Add description]
+                """
                 clean_sql = sql.strip().rstrip(";").strip()
                 if DATAFLOW_AVAILABLE:
                     clean_sql = sanitize_sql(sql)
@@ -585,6 +590,15 @@ class SupabaseSaver:
                     def __init__(
                         self, config, checkpoint, metadata, parent_config, writes=None
                     ):
+                        """Init  .
+
+                        Args:
+                            config: [TODO: Add description]
+                            checkpoint: [TODO: Add description]
+                            metadata: [TODO: Add description]
+                            parent_config: [TODO: Add description]
+                            writes: [TODO: Add description]
+                        """
                         self.config = config
                         self.checkpoint = checkpoint
                         self.metadata = metadata

@@ -50,7 +50,7 @@ class TreeNode(BaseModel, Generic[ContentT, ResultT], ABC):
 class Leaf(TreeNode[ContentT, ResultT], Generic[ContentT, ResultT]):
     """Leaf node - has content but no children.
 
-    Example:
+    Examples:
         .. code-block:: python
 
             # With explicit types
@@ -63,6 +63,11 @@ class Leaf(TreeNode[ContentT, ResultT], Generic[ContentT, ResultT]):
     """
 
     def is_leaf(self) -> bool:
+        """Is Leaf.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return True
 
 
@@ -72,7 +77,7 @@ class Tree(TreeNode[ContentT, ResultT], Generic[ContentT, ChildT, ResultT]):
     The ChildT parameter allows for heterogeneous trees where children
     can be of different types (but all extending the bound).
 
-    Example:
+    Examples:
         .. code-block:: python
 
             # Homogeneous tree (all children same type)
@@ -92,6 +97,11 @@ class Tree(TreeNode[ContentT, ResultT], Generic[ContentT, ChildT, ResultT]):
     _child_counter: int = PrivateAttr(default=0)
 
     def is_leaf(self) -> bool:
+        """Is Leaf.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return False
 
     @overload

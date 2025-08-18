@@ -29,6 +29,14 @@ class NodeConfig(BaseModel):
     @field_validator("command_goto")
     @classmethod
     def validate_command_goto(cls, v) -> Any:
+        """Validate Command Goto.
+
+        Args:
+            v: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         if v == "END":
             return END
         return v
@@ -44,6 +52,14 @@ class EdgeConfig(BaseModel):
     @field_validator("to_node")
     @classmethod
     def validate_to_node(cls, v) -> Any:
+        """Validate To Node.
+
+        Args:
+            v: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         if v == "END":
             return END
         return v
@@ -60,6 +76,14 @@ class BranchConfig(BaseModel):
     @field_validator("destinations")
     @classmethod
     def validate_destinations(cls, destinations) -> Any:
+        """Validate Destinations.
+
+        Args:
+            destinations: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         validated = {}
         for key, value in destinations.items():
             if value == "END":

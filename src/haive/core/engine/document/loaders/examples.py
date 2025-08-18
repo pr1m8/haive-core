@@ -81,6 +81,7 @@ def example_convenience_functions() -> None:
     # Async loading
 
     async def async_example():
+        """Async Example."""
         with contextlib.suppress(Exception):
             await aload_document("https://example.com")
 
@@ -190,6 +191,12 @@ def example_bulk_loading() -> None:
     # Progress tracking
 
     def progress_callback(completed: int, total: int):
+        """Progress Callback.
+
+        Args:
+            completed: [TODO: Add description]
+            total: [TODO: Add description]
+        """
         (completed / total) * 100
 
     try:
@@ -457,6 +464,15 @@ def example_legal_document_analysis() -> None:
     try:
 
         def legal_progress(completed, total) -> None:
+            """Legal Progress.
+
+            Args:
+                completed: [TODO: Add description]
+                total: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             pass
 
         result = legal_loader.load_bulk(legal_sources, progress_callback=legal_progress)

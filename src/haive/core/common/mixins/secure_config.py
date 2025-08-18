@@ -6,29 +6,27 @@ automatic resolution of API keys from environment variables based on
 the provider type, with proper secure storage using Pydantic's SecretStr.
 
 Usage:
-    ```python
-    from pydantic import BaseModel, Field
-    from typing import Optional
-    from haive.core.common.mixins import SecureConfigMixin
+            from pydantic import BaseModel, Field
+            from typing import Optional
+            from haive.core.common.mixins import SecureConfigMixin
 
-    class APIConfig(SecureConfigMixin, BaseModel):
-        provider: str = Field(default="openai")
-        api_key: Optional[SecretStr] = Field(default=None)
+            class APIConfig(SecureConfigMixin, BaseModel):
+                provider: str = Field(default="openai")
+                api_key: Optional[SecretStr] = Field(default=None)
 
-        def make_api_call(self):
-            # Securely retrieve the API key
-            key = self.get_api_key()
-            if not key:
-                raise ValueError("No API key available")
-            # Use key for API call
-            # ...
+                def make_api_call(self):
+                    # Securely retrieve the API key
+                    key = self.get_api_key()
+                    if not key:
+                        raise ValueError("No API key available")
+                    # Use key for API call
+                    # ...
 
-    # Will try to use OPENAI_API_KEY from environment
-    config = APIConfig(provider="openai")
+            # Will try to use OPENAI_API_KEY from environment
+            config = APIConfig(provider="openai")
 
-    # Will use the explicitly provided key
-    config = APIConfig(provider="anthropic", api_key="sk-ant-...")
-    ```
+            # Will use the explicitly provided key
+            config = APIConfig(provider="anthropic", api_key="sk-ant-...")
 """
 
 import logging

@@ -76,6 +76,11 @@ def register_agent(config_class: type[AgentConfig]):
     """Register an agent class with its configuration class."""
 
     def decorator(agent_class: type[Agent]):
+        """Decorator.
+
+        Args:
+            agent_class: [TODO: Add description]
+        """
         AGENT_REGISTRY[config_class] = agent_class
         # Set reference to config class on agent class
         agent_class.config_class = config_class
@@ -767,6 +772,14 @@ class Agent(Generic[TConfig], ABC):
 
         # Helper to extract field info
         def extract_field_info(schema) -> Any:
+            """Extract Field Info.
+
+            Args:
+                schema: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             fields = {}
             if hasattr(schema, "model_fields"):
                 # Pydantic v2
@@ -2786,6 +2799,7 @@ class Agent(Generic[TConfig], ABC):
 
                     # Convert sync generator to async generator
                     async def async_wrapper():
+                        """Async Wrapper."""
                         for chunk in sync_gen:
                             yield chunk
 
@@ -2882,6 +2896,7 @@ class Agent(Generic[TConfig], ABC):
 
                     # Convert sync generator to async generator
                     async def async_wrapper():
+                        """Async Wrapper."""
                         for chunk in sync_gen:
                             yield chunk
 

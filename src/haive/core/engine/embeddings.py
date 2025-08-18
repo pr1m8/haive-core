@@ -46,6 +46,14 @@ class EmbeddingsEngineConfig(
     @field_validator("engine_type")
     @classmethod
     def validate_engine_type(cls, v) -> Any:
+        """Validate Engine Type.
+
+        Args:
+            v: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         if v != EngineType.EMBEDDINGS:
             raise TypeError("engine_type must be EMBEDDINGS")
         return v

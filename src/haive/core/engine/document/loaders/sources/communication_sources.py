@@ -158,6 +158,11 @@ class MatrixSource(RemoteSource):
     end_date: datetime | None = Field(None, description="End date")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -248,6 +253,11 @@ class RocketChatSource(RemoteSource):
     include_reactions: bool = Field(True, description="Include reactions")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -324,6 +334,11 @@ class MattermostSource(RemoteSource):
     include_deleted: bool = Field(False, description="Include deleted messages")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -399,6 +414,11 @@ class WeChatSource(RemoteSource):
     days_back: int = Field(30, description="Number of days to go back")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -457,6 +477,11 @@ class LineSource(RemoteSource):
     include_audio: bool = Field(False, description="Include audio messages")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -534,6 +559,11 @@ class ZoomSource(RemoteSource):
     meeting_type: str = Field("all", description="Meeting type filter")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -617,6 +647,11 @@ class TeamsSource(RemoteSource):
     end_date: datetime | None = Field(None, description="End date")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -700,6 +735,11 @@ class FigmaSource(RemoteSource):
     image_scale: float = Field(1.0, description="Image scale factor")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -774,6 +814,11 @@ class MiroSource(RemoteSource):
     export_format: ExportFormat = Field(ExportFormat.JSON, description="Export format")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -849,6 +894,11 @@ class OutlineSource(RemoteSource):
     )
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -920,6 +970,11 @@ class BookStackSource(RemoteSource):
     export_format: ExportFormat = Field(ExportFormat.HTML, description="Export format")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -999,6 +1054,11 @@ class IntercomSource(RemoteSource):
     date_range: int | None = Field(30, description="Days to look back")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(

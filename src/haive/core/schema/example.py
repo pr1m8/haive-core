@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""from typing import Any
+"""from typing import Any.
 Haive Schema System Examples.
 
 This file demonstrates comprehensive usage of the Haive Schema System,
@@ -298,6 +298,14 @@ def example_validation_and_custom_methods() -> Any:
     @field_validator("email")
     @classmethod
     def validate_email(cls, v) -> Any:
+        """Validate Email.
+
+        Args:
+            v: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         if v and "@" not in v:
             raise ValueError("Invalid email format")
         return v.lower()  # Normalize
@@ -305,6 +313,14 @@ def example_validation_and_custom_methods() -> Any:
     @field_validator("age")
     @classmethod
     def validate_age(cls, v) -> Any:
+        """Validate Age.
+
+        Args:
+            v: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         if v < 0:
             raise ValueError("Age cannot be negative")
         if v > 150:
@@ -314,11 +330,27 @@ def example_validation_and_custom_methods() -> Any:
     @field_validator("score")
     @classmethod
     def validate_score(cls, v) -> Any:
+        """Validate Score.
+
+        Args:
+            v: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         return max(0.0, min(1.0, v))  # Clamp to [0, 1]
 
     @field_validator("tags")
     @classmethod
     def validate_tags(cls, v) -> Any:
+        """Validate Tags.
+
+        Args:
+            v: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         # Remove duplicates and empty strings
         return list({tag.strip() for tag in v if tag.strip()})
 

@@ -24,36 +24,34 @@ Core functions include:
 These utilities are primarily used by FieldDefinition, SchemaComposer, and
 StateSchemaManager to implement higher-level functionality.
 
-Example:
-    ```python
-    from haive.core.schema.field_utils import (
-        create_field, create_annotated_field, get_common_reducers
-    )
-    from typing import List
-    import operator
+Examples:
+            from haive.core.schema.field_utils import (
+                create_field, create_annotated_field, get_common_reducers
+            )
+            from typing import List
+            import operator
 
-    # Create a standard field
-    field_type, field_info = create_field(
-        field_type=List[str],
-        default_factory=list,
-        description="List of items",
-        shared=True,
-        reducer=operator.add
-    )
+            # Create a standard field
+            field_type, field_info = create_field(
+                field_type=List[str],
+                default_factory=list,
+                description="List of items",
+                shared=True,
+                reducer=operator.add
+            )
 
-    # Create an annotated field with embedded metadata
-    field_type, field_info = create_annotated_field(
-        field_type=List[str],
-        default_factory=list,
-        description="List of items",
-        shared=True,
-        reducer=operator.add
-    )
+            # Create an annotated field with embedded metadata
+            field_type, field_info = create_annotated_field(
+                field_type=List[str],
+                default_factory=list,
+                description="List of items",
+                shared=True,
+                reducer=operator.add
+            )
 
-    # Get common reducer functions
-    reducers = get_common_reducers()
-    add_messages = reducers["add_messages"]  # LangGraph's message list combiner
-    ```
+            # Get common reducer functions
+            reducers = get_common_reducers()
+            add_messages = reducers["add_messages"]  # LangGraph's message list combiner
 """
 
 import logging
@@ -192,6 +190,11 @@ def field_name(name: str):
     """
 
     def decorator(cls) -> Any:
+        """Decorator.
+
+        Returns:
+            [TODO: Add return description]
+        """
         cls.__field_name__ = name
         return cls
 
@@ -211,6 +214,11 @@ def field_description(description: str):
     """
 
     def decorator(cls) -> Any:
+        """Decorator.
+
+        Returns:
+            [TODO: Add return description]
+        """
         cls.__field_description__ = description
         return cls
 
@@ -230,6 +238,11 @@ def field_config(**config) -> Any:
     """
 
     def decorator(cls) -> Any:
+        """Decorator.
+
+        Returns:
+            [TODO: Add return description]
+        """
         cls.__field_config__ = config
         return cls
 
@@ -614,30 +627,28 @@ def create_annotated_field(
             - field_type: The annotated type with embedded metadata
             - field_info: The Pydantic Field object with standard properties
 
-    Example:
-        ```python
-        from typing import List
-        from pydantic import create_model, Field
-        import operator
+    Examples:
+                from typing import List
+                from pydantic import create_model, Field
+                import operator
 
-        # Create an annotated field with shared status and reducer
-        field_type, field_info = create_annotated_field(
-            field_type=List[str],
-            default_factory=list,
-            description="List of items",
-            shared=True,
-            reducer=operator.add
-        )
+                # Create an annotated field with shared status and reducer
+                field_type, field_info = create_annotated_field(
+                    field_type=List[str],
+                    default_factory=list,
+                    description="List of items",
+                    shared=True,
+                    reducer=operator.add
+                )
 
-        # Create a model using the field
-        MyModel = create_model(
-            "MyModel",
-            items=(field_type, field_info)
-        )
+                # Create a model using the field
+                MyModel = create_model(
+                    "MyModel",
+                    items=(field_type, field_info)
+                )
 
-        # The model will have "items" as a shared field with an add reducer
-        # The metadata stays attached to the field type
-        ```
+                # The model will have "items" as a shared field with an add reducer
+                # The metadata stays attached to the field type
     """
     from typing import Optional as OptionalType
 
@@ -876,11 +887,29 @@ def get_common_reducers() -> dict[str, Callable]:
 
     # Add common list operations
     def add_lists(a, b) -> Any:
+        """Add Lists.
+
+        Args:
+            a: [TODO: Add description]
+            b: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         return (a or []) + (b or [])
 
     reducers["add_lists"] = add_lists
 
     def concat_lists(a, b) -> Any:
+        """Concat Lists.
+
+        Args:
+            a: [TODO: Add description]
+            b: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         return (a or []) + (b or [])
 
     reducers["concat_lists"] = concat_lists
@@ -893,18 +922,45 @@ def get_common_reducers() -> dict[str, Callable]:
     except ImportError:
         # Fallback implementation
         def add_messages(a, b) -> Any:
+            """Add Messages.
+
+            Args:
+                a: [TODO: Add description]
+                b: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             return (a or []) + (b or [])
 
         reducers["add_messages"] = add_messages
 
     # Add string operations
     def concat_strings(a, b) -> Any:
+        """Concat Strings.
+
+        Args:
+            a: [TODO: Add description]
+            b: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         return (a or "") + (b or "")
 
     reducers["concat_strings"] = concat_strings
 
     # Add numeric operations
     def sum_values(a, b) -> Any:
+        """Sum Values.
+
+        Args:
+            a: [TODO: Add description]
+            b: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         return (a or 0) + (b or 0)
 
     reducers["sum_values"] = sum_values
@@ -949,6 +1005,15 @@ def resolve_reducer(reducer_name: str) -> Callable | None:
     if reducer_name == "<lambda>":
 
         def generic_lambda_reducer(a, b) -> Any:
+            """Generic Lambda Reducer.
+
+            Args:
+                a: [TODO: Add description]
+                b: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             # Simple fallback that concatenates lists or dicts, otherwise takes
             # b
             if isinstance(a, list | tuple) and isinstance(b, list | tuple):

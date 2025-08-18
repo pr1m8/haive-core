@@ -221,7 +221,7 @@ def create_node(
     Returns:
         Node function that can be added to a graph
 
-    Example:
+    Examples:
         Create a node from an engine::
 
             retriever_node = create_node(

@@ -87,6 +87,11 @@ class RecursiveDirectorySource(DirectorySource):
     progress_callback: str | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         # Build file filter
@@ -143,6 +148,11 @@ class FilteredDirectorySource(DirectorySource):
     duplicate_detection: bool = False
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         # Add filtering logic
@@ -194,6 +204,11 @@ class S3BucketSource(CloudStorageSource):
     max_objects: int | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -233,6 +248,11 @@ class GCSBucketSource(CloudStorageSource):
     project_id: str | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -271,6 +291,11 @@ class AzureContainerSource(CloudStorageSource):
     connection_string: str | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -316,6 +341,11 @@ class MergedDataSource(DirectorySource):
     conflict_resolution: str = "first"  # first, last, merge
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -362,6 +392,11 @@ class FileSystemBlobSource(DirectorySource):
     buffer_size: int = 8192
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -406,6 +441,11 @@ class CloudBlobSource(CloudStorageSource):
     parser_config: dict[str, Any] = {}
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {"path": f"{self.scheme}{self.path}", "parser": self.parser_config}
@@ -448,6 +488,11 @@ class StreamingDirectorySource(DirectorySource):
     detect_deletions: bool = False
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {

@@ -22,92 +22,84 @@ detect, configure, and load documents from ANY source type.
 - **Specialized**: Government, healthcare, education, finance, etc.
 
 💡 **Quick Start:**
-    ```python
-    from haive.core.engine.document.loaders import AutoLoader
+            from haive.core.engine.document.loaders import AutoLoader
 
-    # Ultimate auto-loader - works with ANY source
-    loader = AutoLoader()
+            # Ultimate auto-loader - works with ANY source
+            loader = AutoLoader()
 
-    # Load from anywhere
-    docs = loader.load("document.pdf")           # Local file
-    docs = loader.load("https://docs.site.com")  # Website
-    docs = loader.load("s3://bucket/docs/")      # Cloud storage
-    docs = loader.load("postgres://db/table")    # Database
+            # Load from anywhere
+            docs = loader.load("document.pdf")           # Local file
+            docs = loader.load("https://docs.site.com")  # Website
+            docs = loader.load("s3://bucket/docs/")      # Cloud storage
+            docs = loader.load("postgres://db/table")    # Database
 
-    # Load documents from multiple sources (standard langchain method)
-    docs = loader.load_documents([
-        "file1.pdf", "file2.txt", "https://site.com"
-    ])
+            # Load documents from multiple sources (standard langchain method)
+            docs = loader.load_documents([
+                "file1.pdf", "file2.txt", "https://site.com"
+            ])
 
-    # Bulk loading with detailed results
-    sources = ["file1.pdf", "https://site.com", "s3://bucket/"]
-    result = loader.load_bulk(sources)
+            # Bulk loading with detailed results
+            sources = ["file1.pdf", "https://site.com", "s3://bucket/"]
+            result = loader.load_bulk(sources)
 
-    # Load everything from a source
-    docs = loader.load_all("/documents/")        # Entire directory
-    docs = loader.load_all("https://wiki.com")   # Entire website
-    ```
+            # Load everything from a source
+            docs = loader.load_all("/documents/")        # Entire directory
+            docs = loader.load_all("https://wiki.com")   # Entire website
 
 🔧 **Advanced Usage:**
-    ```python
-    from haive.core.engine.document.loaders import (
-        AutoLoader, AutoLoaderConfig, LoaderPreference
-    )
+            from haive.core.engine.document.loaders import (
+                AutoLoader, AutoLoaderConfig, LoaderPreference
+            )
 
-    # Configure for quality vs speed
-    config = AutoLoaderConfig(
-        preference=LoaderPreference.QUALITY,
-        max_concurrency=20,
-        enable_caching=True
-    )
-    loader = AutoLoader(config)
+            # Configure for quality vs speed
+            config = AutoLoaderConfig(
+                preference=LoaderPreference.QUALITY,
+                max_concurrency=20,
+                enable_caching=True
+            )
+            loader = AutoLoader(config)
 
-    # Async loading from single source
-    docs = await loader.aload("https://large-site.com")
+            # Async loading from single source
+            docs = await loader.aload("https://large-site.com")
 
-    # Async loading from multiple sources
-    docs = await loader.aload_documents([
-        "file1.pdf", "https://site1.com", "https://site2.com"
-    ])
+            # Async loading from multiple sources
+            docs = await loader.aload_documents([
+                "file1.pdf", "https://site1.com", "https://site2.com"
+            ])
 
-    # Get detailed loading information
-    result = loader.load_detailed("document.pdf")
-    print(f"Loaded {len(result.documents)} docs in {result.loading_time:.2f}s")
-    ```
+            # Get detailed loading information
+            result = loader.load_detailed("document.pdf")
+            print(f"Loaded {len(result.documents)} docs in {result.loading_time:.2f}s")
 
 📊 **Registry Management:**
-    ```python
-    from haive.core.engine.document.loaders import (
-        auto_register_all, get_registration_status, list_available_sources
-    )
+            from haive.core.engine.document.loaders import (
+                auto_register_all, get_registration_status, list_available_sources
+            )
 
-    # Auto-register all 230+ loaders
-    stats = auto_register_all()
-    print(f"Registered {stats.total_sources_registered} sources")
+            # Auto-register all 230+ loaders
+            stats = auto_register_all()
+            print(f"Registered {stats.total_sources_registered} sources")
 
-    # Check what's available
-    sources = list_available_sources()
-    print(f"Available sources: {len(sources)}")
+            # Check what's available
+            sources = list_available_sources()
+            print(f"Available sources: {len(sources)}")
 
-    # Get detailed status
-    status = get_registration_status()
-    ```
+            # Get detailed status
+            status = get_registration_status()
 
 ⚡ **Convenience Functions:**
-    ```python
-    from haive.core.engine.document.loaders import (
-        load_document, load_documents_bulk, aload_document
-    )
+            from haive.core.engine.document.loaders import (
+                load_document, load_documents_bulk, aload_document
+            )
 
-    # Simple one-liner loading
-    docs = load_document("any-source-here")
+            # Simple one-liner loading
+            docs = load_document("any-source-here")
 
-    # Bulk loading multiple sources
-    docs = load_documents_bulk(["file1.pdf", "file2.docx"])
+            # Bulk loading multiple sources
+            docs = load_documents_bulk(["file1.pdf", "file2.docx"])
 
-    # Async loading
-    docs = await aload_document("https://example.com")
-    ```
+            # Async loading
+            docs = await aload_document("https://example.com")
 
 This system represents the ultimate evolution of document loading - from the
 messy legacy system to a production-ready, scalable solution that handles

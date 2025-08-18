@@ -1,4 +1,4 @@
-"""from typing import Any
+"""from typing import Any.
 Examples demonstrating the schema compatibility module.
 
 This file shows various use cases and patterns for using the
@@ -184,9 +184,23 @@ def example_custom_converter() -> Any:
     class TemperatureConverter(TypeConverter):
         @property
         def name(self) -> str:
+            """Name.
+
+            Returns:
+                [TODO: Add return description]
+            """
             return "temperature_converter"
 
         def can_convert(self, source_type: type, target_type: type) -> bool:
+            """Can Convert.
+
+            Args:
+                source_type: [TODO: Add description]
+                target_type: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             return (source_type == Temperature and target_type == Celsius) or (
                 source_type == Celsius and target_type == Temperature
             )
@@ -194,9 +208,27 @@ def example_custom_converter() -> Any:
         def get_quality(
             self, source_type: type, target_type: type
         ) -> ConversionQuality:
+            """Get Quality.
+
+            Args:
+                source_type: [TODO: Add description]
+                target_type: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             return ConversionQuality.LOSSLESS
 
         def convert(self, value: Any, context: ConversionContext) -> Any:
+            """Convert.
+
+            Args:
+                value: [TODO: Add description]
+                context: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             if isinstance(value, Temperature):
                 # Convert to Celsius
                 if value.unit == "C":
@@ -303,6 +335,14 @@ def example_field_validation() -> Any:
 
     # Add cross-field validator
     def passwords_match(data: dict) -> tuple[bool, str]:
+        """Passwords Match.
+
+        Args:
+            data: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         if data.get("password") != data.get("confirm_password"):
             return False, "Passwords do not match"
         return True, ""

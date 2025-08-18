@@ -262,6 +262,11 @@ class LocalFileSource(BaseSource):
     file_modified: str | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = {"file_path": str(self.file_path), "encoding": self.encoding}
         if self.chunk_size:
             kwargs["chunk_size"] = self.chunk_size
@@ -284,6 +289,11 @@ class RemoteSource(BaseSource, SecureConfigMixin):
         arbitrary_types_allowed = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = {"url": self.url, "headers": self.headers, "timeout": self.timeout}
         # Add authentication if available
         auth_headers = self.get_auth_headers()
@@ -314,6 +324,11 @@ class DatabaseSource(BaseSource, SecureConfigMixin):
         arbitrary_types_allowed = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = {}
         if self.connection_string:
             kwargs["connection_string"] = self.connection_string
@@ -341,6 +356,11 @@ class CloudStorageSource(BaseSource, SecureConfigMixin):
         arbitrary_types_allowed = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return {
             "bucket": self.bucket_name,
             "key": self.object_key,
@@ -358,6 +378,11 @@ class DirectorySource(BaseSource):
     file_filter: str | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return {
             "path": str(self.directory_path),
             "glob": self.glob_pattern,
@@ -385,6 +410,11 @@ class MessagingSource(BaseSource, SecureConfigMixin):
         arbitrary_types_allowed = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = {"platform": self.platform}
         if self.channel_id:
             kwargs["channel_id"] = self.channel_id
@@ -412,6 +442,11 @@ class BusinessSource(BaseSource, SecureConfigMixin):
         arbitrary_types_allowed = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = {"platform": self.platform}
         if self.workspace_id:
             kwargs["workspace_id"] = self.workspace_id
@@ -429,6 +464,11 @@ class AcademicSource(BaseSource):
     date_filter: str | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return {
             "query": self.query,
             "max_results": self.max_results,
@@ -454,6 +494,11 @@ class MediaSource(BaseSource, SecureConfigMixin):
         arbitrary_types_allowed = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = {
             "platform": self.platform,
             "quality": self.quality,
@@ -485,6 +530,11 @@ class KnowledgeSource(BaseSource, SecureConfigMixin):
         arbitrary_types_allowed = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return {
             "platform": self.platform,
             "workspace_id": self.workspace_id,
@@ -512,6 +562,11 @@ class DevelopmentSource(BaseSource, SecureConfigMixin):
         arbitrary_types_allowed = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return {
             "repo_url": self.repository_url,
             "branch": self.branch,
@@ -534,6 +589,11 @@ class PDFSource(LocalFileSource):
     layout_analysis: bool = False
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -555,6 +615,11 @@ class WebScrapingSource(RemoteSource):
     selector: str | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -575,6 +640,11 @@ class DatabaseQuerySource(DatabaseSource):
     streaming: bool = False
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update({"page_size": self.page_size, "streaming": self.streaming})
         return kwargs
@@ -589,6 +659,11 @@ class BulkDirectorySource(DirectorySource):
     progress_callback: str | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {

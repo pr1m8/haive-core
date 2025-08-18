@@ -31,7 +31,7 @@ class EdgeManager(BaseGraphComponent):
     Attributes:
         component_name: Always "edge_manager"
 
-    Example:
+    Examples:
         Using the EdgeManager::
 
             edge_manager = EdgeManager(graph)
@@ -85,7 +85,7 @@ class EdgeManager(BaseGraphComponent):
             ValueError: If nodes don't exist (when validate_nodes=True)
             ValueError: If edge already exists
 
-        Example:
+        Examples:
             Add edge between existing nodes::
 
                 edge_manager.add_edge("start", "process")
@@ -131,7 +131,7 @@ class EdgeManager(BaseGraphComponent):
         Raises:
             ValueError: If specified edge doesn't exist
 
-        Example:
+        Examples:
             Remove specific edge::
 
                 edge_manager.remove_edge("start", "process")
@@ -184,7 +184,7 @@ class EdgeManager(BaseGraphComponent):
         Returns:
             List of edges matching the criteria
 
-        Example:
+        Examples:
             Get all edges::
 
                 all_edges = edge_manager.get_edges()
@@ -255,7 +255,7 @@ class EdgeManager(BaseGraphComponent):
         Returns:
             List of edges with missing source or target nodes
 
-        Example:
+        Examples:
             Check for connectivity issues::
 
                 dangling = edge_manager.find_dangling_edges()

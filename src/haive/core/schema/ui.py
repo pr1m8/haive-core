@@ -18,32 +18,30 @@ Key features include:
 - Support for both class and instance visualization
 - Highlight of important schema features like shared fields and reducers
 
-Example:
-    ```python
-    from haive.core.schema import SchemaUI
-    from haive.core.schema import SchemaComposer
-    from typing import List
+Examples:
+            from haive.core.schema import SchemaUI
+            from haive.core.schema import SchemaComposer
+            from typing import List
 
-    # Create a schema
-    composer = SchemaComposer(name="MyState")
-    composer.add_field(
-        name="messages",
-        field_type=List[str],
-        default_factory=list
-    )
-    MyState = composer.build()
+            # Create a schema
+            composer = SchemaComposer(name="MyState")
+            composer.add_field(
+                name="messages",
+                field_type=List[str],
+                default_factory=list
+            )
+            MyState = composer.build()
 
-    # Display schema structure
-    SchemaUI.display_schema(MyState)
+            # Display schema structure
+            SchemaUI.display_schema(MyState)
 
-    # Generate Python code representation
-    code = SchemaUI.schema_to_code(MyState)
-    print(code)
+            # Generate Python code representation
+            code = SchemaUI.schema_to_code(MyState)
+            print(code)
 
-    # Create an instance and display it
-    state = MyState(messages=["Hello"])
-    SchemaUI.display_schema(state, title="State Instance")
-    ```
+            # Create an instance and display it
+            state = MyState(messages=["Hello"])
+            SchemaUI.display_schema(state, title="State Instance")
 """
 
 import logging

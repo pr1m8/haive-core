@@ -5,26 +5,24 @@ to any BaseModel. It maintains a current state string and a complete history
 of all state changes with timestamps and optional reasons.
 
 Usage:
-    ```python
-    from pydantic import BaseModel
-    from haive.core.common.mixins.general.state import StateMixin
+            from pydantic import BaseModel
+            from haive.core.common.mixins.general.state import StateMixin
 
-    class MyComponent(StateMixin, BaseModel):
-        name: str
+            class MyComponent(StateMixin, BaseModel):
+                name: str
 
-    # Create component and change states
-    component = MyComponent(name="test")
-    component.change_state("processing", "Starting work")
-    component.change_state("complete", "Finished successfully")
+            # Create component and change states
+            component = MyComponent(name="test")
+            component.change_state("processing", "Starting work")
+            component.change_state("complete", "Finished successfully")
 
-    # Check current state
-    if component.is_in_state("complete"):
-        print("Component is done!")
+            # Check current state
+            if component.is_in_state("complete"):
+                print("Component is done!")
 
-    # Review state history
-    for change in component.get_state_changes():
-        print(f"{change['timestamp']}: {change['from_state']} -> {change['to_state']}")
-    ```
+            # Review state history
+            for change in component.get_state_changes():
+                print(f"{change['timestamp']}: {change['from_state']} -> {change['to_state']}")
 """
 
 from datetime import datetime
@@ -47,7 +45,7 @@ class StateMixin(BaseModel):
         state: Current state of the object (defaults to "active").
         state_history: Chronological list of all state changes with metadata.
 
-    Example:
+    Examples:
         >>> class Task(StateMixin, BaseModel):
         ...     name: str
         >>> task = Task(name="Process data")
@@ -74,7 +72,7 @@ class StateMixin(BaseModel):
             new_state: The new state to transition to.
             reason: Optional explanation for the state change.
 
-        Example:
+        Examples:
             >>> task.change_state("paused", "Waiting for user input")
             >>> task.state
             'paused'
@@ -100,7 +98,7 @@ class StateMixin(BaseModel):
                 - timestamp: When the change occurred
                 - reason: Optional explanation for the change
 
-        Example:
+        Examples:
             >>> changes = task.get_state_changes()
             >>> print(changes[0]["from_state"])
             'active'
@@ -116,7 +114,7 @@ class StateMixin(BaseModel):
         Returns:
             True if current state matches the specified state, False otherwise.
 
-        Example:
+        Examples:
             >>> task.is_in_state("complete")
             False
             >>> task.change_state("complete")

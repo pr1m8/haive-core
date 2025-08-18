@@ -61,28 +61,26 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
     includes table setup and validation to ensure the database schema is properly
     configured.
 
-    Example:
-        ```python
-        from haive.core.persistence import PostgresCheckpointerConfig
-        from haive.core.persistence.types import CheckpointerMode, CheckpointStorageMode
+    Examples:
+                from haive.core.persistence import PostgresCheckpointerConfig
+                from haive.core.persistence.types import CheckpointerMode, CheckpointStorageMode
 
-        # Create a basic PostgreSQL checkpointer
-        config = PostgresCheckpointerConfig(
-            db_host="localhost",
-            db_port=5432,
-            db_name="haive",
-            db_user="postgres",
-            db_pass="secure_password",
-            ssl_mode="require",
-            mode=CheckpointerMode.ASYNC,
-            storage_mode=CheckpointStorageMode.SHALLOW
-        )
+                # Create a basic PostgreSQL checkpointer
+                config = PostgresCheckpointerConfig(
+                    db_host="localhost",
+                    db_port=5432,
+                    db_name="haive",
+                    db_user="postgres",
+                    db_pass="secure_password",
+                    ssl_mode="require",
+                    mode=CheckpointerMode.ASYNC,
+                    storage_mode=CheckpointStorageMode.SHALLOW
+                )
 
-        # For async usage
-        async def setup():
-            async_checkpointer = await config.create_async_checkpointer()
-            # Use the checkpointer...
-        ```
+                # For async usage
+                async def setup():
+                    async_checkpointer = await config.create_async_checkpointer()
+                    # Use the checkpointer...
 
     Notes:
         - Requires the psycopg and psycopg_pool packages to be installed
@@ -172,18 +170,16 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
         Returns:
             str: Formatted PostgreSQL connection string ready for use
 
-        Example:
-            ```python
-            config = PostgresCheckpointerConfig(
-                db_host="db.example.com",
-                db_port=5432,
-                db_name="haive",
-                db_user="app_user",
-                db_pass="secret_password",
-                ssl_mode="require"
-            uri = config.get_connection_uri()
-            # uri = "postgresql://app_user:secret_password@db.example.com:5432/haive?sslmode=require"
-            ```
+        Examples:
+                    config = PostgresCheckpointerConfig(
+                        db_host="db.example.com",
+                        db_port=5432,
+                        db_name="haive",
+                        db_user="app_user",
+                        db_pass="secret_password",
+                        ssl_mode="require"
+                    uri = config.get_connection_uri()
+                    # uri = "postgresql://app_user:secret_password@db.example.com:5432/haive?sslmode=require"
         """
         # Use direct connection string if provided
         if self.connection_string:
@@ -213,19 +209,17 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
             Dict[str, Any]: Dictionary of connection options ready to use with
                 PostgreSQL connections or connection pools
 
-        Example:
-            ```python
-            config = PostgresCheckpointerConfig(
-                auto_commit=True,
-                prepare_threshold=5,
-                connection_kwargs={"application_name": "haive_app"}
-            kwargs = config.get_connection_kwargs()
-            # kwargs = {
-            #    "autocommit": True,
-            #    "prepare_threshold": 5,
-            #    "application_name": "haive_app"
-            # }
-            ```
+        Examples:
+                    config = PostgresCheckpointerConfig(
+                        auto_commit=True,
+                        prepare_threshold=5,
+                        connection_kwargs={"application_name": "haive_app"}
+                    kwargs = config.get_connection_kwargs()
+                    # kwargs = {
+                    #    "autocommit": True,
+                    #    "prepare_threshold": 5,
+                    #    "application_name": "haive_app"
+                    # }
         """
         kwargs = {
             "autocommit": self.auto_commit,
@@ -253,22 +247,20 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
             RuntimeError: If async mode is requested (use create_async_checkpointer instead)
             RuntimeError: If the PostgreSQL dependencies are missing or connection fails
 
-        Example:
-            ```python
-            config = PostgresCheckpointerConfig(
-                db_host="localhost",
-                db_port=5432,
-                storage_mode=CheckpointStorageMode.SHALLOW
-            try:
-                # Creates a ShallowPostgresSaver instance
-                checkpointer = config.create_checkpointer()
+        Examples:
+                    config = PostgresCheckpointerConfig(
+                        db_host="localhost",
+                        db_port=5432,
+                        storage_mode=CheckpointStorageMode.SHALLOW
+                    try:
+                        # Creates a ShallowPostgresSaver instance
+                        checkpointer = config.create_checkpointer()
 
-                # Use with a graph
-                graph = Graph(checkpointer=checkpointer)
-            except RuntimeError as e:
-                print(f"Failed to create PostgreSQL checkpointer: {e}")
-                # Handle error - perhaps fall back to memory checkpointer
-            ```
+                        # Use with a graph
+                        graph = Graph(checkpointer=checkpointer)
+                    except RuntimeError as e:
+                        print(f"Failed to create PostgreSQL checkpointer: {e}")
+                        # Handle error - perhaps fall back to memory checkpointer
         """
         try:
             # Handle async mode request
@@ -355,27 +347,25 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
             RuntimeError: If the asynchronous PostgreSQL dependencies are missing
                 or connection fails
 
-        Example:
-            ```python
-            config = PostgresCheckpointerConfig(
-                db_host="localhost",
-                db_port=5432,
-                mode=CheckpointerMode.ASYNC,
-                storage_mode=CheckpointStorageMode.FULL
-            )
+        Examples:
+                    config = PostgresCheckpointerConfig(
+                        db_host="localhost",
+                        db_port=5432,
+                        mode=CheckpointerMode.ASYNC,
+                        storage_mode=CheckpointStorageMode.FULL
+                    )
 
-            async def setup_graph():
-                try:
-                    # Creates an AsyncPostgresSaver instance
-                    async_checkpointer = await config.create_async_checkpointer()
+                    async def setup_graph():
+                        try:
+                            # Creates an AsyncPostgresSaver instance
+                            async_checkpointer = await config.create_async_checkpointer()
 
-                    # Use with an async graph
-                    graph = AsyncGraph(checkpointer=async_checkpointer)
-                    return graph
-                except RuntimeError as e:
-                    print(f"Failed to create async PostgreSQL checkpointer: {e}")
-                    # Handle error
-            ```
+                            # Use with an async graph
+                            graph = AsyncGraph(checkpointer=async_checkpointer)
+                            return graph
+                        except RuntimeError as e:
+                            print(f"Failed to create async PostgreSQL checkpointer: {e}")
+                            # Handle error
 
         Note:
             This method automatically forces the mode to ASYNC for consistency,
@@ -481,22 +471,20 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
             RuntimeError: If the asynchronous PostgreSQL dependencies are missing
                 or connection fails
 
-        Example:
-            ```python
-            config = PostgresCheckpointerConfig(
-                db_host="localhost",
-                db_port=5432,
-                mode=CheckpointerMode.ASYNC
-            )
+        Examples:
+                    config = PostgresCheckpointerConfig(
+                        db_host="localhost",
+                        db_port=5432,
+                        mode=CheckpointerMode.ASYNC
+                    )
 
-            async def run_with_managed_resources():
-                # Resources will be properly initialized and cleaned up
-                async with await config.initialize_async_checkpointer() as checkpointer:
-                    # Use checkpointer with async code
-                    graph = AsyncGraph(checkpointer=checkpointer)
-                    # Run operations with graph...
-                # Connection pool is automatically closed here
-            ```
+                    async def run_with_managed_resources():
+                        # Resources will be properly initialized and cleaned up
+                        async with await config.initialize_async_checkpointer() as checkpointer:
+                            # Use checkpointer with async code
+                            graph = AsyncGraph(checkpointer=checkpointer)
+                            # Run operations with graph...
+                        # Connection pool is automatically closed here
 
         Note:
             This is the recommended method for asynchronous usage in production

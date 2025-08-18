@@ -35,6 +35,11 @@ class DynamicMapping(BaseModel):
 
     @model_validator(mode="after")
     def validate_mappings(self) -> Self:
+        """Validate Mappings.
+
+        Returns:
+            [TODO: Add return description]
+        """
         for _key, mapping_data in self.mappings.items():
             if "mapping" in mapping_data and isinstance(mapping_data["mapping"], dict):
                 pass

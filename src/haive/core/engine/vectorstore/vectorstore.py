@@ -15,50 +15,46 @@ Classes:
     VectorStoreProvider: Enumeration of supported vector store providers
     VectorStoreProviderRegistry: Registry for extending supported providers
 
-Example:
+Examples:
     Basic usage of creating a vector store:
-    ```python
-    from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
-    from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
+            from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
+            from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
 
-    # Create a vector store config
-    config = VectorStoreConfig(
-        name="my_vectorstore",
-        documents=[Document(page_content="Hello world")],
-        vector_store_provider=VectorStoreProvider.FAISS,
-        embedding_model=HuggingFaceEmbeddingConfig(
-            model="sentence-transformers/all-MiniLM-L6-v2"
-        )
-    )
+            # Create a vector store config
+            config = VectorStoreConfig(
+                name="my_vectorstore",
+                documents=[Document(page_content="Hello world")],
+                vector_store_provider=VectorStoreProvider.FAISS,
+                embedding_model=HuggingFaceEmbeddingConfig(
+                    model="sentence-transformers/all-MiniLM-L6-v2"
+                )
+            )
 
-    # Create the vector store
-    vectorstore = config.create_vectorstore()
-    ```
+            # Create the vector store
+            vectorstore = config.create_vectorstore()
 
     Registering a custom vector store provider:
-    ```python
-    from haive.core.engine.vectorstore import VectorStoreProviderRegistry
+            from haive.core.engine.vectorstore import VectorStoreProviderRegistry
 
-    # Direct registration with a class
-    class MyVectorStore(VectorStore):
-        # Implementation of VectorStore methods
-        ...
+            # Direct registration with a class
+            class MyVectorStore(VectorStore):
+                # Implementation of VectorStore methods
+                ...
 
-    VectorStoreProviderRegistry.register_provider("MyCustomStore", MyVectorStore)
+            VectorStoreProviderRegistry.register_provider("MyCustomStore", MyVectorStore)
 
-    # Or with a factory function for lazy loading
-    def get_my_vectorstore_class():
-        from my_package.vectorstore import MyOtherVectorStore
-        return MyOtherVectorStore
+            # Or with a factory function for lazy loading
+            def get_my_vectorstore_class():
+                from my_package.vectorstore import MyOtherVectorStore
+                return MyOtherVectorStore
 
-    VectorStoreProviderRegistry.register_provider_factory("MyOtherStore", get_my_vectorstore_class)
+            VectorStoreProviderRegistry.register_provider_factory("MyOtherStore", get_my_vectorstore_class)
 
-    # Now you can use these custom providers
-    config = VectorStoreConfig(
-        name="custom_vectorstore",
-        vector_store_provider="MyCustomStore"
-    )
-    ```
+            # Now you can use these custom providers
+            config = VectorStoreConfig(
+                name="custom_vectorstore",
+                vector_store_provider="MyCustomStore"
+            )
 
     TODO: Need to seperate and implement the registry system, similar to retrievers and add base.
 """
@@ -262,6 +258,14 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
     @field_validator("engine_type")
     @classmethod
     def validate_engine_type(cls, v) -> Any:
+        """Validate Engine Type.
+
+        Args:
+            v: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         if v != EngineType.VECTOR_STORE:
             raise TypeError("engine_type must be VECTOR_STORE")
         return v

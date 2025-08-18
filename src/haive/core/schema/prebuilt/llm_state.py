@@ -54,35 +54,33 @@ class LLMState(ToolState):
     Input Schema: Just messages (from MessagesStateWithTokenUsage)
     Output Schema: Full state including engine, messages, token usage, etc.
 
-    Example:
-        ```python
-        from haive.core.schema.prebuilt import LLMState
-        from haive.core.engine.aug_llm import AugLLMConfig
+    Examples:
+                from haive.core.schema.prebuilt import LLMState
+                from haive.core.engine.aug_llm import AugLLMConfig
 
-        # Create state with engine
-        state = LLMState(
-            engine=AugLLMConfig(
-                name="gpt4_engine",
-                model="gpt-4-turbo",  # Automatically detects 128k context
-                temperature=0.7
-            )
-        )
+                # Create state with engine
+                state = LLMState(
+                    engine=AugLLMConfig(
+                        name="gpt4_engine",
+                        model="gpt-4-turbo",  # Automatically detects 128k context
+                        temperature=0.7
+                    )
+                )
 
-        # Messages automatically track tokens
-        state.add_message(ai_message)
+                # Messages automatically track tokens
+                state.add_message(ai_message)
 
-        # Check against model-specific thresholds
-        if state.is_approaching_token_limit:
-            print(f"Warning: {state.token_usage_percentage:.1f}% of {state.context_length} tokens used")
+                # Check against model-specific thresholds
+                if state.is_approaching_token_limit:
+                    print(f"Warning: {state.token_usage_percentage:.1f}% of {state.context_length} tokens used")
 
-        # Set custom thresholds
-        state.warning_threshold = 0.75  # Warn at 75% usage
-        state.critical_threshold = 0.90  # Critical at 90% usage
+                # Set custom thresholds
+                state.warning_threshold = 0.75  # Warn at 75% usage
+                state.critical_threshold = 0.90  # Critical at 90% usage
 
-        # Get cost analysis
-        analysis = state.get_conversation_cost_analysis()
-        print(f"Total cost: ${analysis['total_cost']:.4f}")
-        ```
+                # Get cost analysis
+                analysis = state.get_conversation_cost_analysis()
+                print(f"Total cost: ${analysis['total_cost']:.4f}")
     """
 
     engine: AugLLMConfig | None = Field(

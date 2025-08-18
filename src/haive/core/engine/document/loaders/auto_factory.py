@@ -27,6 +27,11 @@ class DocumentLoaderFactory:
     """Factory for creating document loaders automatically."""
 
     def __init__(self) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         self._loader_cache: dict[str, BaseLoader] = {}
 
     def create_loader_from_path(

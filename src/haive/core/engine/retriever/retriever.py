@@ -18,26 +18,24 @@ Functions:
     create_retriever_config: Factory function for creating retriever configurations
     create_retriever_from_vectorstore: Helper to create a retriever from a vector store
 
-Example:
+Examples:
     Basic usage of creating a vector store retriever:
-    ```python
-    from haive.core.engine.retriever import VectorStoreRetrieverConfig
-    from haive.core.engine.vectorstore import VectorStoreConfig
+            from haive.core.engine.retriever import VectorStoreRetrieverConfig
+            from haive.core.engine.vectorstore import VectorStoreConfig
 
-    # Create vector store config
-    vs_config = VectorStoreConfig(...)
+            # Create vector store config
+            vs_config = VectorStoreConfig(...)
 
-    # Create retriever config
-    retriever_config = VectorStoreRetrieverConfig(
-        name="my_retriever",
-        vector_store_config=vs_config,
-        k=4
-    )
+            # Create retriever config
+            retriever_config = VectorStoreRetrieverConfig(
+                name="my_retriever",
+                vector_store_config=vs_config,
+                k=4
+            )
 
-    # Create and use the retriever
-    retriever = retriever_config.instantiate()
-    docs = retriever.get_relevant_documents("query")
-    ```
+            # Create and use the retriever
+            retriever = retriever_config.instantiate()
+            docs = retriever.get_relevant_documents("query")
 """
 
 import importlib
@@ -116,23 +114,21 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
         filter (Optional[Dict[str, Any]]): Optional filter to apply to vector store search.
         _registry (ClassVar[Dict[RetrieverType, Type['RetrieverConfig']]]): Registry for retriever types.
 
-    Example:
-        ```python
-        from haive.core.engine.retriever import RetrieverConfig, RetrieverType
-        from haive.core.engine.vectorstore import VectorStoreConfig
+    Examples:
+                from haive.core.engine.retriever import RetrieverConfig, RetrieverType
+                from haive.core.engine.vectorstore import VectorStoreConfig
 
-        # Create a basic retriever config
-        config = RetrieverConfig(
-            name="my_retriever",
-            retriever_type=RetrieverType.VECTOR_STORE,
-            k=4,
-            search_type="similarity"
-        )
+                # Create a basic retriever config
+                config = RetrieverConfig(
+                    name="my_retriever",
+                    retriever_type=RetrieverType.VECTOR_STORE,
+                    k=4,
+                    search_type="similarity"
+                )
 
-        # Create and use the retriever
-        retriever = config.instantiate()
-        docs = retriever.get_relevant_documents("query")
-        ```
+                # Create and use the retriever
+                retriever = config.instantiate()
+                docs = retriever.get_relevant_documents("query")
     """
 
     engine_type: EngineType = Field(default=EngineType.RETRIEVER)
@@ -319,6 +315,14 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
         """
 
         def decorator(subclass) -> Any:
+            """Decorator.
+
+            Args:
+                subclass: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             logger.debug(
                 f"Registering retriever type {retriever_type} with class {subclass.__name__}"
             )
@@ -423,7 +427,7 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
         Returns:
             A LangChain tool that performs retrieval using this configuration
 
-        Example:
+        Examples:
             >>> from haive.core.engine.retriever import VectorStoreRetrieverConfig
             >>> retriever_config = VectorStoreRetrieverConfig(
             ...     name="my_retriever",
@@ -447,6 +451,14 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
 
         @tool(tool_name)
         def retriever_tool(query: str) -> str:
+            """Retriever Tool.
+
+            Args:
+                query: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             f"""{tool_description}"""
 
             try:
@@ -501,31 +513,29 @@ class VectorStoreRetrieverConfig(BaseRetrieverConfig):
         search_kwargs (Dict[str, Any]): Additional parameters for the search operation.
         filter (Optional[Dict[str, Any]]): Optional metadata filter for the search.
 
-    Example:
-        ```python
-        from haive.core.engine.retriever import VectorStoreRetrieverConfig
-        from haive.core.engine.vectorstore import VectorStoreConfig
+    Examples:
+                from haive.core.engine.retriever import VectorStoreRetrieverConfig
+                from haive.core.engine.vectorstore import VectorStoreConfig
 
-        # Create a vector store config
-        vector_store_config = VectorStoreConfig(
-            name="my_vectorstore",
-            store_type="chroma",
-            embedding_config={"model": "sentence-transformers/all-mpnet-base-v2"}
-        )
+                # Create a vector store config
+                vector_store_config = VectorStoreConfig(
+                    name="my_vectorstore",
+                    store_type="chroma",
+                    embedding_config={"model": "sentence-transformers/all-mpnet-base-v2"}
+                )
 
-        # Create a vector store retriever config
-        retriever_config = VectorStoreRetrieverConfig(
-            name="my_retriever",
-            vector_store_config=vector_store_config,
-            k=4,
-            search_type="mmr",
-            search_kwargs={"fetch_k": 20, "lambda_mult": 0.5}
-        )
+                # Create a vector store retriever config
+                retriever_config = VectorStoreRetrieverConfig(
+                    name="my_retriever",
+                    vector_store_config=vector_store_config,
+                    k=4,
+                    search_type="mmr",
+                    search_kwargs={"fetch_k": 20, "lambda_mult": 0.5}
+                )
 
-        # Create and use the retriever
-        retriever = retriever_config.instantiate()
-        docs = retriever.get_relevant_documents("query")
-        ```
+                # Create and use the retriever
+                retriever = retriever_config.instantiate()
+                docs = retriever.get_relevant_documents("query")
     """
 
     retriever_type: RetrieverType = Field(

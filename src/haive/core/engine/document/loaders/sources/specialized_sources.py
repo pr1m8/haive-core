@@ -140,6 +140,11 @@ class ArxivSource(RemoteSource):
     include_metadata: bool = Field(True, description="Include paper metadata")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         if self.arxiv_ids:
@@ -200,6 +205,11 @@ class PubMedSource(RemoteSource):
     include_metadata: bool = Field(True, description="Include article metadata")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"query": self.query, "load_max_docs": self.max_results})
@@ -252,6 +262,11 @@ class SemanticScholarSource(RemoteSource):
     include_references: bool = Field(True, description="Include references")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         if self.paper_ids:
@@ -345,6 +360,11 @@ class YouTubeSource(RemoteSource):
         return v
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         if self.media_type == MediaType.TRANSCRIPT:
@@ -396,6 +416,11 @@ class BilibiliSource(RemoteSource):
     buvid3: str | None = Field(None, description="buvid3 cookie value")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -456,6 +481,11 @@ class AudioFileSource(LocalFileSource):
     api_key: str | None = Field(None, description="API key for transcription service")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -533,6 +563,11 @@ class GitHubSource(RemoteSource):
     file_path: str | None = Field(None, description="Specific file path")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -594,6 +629,11 @@ class GitSource(LocalFileSource):
     include_commits: bool = Field(False, description="Include commit history")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -648,6 +688,11 @@ class WikipediaSource(RemoteSource):
     doc_content_chars_max: int | None = Field(None, description="Max content length")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         if self.query:
@@ -703,6 +748,11 @@ class MediaWikiSource(LocalFileSource):
     skip_redirects: bool = Field(True, description="Skip redirect pages")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -764,6 +814,11 @@ class WeatherSource(RemoteSource):
     units: str = Field("metric", description="Units (metric/imperial)")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -819,6 +874,11 @@ class FinancialNewsSource(RemoteSource):
     time_to: str | None = Field(None, description="End time (YYYYMMDDTHHMM)")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs["api_key"] = (

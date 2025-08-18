@@ -11,24 +11,22 @@ The meta state pattern enables:
 - Agent lifecycle management
 - Dynamic agent modification
 
-Example:
-    ```python
-    from haive.core.schema.prebuilt.meta_state import MetaStateSchema
-    from haive.agents.simple.agent import SimpleAgent
+Examples:
+            from haive.core.schema.prebuilt.meta_state import MetaStateSchema
+            from haive.agents.simple.agent import SimpleAgent
 
-    # Create a contained agent
-    inner_agent = SimpleAgent()
+            # Create a contained agent
+            inner_agent = SimpleAgent()
 
-    # Create meta state with embedded agent
-    meta_state = MetaStateSchema(
-        agent=inner_agent,
-        agent_state={"initialized": True},
-        graph_context={"composition": "nested"}
-    )
+            # Create meta state with embedded agent
+            meta_state = MetaStateSchema(
+                agent=inner_agent,
+                agent_state={"initialized": True},
+                graph_context={"composition": "nested"}
+            )
 
-    # Agent can be executed and recompiled within graph nodes
-    result = meta_state.execute_agent()
-    ```
+            # Agent can be executed and recompiled within graph nodes
+            result = meta_state.execute_agent()
 """
 
 from __future__ import annotations

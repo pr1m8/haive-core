@@ -5,31 +5,29 @@ Pydantic models. It enables storing arbitrary key-value pairs as additional
 information that may not warrant dedicated model fields.
 
 Usage:
-    ```python
-    from pydantic import BaseModel
-    from haive.core.common.mixins.general import MetadataMixin
+            from pydantic import BaseModel
+            from haive.core.common.mixins.general import MetadataMixin
 
-    class Document(MetadataMixin, BaseModel):
-        title: str
-        content: str
+            class Document(MetadataMixin, BaseModel):
+                title: str
+                content: str
 
-    # Create a document with metadata
-    doc = Document(
-        title="Example",
-        content="Sample content",
-        metadata={"author": "John Doe", "tags": ["example", "sample"]}
-    )
+            # Create a document with metadata
+            doc = Document(
+                title="Example",
+                content="Sample content",
+                metadata={"author": "John Doe", "tags": ["example", "sample"]}
+            )
 
-    # Add additional metadata
-    doc.add_metadata("created_at", "2025-06-19")
+            # Add additional metadata
+            doc.add_metadata("created_at", "2025-06-19")
 
-    # Access metadata
-    author = doc.get_metadata("author")  # "John Doe"
+            # Access metadata
+            author = doc.get_metadata("author")  # "John Doe"
 
-    # Check if metadata exists
-    if doc.has_metadata("tags"):
-        tags = doc.get_metadata("tags")
-    ```
+            # Check if metadata exists
+            if doc.has_metadata("tags"):
+                tags = doc.get_metadata("tags")
 """
 
 from typing import Any

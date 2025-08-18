@@ -101,6 +101,14 @@ class BaseEmbeddingConfig(SecureConfigMixin, InvokableEngine):
         def decorator(
             config_cls: type["BaseEmbeddingConfig"],
         ) -> type["BaseEmbeddingConfig"]:
+            """Decorator.
+
+            Args:
+                config_cls: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             type_str = str(
                 embedding_type.value
                 if hasattr(embedding_type, "value")

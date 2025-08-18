@@ -14,19 +14,17 @@ Available mixins:
 - VersionMixin: Version tracking and compatibility checking
 
 Usage:
-    ```python
-    from pydantic import BaseModel
-    from haive.core.common.mixins.general import (
-        IdMixin, TimestampMixin, VersionMixin
-    )
+            from pydantic import BaseModel
+            from haive.core.common.mixins.general import (
+                IdMixin, TimestampMixin, VersionMixin
+            )
 
-    class MyComponent(IdMixin, TimestampMixin, VersionMixin, BaseModel):
-        name: str
+            class MyComponent(IdMixin, TimestampMixin, VersionMixin, BaseModel):
+                name: str
 
-        def __init__(self, **data):
-            super().__init__(**data)
-            # Now the component has ID, timestamp, and version capabilities
-    ```
+                def __init__(self, **data):
+                    super().__init__(**data)
+                    # Now the component has ID, timestamp, and version capabilities
 """
 
 from haive.core.common.mixins.general.id import IdMixin

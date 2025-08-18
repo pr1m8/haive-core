@@ -1,10 +1,11 @@
-{# Enhanced AutoAPI module template #}
+{# Enhanced AutoAPI module template with better summaries and Pydantic/Enum support #}
 {% if not obj.display %}
 :orphan:
 
 {% endif %}
-:py:mod:`{{ obj.name }}`
-=========={{ "=" * obj.name|length }}
+{% set display_name = obj.name.split('.')[-1] %}
+{{ display_name }}
+{{ "=" * display_name|length }}
 
 .. py:module:: {{ obj.name }}
 
@@ -15,144 +16,158 @@
 
 {% endif %}
 
+{% block summary %}
+{% set visible_children = obj.children|selectattr("display")|list %}
+{% if visible_children %}
+
+Module Summary
+--------------
+
+.. autosummary::
+   :nosignatures:
+   :toctree: _autosummary
+   :template: custom-module-summary.rst
+
+   {% for child in visible_children %}
+   {{ child.name }}
+   {%- endfor %}
+
+{% endif %}
+{% endblock %}
+
 {% block subpackages %}
 {% set visible_subpackages = obj.subpackages|selectattr("display")|list %}
 {% if visible_subpackages %}
-{{ _('Subpackages') }}
-{{ "-" * _('Subpackages')|length }}
+
+Subpackages
+-----------
 
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
 {% for subpackage in visible_subpackages %}
-   {{ subpackage.short_name }}/index.rst
-{%- endfor %}
+   {{ subpackage.short_name }} <{{ subpackage.short_name }}/index>
+{% endfor %}
+
 {% endif %}
 {% endblock %}
 
 {% block submodules %}
 {% set visible_submodules = obj.submodules|selectattr("display")|list %}
 {% if visible_submodules %}
-{{ _('Submodules') }}
-{{ "-" * _('Submodules')|length }}
+
+Submodules
+----------
 
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
 {% for submodule in visible_submodules %}
-   {{ submodule.short_name }}.rst
-{%- endfor %}
+   {{ submodule.short_name }} <{{ submodule.short_name }}/index>
+{% endfor %}
 
 {% endif %}
 {% endblock %}
 
-{% block summary %}
-{% if obj.all is not none %}
-{% set visible_children = obj.children|selectattr("short_name", "in", obj.all)|list %}
-{% elif obj.type is equalto("package") %}
-{% set visible_children = obj.children|selectattr("display")|list %}
-{% else %}
-{% set visible_children = obj.children|selectattr("display")|rejectattr("imported")|list %}
-{% endif %}
-{% if visible_children %}
-
-{{ _('Package Contents') }}
-{{ "-" * _('Package Contents')|length }}
-
-.. raw:: html
-
-   <div class="autoapi-summary">
-
 {% block classes %}
-{% set visible_classes = visible_children|selectattr("type", "equalto", "class")|list %}
+{% set visible_classes = obj.classes|selectattr("display")|list %}
 {% if visible_classes %}
 
 Classes
-~~~~~~~
+-------
 
-.. autoapisummary::
+{% for class in visible_classes %}
 
-{% for klass in visible_classes %}
-   {{ obj.name }}.{{ klass.short_name }}
-{%- endfor %}
+.. autoclass:: {{ class.name }}
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __init__, __call__
+   
+   {% if class.bases %}
+   .. rubric:: Inheritance
+   
+   .. inheritance-diagram:: {{ class.name }}
+      :parts: 1
+   {% endif %}
+   
+   {% if class.obj.type == "pydantic_model" %}
+   .. autopydantic_model:: {{ class.name }}
+      :model-show-json: True
+      :model-show-field-summary: True
+      :model-show-validator-members: True
+      :field-list-validators: True
+      :field-show-constraints: True
+   {% endif %}
 
+{% endfor %}
 {% endif %}
 {% endblock %}
 
 {% block functions %}
-{% set visible_functions = visible_children|selectattr("type", "equalto", "function")|list %}
+{% set visible_functions = obj.functions|selectattr("display")|list %}
 {% if visible_functions %}
 
 Functions
-~~~~~~~~~
-
-.. autoapisummary::
+---------
 
 {% for function in visible_functions %}
-   {{ obj.name }}.{{ function.short_name }}
-{%- endfor %}
 
+.. autofunction:: {{ function.name }}
+
+{% endfor %}
 {% endif %}
 {% endblock %}
 
 {% block exceptions %}
-{% set visible_exceptions = visible_children|selectattr("type", "equalto", "exception")|list %}
+{% set visible_exceptions = obj.exceptions|selectattr("display")|list %}
 {% if visible_exceptions %}
 
 Exceptions
-~~~~~~~~~~
-
-.. autoapisummary::
+----------
 
 {% for exception in visible_exceptions %}
-   {{ obj.name }}.{{ exception.short_name }}
-{%- endfor %}
 
+.. autoexception:: {{ exception.name }}
+   :members:
+   :show-inheritance:
+
+{% endfor %}
+{% endif %}
+{% endblock %}
+
+{% block enums %}
+{% set enums = obj.children|selectattr("type", "equalto", "enum")|selectattr("display")|list %}
+{% if enums %}
+
+Enumerations
+------------
+
+{% for enum in enums %}
+
+.. autoenum:: {{ enum.name }}
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+{% endfor %}
 {% endif %}
 {% endblock %}
 
 {% block attributes %}
-{% set visible_attributes = visible_children|selectattr("type", "equalto", "data")|list %}
+{% set visible_attributes = obj.attributes|selectattr("display")|list %}
 {% if visible_attributes %}
 
 Module Attributes
-~~~~~~~~~~~~~~~~~
-
-.. autoapisummary::
+-----------------
 
 {% for attribute in visible_attributes %}
-   {{ obj.name }}.{{ attribute.short_name }}
-{%- endfor %}
 
-{% endif %}
-{% endblock %}
+.. autodata:: {{ attribute.name }}
+   :annotation:
 
-.. raw:: html
+   {{ attribute.docstring|indent(3) }}
 
-   </div>
-
-{% endif %}
-{% endblock %}
-
-{% block content %}
-{% if obj.all is not none %}
-{% set visible_children = obj.children|selectattr("short_name", "in", obj.all)|list %}
-{% elif obj.type is equalto("package") %}
-{% set visible_children = obj.children|selectattr("display")|list %}
-{% else %}
-{% set visible_children = obj.children|selectattr("display")|rejectattr("imported")|list %}
-{% endif %}
-
-{% if visible_children %}
-
-{{ _('API Reference') }}
-{{ "-" * _('API Reference')|length }}
-
-{% for obj_item in visible_children %}
-{{ obj_item.rendered|indent(0) }}
 {% endfor %}
-
 {% endif %}
 {% endblock %}

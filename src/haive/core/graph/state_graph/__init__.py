@@ -25,28 +25,26 @@ Modules:
     pattern: Graph pattern implementations
     utils: Utility functions
 
-Example:
+Examples:
     Basic graph creation:
-    ```python
-    from haive.core.graph.state_graph import BaseGraph
-    from langgraph.graph import START, END
+            from haive.core.graph.state_graph import BaseGraph
+            from langgraph.graph import START, END
 
-    # Create a new graph
-    graph = BaseGraph(name="my_graph")
+            # Create a new graph
+            graph = BaseGraph(name="my_graph")
 
-    # Add nodes
-    graph.add_node("node1", lambda state: state)
-    graph.add_node("node2", lambda state: state)
+            # Add nodes
+            graph.add_node("node1", lambda state: state)
+            graph.add_node("node2", lambda state: state)
 
-    # Add edges
-    graph.add_edge(START, "node1")
-    graph.add_edge("node1", "node2")
-    graph.add_edge("node2", END)
+            # Add edges
+            graph.add_edge(START, "node1")
+            graph.add_edge("node1", "node2")
+            graph.add_edge("node2", END)
 
-    # Compile and run the graph
-    compiled_graph = graph.compile()
-    result = compiled_graph.invoke({"input": "some input"})
-    ```
+            # Compile and run the graph
+            compiled_graph = graph.compile()
+            result = compiled_graph.invoke({"input": "some input"})
 """
 
 # Base graph implementation

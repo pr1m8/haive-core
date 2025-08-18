@@ -1,4 +1,4 @@
-"""from typing import Any
+"""from typing import Any.
 Utility functions for the schema compatibility module.
 """
 
@@ -105,7 +105,7 @@ def flatten_nested_dict(
 ) -> dict[str, Any]:
     """Flatten nested dictionary.
 
-    Example:
+    Examples:
         {"user": {"name": "John", "age": 30}}
         becomes
         {"user.name": "John", "user.age": 30}
@@ -129,7 +129,7 @@ def unflatten_dict(
 ) -> dict[str, Any]:
     """Unflatten a dictionary.
 
-    Example:
+    Examples:
         {"user.name": "John", "user.age": 30}
         becomes
         {"user": {"name": "John", "age": 30}}
@@ -328,6 +328,11 @@ def memoize(func: Callable[..., T]) -> Callable[..., T]:
 
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
+        """Wrapper.
+
+        Returns:
+            [TODO: Add return description]
+        """
         # Create cache key
         key = (args, tuple(sorted(kwargs.items())))
 

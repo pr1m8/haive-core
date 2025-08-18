@@ -68,6 +68,11 @@ class Leaf(TreeNode[ContentType, ResultType]):
     """Leaf node - contains content but no children."""
 
     def is_leaf(self) -> bool:
+        """Is Leaf.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return True
 
     @computed_field
@@ -88,6 +93,11 @@ class Branch(TreeNode[ContentType, ResultType], Generic[ContentType, ResultType]
     _next_child_index: int = PrivateAttr(default=0)
 
     def is_leaf(self) -> bool:
+        """Is Leaf.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return False
 
     def add_child(

@@ -22,41 +22,39 @@ Key features include:
 - Pretty printing: Rich visualization of state content
 - Engine integration: Prepare inputs and process outputs for specific engines
 
-Example:
-    ```python
-    from typing import List
-    from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
-    from pydantic import Field
-    from haive.core.schema import StateSchema
-    from langgraph.graph import add_messages
+Examples:
+            from typing import List
+            from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+            from pydantic import Field
+            from haive.core.schema import StateSchema
+            from langgraph.graph import add_messages
 
-    class ConversationState(StateSchema):
-        messages: List[BaseMessage] = Field(default_factory=list)
-        query: str = Field(default="")
-        response: str = Field(default="")
-        context: List[str] = Field(default_factory=list)
+            class ConversationState(StateSchema):
+                messages: List[BaseMessage] = Field(default_factory=list)
+                query: str = Field(default="")
+                response: str = Field(default="")
+                context: List[str] = Field(default_factory=list)
 
-        # Define which fields should be shared with parent graphs
-        __shared_fields__ = ["messages"]
+                # Define which fields should be shared with parent graphs
+                __shared_fields__ = ["messages"]
 
-        # Define reducer functions for each field
-        __reducer_fields__ = {
-            "messages": add_messages,
-            "context": lambda a, b: (a or []) + (b or [])
-        }
+                # Define reducer functions for each field
+                __reducer_fields__ = {
+                    "messages": add_messages,
+                    "context": lambda a, b: (a or []) + (b or [])
+                }
 
-        # Define which fields are inputs/outputs for which engines
-        __engine_io_mappings__ = {
-            "retriever": {
-                "inputs": ["query"],
-                "outputs": ["context"]
-            },
-            "llm": {
-                "inputs": ["query", "context", "messages"],
-                "outputs": ["response"]
-            }
-        }
-    ```
+                # Define which fields are inputs/outputs for which engines
+                __engine_io_mappings__ = {
+                    "retriever": {
+                        "inputs": ["query"],
+                        "outputs": ["context"]
+                    },
+                    "llm": {
+                        "inputs": ["query", "context", "messages"],
+                        "outputs": ["response"]
+                    }
+                }
 """
 
 from __future__ import annotations
@@ -160,38 +158,36 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
     define how field values are combined during updates, enabling sophisticated state
     merging operations beyond simple assignment.
 
-    Example:
-        ```python
-        from typing import List
-        from langchain_core.messages import BaseMessage
-        from pydantic import Field
-        from haive.core.schema import StateSchema
+    Examples:
+                from typing import List
+                from langchain_core.messages import BaseMessage
+                from pydantic import Field
+                from haive.core.schema import StateSchema
 
-        class MyState(StateSchema):
-            messages: List[BaseMessage] = Field(default_factory=list)
-            query: str = Field(default="")
-            result: str = Field(default="")
+                class MyState(StateSchema):
+                    messages: List[BaseMessage] = Field(default_factory=list)
+                    query: str = Field(default="")
+                    result: str = Field(default="")
 
-            # Share only messages with parent graphs
-            __shared_fields__ = ["messages"]
+                    # Share only messages with parent graphs
+                    __shared_fields__ = ["messages"]
 
-            # Define reducer for messages
-            __reducer_fields__ = {
-                "messages": add_messages  # From langgraph.graph
-            }
+                    # Define reducer for messages
+                    __reducer_fields__ = {
+                        "messages": add_messages  # From langgraph.graph
+                    }
 
-        # Create state instance
-        state = MyState()
+                # Create state instance
+                state = MyState()
 
-        # Add a message
-        state.add_message(HumanMessage(content="Hello"))
+                # Add a message
+                state.add_message(HumanMessage(content="Hello"))
 
-        # Convert to dictionary
-        state_dict = state.to_dict()
+                # Convert to dictionary
+                state_dict = state.to_dict()
 
-        # Create from dictionary
-        new_state = MyState.from_dict(state_dict)
-        ```
+                # Create from dictionary
+                new_state = MyState.from_dict(state_dict)
     """
 
     # Class variables to track field sharing and reducers
@@ -1148,17 +1144,44 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         except ImportError:
             # Create a simple concat function as fallback
             def concat_lists(a, b) -> Any:
+                """Concat Lists.
+
+Args:
+    a: [TODO: Add description]
+    b: [TODO: Add description]
+
+Returns:
+    [TODO: Add return description]
+"""
                 return (a or []) + (b or [])
 
             registry["concat_lists"] = concat_lists
 
         # Add common reducer functions
         def concat_strings(a, b) -> Any:
+            """Concat Strings.
+
+Args:
+    a: [TODO: Add description]
+    b: [TODO: Add description]
+
+Returns:
+    [TODO: Add return description]
+"""
             return (a or "") + (b or "")
 
         registry["concat_strings"] = concat_strings
 
         def sum_values(a, b) -> Any:
+            """Sum Values.
+
+Args:
+    a: [TODO: Add description]
+    b: [TODO: Add description]
+
+Returns:
+    [TODO: Add return description]
+"""
             return (a or 0) + (b or 0)
 
         registry["sum_values"] = sum_values
@@ -1188,6 +1211,15 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             # Can't restore lambdas from name, but we can provide a generic
             # reducer
             def generic_lambda_reducer(a, b) -> Any:
+                """Generic Lambda Reducer.
+
+Args:
+    a: [TODO: Add description]
+    b: [TODO: Add description]
+
+Returns:
+    [TODO: Add return description]
+"""
                 # Simple fallback implementation
                 if isinstance(a, list | tuple) and isinstance(b, list | tuple):
                     return a + b

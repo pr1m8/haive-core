@@ -1444,9 +1444,19 @@ class _DefaultLoaderProperty:
     """Lazy loading property for default_loader."""
 
     def __getattr__(self, name):
+        """Getattr  .
+
+        Args:
+            name: [TODO: Add description]
+        """
         return getattr(get_default_loader(), name)
 
     def __call__(self, *args, **kwargs) -> Any:
+        """Call  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         return get_default_loader()(*args, **kwargs)
 
 

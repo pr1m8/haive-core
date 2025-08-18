@@ -41,10 +41,20 @@ class MessageConverter(TypeConverter):
 
     @property
     def name(self) -> str:
+        """Name.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return "langchain_message_converter"
 
     @property
     def priority(self) -> int:
+        """Priority.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return 10  # High priority for message conversions
 
     def can_convert(self, source_type: type, target_type: type) -> bool:
@@ -182,10 +192,20 @@ class DocumentConverter(TypeConverter):
 
     @property
     def name(self) -> str:
+        """Name.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return "langchain_document_converter"
 
     @property
     def priority(self) -> int:
+        """Priority.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return 10
 
     def can_convert(self, source_type: type, target_type: type) -> bool:
@@ -342,10 +362,20 @@ class PromptConverter(TypeConverter):
 
     @property
     def name(self) -> str:
+        """Name.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return "langchain_prompt_converter"
 
     @property
     def priority(self) -> int:
+        """Priority.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return 10
 
     def can_convert(self, source_type: type, target_type: type) -> bool:

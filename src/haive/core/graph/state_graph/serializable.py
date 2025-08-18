@@ -1,4 +1,4 @@
-"""from typing import Any, Dict
+"""from typing import Any, Dict.
 Serialization support for BaseGraph.
 
 This module provides serialization and deserialization utilities for BaseGraph,
@@ -34,6 +34,14 @@ class TypeReference(BaseModel):
 
     @classmethod
     def from_type(cls, type_obj) -> Any:
+        """From Type.
+
+        Args:
+            type_obj: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         if type_obj is None:
             return None
 

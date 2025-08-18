@@ -210,6 +210,14 @@ class _SchemaComposerBase:
                     output_schemas[parts[1]] = field_def.default
 
         def schema_post_init(self, __context) -> None:
+            """Schema Post Init.
+
+            Args:
+                __context: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             if hasattr(super(self.__class__, self), "model_post_init"):
                 super(self.__class__, self).model_post_init(__context)
 

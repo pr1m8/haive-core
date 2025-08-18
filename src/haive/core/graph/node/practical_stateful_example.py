@@ -1,4 +1,4 @@
-"""from typing import Any, Dict
+"""from typing import Any, Dict.
 Practical Stateful Node Example - Real Implementation.
 
 This shows how to practically implement stateful nodes that work with the current

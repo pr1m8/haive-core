@@ -1,5 +1,5 @@
 # src/haive/core/graph/node/decorators.py
-"""from typing import Any, Dict
+"""from typing import Any, Dict.
 Decorators for creating and registering nodes.
 
 This module provides decorators that make it easy to create various types
@@ -53,6 +53,11 @@ def register_node(
     """
 
     def decorator(func: Callable[[StateInput, ConfigType | None], StateOutput]):
+        """Decorator.
+
+        Args:
+            func: [TODO: Add description]
+        """
         # Get node name from function name if not provided
         node_name = name or func.__name__
 
@@ -211,6 +216,14 @@ def debug_node(name: str | None = None):
     console = Console()
 
     def decorator(func) -> Any:
+        """Decorator.
+
+        Args:
+            func: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         func_name = name or func.__name__
 
         def wrapper(state: dict[str, Any], config: dict[str, Any] | None = None):

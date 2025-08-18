@@ -376,6 +376,15 @@ class ComposedNode:
         name: str,
         composer: NodeSchemaComposer,
     ):
+        """Init  .
+
+        Args:
+            base_node: [TODO: Add description]
+            input_mappings: [TODO: Add description]
+            output_mappings: [TODO: Add description]
+            name: [TODO: Add description]
+            composer: [TODO: Add description]
+        """
         self.base_node = base_node
         self.input_mappings = input_mappings
         self.output_mappings = output_mappings
@@ -460,6 +469,15 @@ class ComposedCallableNode(ComposedNode):
         name: str,
         composer: NodeSchemaComposer,
     ):
+        """Init  .
+
+        Args:
+            base_node: [TODO: Add description]
+            input_mappings: [TODO: Add description]
+            output_mappings: [TODO: Add description]
+            name: [TODO: Add description]
+            composer: [TODO: Add description]
+        """
         super().__init__(base_node, input_mappings, output_mappings, name, composer)
 
 
@@ -474,6 +492,15 @@ class SchemaAdapter:
         name: str,
         composer: NodeSchemaComposer,
     ):
+        """Init  .
+
+        Args:
+            source_schema: [TODO: Add description]
+            target_schema: [TODO: Add description]
+            field_mappings: [TODO: Add description]
+            name: [TODO: Add description]
+            composer: [TODO: Add description]
+        """
         self.source_schema = source_schema
         self.target_schema = target_schema
         self.field_mappings = field_mappings

@@ -8,6 +8,12 @@ class StateSchema:
     """Enhanced schema management system with RunnableConfig awareness."""
 
     def __init__(self, name: str = "State", fields: dict[str, Any] | None = None):
+        """Init  .
+
+        Args:
+            name: [TODO: Add description]
+            fields: [TODO: Add description]
+        """
         self.name = name
         self.fields = fields or {}
         self.config_aware_fields = set()

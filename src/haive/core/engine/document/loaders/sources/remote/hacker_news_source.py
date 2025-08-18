@@ -15,6 +15,14 @@ class HackerNewsSource(URLSource):
     @field_validator("url")
     @classmethod
     def validate_url(cls, v) -> Any:
+        """Validate Url.
+
+        Args:
+            v: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         if not v.startswith("https://news.ycombinator.com/"):
             raise ValueError(f"Invalid url: {v}")
         return v

@@ -5,6 +5,10 @@ Haive Core Overview
 
 Welcome to **haive-core**, the foundation of the Haive AI Agent Framework! 🚀
 
+.. note::
+   
+   Looking for other Haive packages? The complete framework documentation will be available at the `Haive root documentation <https://github.com/pr1m8/haive>`_.
+
 .. grid:: 2
    :gutter: 3
    :margin: 0

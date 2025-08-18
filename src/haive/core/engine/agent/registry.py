@@ -27,6 +27,11 @@ def register_agent(config_class: type):
     """
 
     def decorator(agent_class: type):
+        """Decorator.
+
+        Args:
+            agent_class: [TODO: Add description]
+        """
         AGENT_REGISTRY[config_class] = agent_class
         logger.debug(
             f"Registered agent {agent_class.__name__} for config {config_class.__name__}"

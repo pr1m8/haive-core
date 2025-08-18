@@ -23,27 +23,25 @@ class MessagesStateWithTokenUsage(MessagesState, TokenUsageMixin):
     - Capacity percentage tracking
     - Usage statistics and summaries
 
-    Example:
-        ```python
-        from haive.core.schema.prebuilt import MessagesStateWithTokenUsage
+    Examples:
+                from haive.core.schema.prebuilt import MessagesStateWithTokenUsage
 
-        # Create state with token tracking
-        state = MessagesStateWithTokenUsage()
+                # Create state with token tracking
+                state = MessagesStateWithTokenUsage()
 
-        # Messages automatically track tokens
-        state.add_message(ai_message_with_usage)
+                # Messages automatically track tokens
+                state.add_message(ai_message_with_usage)
 
-        # Get usage summary
-        summary = state.get_token_usage_summary()
-        print(f"Total tokens: {summary['total_tokens']}")
-        print(f"Total cost: ${summary['total_cost']:.4f}")
+                # Get usage summary
+                summary = state.get_token_usage_summary()
+                print(f"Total tokens: {summary['total_tokens']}")
+                print(f"Total cost: ${summary['total_cost']:.4f}")
 
-        # Calculate costs with provider pricing
-        state.calculate_costs(
-            input_cost_per_1k=0.003,  # $0.003 per 1k input tokens
-            output_cost_per_1k=0.015  # $0.015 per 1k output tokens
-        )
-        ```
+                # Calculate costs with provider pricing
+                state.calculate_costs(
+                    input_cost_per_1k=0.003,  # $0.003 per 1k input tokens
+                    output_cost_per_1k=0.015  # $0.015 per 1k output tokens
+                )
     """
 
     @model_validator(mode="after")

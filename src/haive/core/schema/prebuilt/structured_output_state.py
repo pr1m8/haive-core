@@ -30,30 +30,28 @@ class StructuredOutputState(MessagesStateWithTokenUsage):
     - Support for multiple output parser types
     - Field validator integration for seamless parsing
 
-    Example:
-        ```python
-        from pydantic import BaseModel
+    Examples:
+                from pydantic import BaseModel
 
-        class SearchQuery(BaseModel):
-            query: str
-            filters: Dict[str, Any]
+                class SearchQuery(BaseModel):
+                    query: str
+                    filters: Dict[str, Any]
 
-        # Configure state with output model
-        state = StructuredOutputState(
-            output_models=[SearchQuery],
-            parse_as_tools=True  # Convert to tool calls
-        )
+                # Configure state with output model
+                state = StructuredOutputState(
+                    output_models=[SearchQuery],
+                    parse_as_tools=True  # Convert to tool calls
+                )
 
-        # AI message with structured output gets parsed automatically
-        ai_msg = AIMessage(
-            content='{"query": "python", "filters": {"language": "en"}}',
-            response_metadata={"token_usage": {"total_tokens": 50}}
-        )
-        state.messages.append(ai_msg)
+                # AI message with structured output gets parsed automatically
+                ai_msg = AIMessage(
+                    content='{"query": "python", "filters": {"language": "en"}}',
+                    response_metadata={"token_usage": {"total_tokens": 50}}
+                )
+                state.messages.append(ai_msg)
 
-        # Automatically creates ToolMessage with parsed content
-        # Token usage is tracked for both original and parsed messages
-        ```
+                # Automatically creates ToolMessage with parsed content
+                # Token usage is tracked for both original and parsed messages
     """
 
     # Configuration for structured output parsing

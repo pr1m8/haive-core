@@ -163,6 +163,15 @@ class AdvancedNodeComposer(NodeSchemaComposer):
 
         @wraps(func)
         def normalized_wrapper(state: Any, config: dict[str, Any] | None = None) -> Any:
+            """Normalized Wrapper.
+
+            Args:
+                state: [TODO: Add description]
+                config: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             config = config or {}
 
             # Build kwargs based on signature
@@ -228,6 +237,15 @@ class AdvancedNodeComposer(NodeSchemaComposer):
         # Create type-validating wrapper
         @wraps(func)
         def typed_wrapper(state: Any, config: Any) -> Any:
+            """Typed Wrapper.
+
+            Args:
+                state: [TODO: Add description]
+                config: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             # Validate input types if enabled
             if validate_types:
                 if not isinstance(state, state_type):
@@ -280,7 +298,7 @@ class AdvancedNodeComposer(NodeSchemaComposer):
         Returns:
             ComposedNode with custom pipeline
 
-        Example:
+        Examples:
             # Custom extraction
             def extract_recent_messages(state, config):
                 messages = state.messages[-5:]  # Last 5 messages
@@ -308,6 +326,15 @@ class AdvancedNodeComposer(NodeSchemaComposer):
         def pipeline_callable(
             state: Any, config: dict[str, Any] | None = None
         ) -> Command:
+            """Pipeline Callable.
+
+            Args:
+                state: [TODO: Add description]
+                config: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             config = config or {}
 
             # Extract
@@ -350,6 +377,19 @@ class AdvancedComposedNode(ComposedNode):
         original_func: Callable | None = None,
         signature_info: dict[str, Any] | None = None,
     ):
+        """Init  .
+
+        Args:
+            base_node: [TODO: Add description]
+            input_mappings: [TODO: Add description]
+            output_mappings: [TODO: Add description]
+            extract_logic: [TODO: Add description]
+            update_logic: [TODO: Add description]
+            name: [TODO: Add description]
+            composer: [TODO: Add description]
+            original_func: [TODO: Add description]
+            signature_info: [TODO: Add description]
+        """
         super().__init__(base_node, input_mappings, output_mappings, name, composer)
         self.extract_logic = extract_logic
         self.update_logic = update_logic
@@ -416,6 +456,18 @@ class TypedCallableNode:
         composer: NodeSchemaComposer,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            base_func: [TODO: Add description]
+            typed_func: [TODO: Add description]
+            state_type: [TODO: Add description]
+            config_type: [TODO: Add description]
+            result_type: [TODO: Add description]
+            input_mappings: [TODO: Add description]
+            output_mappings: [TODO: Add description]
+            composer: [TODO: Add description]
+        """
         self.base_func = base_func
         self.typed_func = typed_func
         self.state_type = state_type
@@ -498,6 +550,14 @@ def as_node(
     """
 
     def decorator(func: Callable) -> AdvancedComposedNode:
+        """Decorator.
+
+        Args:
+            func: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         composer = AdvancedNodeComposer()
         return composer.from_callable_advanced(
             func,

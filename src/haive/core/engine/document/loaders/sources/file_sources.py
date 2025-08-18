@@ -56,6 +56,11 @@ class UnstructuredFileSource(LocalFileSource):
     coordinates: bool = False
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -97,6 +102,11 @@ class GenericFileSource(LocalFileSource):
     fallback_encoding: str = "utf-8"
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -142,6 +152,11 @@ class PythonCodeSource(LocalFileSource):
     parse_functions: bool = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -176,6 +191,11 @@ class NotebookSource(LocalFileSource):
     remove_newline: bool = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -215,6 +235,11 @@ class PowerPointSource(LocalFileSource):
     mode: str = "elements"
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -242,6 +267,11 @@ class ODTDocumentSource(LocalFileSource):
     mode: str = "elements"
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -269,6 +299,11 @@ class RTFDocumentSource(LocalFileSource):
     mode: str = "elements"
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -310,6 +345,11 @@ class EmailSource(LocalFileSource):
     extract_attachments: bool = False
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {"mode": self.mode, "extract_attachments": self.extract_attachments}
@@ -345,6 +385,11 @@ class EPubSource(LocalFileSource):
     mode: str = "elements"
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -377,6 +422,11 @@ class CHMHelpSource(LocalFileSource):
     mode: str = "elements"
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -408,6 +458,11 @@ class TOMLConfigSource(LocalFileSource):
     parse_structure: bool = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["parse_structure"] = self.parse_structure
         return kwargs
@@ -441,6 +496,11 @@ class YAMLConfigSource(LocalFileSource):
     parse_yaml: bool = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["parse_yaml"] = self.parse_yaml
         return kwargs
@@ -469,6 +529,11 @@ class XMLDataSource(LocalFileSource):
     mode: str = "elements"
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -507,6 +572,11 @@ class SubtitleSource(LocalFileSource):
     include_timestamps: bool = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["include_timestamps"] = self.include_timestamps
         return kwargs
@@ -545,6 +615,11 @@ class PDFDirectorySource(DirectorySource):
     silent_errors: bool = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {"extract_images": self.extract_images, "silent_errors": self.silent_errors}
@@ -580,6 +655,11 @@ class UnstructuredDirectorySource(DirectorySource):
     loader_kwargs: dict[str, Any] = {}
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {"loader_cls": self.loader_cls_name, "loader_kwargs": self.loader_kwargs}
@@ -624,6 +704,11 @@ class ImageDocumentSource(LocalFileSource):
     ocr_languages: list[str] = ["eng"]
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -663,6 +748,11 @@ class BibtexSource(LocalFileSource):
     max_docs: int | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         if self.max_docs:
             kwargs["max_docs"] = self.max_docs
@@ -689,6 +779,11 @@ class CoNLLULinguisticSource(LocalFileSource):
     """CoNLL-U linguistic data source."""
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return super().get_loader_kwargs()
 
 

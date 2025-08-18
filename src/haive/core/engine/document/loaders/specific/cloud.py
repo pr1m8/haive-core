@@ -28,6 +28,14 @@ class S3Source(CloudStorageSource):
         region: str | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            bucket_name: [TODO: Add description]
+            object_key: [TODO: Add description]
+            prefix: [TODO: Add description]
+            region: [TODO: Add description]
+        """
         s3_path = f"s3://{bucket_name}/{object_key or prefix or ''}"
         super().__init__(source_path=s3_path, **kwargs)
         self.bucket_name = bucket_name
@@ -115,6 +123,14 @@ class GCSSource(CloudStorageSource):
         project_id: str | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            bucket_name: [TODO: Add description]
+            object_name: [TODO: Add description]
+            prefix: [TODO: Add description]
+            project_id: [TODO: Add description]
+        """
         gcs_path = f"gs://{bucket_name}/{object_name or prefix or ''}"
         super().__init__(source_path=gcs_path, **kwargs)
         self.bucket_name = bucket_name
@@ -200,6 +216,14 @@ class AzureBlobSource(CloudStorageSource):
         prefix: str | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            account_name: [TODO: Add description]
+            container_name: [TODO: Add description]
+            blob_name: [TODO: Add description]
+            prefix: [TODO: Add description]
+        """
         azure_path = (
             f"azure://{account_name}/{container_name}/{blob_name or prefix or ''}"
         )

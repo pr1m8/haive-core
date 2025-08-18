@@ -65,6 +65,11 @@ class PDFSource(LocalFileSource):
     layout_analysis: bool = False
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update({"extract_images": self.extract_images})
         return kwargs
@@ -102,6 +107,11 @@ class CSVSource(LocalFileSource):
     columns: list | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -137,6 +147,11 @@ class JSONSource(LocalFileSource):
     text_content: bool = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         if self.jq_schema:
             kwargs["jq_schema"] = self.jq_schema
@@ -165,6 +180,11 @@ class TextSource(LocalFileSource):
     autodetect_encoding: bool = True
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["autodetect_encoding"] = self.autodetect_encoding
         return kwargs
@@ -192,6 +212,11 @@ class MarkdownSource(LocalFileSource):
     mode: str = "elements"  # single, elements, paged
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -226,6 +251,11 @@ class WordDocumentSource(LocalFileSource):
     mode: str = "elements"
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -253,6 +283,11 @@ class ExcelSource(LocalFileSource):
     mode: str = "elements"
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -287,6 +322,11 @@ class HTMLSource(LocalFileSource):
     mode: str = "elements"
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -333,6 +373,11 @@ class WebPageSource(RemoteSource):
     selector: str | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -367,6 +412,11 @@ class GitHubSource(RemoteSource):
     file_path: str | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -407,6 +457,11 @@ class LocalDirectorySource(DirectorySource):
     show_progress: bool = False
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -444,6 +499,11 @@ class PostgreSQLSource(DatabaseSource):
     page_size: int = 1000
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs["page_size"] = self.page_size
         return kwargs
@@ -471,6 +531,11 @@ class MongoDBSource(DatabaseSource):
     filter_criteria: dict | None = None
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {

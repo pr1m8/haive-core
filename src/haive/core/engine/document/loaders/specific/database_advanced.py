@@ -31,6 +31,16 @@ class BigQuerySource(DatabaseSource):
         metadata_columns: list[str] | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            project_id: [TODO: Add description]
+            dataset_id: [TODO: Add description]
+            table_id: [TODO: Add description]
+            query: [TODO: Add description]
+            page_content_columns: [TODO: Add description]
+            metadata_columns: [TODO: Add description]
+        """
         bq_uri = f"bigquery://{project_id}"
         if dataset_id:
             bq_uri += f"/{dataset_id}"
@@ -183,6 +193,13 @@ class SQLiteSource(DatabaseSource):
         table_name: str | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            database_path: [TODO: Add description]
+            query: [TODO: Add description]
+            table_name: [TODO: Add description]
+        """
         super().__init__(source_path=f"sqlite:///{database_path}", **kwargs)
         self.database_path = database_path
         self.query = query
@@ -248,6 +265,15 @@ class MySQLSource(DatabaseSource):
         table_name: str | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            host: [TODO: Add description]
+            database: [TODO: Add description]
+            port: [TODO: Add description]
+            query: [TODO: Add description]
+            table_name: [TODO: Add description]
+        """
         mysql_uri = f"mysql://{host}:{port}/{database}"
         super().__init__(source_path=mysql_uri, **kwargs)
         self.host = host

@@ -73,15 +73,13 @@ class SQLiteSaver:
                 This can be an absolute or relative path. The directory structure
                 will be created if it doesn't exist.
 
-        Example:
-            ```python
-            # Create a SQLite checkpointer in the 'data' directory
-            saver = SQLiteSaver("data/agent_state.db")
+        Examples:
+                    # Create a SQLite checkpointer in the 'data' directory
+                    saver = SQLiteSaver("data/agent_state.db")
 
-            # Use with a graph
-            from langgraph.graph import Graph
-            graph = Graph(checkpointer=saver)
-            ```
+                    # Use with a graph
+                    from langgraph.graph import Graph
+                    graph = Graph(checkpointer=saver)
         """
         self.db_path = db_path
         self._ensure_db_dir()
@@ -179,21 +177,19 @@ class SQLiteSaver:
                 - id: The checkpoint identifier
                 Or None if no matching checkpoint is found
 
-        Example:
-            ```python
-            # Get the latest checkpoint for a thread
-            checkpoint = saver.get({"thread_id": "user_123"})
+        Examples:
+                    # Get the latest checkpoint for a thread
+                    checkpoint = saver.get({"thread_id": "user_123"})
 
-            # Get a specific checkpoint
-            checkpoint = saver.get({
-                "thread_id": "user_123",
-                "checkpoint_id": "checkpoint_456"
-            })
+                    # Get a specific checkpoint
+                    checkpoint = saver.get({
+                        "thread_id": "user_123",
+                        "checkpoint_id": "checkpoint_456"
+                    })
 
-            if checkpoint:
-                # Use the state data
-                state_data = checkpoint["channel_values"]
-            ```
+                    if checkpoint:
+                        # Use the state data
+                        state_data = checkpoint["channel_values"]
         """
         thread_id = config["configurable"]["thread_id"]
         checkpoint_id = config["configurable"].get("checkpoint_id")
@@ -379,6 +375,15 @@ class SQLiteSaver:
                     def __init__(
                         self, config, checkpoint, metadata, parent_config, writes=None
                     ):
+                        """Init  .
+
+                        Args:
+                            config: [TODO: Add description]
+                            checkpoint: [TODO: Add description]
+                            metadata: [TODO: Add description]
+                            parent_config: [TODO: Add description]
+                            writes: [TODO: Add description]
+                        """
                         self.config = config
                         self.checkpoint = checkpoint
                         self.metadata = metadata
@@ -425,22 +430,20 @@ class SQLiteCheckpointerConfig(CheckpointerConfig):
     - Applications with modest concurrency requirements
     - Scenarios where file-based persistence is sufficient
 
-    Example:
-        ```python
-        from haive.core.persistence import SQLiteCheckpointerConfig
+    Examples:
+                from haive.core.persistence import SQLiteCheckpointerConfig
 
-        # Create a basic SQLite checkpointer
-        config = SQLiteCheckpointerConfig(
-            db_path="data/agent_state.db"
-        )
+                # Create a basic SQLite checkpointer
+                config = SQLiteCheckpointerConfig(
+                    db_path="data/agent_state.db"
+                )
 
-        # Create a checkpointer
-        checkpointer = config.create_checkpointer()
+                # Create a checkpointer
+                checkpointer = config.create_checkpointer()
 
-        # Use with a graph
-        from langgraph.graph import Graph
-        graph = Graph(checkpointer=checkpointer)
-        ```
+                # Use with a graph
+                from langgraph.graph import Graph
+                graph = Graph(checkpointer=checkpointer)
 
     Note:
         While SQLite supports concurrent readers, it has limitations for
@@ -478,14 +481,12 @@ class SQLiteCheckpointerConfig(CheckpointerConfig):
         Returns:
             Any: A SQLiteSaver instance ready for use with LangGraph
 
-        Example:
-            ```python
-            config = SQLiteCheckpointerConfig(db_path="data/state.db")
-            checkpointer = config.create_checkpointer()
+        Examples:
+                    config = SQLiteCheckpointerConfig(db_path="data/state.db")
+                    checkpointer = config.create_checkpointer()
 
-            # Use with a graph
-            graph = Graph(checkpointer=checkpointer)
-            ```
+                    # Use with a graph
+                    graph = Graph(checkpointer=checkpointer)
         """
         if self.checkpointer is None:
             self.checkpointer = SQLiteSaver(self.db_path)
@@ -517,27 +518,25 @@ class SQLiteCheckpointerConfig(CheckpointerConfig):
                 which can include any JSON-serializable information relevant to
                 the thread (user info, session data, etc.)
 
-        Example:
-            ```python
-            config = SQLiteCheckpointerConfig(db_path="data/state.db")
+        Examples:
+                    config = SQLiteCheckpointerConfig(db_path="data/state.db")
 
-            # Register a new thread with metadata
-            config.register_thread(
-                thread_id="user_123",
-                name="John's Conversation",
-                metadata={
-                    "user_id": "user_123",
-                    "session_start": "2023-04-01T12:00:00Z",
-                    "source": "web_app"
-                }
-            )
+                    # Register a new thread with metadata
+                    config.register_thread(
+                        thread_id="user_123",
+                        name="John's Conversation",
+                        metadata={
+                            "user_id": "user_123",
+                            "session_start": "2023-04-01T12:00:00Z",
+                            "source": "web_app"
+                        }
+                    )
 
-            # Later, you can use this thread_id with checkpoints
-            config.put_checkpoint(
-                {"configurable": {"thread_id": "user_123"}},
-                {"key": "value"}
-            )
-            ```
+                    # Later, you can use this thread_id with checkpoints
+                    config.put_checkpoint(
+                        {"configurable": {"thread_id": "user_123"}},
+                        {"key": "value"}
+                    )
         """
         self.create_checkpointer()
 

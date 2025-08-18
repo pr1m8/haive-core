@@ -22,41 +22,39 @@ Key capabilities include:
 - Schema finalization with proper metadata configuration
 - Integration with SchemaComposer for seamless conversion
 
-Example:
-    ```python
-    from haive.core.schema import StateSchemaManager
-    from typing import List
-    from langchain_core.messages import BaseMessage
+Examples:
+            from haive.core.schema import StateSchemaManager
+            from typing import List
+            from langchain_core.messages import BaseMessage
 
-    # Create a manager
-    manager = StateSchemaManager(name="ConversationState")
+            # Create a manager
+            manager = StateSchemaManager(name="ConversationState")
 
-    # Add fields
-    manager.add_field(
-        "messages",
-        List[BaseMessage],
-        default_factory=list,
-        description="Conversation history",
-        shared=True
-    )
+            # Add fields
+            manager.add_field(
+                "messages",
+                List[BaseMessage],
+                default_factory=list,
+                description="Conversation history",
+                shared=True
+            )
 
-    # Add a computed property
-    def get_last_message(self):
-        if not self.messages:
-            return None
-        return self.messages[-1]
+            # Add a computed property
+            def get_last_message(self):
+                if not self.messages:
+                    return None
+                return self.messages[-1]
 
-    manager.add_computed_property("last_message", get_last_message)
+            manager.add_computed_property("last_message", get_last_message)
 
-    # Add a method
-    def add_message(self, message):
-        self.messages.append(message)
+            # Add a method
+            def add_message(self, message):
+                self.messages.append(message)
 
-    manager.add_method("add_message", add_message)
+            manager.add_method("add_message", add_message)
 
-    # Build the schema
-    ConversationState = manager.build()
-    ```
+            # Build the schema
+            ConversationState = manager.build()
 
 This module is part of the Haive Schema System, providing the lower-level foundation
 for schema manipulation that complements the higher-level SchemaComposer.

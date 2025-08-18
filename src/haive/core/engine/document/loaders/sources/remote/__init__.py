@@ -15,16 +15,34 @@ class RemoteSource(BaseSource):
     @field_validator("url")
     @classmethod
     def validate_url(cls, v):
+        """Validate Url.
+
+        Args:
+            v: [TODO: Add description]
+        """
         if not v.is_valid():
             raise ValueError(f"Invalid url: {v}")
         return v
 
     @property
     def source(self) -> HttpUrl:
+        """Source.
+
+        Returns:
+            [TODO: Add return description]
+        """
         return self.url
 
     @classmethod
     def from_url(cls, url: HttpUrl | str) -> "RemoteSource":
+        """From Url.
+
+        Args:
+            url: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         if isinstance(url, str):
             url = HttpUrl(url)
         return cls(url=url)

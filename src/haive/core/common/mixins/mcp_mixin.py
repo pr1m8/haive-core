@@ -6,41 +6,39 @@ management, and prompt template integration while maintaining compatibility with
 existing Haive patterns.
 
 Usage:
-    ```python
-    from pydantic import BaseModel
-    from haive.core.common.mixins import MCPMixin
-    from haive.mcp.config import MCPConfig, MCPServerConfig
+            from pydantic import BaseModel
+            from haive.core.common.mixins import MCPMixin
+            from haive.mcp.config import MCPConfig, MCPServerConfig
 
-    class MyConfig(MCPMixin, BaseModel):
-        name: str
+            class MyConfig(MCPMixin, BaseModel):
+                name: str
 
-    # Create config with MCP support
-    config = MyConfig(
-        name="agent",
-        mcp_config=MCPConfig(
-            enabled=True,
-            servers={
-                "filesystem": MCPServerConfig(
-                    transport="stdio",
-                    command="npx",
-                    args=["-y", "@modelcontextprotocol/server-filesystem"]
+            # Create config with MCP support
+            config = MyConfig(
+                name="agent",
+                mcp_config=MCPConfig(
+                    enabled=True,
+                    servers={
+                        "filesystem": MCPServerConfig(
+                            transport="stdio",
+                            command="npx",
+                            args=["-y", "@modelcontextprotocol/server-filesystem"]
+                        )
+                    }
                 )
-            }
-        )
-    )
+            )
 
-    # Initialize MCP (discovers tools, resources, prompts)
-    await config.setup_mcp()
+            # Initialize MCP (discovers tools, resources, prompts)
+            await config.setup_mcp()
 
-    # Access MCP tools (automatically wrapped)
-    tools = config.get_mcp_tools()
+            # Access MCP tools (automatically wrapped)
+            tools = config.get_mcp_tools()
 
-    # Access MCP resources
-    resources = config.get_mcp_resources()
+            # Access MCP resources
+            resources = config.get_mcp_resources()
 
-    # Use MCP-enhanced system prompt
-    enhanced_prompt = config.enhance_system_prompt_with_mcp("Base prompt")
-    ```
+            # Use MCP-enhanced system prompt
+            enhanced_prompt = config.enhance_system_prompt_with_mcp("Base prompt")
 """
 
 import logging

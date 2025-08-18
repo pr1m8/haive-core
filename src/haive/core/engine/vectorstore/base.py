@@ -86,6 +86,14 @@ class BaseVectorStoreConfig(InvokableEngine):
         def decorator(
             config_cls: type[BaseVectorStoreConfig],
         ) -> type[BaseVectorStoreConfig]:
+            """Decorator.
+
+            Args:
+                config_cls: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             type_str = str(
                 vector_store_type.value
                 if hasattr(vector_store_type, "value")

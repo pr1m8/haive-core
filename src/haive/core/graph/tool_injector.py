@@ -60,6 +60,11 @@ class ToolInjector:
         # injection
         @functools.wraps(func)
         def wrapped_func(*args, **kwargs) -> Any:
+            """Wrapped Func.
+
+Returns:
+    [TODO: Add return description]
+"""
             return func(*args, **kwargs)
 
         # Update type hints to include InjectedState
@@ -134,6 +139,11 @@ class ToolInjector:
         # injection
         @functools.wraps(func)
         def wrapped_func(*args, **kwargs) -> Any:
+            """Wrapped Func.
+
+Returns:
+    [TODO: Add return description]
+"""
             return func(*args, **kwargs)
 
         # Update type hints to include InjectedStore
@@ -219,6 +229,11 @@ class ToolInjector:
         # Create a new function with both parameters annotated for injection
         @functools.wraps(func)
         def wrapped_func(*args, **kwargs) -> Any:
+            """Wrapped Func.
+
+Returns:
+    [TODO: Add return description]
+"""
             return func(*args, **kwargs)
 
         # Update type hints to include InjectedState and InjectedStore
@@ -270,6 +285,14 @@ def state_tool(state_field: str | None = None, return_direct: bool = False):
     """
 
     def decorator(func: F) -> BaseTool:
+        """Decorator.
+
+Args:
+    func: [TODO: Add description]
+
+Returns:
+    [TODO: Add return description]
+"""
         return ToolInjector.create_state_tool(
             func=func, state_field=state_field, return_direct=return_direct
         )
@@ -288,6 +311,14 @@ def store_tool(return_direct: bool = False):
     """
 
     def decorator(func: F) -> BaseTool:
+        """Decorator.
+
+Args:
+    func: [TODO: Add description]
+
+Returns:
+    [TODO: Add return description]
+"""
         return ToolInjector.create_store_tool(func=func, return_direct=return_direct)
 
     return decorator
@@ -305,6 +336,14 @@ def hybrid_tool(state_field: str | None = None, return_direct: bool = False):
     """
 
     def decorator(func: F) -> BaseTool:
+        """Decorator.
+
+Args:
+    func: [TODO: Add description]
+
+Returns:
+    [TODO: Add return description]
+"""
         return ToolInjector.create_hybrid_tool(
             func=func, state_field=state_field, return_direct=return_direct
         )

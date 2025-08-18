@@ -287,6 +287,11 @@ class StateGraphManager:
 
         # Add get_manager method to the graph
         def get_manager() -> Any | None:
+            """Get Manager.
+
+            Returns:
+                [TODO: Add return description]
+            """
             return manager
 
         # Attach the method to the graph

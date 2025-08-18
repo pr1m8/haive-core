@@ -13,6 +13,14 @@ class SerializableModelMetaclass(type(BaseModel)):
     """Metaclass for serializable models to register them with a registry."""
 
     def __new__(mcs, name, bases, namespace, **kwargs):
+        """New  .
+
+        Args:
+            mcs: [TODO: Add description]
+            name: [TODO: Add description]
+            bases: [TODO: Add description]
+            namespace: [TODO: Add description]
+        """
         cls = super().__new__(mcs, name, bases, namespace, **kwargs)
 
         # Register the model if it has a registry defined and is not an

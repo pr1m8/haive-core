@@ -77,6 +77,13 @@ class FieldValidator(Validator):
         validators: list[Callable[[Any], bool]] | None = None,
         error_messages: dict[str, str] | None = None,
     ):
+        """Init  .
+
+        Args:
+            field_name: [TODO: Add description]
+            validators: [TODO: Add description]
+            error_messages: [TODO: Add description]
+        """
         self.field_name = field_name
         self.validators = validators or []
         self.error_messages = error_messages or {}
@@ -132,6 +139,13 @@ class ModelValidator(Validator):
         field_validators: dict[str, FieldValidator] | None = None,
         cross_field_validators: list[Callable] | None = None,
     ):
+        """Init  .
+
+        Args:
+            schema_info: [TODO: Add description]
+            field_validators: [TODO: Add description]
+            cross_field_validators: [TODO: Add description]
+        """
         self.schema_info = schema_info
         self.field_validators = field_validators or {}
         self.cross_field_validators = cross_field_validators or []

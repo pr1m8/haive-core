@@ -152,6 +152,11 @@ class LoaderStrategyRegistry:
     """Registry for managing loader strategies."""
 
     def __init__(self) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         self._strategies: dict[str, LoaderStrategy] = {}
         self._register_default_strategies()
 

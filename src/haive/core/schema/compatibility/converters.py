@@ -40,6 +40,7 @@ class ConverterRegistry:
     """Registry for type converters."""
 
     def __init__(self):
+        """Init  ."""
         self._converters: dict[str, TypeConverter] = {}
         self._type_cache: dict[tuple[type[Any], type[Any]], TypeConverter | None] = {}
 

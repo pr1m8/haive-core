@@ -67,7 +67,7 @@ class MessageRound(BaseModel):
 
 
 class MessageList(RootModel[list[AnyMessage]]):
-    """Enhanced root model for managing conversation messages with advanced filtering,
+    """Enhanced root model for managing conversation messages with advanced filtering,.
     analysis, and transformation capabilities.
 
     Key Features:

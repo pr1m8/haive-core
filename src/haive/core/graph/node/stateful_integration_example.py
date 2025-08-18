@@ -1,4 +1,4 @@
-"""from typing import Any, Dict
+"""from typing import Any, Dict.
 Stateful Node Integration Example - How it works with SimpleAgent and LLMState.
 
 This example shows how the stateful node architecture integrates with the existing
@@ -225,6 +225,11 @@ def show_integration_with_simple_agent() -> Any:
 
     # Override build_graph to use stateful nodes
     def build_stateful_graph(agent_instance: Any):
+        """Build Stateful Graph.
+
+        Args:
+            agent_instance: [TODO: Add description]
+        """
         from langgraph.graph import END, START
 
         from haive.core.graph.node.engine_node import EngineNodeConfig

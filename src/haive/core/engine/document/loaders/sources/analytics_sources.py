@@ -149,6 +149,11 @@ class SnowflakeSource(RemoteSource):
     limit: int | None = Field(None, description="Row limit")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -228,6 +233,11 @@ class DatabricksSource(RemoteSource):
     max_rows: int | None = Field(None, description="Maximum rows to fetch")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -307,6 +317,11 @@ class BigQuerySource(RemoteSource):
     max_results: int | None = Field(None, description="Maximum results")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -393,6 +408,11 @@ class TableauSource(RemoteSource):
     tags: list[str] | None = Field(None, description="Filter by tags")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"server": self.server_url, "site_id": self.site_id})
@@ -467,6 +487,11 @@ class PowerBISource(RemoteSource):
     include_dashboards: bool = Field(True, description="Include dashboards")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -550,6 +575,11 @@ class InfluxDBSource(RemoteSource):
     aggregation_method: str | None = Field(None, description="Aggregation method")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -632,6 +662,11 @@ class PrometheusSource(RemoteSource):
     timeout: int = Field(30, description="Query timeout in seconds")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -705,6 +740,11 @@ class ElasticsearchSource(RemoteSource):
     scroll_time: str = Field("5m", description="Scroll timeout")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -795,6 +835,11 @@ class SplunkSource(RemoteSource):
     max_count: int = Field(1000, description="Maximum results")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -867,6 +912,11 @@ class KafkaSource(RemoteSource):
     key_deserializer: str = Field("string", description="Key deserializer type")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -936,6 +986,11 @@ class AirflowSource(RemoteSource):
     start_date: datetime | None = Field(None, description="Filter by start date")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(

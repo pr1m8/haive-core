@@ -12,14 +12,12 @@ The mixins are organized into several categories:
 - State management mixins
 
 Usage:
-    ```python
-    from haive.core.common.mixins import IdentifierMixin, StateMixin
+            from haive.core.common.mixins import IdentifierMixin, StateMixin
 
-    class MyComponent(IdentifierMixin, StateMixin):
-        def __init__(self, id: str = None):
-            super().__init__(id=id)
-            # Now the class has ID management and state management capabilities
-    ```
+            class MyComponent(IdentifierMixin, StateMixin):
+                def __init__(self, id: str = None):
+                    super().__init__(id=id)
+                    # Now the class has ID management and state management capabilities
 """
 
 from haive.core.common.mixins.checkpointer_mixin import CheckpointerMixin

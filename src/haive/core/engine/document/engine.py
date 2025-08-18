@@ -534,6 +534,15 @@ class DocumentEngine(
         separators = ["\n\n", "\n", " ", ""]
 
         def split_recursive(text: str, separators: list[str]) -> list[str]:
+            """Split Recursive.
+
+            Args:
+                text: [TODO: Add description]
+                separators: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             if len(text) <= size:
                 return [text]
             if not separators:

@@ -1,13 +1,11 @@
-"""from typing import Any
+"""from typing import Any.
 This module provides an abstract base class for root-wrapped models that serialize with a named key.
 
 This is useful for models that are used as the root of a response, but need to be serialized with a named key.
 
 For example, if you have a model like this:
-```python
-class Query(ABCRootWrapper[str]):
-    pass
-```
+        class Query(ABCRootWrapper[str]):
+            pass
 
 It will serialize as `{"query": "Hello, world!"}` instead of `{"root": "Hello, world!"}`.
 """
@@ -21,13 +19,13 @@ T = TypeVar("T")
 
 
 class ABCRootWrapper(RootModel[T], Generic[T], ABC):
-    """Abstract base class for root-wrapped models that serialize with a named key
+    """Abstract base class for root-wrapped models that serialize with a named key.
     (like 'query' instead of 'root').
 
     The key is inferred automatically from the class name (lowercased),
     unless explicitly overridden by setting `SERIALIZED_KEY`.
 
-    Example:
+    Examples:
         class Query(ABCRootWrapper[str]):
             # SERIALIZED_KEY = "query"  # Optional override
     """
@@ -35,6 +33,11 @@ class ABCRootWrapper(RootModel[T], Generic[T], ABC):
     SERIALIZED_KEY: ClassVar[str | None] = None
 
     def model_dump(self, *args, **kwargs) -> Any:
+        """Model Dump.
+
+        Returns:
+            [TODO: Add return description]
+        """
         data = super().model_dump(*args, **kwargs)
         key = self._get_serialized_key()
         if "root" in data:
@@ -42,6 +45,11 @@ class ABCRootWrapper(RootModel[T], Generic[T], ABC):
         return data
 
     def model_dump_json(self, *args, **kwargs) -> Any:
+        """Model Dump Json.
+
+        Returns:
+            [TODO: Add return description]
+        """
         key = self._get_serialized_key()
         return super().model_dump_json(*args, **kwargs).replace('"root":', f'"{key}":')
 

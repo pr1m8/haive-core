@@ -147,6 +147,11 @@ class GovDocsSource(RemoteSource):
     languages: list[str] = Field(default=["en"], description="Document languages")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -224,6 +229,11 @@ class LegalDatabaseSource(RemoteSource):
     )
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -305,6 +315,11 @@ class FHIRSource(RemoteSource):
     include_references: bool = Field(True, description="Include referenced resources")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -369,6 +384,11 @@ class DICOMSource(LocalFileSource):
     )
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -441,6 +461,11 @@ class CanvasSource(RemoteSource):
     include_grades: bool = Field(False, description="Include grade data")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -513,6 +538,11 @@ class MoodleSource(RemoteSource):
     include_grades: bool = Field(False, description="Include gradebook")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -583,6 +613,11 @@ class BaiduSource(RemoteSource):
     language: str = Field("zh", description="Content language")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -643,6 +678,11 @@ class YandexSource(RemoteSource):
     region: str = Field("ru", description="Search region")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -713,6 +753,11 @@ class BlockchainSource(RemoteSource):
     include_metadata: bool = Field(True, description="Include metadata")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -786,6 +831,11 @@ class IoTPlatformSource(RemoteSource):
     aggregation: str | None = Field(None, description="Data aggregation method")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -859,6 +909,11 @@ class XMLFeedSource(LocalFileSource):
     xpath_filters: list[str] | None = Field(None, description="XPath filters")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -927,6 +982,11 @@ class GeospatialSource(RemoteSource):
     )
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(

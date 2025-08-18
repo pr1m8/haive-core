@@ -150,11 +150,9 @@ class ConnectionOptions:
         Returns:
             Dict[str, str]: Dictionary mapping SSL mode names to descriptions
 
-        Example:
-            ```python
-            ssl_modes = ConnectionOptions.get_postgres_ssl_modes()
-            print(ssl_modes['require'])  # "Require SSL connection"
-            ```
+        Examples:
+                    ssl_modes = ConnectionOptions.get_postgres_ssl_modes()
+                    print(ssl_modes['require'])  # "Require SSL connection"
         """
         return {
             "disable": "No SSL",
@@ -192,18 +190,16 @@ class ConnectionOptions:
         Returns:
             str: Formatted PostgreSQL connection string ready for use
 
-        Example:
-            ```python
-            dsn = ConnectionOptions.get_postgres_dsn(
-                host="db.example.com",
-                port=5432,
-                dbname="myapp",
-                user="appuser",
-                password="secret",
-                ssl_mode="require"
-            )
-            # dsn = "postgresql://appuser:secret@db.example.com:5432/myapp?sslmode=require"
-            ```
+        Examples:
+                    dsn = ConnectionOptions.get_postgres_dsn(
+                        host="db.example.com",
+                        port=5432,
+                        dbname="myapp",
+                        user="appuser",
+                        password="secret",
+                        ssl_mode="require"
+                    )
+                    # dsn = "postgresql://appuser:secret@db.example.com:5432/myapp?sslmode=require"
         """
 
         encoded_pass = urllib.parse.quote_plus(password)

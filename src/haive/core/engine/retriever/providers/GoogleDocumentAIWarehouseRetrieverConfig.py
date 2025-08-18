@@ -1,4 +1,4 @@
-"""from typing import Any
+"""from typing import Any.
 Google Document AI Warehouse Retriever implementation for the Haive framework.
 
 This module provides a configuration class for the Google Document AI Warehouse retriever,

@@ -34,19 +34,17 @@ class FlexibleMultiAgentState(StateSchema):
     - Private state passing support
     - No schema flattening
 
-    Example:
-        ```python
-        # Create with minimal fields
-        state = FlexibleMultiAgentState(
-            agents=[planner, executor]
-        )
+    Examples:
+                # Create with minimal fields
+                state = FlexibleMultiAgentState(
+                    agents=[planner, executor]
+                )
 
-        # Or with custom shared context
-        state = FlexibleMultiAgentState(
-            agents={"plan": planner, "exec": executor},
-            shared_context={"task": "analyze data"}
-        )
-        ```
+                # Or with custom shared context
+                state = FlexibleMultiAgentState(
+                    agents={"plan": planner, "exec": executor},
+                    shared_context={"task": "analyze data"}
+                )
     """
 
     agents: list["Agent"] | dict[str, "Agent"] = Field(

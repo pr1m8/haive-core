@@ -20,48 +20,46 @@ Key features include:
 - Integration with structured output models
 - Rich visualization for debugging and analysis
 
-Example:
-    ```python
-    from haive.core.schema import SchemaComposer
-    from typing import List
-    from langchain_core.messages import BaseMessage
-    from pydantic import Field
-    import operator
+Examples:
+            from haive.core.schema import SchemaComposer
+            from typing import List
+            from langchain_core.messages import BaseMessage
+            from pydantic import Field
+            import operator
 
-    # Create a new composer
-    composer = SchemaComposer(name="ConversationState")
+            # Create a new composer
+            composer = SchemaComposer(name="ConversationState")
 
-    # Add fields manually
-    composer.add_field(
-        name="messages",
-        field_type=List[BaseMessage],
-        default_factory=list,
-        description="Conversation history",
-        shared=True,
-        reducer="add_messages"
-    )
+            # Add fields manually
+            composer.add_field(
+                name="messages",
+                field_type=List[BaseMessage],
+                default_factory=list,
+                description="Conversation history",
+                shared=True,
+                reducer="add_messages"
+            )
 
-    composer.add_field(
-        name="context",
-        field_type=List[str],
-        default_factory=list,
-        description="Retrieved document contexts",
-        reducer=operator.add
-    )
+            composer.add_field(
+                name="context",
+                field_type=List[str],
+                default_factory=list,
+                description="Retrieved document contexts",
+                reducer=operator.add
+            )
 
-    # Extract fields from components
-    composer.add_fields_from_components([
-        retriever_engine,
-        llm_engine,
-        memory_component
-    ])
+            # Extract fields from components
+            composer.add_fields_from_components([
+                retriever_engine,
+                llm_engine,
+                memory_component
+            ])
 
-    # Build the schema
-    ConversationState = composer.build()
+            # Build the schema
+            ConversationState = composer.build()
 
-    # Use the schema
-    state = ConversationState()
-    ```
+            # Use the schema
+            state = ConversationState()
 """
 
 from __future__ import annotations
@@ -145,7 +143,7 @@ class SchemaComposer:
             base_state_schema: Optional custom base state schema to use. If not provided,
                              the composer will auto-detect the appropriate base class.
 
-        Example:
+        Examples:
             Creating a schema composer for a conversational agent::
 
                 composer = SchemaComposer(name="ConversationState")
@@ -613,20 +611,18 @@ class SchemaComposer:
         Returns:
             Self for method chaining to enable fluent API style
 
-        Example:
-            ```python
-            composer = SchemaComposer(name="MyState")
-            composer.add_field(
-                name="messages",
-                field_type=List[BaseMessage],
-                default_factory=list,
-                description="Conversation history",
-                shared=True,
-                reducer=add_messages,
-                input_for=["memory_engine"],
-                output_from=["llm_engine"]
-            )
-            ```
+        Examples:
+                    composer = SchemaComposer(name="MyState")
+                    composer.add_field(
+                        name="messages",
+                        field_type=List[BaseMessage],
+                        default_factory=list,
+                        description="Conversation history",
+                        shared=True,
+                        reducer=add_messages,
+                        input_for=["memory_engine"],
+                        output_from=["llm_engine"]
+                    )
         """
         # Skip special fields
         if name in {"__runnable_config__", "runnable_config"}:
@@ -1678,17 +1674,15 @@ class SchemaComposer:
         Returns:
             Self for method chaining to enable fluent API style
 
-        Example:
-            ```python
-            # Create a schema from multiple components
-            composer = SchemaComposer(name="AgentState")
-            composer.add_fields_from_components([
-                llm_engine,          # Engine instance
-                retriever_engine,    # Engine instance
-                MemoryConfig,        # Pydantic model class
-                {"context": (List[str], list, {"description": "Retrieved documents"})}
-            ])
-            ```
+        Examples:
+                    # Create a schema from multiple components
+                    composer = SchemaComposer(name="AgentState")
+                    composer.add_fields_from_components([
+                        llm_engine,          # Engine instance
+                        retriever_engine,    # Engine instance
+                        MemoryConfig,        # Pydantic model class
+                        {"context": (List[str], list, {"description": "Retrieved documents"})}
+                    ])
 
         Note:
             This is one of the most powerful methods in SchemaComposer, as it can
@@ -1796,6 +1790,11 @@ class SchemaComposer:
 
             # Create a default factory that returns the class engines
             def get_class_engines() -> Any | None:
+                """Get Class Engines.
+
+Returns:
+    [TODO: Add return description]
+"""
                 # This will be bound to the schema class later
                 return {}
 
@@ -1936,6 +1935,15 @@ class SchemaComposer:
 
                     # Create simple concat lists reducer
                     def concat_lists(a, b) -> Any:
+                        """Concat Lists.
+
+Args:
+    a: [TODO: Add description]
+    b: [TODO: Add description]
+
+Returns:
+    [TODO: Add return description]
+"""
                         return (a or []) + (b or [])
 
                     # If force_add is True and the field doesn't exist, add it
@@ -2176,6 +2184,11 @@ class SchemaComposer:
             if "engines" in schema.model_fields:
                 # Create a factory that returns the class engines
                 def engines_factory(cls=schema) -> Any:
+                    """Engines Factory.
+
+Returns:
+    [TODO: Add return description]
+"""
                     return cls.engines.copy() if hasattr(cls, "engines") else {}
 
                 # Update the field's default_factory
@@ -2655,25 +2668,23 @@ class SchemaComposer:
         Returns:
             A fully constructed StateSchema subclass ready for instantiation
 
-        Example:
-            ```python
-            # Create a schema from components in one step
-            ConversationState = SchemaComposer.from_components(
-                [llm_engine, retriever_engine, memory_component],
-                name="ConversationState"
-            )
+        Examples:
+                    # Create a schema from components in one step
+                    ConversationState = SchemaComposer.from_components(
+                        [llm_engine, retriever_engine, memory_component],
+                        name="ConversationState"
+                    )
 
-            # Use the schema
-            state = ConversationState()
+                    # Use the schema
+                    state = ConversationState()
 
-            # With custom base schema for token tracking
-            from haive.core.schema.prebuilt import MessagesStateWithTokenUsage
-            TokenAwareState = SchemaComposer.from_components(
-                [llm_engine],
-                name="TokenAwareState",
-                base_state_schema=MessagesStateWithTokenUsage
-            )
-            ```
+                    # With custom base schema for token tracking
+                    from haive.core.schema.prebuilt import MessagesStateWithTokenUsage
+                    TokenAwareState = SchemaComposer.from_components(
+                        [llm_engine],
+                        name="TokenAwareState",
+                        base_state_schema=MessagesStateWithTokenUsage
+                    )
 
         Note:
             This method automatically detects which base class to use (StateSchema,
@@ -3077,6 +3088,15 @@ class SchemaComposer:
 
             # Create simple concat lists reducer
             def concat_lists(a, b) -> Any:
+                """Concat Lists.
+
+Args:
+    a: [TODO: Add description]
+    b: [TODO: Add description]
+
+Returns:
+    [TODO: Add return description]
+"""
                 return (a or []) + (b or [])
 
             composer.add_field(
@@ -3149,6 +3169,15 @@ class SchemaComposer:
         except ImportError:
             # Fallback if add_messages is not available
             def concat_lists(a, b) -> Any:
+                """Concat Lists.
+
+Args:
+    a: [TODO: Add description]
+    b: [TODO: Add description]
+
+Returns:
+    [TODO: Add return description]
+"""
                 return (a or []) + (b or [])
 
             composer.add_field(

@@ -96,14 +96,13 @@ haive-core Documentation
    :hidden:
 
    API Overview <autoapi/index>
-   Core Engine <autoapi/haive/core/engine/index>
-   State & Schema <autoapi/haive/core/schema/index>
-   Graph System <autoapi/haive/core/graph/index>
-   Persistence <autoapi/haive/core/persistence/index>
-   Tools & Retrievers <autoapi/haive/core/tools/index>
-   Common Utilities <autoapi/haive/core/common/index>
-   Configuration <autoapi/haive/core/config/index>
-   Full API <autoapi/haive/core/index>
+   Engine <autoapi/core/engine/index>
+   Schema <autoapi/core/schema/index>
+   Graph <autoapi/core/graph/index>
+   Persistence <autoapi/core/persistence/index>
+   Tools <autoapi/core/tools/index>
+   Common <autoapi/core/common/index>
+   Config <autoapi/core/config/index>
 
 Quick Navigation
 ----------------

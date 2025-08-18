@@ -219,6 +219,11 @@ class HubSpotSource(BusinessSource):
     )
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -286,6 +291,11 @@ class SalesforceSource(BusinessSource):
     )
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -344,6 +354,11 @@ class PipedriveSource(BusinessSource):
     include_activities: bool = Field(False, description="Include activities")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -410,6 +425,11 @@ class ShopifySource(BusinessSource):
     include_inventory: bool = Field(False, description="Include inventory")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -476,6 +496,11 @@ class NotionSource(BusinessSource):
     include_comments: bool = Field(False, description="Include comments")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -530,6 +555,11 @@ class AirtableSource(BusinessSource):
     formula: str | None = Field(None, description="Airtable formula filter")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -587,6 +617,11 @@ class TrelloSource(BusinessSource):
     include_comments: bool = Field(False, description="Include comments")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -655,6 +690,11 @@ class JiraSource(BusinessSource):
     include_history: bool = Field(False, description="Include issue history")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -727,6 +767,11 @@ class ConfluenceSource(BusinessSource):
     include_comments: bool = Field(False, description="Include comments")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -799,6 +844,11 @@ class AirbyteSource(BusinessSource):
     namespace: str | None = Field(None, description="Stream namespace")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -871,6 +921,11 @@ class GoogleAnalyticsSource(BusinessSource):
     )
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(

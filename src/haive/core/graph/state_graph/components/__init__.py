@@ -15,25 +15,23 @@ New Modular Components (Composition-based architecture):
     - BranchManager: Handles conditional routing and branches
     - ModularBaseGraph: Main graph class using composition
 
-Example:
+Examples:
     Using the new modular architecture:
-    ```python
-    from haive.core.graph.state_graph.components import ModularBaseGraph
+            from haive.core.graph.state_graph.components import ModularBaseGraph
 
-    # Create a modular graph
-    graph = ModularBaseGraph(name="my_workflow")
+            # Create a modular graph
+            graph = ModularBaseGraph(name="my_workflow")
 
-    # Add nodes
-    graph.add_node("start", start_function)
-    graph.add_node("process", process_function)
+            # Add nodes
+            graph.add_node("start", start_function)
+            graph.add_node("process", process_function)
 
-    # Add edges and routing
-    graph.add_edge("start", "process")
-    graph.add_conditional_edges("process", router_function, {
-        "success": "finish",
-        "error": "retry"
-    })
-    ```
+            # Add edges and routing
+            graph.add_edge("start", "process")
+            graph.add_conditional_edges("process", router_function, {
+                "success": "finish",
+                "error": "retry"
+            })
 """
 
 # New modular components

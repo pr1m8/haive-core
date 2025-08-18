@@ -8,18 +8,16 @@ The main component of this module is the RetrieverType enum, which defines all
 supported retriever implementations and their categories. This helps in organizing
 and selecting appropriate retriever strategies for different use cases.
 
-Example:
-    ```python
-    from haive.core.engine.retriever.types import RetrieverType
+Examples:
+            from haive.core.engine.retriever.types import RetrieverType
 
-    # Use specific retriever types
-    vector_store_type = RetrieverType.VECTOR_STORE
-    ensemble_type = RetrieverType.ENSEMBLE
+            # Use specific retriever types
+            vector_store_type = RetrieverType.VECTOR_STORE
+            ensemble_type = RetrieverType.ENSEMBLE
 
-    # Check retriever type
-    if retriever_type == RetrieverType.MULTI_QUERY:
-        print("Using multi-query retrieval strategy")
-    ```
+            # Check retriever type
+            if retriever_type == RetrieverType.MULTI_QUERY:
+                print("Using multi-query retrieval strategy")
 """
 
 from enum import Enum
@@ -67,25 +65,23 @@ class RetrieverType(str, Enum):
             - PINECONE: Pinecone vector database
             - QDRANT: Qdrant vector database
 
-    Example:
-        ```python
-        from haive.core.engine.retriever.types import RetrieverType
-        from haive.core.engine.retriever import create_retriever_config
+    Examples:
+                from haive.core.engine.retriever.types import RetrieverType
+                from haive.core.engine.retriever import create_retriever_config
 
-        # Create a vector store retriever config
-        config = create_retriever_config(
-            retriever_type=RetrieverType.VECTOR_STORE,
-            name="my_retriever",
-            vector_store_config=vs_config
-        )
+                # Create a vector store retriever config
+                config = create_retriever_config(
+                    retriever_type=RetrieverType.VECTOR_STORE,
+                    name="my_retriever",
+                    vector_store_config=vs_config
+                )
 
-        # Create an ensemble retriever config
-        ensemble_config = create_retriever_config(
-            retriever_type=RetrieverType.ENSEMBLE,
-            name="ensemble_retriever",
-            retrievers=[config1, config2]
-        )
-        ```
+                # Create an ensemble retriever config
+                ensemble_config = create_retriever_config(
+                    retriever_type=RetrieverType.ENSEMBLE,
+                    name="ensemble_retriever",
+                    retrievers=[config1, config2]
+                )
     """
 
     # Base vector store retrievers

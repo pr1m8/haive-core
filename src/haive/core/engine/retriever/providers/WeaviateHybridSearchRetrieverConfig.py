@@ -1,4 +1,4 @@
-"""from typing import Any
+"""from typing import Any.
 Weaviate Hybrid Search Retriever implementation for the Haive framework.
 
 This module provides a configuration class for the Weaviate Hybrid Search retriever,

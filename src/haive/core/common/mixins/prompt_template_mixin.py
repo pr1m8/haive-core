@@ -30,7 +30,7 @@ Integration Patterns:
     2. Field Validation: @field_validator decorators preprocess prompt templates
     3. Composition: Existing schemas are preserved and extended, not replaced
 
-Example:
+Examples:
     Basic integration with an engine class:
 
     .. code-block:: python

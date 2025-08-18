@@ -29,6 +29,12 @@ class NotionSource(EnhancedSource):
         page_ids: list[str] | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            database_id: [TODO: Add description]
+            page_ids: [TODO: Add description]
+        """
         super().__init__(source_path="notion://workspace", **kwargs)
         self.database_id = database_id
         self.page_ids = page_ids or []
@@ -94,6 +100,12 @@ class ObsidianSource(EnhancedSource):
     source_type: SourceType = SourceType.LOCAL_DIRECTORY
 
     def __init__(self, vault_path: str, encoding: str = "utf-8", **kwargs):
+        """Init  .
+
+        Args:
+            vault_path: [TODO: Add description]
+            encoding: [TODO: Add description]
+        """
         super().__init__(source_path=vault_path, **kwargs)
         self.vault_path = vault_path
         self.encoding = encoding
@@ -142,6 +154,12 @@ class SlackSource(EnhancedSource):
         export_path: str | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            channel_id: [TODO: Add description]
+            export_path: [TODO: Add description]
+        """
         super().__init__(source_path="slack://workspace", **kwargs)
         self.channel_id = channel_id
         self.export_path = export_path
@@ -194,6 +212,12 @@ class GutenbergSource(EnhancedSource):
     def __init__(
         self, book_url: str | None = None, book_id: int | None = None, **kwargs
     ):
+        """Init  .
+
+        Args:
+            book_url: [TODO: Add description]
+            book_id: [TODO: Add description]
+        """
         source_path = book_url or f"gutenberg://book/{book_id}"
         super().__init__(source_path=source_path, **kwargs)
         self.book_url = book_url
@@ -240,6 +264,13 @@ class ConfluenceSource(EnhancedSource):
         page_ids: list[str] | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            url: [TODO: Add description]
+            space_key: [TODO: Add description]
+            page_ids: [TODO: Add description]
+        """
         super().__init__(source_path=url, **kwargs)
         self.url = url
         self.space_key = space_key
@@ -310,6 +341,12 @@ class ReadTheDocsSource(EnhancedSource):
     source_type: SourceType = SourceType.WEB_URL
 
     def __init__(self, project_url: str, features: list[str] | None = None, **kwargs):
+        """Init  .
+
+        Args:
+            project_url: [TODO: Add description]
+            features: [TODO: Add description]
+        """
         super().__init__(source_path=project_url, **kwargs)
         self.project_url = project_url
         self.features = features or ["page_content", "metadata"]

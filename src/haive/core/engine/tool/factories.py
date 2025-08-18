@@ -90,6 +90,7 @@ def create_structured_output_tool(
 
     # Create wrapper that validates output
     def structured_wrapper(*args, **kwargs):
+        """Structured Wrapper."""
         result = func(*args, **kwargs)
 
         # Validate output against model
@@ -331,6 +332,7 @@ def create_interruptible_tool(
 
     # Add interrupt method
     def interrupt():
+        """Interrupt."""
         raise InterruptedError(interrupt_message)
 
     interruptible.interrupt = interrupt

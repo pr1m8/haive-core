@@ -28,6 +28,11 @@ class MergeContext:
     """Context for merge operations."""
 
     def __init__(self) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         self.conflicts: list[dict[str, Any]] = []
         self.warnings: list[str] = []
         # field -> [schema_names]
@@ -92,6 +97,11 @@ class UnionMergeStrategy(MergeStrategy):
     def __init__(
         self, conflict_resolution: ConflictResolution = ConflictResolution.LAST_WINS
     ):
+        """Init  .
+
+        Args:
+            conflict_resolution: [TODO: Add description]
+        """
         self.conflict_resolution = conflict_resolution
 
     def should_include_field(
@@ -215,6 +225,13 @@ class SchemaMerger:
         analyzer: TypeAnalyzer | None = None,
         compatibility_checker: CompatibilityChecker | None = None,
     ):
+        """Init  .
+
+        Args:
+            strategy: [TODO: Add description]
+            analyzer: [TODO: Add description]
+            compatibility_checker: [TODO: Add description]
+        """
         self.analyzer = analyzer or TypeAnalyzer()
         self.compatibility_checker = compatibility_checker or CompatibilityChecker()
 

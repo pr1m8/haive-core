@@ -112,6 +112,11 @@ class S3FileSource(RemoteSource):
     endpoint_url: str | None = Field(None, description="Custom endpoint URL")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -174,6 +179,11 @@ class S3DirectorySource(RemoteSource):
     max_concurrency: int = Field(10, ge=1, le=50, description="Max concurrent loads")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -245,6 +255,11 @@ class GCSFileSource(RemoteSource):
     project_id: str | None = Field(None, description="GCP project ID")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"bucket": self.bucket, "blob": self.blob})
@@ -303,6 +318,11 @@ class GCSDirectorySource(RemoteSource):
     continue_on_failure: bool = Field(True, description="Continue if file fails")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -363,6 +383,11 @@ class AzureBlobFileSource(RemoteSource):
     credential: str | None = Field(None, description="Azure credential")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"container": self.container, "blob": self.blob_name})
@@ -419,6 +444,11 @@ class AzureBlobDirectorySource(RemoteSource):
     exclude: list[str] | None = Field(None, description="Exclude patterns")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"container": self.container, "prefix": self.prefix})
@@ -478,6 +508,11 @@ class DropboxSource(RemoteSource):
     file_types: list[str] | None = Field(None, description="Filter by file types")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -546,6 +581,11 @@ class GoogleDriveSource(RemoteSource):
     max_files: int | None = Field(None, description="Maximum files to load")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         if self.folder_id:
@@ -620,6 +660,11 @@ class OneDriveSource(RemoteSource):
     recursive: bool = Field(True, description="Load recursively")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -683,6 +728,11 @@ class DeltaLakeSource(RemoteSource):
     storage_options: dict[str, str] | None = Field(None, description="Storage options")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"table_path": self.table_path})
@@ -747,6 +797,11 @@ class IcebergSource(RemoteSource):
     filter_expression: str | None = Field(None, description="Filter expression")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"table": self.table_identifier, "catalog_uri": self.catalog_uri})
@@ -817,6 +872,11 @@ class SharePointSource(RemoteSource):
     include_metadata: bool = Field(True, description="Include file metadata")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -900,6 +960,11 @@ class MinioSource(RemoteSource):
     include_version: bool = Field(False, description="Include object versions")
 
     def get_loader_kwargs(self) -> dict[str, Any]:
+        """Get Loader Kwargs.
+
+        Returns:
+            [TODO: Add return description]
+        """
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(

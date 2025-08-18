@@ -59,4 +59,9 @@ class BaseTextSplitter(InvokableEngine[list[Document], list[Document]]):
     """A base class for text splitters."""
 
     def __init__(self, *args, **kwargs) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         super().__init__(*args, **kwargs)

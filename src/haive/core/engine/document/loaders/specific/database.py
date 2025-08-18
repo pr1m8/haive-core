@@ -29,6 +29,14 @@ class MongoDBSource(DatabaseSource):
         filter_criteria: dict[str, Any] | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            connection_string: [TODO: Add description]
+            database_name: [TODO: Add description]
+            collection_name: [TODO: Add description]
+            filter_criteria: [TODO: Add description]
+        """
         super().__init__(source_path=connection_string, **kwargs)
         self.connection_string = connection_string
         self.database_name = database_name
@@ -118,6 +126,13 @@ class PostgreSQLSource(DatabaseSource):
         table_name: str | None = None,
         **kwargs,
     ):
+        """Init  .
+
+        Args:
+            connection_string: [TODO: Add description]
+            query: [TODO: Add description]
+            table_name: [TODO: Add description]
+        """
         super().__init__(source_path=connection_string, **kwargs)
         self.connection_string = connection_string
         self.query = query

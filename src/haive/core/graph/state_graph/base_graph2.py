@@ -1735,6 +1735,14 @@ class BaseGraph(BaseModel, ValidationMixin):
         reachable = set()
 
         def dfs(node) -> None:
+            """Dfs.
+
+            Args:
+                node: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             if node in reachable:
                 return
             reachable.add(node)
@@ -2087,6 +2095,12 @@ class BaseGraph(BaseModel, ValidationMixin):
         def validation_wrapper(
             state: dict[str, Any], config: dict[str, Any] | None = None
         ):
+            """Validation Wrapper.
+
+            Args:
+                state: [TODO: Add description]
+                config: [TODO: Add description]
+            """
             try:
                 if callable(validation_config):
                     result = validation_config(state, config)
@@ -2169,6 +2183,12 @@ class BaseGraph(BaseModel, ValidationMixin):
         has_string_keys = any(isinstance(k, str) for k in destination_map)
 
         def wrapper(state: dict[str, Any], config: dict[str, Any] | None = None):
+            """Wrapper.
+
+            Args:
+                state: [TODO: Add description]
+                config: [TODO: Add description]
+            """
             try:
                 result = func(state) if param_count == 1 else func(state, config)
                 logger.debug(
@@ -2694,6 +2714,12 @@ class BaseGraph(BaseModel, ValidationMixin):
             logger.info("Created StateGraph")
 
             def log_function_call(func, name: str):
+                """Log Function Call.
+
+                Args:
+                    func: [TODO: Add description]
+                    name: [TODO: Add description]
+                """
                 import inspect
 
                 sig = inspect.signature(func)
@@ -2764,6 +2790,12 @@ class BaseGraph(BaseModel, ValidationMixin):
                     def action(
                         state: dict[str, Any], config: dict[str, Any] | None = None
                     ):
+                        """Action.
+
+                        Args:
+                            state: [TODO: Add description]
+                            config: [TODO: Add description]
+                        """
                         return state
 
                 import os
@@ -2802,6 +2834,15 @@ class BaseGraph(BaseModel, ValidationMixin):
                         def branch_wrapper(
                             branch_func, param_count, branch_name, dest_dict
                         ):
+                            """Branch Wrapper.
+
+                            Args:
+                                branch_func: [TODO: Add description]
+                                param_count: [TODO: Add description]
+                                branch_name: [TODO: Add description]
+                                dest_dict: [TODO: Add description]
+                            """
+
                             def wrapper(
                                 state: dict[str, Any],
                                 config: dict[str, Any] | None = None,
@@ -3303,6 +3344,14 @@ class BaseGraph(BaseModel, ValidationMixin):
         path_set = set()
 
         def dfs(node) -> None:
+            """Dfs.
+
+            Args:
+                node: [TODO: Add description]
+
+            Returns:
+                [TODO: Add return description]
+            """
             if node in path_set:
                 cycle_start = path.index(node)
                 cycles.append(path[cycle_start:] + [node])
@@ -3610,6 +3659,16 @@ class BaseGraph(BaseModel, ValidationMixin):
             next_node = f"{prefix}{agent_names[i + 1]}"
 
             def make_condition(current=agent_names[i], next=agent_names[i + 1]) -> Any:
+                """Make Condition.
+
+                Args:
+                    current: [TODO: Add description]
+                    next: [TODO: Add description]
+
+                Returns:
+                    [TODO: Add return description]
+                """
+
                 def condition(_____state: dict[str, Any]):
                     return f"{prefix}{next}"
 
@@ -3631,6 +3690,11 @@ class BaseGraph(BaseModel, ValidationMixin):
             return
 
         def branch_condition(_____state: dict[str, Any]):
+            """Branch Condition.
+
+            Args:
+                _____state: [TODO: Add description]
+            """
             condition = branch_config.get("condition", "default")
             if condition == "default":
                 return f"{prefix}{targets[0]}" if targets else END
@@ -3823,6 +3887,11 @@ def create_debug_has_tool_calls(original_func) -> Any:
     """
 
     def debug_wrapper(_____state: dict[str, Any]):
+        """Debug Wrapper.
+
+        Args:
+            _____state: [TODO: Add description]
+        """
         from langchain_core.messages import AIMessage
 
         logger.debug("Starting has_tool_calls debug")

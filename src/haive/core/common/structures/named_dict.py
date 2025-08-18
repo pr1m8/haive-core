@@ -194,6 +194,12 @@ class NamedDict(BaseModel, Generic[T], GetterMixin[T]):
             attr_name = name[7:]  # Remove "get_by_"
 
             def getter_method(value: str, default=None):
+                """Getter Method.
+
+                Args:
+                    value: [TODO: Add description]
+                    default: [TODO: Add description]
+                """
                 return self.get_by_attr(attr_name, value, default)
 
             return getter_method

@@ -96,6 +96,11 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
     )
 
     def __init__(self, **data) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         super().__init__(**data)
         self._modified = False
 

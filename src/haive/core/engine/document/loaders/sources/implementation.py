@@ -64,6 +64,11 @@ class CredentialManager:
     """Manages credentials for various source types."""
 
     def __init__(self) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         self._credentials: dict[str, Credential] = {}
         self._env_prefix = "HAIVE_CRED_"
 
@@ -284,6 +289,11 @@ class SourceRegistry:
     """Registry for managing source types."""
 
     def __init__(self) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         self._sources: list[EnhancedSource] = []
         self._register_default_sources()
 

@@ -81,6 +81,11 @@ class BranchDefinition(BaseModel):
         if self.condition_func is None:
             # Create a default condition function based on routes
             def default_condition(____state: dict[str, Any]):
+                """Default Condition.
+
+                Args:
+                    ____state: [TODO: Add description]
+                """
                 # Look for route matches in state
                 for route_key in self.routes:
                     if route_key in state:
@@ -108,6 +113,11 @@ class GraphPatternRegistry:
         return cls._instance
 
     def __init__(self) -> None:
+        """Init  .
+
+        Returns:
+            [TODO: Add return description]
+        """
         self.patterns: dict[str, GraphPattern] = {}
         self.branches: dict[str, BranchDefinition] = {}
 
@@ -209,6 +219,14 @@ def register_pattern(
     """
 
     def decorator(func) -> Any:
+        """Decorator.
+
+        Args:
+            func: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         pattern = GraphPattern(
             name=name,
             pattern_type=pattern_type,
@@ -244,6 +262,14 @@ def register_branch(
     """
 
     def decorator(func) -> Any:
+        """Decorator.
+
+        Args:
+            func: [TODO: Add description]
+
+        Returns:
+            [TODO: Add return description]
+        """
         branch = BranchDefinition(
             name=name,
             condition_type=condition_type,

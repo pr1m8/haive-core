@@ -120,15 +120,13 @@ async def ensure_async_pool_open(checkpointer: Any) -> Any | None:
         dependencies are not available, making it safe to call even if the
         async database modules are not installed.
 
-    Example:
-        ```python
-        async def prepare_checkpointer(checkpointer):
-            # Ensure the pool is open before using it
-            pool = await ensure_async_pool_open(checkpointer)
-            if pool:
-                print("Pool is ready for use")
-            # Continue with checkpointer operations...
-        ```
+    Examples:
+                async def prepare_checkpointer(checkpointer):
+                    # Ensure the pool is open before using it
+                    pool = await ensure_async_pool_open(checkpointer)
+                    if pool:
+                        print("Pool is ready for use")
+                    # Continue with checkpointer operations...
     """
     opened_pool = None
     try:
