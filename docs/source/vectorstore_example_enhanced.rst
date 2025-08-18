@@ -71,7 +71,7 @@ Quick Start
 
          # Configure a local vector store
          config = VectorStoreConfig(
-             provider=VectorStoreProvider.CHROMA,
+             provider=VectorStoreProvider.Chroma,
              collection_name="documents",
              persist_directory="./chroma_db"
          )
@@ -87,7 +87,7 @@ Quick Start
 
          # Configure for production with Pinecone
          config = VectorStoreConfig(
-             provider=VectorStoreProvider.PINECONE,
+             provider=VectorStoreProvider.Pinecone,
              api_key_env_var="PINECONE_API_KEY",
              environment="us-west1-gcp",
              index_name="production-index"
@@ -115,7 +115,7 @@ Quick Start
          # Create vector store from documents
          vs_config = VectorStoreConfig.create_vs_config_from_documents(
              documents=docs,
-             vector_store_provider=VectorStoreProvider.CHROMA
+             vector_store_provider=VectorStoreProvider.Chroma
          )
 
 API Reference
@@ -150,7 +150,7 @@ Configuration Classes
    .. code-block:: python
 
       config = VectorStoreConfig(
-          provider=VectorStoreProvider.CHROMA,
+          provider=VectorStoreProvider.Chroma,
           persist_directory="./local_db",
           collection_name="my_documents"
       )
@@ -160,7 +160,7 @@ Configuration Classes
    .. code-block:: python
 
       config = VectorStoreConfig(
-          provider=VectorStoreProvider.PINECONE,
+          provider=VectorStoreProvider.Pinecone,
           api_key_env_var="PINECONE_API_KEY",
           environment="us-west1-gcp",
           index_name="production",
@@ -184,16 +184,16 @@ Configuration Classes
       * - Provider
         - Type
         - Best For
-      * - :attr:`~VectorStoreProvider.CHROMA`
+      * - :attr:`~VectorStoreProvider.Chroma`
         - Open Source
         - Local development, prototyping
-      * - :attr:`~VectorStoreProvider.PINECONE`
+      * - :attr:`~VectorStoreProvider.Pinecone`
         - Cloud Service
         - Production, managed infrastructure
       * - :attr:`~VectorStoreProvider.FAISS`
         - Local/Memory
         - High-performance similarity search
-      * - :attr:`~VectorStoreProvider.WEAVIATE`
+      * - :attr:`~VectorStoreProvider.Weaviate`
         - Open Source
         - GraphQL queries, hybrid search
 
@@ -256,7 +256,7 @@ RAG Pipeline Example
    
    # Setup vector store
    config = VectorStoreConfig(
-       provider=VectorStoreProvider.CHROMA,
+       provider=VectorStoreProvider.Chroma,
        collection_name="knowledge_base"
    )
    
