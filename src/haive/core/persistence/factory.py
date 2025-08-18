@@ -7,10 +7,21 @@ import random
 import time
 from typing import Any
 
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.checkpoint.postgres import ShallowPostgresSaver
-from langgraph.checkpoint.postgres.aio import AsyncShallowPostgresSaver
-from psycopg_pool import AsyncConnectionPool, ConnectionPool
+try:
+    from langgraph.checkpoint.memory import MemorySaver
+    from langgraph.checkpoint.postgres import ShallowPostgresSaver
+    from langgraph.checkpoint.postgres.aio import AsyncShallowPostgresSaver
+except ImportError:
+    # Fallback classes for documentation builds
+    class MemorySaver: pass
+    class ShallowPostgresSaver: pass
+    class AsyncShallowPostgresSaver: pass
+try:
+    from psycopg_pool import AsyncConnectionPool, ConnectionPool
+except ImportError:
+    # Fallback classes for documentation builds
+    class AsyncConnectionPool: pass
+    class ConnectionPool: pass
 
 from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
 from haive.core.persistence.postgres_saver_override import (

@@ -26,12 +26,27 @@ Typical usage example:
 import os
 from typing import Any
 
-import torch
-from dotenv import load_dotenv
-from langchain.embeddings import CacheBackedEmbeddings
-from langchain.storage import LocalFileStore
-from langchain_community.embeddings.anyscale import AnyscaleEmbeddings
-from langchain_community.embeddings.bedrock import BedrockEmbeddings
+try:
+    import torch
+except ImportError:
+    # Fallback for documentation builds
+    torch = None
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv(*args, **kwargs): pass
+
+try:
+    from langchain.embeddings import CacheBackedEmbeddings
+    from langchain.storage import LocalFileStore
+    from langchain_community.embeddings.anyscale import AnyscaleEmbeddings
+    from langchain_community.embeddings.bedrock import BedrockEmbeddings
+except ImportError:
+    # Fallback classes for documentation builds
+    class CacheBackedEmbeddings: pass
+    class LocalFileStore: pass
+    class AnyscaleEmbeddings: pass
+    class BedrockEmbeddings: pass
 from langchain_community.embeddings.cloudflare_workersai import (
     CloudflareWorkersAIEmbeddings,
 )

@@ -19,7 +19,12 @@ import urllib.parse
 from contextlib import asynccontextmanager
 from typing import Any
 
-from psycopg_pool import AsyncConnectionPool, ConnectionPool
+try:
+    from psycopg_pool import AsyncConnectionPool, ConnectionPool
+except ImportError:
+    # Fallback classes for documentation builds
+    class AsyncConnectionPool: pass
+    class ConnectionPool: pass
 from pydantic import Field, SecretStr
 
 from haive.core.persistence.base import CheckpointerConfig
