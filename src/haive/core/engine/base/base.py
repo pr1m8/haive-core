@@ -17,7 +17,11 @@ import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar
 
-from langchain_core.runnables import RunnableConfig
+try:
+    from langchain_core.runnables import RunnableConfig
+except ImportError:
+    # Fallback for documentation builds
+    class RunnableConfig: pass
 from pydantic import BaseModel, ConfigDict, Field, create_model, field_serializer
 
 # Import registry base

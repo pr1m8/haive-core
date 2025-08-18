@@ -27,23 +27,62 @@ import os
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any, Literal, Self, Union, cast
 
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
-from langchain_core.output_parsers import (
-    BaseOutputParser,
-    PydanticOutputParser,
-    StrOutputParser,
-)
-from langchain_core.output_parsers.openai_tools import PydanticToolsParser
-from langchain_core.prompts import (
-    BasePromptTemplate,
-    ChatPromptTemplate,
-    FewShotChatMessagePromptTemplate,
-    FewShotPromptTemplate,
-    MessagesPlaceholder,
-    PromptTemplate,
-)
-from langchain_core.runnables import Runnable, RunnableConfig
-from langchain_core.tools import BaseTool, StructuredTool
+# Handle missing dependencies gracefully for documentation builds
+try:
+    from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+except ImportError:
+    # Fallback classes for documentation builds
+    class BaseMessage: pass
+    class AIMessage(BaseMessage): pass
+    class HumanMessage(BaseMessage): pass
+    class SystemMessage(BaseMessage): pass
+
+try:
+    from langchain_core.output_parsers import (
+        BaseOutputParser,
+        PydanticOutputParser,
+        StrOutputParser,
+    )
+except ImportError:
+    # Fallback classes for documentation builds
+    class BaseOutputParser: pass
+    class PydanticOutputParser(BaseOutputParser): pass
+    class StrOutputParser(BaseOutputParser): pass
+try:
+    from langchain_core.output_parsers.openai_tools import PydanticToolsParser
+except ImportError:
+    class PydanticToolsParser: pass
+
+try:
+    from langchain_core.prompts import (
+        BasePromptTemplate,
+        ChatPromptTemplate,
+        FewShotChatMessagePromptTemplate,
+        FewShotPromptTemplate,
+        MessagesPlaceholder,
+        PromptTemplate,
+    )
+except ImportError:
+    # Fallback classes for documentation builds
+    class BasePromptTemplate: pass
+    class ChatPromptTemplate(BasePromptTemplate): pass
+    class FewShotChatMessagePromptTemplate(BasePromptTemplate): pass
+    class FewShotPromptTemplate(BasePromptTemplate): pass
+    class MessagesPlaceholder: pass
+    class PromptTemplate(BasePromptTemplate): pass
+
+try:
+    from langchain_core.runnables import Runnable, RunnableConfig
+except ImportError:
+    # Fallback classes for documentation builds
+    class Runnable: pass
+    class RunnableConfig: pass
+try:
+    from langchain_core.tools import BaseTool, StructuredTool
+except ImportError:
+    # Fallback classes for documentation builds
+    class BaseTool: pass
+    class StructuredTool(BaseTool): pass
 from pydantic import (
     BaseModel,
     ConfigDict,
