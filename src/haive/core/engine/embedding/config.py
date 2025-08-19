@@ -3,8 +3,8 @@
 import logging
 from typing import Any
 
-from .base import BaseEmbeddingConfig
-from .types import EmbeddingType
+from haive.core.engine.embedding.base import BaseEmbeddingConfig
+from haive.core.engine.embedding.types import EmbeddingType
 
 logger = logging.getLogger(__name__)
 

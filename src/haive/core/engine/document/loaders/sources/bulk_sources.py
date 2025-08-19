@@ -8,8 +8,8 @@ and filtering capabilities.
 from enum import Enum
 from typing import Any
 
-from .enhanced_registry import enhanced_registry, register_bulk_source
-from .source_types import (
+from haive.core.engine.document.loaders.sources.enhanced_registry import enhanced_registry, register_bulk_source
+from haive.core.engine.document.loaders.sources.source_types import (
     CloudStorageSource,
     CredentialType,
     DirectorySource,

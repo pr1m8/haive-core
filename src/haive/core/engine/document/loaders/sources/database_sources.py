@@ -11,8 +11,8 @@ from urllib.parse import urlparse
 
 from pydantic import Field, field_validator
 
-from .enhanced_registry import enhanced_registry, register_database_source
-from .source_types import BaseSource, LoaderCapability
+from haive.core.engine.document.loaders.sources.enhanced_registry import enhanced_registry, register_database_source
+from haive.core.engine.document.loaders.sources.source_types import BaseSource, LoaderCapability
 
 
 class DatabaseType(str, Enum):

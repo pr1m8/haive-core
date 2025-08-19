@@ -11,21 +11,21 @@ Version: 1.0.0
 import asyncio
 import contextlib
 
-from .auto_loader import (
+from haive.core.engine.document.loaders.auto_loader import (
     AutoLoader,
     AutoLoaderConfig,
     aload_document,
     load_document,
     load_documents_bulk,
 )
-from .auto_registry import (
+from haive.core.engine.document.loaders.auto_registry import (
     auto_register_all,
     get_registration_status,
     get_sources_by_category,
     list_available_sources,
 )
-from .sources.enhanced_registry import LoaderPreference
-from .sources.source_types import SourceCategory
+from haive.core.engine.document.loaders.sources.enhanced_registry import LoaderPreference
+from haive.core.engine.document.loaders.sources.source_types import SourceCategory
 
 # =============================================================================
 # Basic Usage Examples

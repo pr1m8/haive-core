@@ -4,8 +4,8 @@ This package provides tools that agents can use, including store management
 tools for memory operations similar to LangMem.
 """
 
-from .store_manager import MemoryEntry, StoreManager
-from .store_tools import (
+from haive.core.tools.store_manager import MemoryEntry, StoreManager
+from haive.core.tools.store_tools import (
     create_delete_memory_tool,
     create_manage_memory_tool,
     create_memory_tools_suite,

@@ -113,7 +113,7 @@ Version: 2.0.0 - Complete Rewrite with 230+ Loaders
 from haive.core.engine.document.config import LoaderPreference
 
 # Ultimate Auto-Loader System - Main Interface
-from .auto_loader import (
+from haive.core.engine.document.loaders.auto_loader import (
     AutoLoader,
     AutoLoaderConfig,
     BulkLoadingResult,
@@ -125,7 +125,7 @@ from .auto_loader import (
 )
 
 # Auto-Registry System
-from .auto_registry import (
+from haive.core.engine.document.loaders.auto_registry import (
     AutoRegistry,
     RegistrationInfo,
     RegistrationStats,
@@ -137,10 +137,10 @@ from .auto_registry import (
 )
 
 # Path Analysis
-from .path_analyzer import PathAnalyzer, SourceInfo, analyze_path
+from haive.core.engine.document.loaders.path_analyzer import PathAnalyzer, SourceInfo, analyze_path
 
 # Enhanced Registry
-from .sources.enhanced_registry import (
+from haive.core.engine.document.loaders.sources.enhanced_registry import (
     enhanced_registry,
     register_bulk_source,
     register_file_source,
@@ -148,7 +148,7 @@ from .sources.enhanced_registry import (
 )
 
 # Source Types
-from .sources.source_types import (
+from haive.core.engine.document.loaders.sources.source_types import (
     BaseSource,
     CredentialType,
     LoaderCapability,

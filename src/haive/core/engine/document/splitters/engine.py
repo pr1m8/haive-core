@@ -17,7 +17,7 @@ from haive.core.engine.base.types import EngineType
 from haive.core.engine.document.config import ProcessedDocument
 from haive.core.schema.prebuilt.document_state import DocumentState
 
-from .base import (
+from haive.core.engine.document.splitters.base import (
     CharacterTextSplitter,
     HTMLHeaderTextSplitter,
     LatexTextSplitter,
@@ -30,7 +30,7 @@ from .base import (
     SpacyTextSplitter,
     TokenTextSplitter,
 )
-from .config import DocSplitterType
+from haive.core.engine.document.splitters.config import DocSplitterType
 
 
 class DocSplitterInputSchema(BaseModel):

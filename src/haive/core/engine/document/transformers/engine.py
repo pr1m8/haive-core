@@ -17,7 +17,7 @@ from haive.core.engine.base.types import EngineType
 from haive.core.engine.document.config import ProcessedDocument
 from haive.core.schema.prebuilt.document_state import DocumentState
 
-from .types import DocTransformerType
+from haive.core.engine.document.transformers.types import DocTransformerType
 
 
 class DocTransformerConfig(BaseModel):

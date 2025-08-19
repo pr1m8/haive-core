@@ -6,14 +6,14 @@ the core functionality needed for the document engine migration.
 
 from typing import Any
 
-from .enhanced_registry import (
+from haive.core.engine.document.loaders.sources.enhanced_registry import (
     enhanced_registry,
     register_bulk_source,
     register_database_source,
     register_file_source,
     register_web_source,
 )
-from .source_types import (
+from haive.core.engine.document.loaders.sources.source_types import (
     DatabaseSource,
     DirectorySource,
     LocalFileSource,

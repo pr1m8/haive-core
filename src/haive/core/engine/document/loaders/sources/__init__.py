@@ -4,8 +4,8 @@ Sources represent the data about where documents come from.
 They are data models that hold configuration and metadata.
 """
 
-from .registry import register_source, source_registry
-from .source_base import (
+from haive.core.engine.document.loaders.sources.registry import register_source, source_registry
+from haive.core.engine.document.loaders.sources.source_base import (
     BaseSource,
     CloudSource,
     DatabaseSource,

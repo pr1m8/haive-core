@@ -4,10 +4,11 @@ This module provides the extension system for runtime components, allowing
 for customization and enhancement of runtime behavior.
 """
 
-from .base import Extension
-from .protocols import ExtensionProtocol
+from haive.core.runtime.extension.base import Extension
+from haive.core.runtime.extension.protocols import ExtensionProtocol
 
 __all__ = [
     "Extension",
     "ExtensionProtocol",
 ]
+

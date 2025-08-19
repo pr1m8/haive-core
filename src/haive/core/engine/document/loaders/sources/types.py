@@ -3,12 +3,12 @@
 This module provides common types and enums used across document loader sources.
 """
 
-from .local.types import (
+from haive.core.engine.document.loaders.sources.local.types import (
     CodeFileType,
     LocalSourceFileType,
     ProgrammingLanguage,
 )
-from .database.types import DatabaseSourceType
+from haive.core.engine.document.loaders.sources.database.types import DatabaseSourceType
 
 __all__ = [
     "CodeFileType",
@@ -16,3 +16,5 @@ __all__ = [
     "ProgrammingLanguage", 
     "DatabaseSourceType",
 ]
+
+

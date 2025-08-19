@@ -1,4 +1,4 @@
-from ..source_types import BaseSource
+from haive.core.engine.document.loaders.sources.source_types import BaseSource
 
 
 class ChatSource(BaseSource):

@@ -17,7 +17,7 @@ from haive.core.utils.tools.tool_schema_generator import (
     extract_output_schema,
 )
 
-from .types import (
+from haive.core.engine.tool.types import (
     InterruptibleTool,
     StateAwareTool,
     ToolCapability,

@@ -19,8 +19,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from haive.core.engine.base import InvokableEngine
 from haive.core.engine.base.types import EngineType
 
-from .analyzer import ToolAnalyzer
-from .types import (
+from haive.core.engine.tool.analyzer import ToolAnalyzer
+from haive.core.engine.tool.types import (
     ToolCapability,
     ToolCategory,
     ToolLike,
@@ -851,7 +851,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
     @classmethod
     def get_tool_type(cls) -> type:
         """Get the universal ToolLike type for other components."""
-        from .types import ToolLike
+        from haive.core.engine.tool.types import ToolLike
 
         return ToolLike
 
@@ -863,14 +863,14 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
     @classmethod
     def get_capability_enum(cls) -> type[ToolCapability]:
         """Get ToolCapability enum for other components."""
-        from .types import ToolCapability
+        from haive.core.engine.tool.types import ToolCapability
 
         return ToolCapability
 
     @classmethod
     def get_category_enum(cls) -> type[ToolCategory]:
         """Get ToolCategory enum for other components."""
-        from .types import ToolCategory
+        from haive.core.engine.tool.types import ToolCategory
 
         return ToolCategory
 

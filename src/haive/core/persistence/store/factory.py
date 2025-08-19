@@ -5,13 +5,13 @@ import logging
 from contextlib import asynccontextmanager, contextmanager
 from typing import Any
 
-from .base import SerializableStoreWrapper
-from .types import StoreConfig, StoreType
-from .wrappers.memory import MemoryStoreWrapper
+from haive.core.persistence.store.base import SerializableStoreWrapper
+from haive.core.persistence.store.types import StoreConfig, StoreType
+from haive.core.persistence.store.wrappers.memory import MemoryStoreWrapper
 
 # Import PostgreSQL wrappers if available
 try:
-    from .postgres import AsyncPostgresStoreWrapper, PostgresStoreWrapper
+    from haive.core.persistence.store.postgres import AsyncPostgresStoreWrapper, PostgresStoreWrapper
 except ImportError:
     # PostgreSQL wrappers not available yet
     AsyncPostgresStoreWrapper = None

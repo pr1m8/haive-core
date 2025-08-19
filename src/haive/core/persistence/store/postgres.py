@@ -12,8 +12,8 @@ from pydantic import Field, PrivateAttr
 
 from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
 
-from .base import SerializableStoreWrapper
-from .types import StoreConfig
+from haive.core.persistence.store.base import SerializableStoreWrapper
+from haive.core.persistence.store.types import StoreConfig
 
 logger = logging.getLogger(__name__)
 

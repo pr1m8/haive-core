@@ -14,8 +14,8 @@ from typing import Any
 
 from pydantic import Field
 
-from .enhanced_registry import enhanced_registry, register_bulk_source, register_source
-from .source_types import CredentialType, LoaderCapability, RemoteSource, SourceCategory
+from haive.core.engine.document.loaders.sources.enhanced_registry import enhanced_registry, register_bulk_source, register_source
+from haive.core.engine.document.loaders.sources.source_types import CredentialType, LoaderCapability, RemoteSource, SourceCategory
 
 
 class AnalyticsPlatform(str, Enum):

@@ -9,7 +9,7 @@ from typing import (
 
 from pydantic import BaseModel, Field, PrivateAttr, computed_field
 
-from haive.core.common.structures.tree_leaf.generics import ChildT, ContentT, DefaultContent, DefaultResult, ResultT
+from .generics import ChildT, ContentT, DefaultContent, DefaultResult, ResultT
 
 
 class TreeNode(BaseModel, Generic[ContentT, ResultT], ABC):

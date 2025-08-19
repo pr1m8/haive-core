@@ -6,12 +6,12 @@ with focus on unstructured processing, generic loaders, and code language suppor
 
 from typing import Any
 
-from .enhanced_registry import (
+from haive.core.engine.document.loaders.sources.enhanced_registry import (
     enhanced_registry,
     register_bulk_source,
     register_file_source,
 )
-from .source_types import (
+from haive.core.engine.document.loaders.sources.source_types import (
     DirectorySource,
     LoaderCapability,
     LocalFileSource,

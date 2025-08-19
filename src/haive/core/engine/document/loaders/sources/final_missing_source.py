@@ -6,8 +6,8 @@ comprehensive document loader system.
 
 from pydantic import Field
 
-from .enhanced_registry import register_source
-from .source_types import LoaderCapability, RemoteSource, SourceCategory
+from haive.core.engine.document.loaders.sources.enhanced_registry import register_source
+from haive.core.engine.document.loaders.sources.source_types import LoaderCapability, RemoteSource, SourceCategory
 
 # =============================================================================
 # Missing Web Loader

@@ -12,7 +12,7 @@ from langchain_core.retrievers import BaseRetriever
 from langchain_core.tools import StructuredTool, tool
 from pydantic import BaseModel, Field
 
-from .types import ToolCapability, ToolCategory, ToolType
+from haive.core.engine.tool.types import ToolCapability, ToolCategory, ToolType
 
 
 def create_retriever_tool(

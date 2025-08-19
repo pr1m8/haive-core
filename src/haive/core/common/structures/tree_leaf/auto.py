@@ -9,8 +9,8 @@ from typing import TypeVar
 
 from pydantic import BaseModel
 
-from .base import Leaf, TreeNode
-from .generics import DefaultContent, DefaultResult
+from haive.core.common.structures.tree_leaf.base import Leaf, TreeNode
+from haive.core.common.structures.tree_leaf.generics import DefaultContent, DefaultResult
 
 T = TypeVar("T", bound=BaseModel)
 

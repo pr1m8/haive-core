@@ -11,7 +11,7 @@ from typing import Any, Union
 from langchain.schema import Document
 from pydantic import BaseModel, Field
 
-from haive.core.config.runnable import RunnableConfig
+from langchain_core.runnables import RunnableConfig
 from haive.core.engine.base.base import InvokableEngine
 from haive.core.engine.base.types import EngineType
 from haive.core.engine.document.config import (
@@ -21,7 +21,7 @@ from haive.core.engine.document.config import (
 )
 from haive.core.schema.prebuilt.document_state import DocumentState
 
-from .auto_loader import AutoLoader, AutoLoaderConfig
+from haive.core.engine.document.loaders.auto_loader import AutoLoader, AutoLoaderConfig
 
 
 class DocumentLoaderConfig(BaseModel):

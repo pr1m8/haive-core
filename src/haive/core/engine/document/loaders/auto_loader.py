@@ -44,9 +44,9 @@ from pydantic import BaseModel, Field
 
 from haive.core.engine.document.config import LoaderPreference
 
-from .path_analyzer import PathAnalyzer, SourceInfo
-from .sources.enhanced_registry import enhanced_registry
-from .sources.source_types import BaseSource, LoaderCapability, SourceCategory
+from haive.core.engine.document.loaders.path_analyzer import PathAnalyzer, SourceInfo
+from haive.core.engine.document.loaders.sources.enhanced_registry import enhanced_registry
+from haive.core.engine.document.loaders.sources.source_types import BaseSource, LoaderCapability, SourceCategory
 
 logger = logging.getLogger(__name__)
 

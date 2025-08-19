@@ -1,6 +1,6 @@
 """Tool management utilities for prebuilt schemas."""
 
-from .validation_state import (
+from haive.core.schema.prebuilt.tools.validation_state import (
     RouteRecommendation,
     ToolValidationResult,
     ValidationRoutingState,

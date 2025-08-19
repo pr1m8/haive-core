@@ -15,8 +15,8 @@ from datetime import datetime
 
 from pydantic import Field
 
-from .enhanced_registry import register_source
-from .source_types import (
+from haive.core.engine.document.loaders.sources.enhanced_registry import register_source
+from haive.core.engine.document.loaders.sources.source_types import (
     CredentialType,
     DatabaseSource,
     LoaderCapability,

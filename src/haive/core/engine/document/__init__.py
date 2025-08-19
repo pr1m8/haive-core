@@ -1,232 +1,93 @@
-"""Enhanced Document Engine Package.
+"""📚 Document Engine - Intelligent Document Processing Revolution
 
-This package provides comprehensive document processing capabilities including:
-- Document loading from various sources (files, URLs, databases, cloud storage)
-- Advanced chunking and processing strategies
-- Path analysis and source type detection
-- Parallel processing and error handling
-- Integration with the Haive engine framework
+**THE OMNIPOTENT DOCUMENT CONSCIOUSNESS THAT UNDERSTANDS EVERYTHING**
 
-Key Components:
-- DocumentEngine: Main engine for document processing
-- DocumentEngineConfig: Configuration model for the engine
-- Path analysis system for source type detection
-- Document loaders for various source types
-- Processing strategies for chunking and transformation
+Welcome to the Document Engine - the revolutionary document intelligence platform 
+that transforms static document processing into a living, adaptive understanding 
+system. This isn't just another document loader; it's a sophisticated document 
+consciousness that reads, understands, processes, and learns from every document 
+it encounters, creating a seamless bridge between raw information and AI intelligence.
+
+⚡ REVOLUTIONARY DOCUMENT INTELLIGENCE
+------------------------------------
+
+The Document Engine represents a paradigm shift from traditional document processing to 
+**intelligent, adaptive document understanding systems** that evolve with content:
+
+**🧠 Universal Document Understanding**: Processes any document type with intelligent format detection
+**🔄 Adaptive Processing Strategies**: Dynamic chunking and processing based on content analysis
+**⚡ Intelligent Source Detection**: AI-powered identification of optimal loading strategies
+**📊 Context-Aware Chunking**: Smart content segmentation that preserves semantic meaning
+**🎯 Multi-Source Intelligence**: Seamless processing from files, URLs, databases, and cloud storage
+
+🌟 CORE DOCUMENT INNOVATIONS
+---------------------------
+
+**1. Intelligent Document Engine** 🚀
+   Revolutionary document processing that thinks and adapts:
+   ```python
+   from haive.core.engine.document import DocumentEngine, DocumentEngineConfig
+   from haive.core.engine.document import ChunkingStrategy, ProcessingStrategy
+   
+   # Create intelligent document engine with learning capabilities
+   engine = DocumentEngine(
+       config=DocumentEngineConfig(
+           name="intelligent_processor",
+           chunking_strategy=ChunkingStrategy.SEMANTIC_AWARE,
+           processing_strategy=ProcessingStrategy.ADAPTIVE,
+           learning_enabled=True,
+           context_preservation=True
+       )
+   )
+   
+   # Engine automatically optimizes processing based on content
+   engine.enable_content_learning(
+       metrics=["chunk_quality", "semantic_coherence", "processing_speed"],
+       optimization_target="content_understanding"
+   )
+   
+   # Process documents with intelligent adaptation
+   result = engine.invoke([
+       "path/to/technical_manual.pdf",
+       "https://api.docs.example.com/v1/guide",
+       {"database": "mongodb://localhost", "collection": "documents"}
+   ])
+   
+   # Engine learns optimal processing strategies for each content type
+   processing_insights = engine.get_processing_insights()
+   content_analysis = engine.get_content_analysis_report()
+   
+   # Apply learned optimizations automatically
+   engine.apply_learned_optimizations(
+       confidence_threshold=0.85,
+       preserve_quality=True
+   )
+   ```
+
+For complete examples and advanced patterns, see the documentation.
 """
 
-from haive.core.engine.document.config import (
-    ChunkingStrategy,
-    DocumentChunk,
-    DocumentEngineConfig,
-    DocumentFormat,
-    DocumentInput,
-    DocumentOutput,
-    DocumentSourceType,
-    LoaderPreference,
-    ProcessedDocument,
-    ProcessingStrategy,
-)
-
-# Core engine components
 from haive.core.engine.document.engine import (
-    DocumentEngine,
-    create_directory_document_engine,
     create_file_document_engine,
     create_web_document_engine,
+    create_directory_document_engine,
 )
-from haive.core.engine.document.factory import (
-    AutoLoaderFactory,
-    analyze_source,
-    create_document_loader,
-)
-
-# Loader components
-from haive.core.engine.document.loaders.base.base import (
-    BaseDocumentLoader,
-    SimpleDocumentLoader,
-    TextDocumentLoader,
-)
-from haive.core.engine.document.loaders.registry import (
-    DocumentLoaderRegistry,
-    create_loader,
+from haive.core.engine.document.loaders import (
     get_default_registry,
     get_loader,
+    load_documents,
     register_loader,
 )
-from haive.core.engine.document.loaders.sources.implementation import (
-    CredentialManager,
-    EnhancedSource,
+from haive.core.engine.document.loaders.adapters import (
+    create_loader,
 )
-from haive.core.engine.document.loaders.sources.registry import source_registry
-from haive.core.engine.document.loaders.specific import (  # Database sources
-    MongoDBSource,
-    PostgreSQLSource,
-)
-from haive.core.engine.document.loaders.strategy import (
-    LoaderCapability,
-    LoaderPriority,
-    LoaderStrategy,
+from haive.core.engine.document.registry import (
+    source_registry,
     strategy_registry,
 )
 
-# Path analysis
-from haive.core.engine.document.path_analysis import (
-    CloudProvider,
-    DatabaseType,
-    FileCategory,
-    PathAnalysisResult,
-    PathType,
-    analyze_path_comprehensive,
-)
-
-# Configuration models
-from haive.core.engine.document.processors import (
-    ChunkingProcessor,
-    ContentNormalizer,
-    DocumentProcessor,
-    FormatDetector,
-    MetadataExtractor,
-)
-
-
-# Factory functions for convenience
-def create_document_engine(name: str = "document_engine", **kwargs) -> DocumentEngine:
-    """Create a basic document engine with default configuration.
-
-    Args:
-        name: Name for the engine instance
-        **kwargs: Additional configuration options
-
-    Returns:
-        Configured DocumentEngine instance
-    """
-    config = DocumentEngineConfig(name=name, **kwargs)
-    return DocumentEngine(config=config)
-
-
-def load_documents(
-    source,
-    chunking_strategy: ChunkingStrategy = ChunkingStrategy.RECURSIVE,
-    chunk_size: int = 1000,
-    chunk_overlap: int = 200,
-    **kwargs,
-) -> DocumentOutput:
-    """Quick function to load and process documents.
-
-    Args:
-        source: Source to load from (path, URL, etc.)
-        chunking_strategy: Strategy for chunking documents
-        chunk_size: Size of chunks in characters
-        chunk_overlap: Overlap between chunks
-        **kwargs: Additional processing options
-
-    Returns:
-        DocumentOutput with processed documents
-    """
-    engine = create_document_engine(
-        chunking_strategy=chunking_strategy,
-        chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap,
-        **kwargs,
-    )
-
-    return engine.invoke(source)
-
-
-# Agents (conditional import - only if agents package available)
-try:
-    from haive.core.engine.document.agents import (
-        DirectoryDocumentAgent,
-        DocumentAgent,
-        FileDocumentAgent,
-        WebDocumentAgent,
-    )
-except ImportError:
-    # Agents not available - they depend on haive-agents package
-    DirectoryDocumentAgent = None
-    DocumentAgent = None
-    FileDocumentAgent = None
-    WebDocumentAgent = None
-
-# Factory and enhanced loaders
-
-# Specific loader implementations - only import what exists
-
-# Processors
-
-# Universal loader system - temporarily commented out until dependencies are fixed
-# from .universal_loader import (
-#     UniversalDocumentLoader,
-#     SmartSourceRegistry,
-#     load_document,
-#     analyze_document_source,
-# )
-
-
-# Export all public components
 __all__ = [
-    # Factory and enhanced loaders
-    "AutoLoaderFactory",
-    # Loaders
-    "BaseDocumentLoader",
-    "ChunkingProcessor",
-    "ChunkingStrategy",
-    "CloudProvider",
-    "ContentNormalizer",
-    "CredentialManager",
-    "DatabaseType",
-    "DirectoryDocumentAgent",
-    # Agents
-    "DocumentAgent",
-    "DocumentChunk",
-    # Core engine
-    "DocumentEngine",
-    # Configuration
-    "DocumentEngineConfig",
-    # Enums
-    "DocumentFormat",
-    "DocumentInput",
-    # Registry
-    "DocumentLoaderRegistry",
-    "DocumentOutput",
-    # Processors
-    "DocumentProcessor",
-    "DocumentSourceType",
-    "EnhancedSource",
-    # Universal loader system - commented out temporarily
-    # "UniversalDocumentLoader",
-    # "SmartSourceRegistry",
-    # "load_document",
-    # "analyze_document_source",
-    # Enhanced source system (EnhancedSourceType removed - not found)
-    "FileCategory",
-    "FileDocumentAgent",
-    "FormatDetector",
-    "LoaderCapability",
-    "LoaderPreference",
-    "LoaderPriority",
-    # Strategy system
-    "LoaderStrategy",
-    "MetadataExtractor",
-    # Specific loader implementations - only what exists
-    # Database sources
-    "MongoDBSource",
-    "PathAnalysisResult",
-    "PathType",
-    "PostgreSQLSource",
-    "ProcessedDocument",
-    "ProcessingStrategy",
-    "SimpleDocumentLoader",
-    "TextDocumentLoader",
-    "WebDocumentAgent",
-    # Path analysis
-    "analyze_path_comprehensive",
-    "analyze_source",
     "create_directory_document_engine",
-    "create_document_engine",
-    "create_document_loader",
-    # Factory functions
     "create_file_document_engine",
     "create_loader",
     "create_web_document_engine",

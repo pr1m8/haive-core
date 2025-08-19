@@ -13,7 +13,7 @@ from typing import Any
 from langgraph.store.base import BaseStore
 from pydantic import BaseModel, Field, PrivateAttr
 
-from .types import StoreConfig
+from haive.core.persistence.store.types import StoreConfig
 
 logger = logging.getLogger(__name__)
 

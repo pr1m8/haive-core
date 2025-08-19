@@ -13,7 +13,7 @@ from urllib.parse import parse_qs, urlparse
 
 from pydantic import BaseModel, Field
 
-from .sources.source_types import LoaderCapability
+from haive.core.engine.document.loaders.sources.source_types import LoaderCapability
 
 
 class PathType(str, Enum):
@@ -485,7 +485,7 @@ def convert_to_source_info(analysis: PathAnalysisResult) -> "SourceInfo":
         SourceInfo object with detected information
     """
     # Import here to avoid circular imports
-    from .sources.source_types import LoaderCapability, SourceCategory
+    from haive.core.engine.document.loaders.sources.source_types import LoaderCapability, SourceCategory
 
     # Map PathType to SourceCategory
     category_mapping = {

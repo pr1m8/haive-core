@@ -9,8 +9,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any, TypeVar
 
-from .registry import LoaderMapping
-from .source_types import (
+from haive.core.engine.document.loaders.sources.registry import LoaderMapping
+from haive.core.engine.document.loaders.sources.source_types import (
     BaseSource,
     CredentialType,
     DatabaseSource,

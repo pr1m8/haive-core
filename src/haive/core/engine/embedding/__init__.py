@@ -65,9 +65,9 @@ Note:
 """
 
 # Lazy loading - providers imported on first use to avoid startup overhead
-from .base import BaseEmbeddingConfig
-from .config import EmbeddingConfigFactory, create_embedding_config
-from .types import EmbeddingType
+from haive.core.engine.embedding.base import BaseEmbeddingConfig
+from haive.core.engine.embedding.config import EmbeddingConfigFactory, create_embedding_config
+from haive.core.engine.embedding.types import EmbeddingType
 
 
 def __getattr__(name: str):
