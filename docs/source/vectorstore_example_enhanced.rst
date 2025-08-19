@@ -248,24 +248,30 @@ RAG Pipeline Example
 ~~~~~~~~~~~~~~~~~~~~
 
 .. exec_code::
-   :hide_code:
+  :hide_code:
 
-   # Example of a complete RAG pipeline
-   from haive.core.models.vectorstore import VectorStoreConfig, VectorStoreProvider
-   from haive.core.engine.retriever import create_retriever
-   
-   # Setup vector store
-   config = VectorStoreConfig(
-       provider=VectorStoreProvider.Chroma,
-       collection_name="knowledge_base"
-   )
-   
-   # Create retriever
-   retriever = config.create_retriever(
-       search_kwargs={"k": 3}
-   )
-   
-   print("RAG pipeline configured successfully!")
+  # Example of a complete RAG pipeline
+  from haive.core.models.vectorstore import VectorStoreConfig, VectorStoreProvider
+  from haive.core.engine.retriever import create_retriever
+  from langchain_core.documents import Document
+  
+  # Create sample documents for the example
+  sample_docs = [
+      Document(page_content="This is a sample document about AI.", metadata={"source": "example"}),
+      Document(page_content="Vector stores enable semantic search.", metadata={"source": "example"})
+  ]
+  
+  # Setup vector store with sample documents
+  config = VectorStoreConfig(
+      provider=VectorStoreProvider.InMemory,  # Use InMemory to avoid external dependencies
+      collection_name="knowledge_base",
+      documents=sample_docs
+  )
+  
+  # Create retriever
+  retriever = config.create_retriever()
+  
+  print("RAG pipeline configured successfully!")
 
 Migration Between Providers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

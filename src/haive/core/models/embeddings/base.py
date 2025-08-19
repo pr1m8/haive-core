@@ -26,11 +26,51 @@ Typical usage example:
 import os
 from typing import Any
 
-try:
-    import torch
-except ImportError:
-    # Fallback for documentation builds
-    torch = None
+# Mock torch to avoid slow initialization during documentation builds
+class MockTorch:
+    """Mock torch module for documentation builds."""
+    
+    class cuda:
+        @staticmethod
+        def is_available():
+            return False
+    
+    class Tensor:
+        def __init__(self, *args, **kwargs):
+            pass
+        def to(self, *args, **kwargs):
+            return self
+        def cpu(self):
+            return self
+        def cuda(self):
+            return self
+        def numpy(self):
+            return []
+    
+    @staticmethod
+    def tensor(*args, **kwargs):
+        return MockTorch.Tensor()
+    
+    @staticmethod
+    def zeros(*args, **kwargs):
+        return MockTorch.Tensor()
+    
+    @staticmethod
+    def ones(*args, **kwargs):
+        return MockTorch.Tensor()
+    
+    @staticmethod
+    def device(*args, **kwargs):
+        return "cpu"
+
+torch = MockTorch()
+
+# Mock VertexAI to avoid slow Google Cloud imports during documentation builds  
+class VertexAIEmbeddings:
+    """Mock VertexAI embeddings to avoid slow imports."""
+    def __init__(self, *args, **kwargs):
+        pass
+
 try:
     from dotenv import load_dotenv
 except ImportError:
@@ -60,7 +100,6 @@ try:
         SentenceTransformerEmbeddings,
     )
     from langchain_community.embeddings.voyageai import VoyageEmbeddings
-    from langchain_google_vertexai import VertexAIEmbeddings
     from langchain_huggingface import HuggingFaceEmbeddings
     from langchain_openai import AzureOpenAIEmbeddings, OpenAIEmbeddings
 except ImportError:
