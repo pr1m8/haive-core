@@ -5,55 +5,79 @@ import sys
 
 sys.path.insert(0, os.path.abspath("../../src"))
 
-# -- Project information -----------------------------------------------------
-project = "haive-core"
-copyright = "2025, Haive Team"
-author = "Haive Team"
-release = "0.1.0"
+# Try to import shared Haive configuration from pydevelop-docs package
+try:
+    from pydevelop_docs.config import get_haive_config
+    
+    # Get package-specific configuration
+    package_name = "haive-core"
+    package_path = "../../src"
+    
+    config = get_haive_config(
+        package_name=package_name,
+        package_path=package_path,
+        is_core_package=True  # This is the core package
+    )
+    
+    # Apply configuration to globals
+    globals().update(config)
+    
+    # Any package-specific overrides can go here
+    
+except ImportError:
+    # Fallback to manual configuration if pydevelop-docs not available
+    # -- Project information -----------------------------------------------------
+    project = "haive-core"
+    copyright = "2025, Haive Team"
+    author = "Haive Team"
+    release = "0.1.0"
 
 # -- General configuration ---------------------------------------------------
 extensions = [
     "autoapi.extension",  # Must be first
-    "sphinx.ext.autodoc",  # Moved up to be right after autoapi
+    "sphinx.ext.autodoc", 
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
-    "sphinx.ext.todo",
-    "sphinx.ext.coverage",
-    "sphinx.ext.mathjax",
-    "sphinx.ext.graphviz",  # NEW: Architecture diagrams
-    "sphinxcontrib.autodoc_pydantic",  # NEW: Pydantic model documentation
-    "sphinx_autodoc_typehints",
     "sphinx_copybutton",
-    "sphinx_togglebutton",
     "sphinx_design",
-    "sphinx_tabs.tabs",  # NEW: Tabbed content
     "sphinxcontrib.mermaid",
-    "sphinx_sitemap",
-    "sphinx_last_updated_by_git",  # NEW: Git timestamps
-    "sphinx_tippy",  # NEW: Enhanced tooltips
-    "notfound.extension",  # NEW: Custom 404 pages
-    "sphinxext.opengraph",
-    "myst_parser",
-    "sphinx_exec_code",  # NEW: Execute example code in docs
-    "sphinx_toggleprompt",  # NEW: Toggle shell prompts in code
-    "sphinx_issues",  # NEW: Link to GitHub issues
-    "sphinx_git",  # NEW: Git integration for changelogs
-    "seed_intersphinx_mapping",  # NEW: Auto-populate intersphinx from requirements.txt
-    "sphinx_favicon",  # NEW: Multiple favicon support
-    "sphinx_changelog",  # NEW: Structured changelog support
-    "sphinx_prompt",  # NEW: Better shell prompts and code blocks
-    # "sphinxemoji",  # NOTE: Extension installed but may have compatibility issues
-    "sphinx_codeautolink",  # NEW: Auto-link code to docs
-    "enum_tools.autoenum",  # NEW: Better enum documentation
+    # Commenting out slow extensions for faster build
+    # "sphinx.ext.todo",
+    # "sphinx.ext.coverage", 
+    # "sphinx.ext.mathjax",
+    "sphinx.ext.graphviz",
+    # "sphinxcontrib.autodoc_pydantic",
+    # "sphinx_autodoc_typehints",
+    # "sphinx_togglebutton",
+    # "sphinx_tabs.tabs",
+    # "sphinx_sitemap",
+    # "sphinx_last_updated_by_git",
+    # "sphinx_tippy",
+    # "notfound.extension",
+    # "sphinxext.opengraph",
+    # "myst_parser",
+    # "sphinx_exec_code",
+    # "sphinx_toggleprompt",
+    # "sphinx_issues",
+    # "sphinx_git",
+    # "seed_intersphinx_mapping",
+    # "sphinx_favicon",
+    # "sphinx_changelog",
+    # "sphinx_prompt",
+    # "sphinx_codeautolink",
+    # "enum_tools.autoenum",
 ]
 
 # AutoAPI Configuration
 autoapi_dirs = ["../../src/haive"]  # Point directly to haive package to avoid src prefix
 autoapi_type = "python"
-autoapi_add_toctree_entry = False  # We'll add manually for better control
+autoapi_add_toctree_entry = True  # Let AutoAPI add itself to the toctree
 autoapi_keep_files = True
 autoapi_root = "autoapi"
+# Add API Reference at the top of the toctree with a custom caption
+autoapi_toctree_caption = "🔍 API Reference"
+autoapi_toctree_first = True  # Add API Reference at the beginning
 autoapi_include_inheritance_diagram = False  # Disable for now
 autoapi_options = [
     "members",
@@ -63,7 +87,7 @@ autoapi_options = [
     "imported-members",
     "special-members",  # Show __init__ and other special methods
 ]
-autoapi_template_dir = "_templates/autoapi"  # Use custom templates
+# autoapi_template_dir = "_templates/autoapi"  # Commented out - directory doesn't exist
 
 # CRITICAL: Use module-level pages for hierarchical organization
 autoapi_own_page_level = "module"
@@ -91,11 +115,23 @@ autoapi_ignore = [
     "**/engine_node_test/**",
     "**/engine_node_test.py",
     "**/graph/state_graph/base.py",  # Metaclass issues
+    # Missing modules that are referenced in docstrings but don't exist
+    # graph modules fixed - state_management documented as aspirational
+    # persistence modules fixed - now using correct paths
+    "**/schema/reducers.py",
+    "**/schema/validation.py",
+    "**/tools/composition.py",
+    "**/tools/validation.py",
 ]
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "furo"
 html_static_path = ["_static"]
+
+# Syntax highlighting style
+# Use purple-friendly syntax highlighting themes
+pygments_style = "default"  # Better for light mode with our custom CSS
+pygments_dark_style = "monokai"  # Good for dark mode
 
 # Furo theme configuration - Enhanced with vibrant colors
 html_theme_options = {
@@ -124,9 +160,9 @@ html_theme_options = {
         "color-admonition-title--tip": "#047857",
         "color-admonition-title--important": "#b91c1c",
         "color-admonition-title--warning": "#92400e",
-        "color-code-background": "#f8f4ff",  # Light purple code bg
-        "color-code-foreground": "#1f2937",
-        "color-inline-code-background": "#ede9fe",
+        "color-code-background": "#1e1e2e",  # Dark purple-tinted code bg for better contrast
+        "color-code-foreground": "#e9ecef",  # Light text on dark bg
+        "color-inline-code-background": "#f3e8ff",  # Light purple for inline code
         "color-highlight-on-target": "#8b5cf640",
         "color-link": "#8b5cf6",
         "color-link--hover": "#7c3aed",
@@ -201,6 +237,9 @@ html_use_index = True  # Generate index pages
 # CSS files
 html_css_files = [
     "custom.css",
+    "enhanced-design.css",  # Modern design system
+    "graphviz-purple-theme.css",  # Purple theme for diagrams
+    "code-purple-theme.css",  # Enhanced purple code block styling (loads last to override)
     "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap",
 ]
 
@@ -406,9 +445,21 @@ sd_fontawesome_latex = True  # Enable FontAwesome icons in LaTeX/PDF
 # Additional design components to enable
 design_builders = ["html", "dirhtml", "singlehtml"]
 
-# NEW: Graphviz configuration
+# Graphviz configuration for beautiful diagrams
 graphviz_output_format = "svg"
-graphviz_dot_args = ["-Kdot", "-Tsvg"]
+graphviz_dot_args = [
+    "-Kdot",
+    "-Tsvg",
+    "-Gfontname=Inter",
+    "-Nfontname=Inter",
+    "-Efontname=Inter",
+    "-Gbgcolor=transparent",
+    "-Gpad=0.5",
+    "-Grankdir=TB",
+    "-Gnodesep=0.7",
+    "-Granksep=0.8",
+    "-Gsplines=true",
+]
 
 # Viewcode extension settings
 viewcode_enable_epub = False
@@ -727,3 +778,11 @@ needs_types = [
 needs_id_regex = "^[A-Z0-9_]{5,}"
 needs_show_link_type = True
 needs_show_link_title = True
+
+# -- Performance optimizations for faster builds ---------------------------
+html_copy_source = False  # Don't copy source files
+html_show_sourcelink = False  # Don't show source links  
+coverage_show_missing_items = False  # Disable expensive coverage
+autoapi_keep_files = True  # Cache AutoAPI files
+html_use_index = True  # Enable search indexing
+html_split_index = False  # Keep index in single file
