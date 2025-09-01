@@ -5,79 +5,57 @@ import sys
 
 sys.path.insert(0, os.path.abspath("../../src"))
 
-# Try to import shared Haive configuration from pydevelop-docs package
-try:
-    from pydevelop_docs.config import get_haive_config
-    
-    # Get package-specific configuration
-    package_name = "haive-core"
-    package_path = "../../src"
-    
-    config = get_haive_config(
-        package_name=package_name,
-        package_path=package_path,
-        is_core_package=True  # This is the core package
-    )
-    
-    # Apply configuration to globals
-    globals().update(config)
-    
-    # Any package-specific overrides can go here
-    
-except ImportError:
-    # Fallback to manual configuration if pydevelop-docs not available
-    # -- Project information -----------------------------------------------------
-    project = "haive-core"
-    copyright = "2025, Haive Team"
-    author = "Haive Team"
-    release = "0.1.0"
+# -- Project information -----------------------------------------------------
+project = "haive-core"
+copyright = "2025, Haive Team"
+author = "Haive Team"
+release = "0.1.0"
 
 # -- General configuration ---------------------------------------------------
 extensions = [
     "autoapi.extension",  # Must be first
-    "sphinx.ext.autodoc", 
+    "sphinx.ext.autodoc",  # Moved up to be right after autoapi
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.todo",
+    "sphinx.ext.coverage",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.graphviz",  # NEW: Architecture diagrams
+    # "sphinxcontrib.autodoc_pydantic",  # DISABLED: Pydantic model documentation (causing AttributeError)
+    "sphinx_autodoc_typehints",
     "sphinx_copybutton",
+    "sphinx_togglebutton",
     "sphinx_design",
+    "sphinx_tabs.tabs",  # NEW: Tabbed content
     "sphinxcontrib.mermaid",
-    # Commenting out slow extensions for faster build
-    # "sphinx.ext.todo",
-    # "sphinx.ext.coverage", 
-    # "sphinx.ext.mathjax",
-    "sphinx.ext.graphviz",
-    # "sphinxcontrib.autodoc_pydantic",
-    # "sphinx_autodoc_typehints",
-    # "sphinx_togglebutton",
-    # "sphinx_tabs.tabs",
-    # "sphinx_sitemap",
-    # "sphinx_last_updated_by_git",
-    # "sphinx_tippy",
-    # "notfound.extension",
-    # "sphinxext.opengraph",
-    # "myst_parser",
-    # "sphinx_exec_code",
-    # "sphinx_toggleprompt",
-    # "sphinx_issues",
-    # "sphinx_git",
-    # "seed_intersphinx_mapping",
-    # "sphinx_favicon",
-    # "sphinx_changelog",
-    # "sphinx_prompt",
-    # "sphinx_codeautolink",
-    # "enum_tools.autoenum",
+    "sphinx_sitemap",
+    "sphinx_last_updated_by_git",  # NEW: Git timestamps
+    "sphinx_tippy",  # NEW: Enhanced tooltips
+    "notfound.extension",  # NEW: Custom 404 pages
+    "sphinxext.opengraph",
+    "myst_parser",
+    # "sphinx_exec_code",  # DISABLED: Execute example code in docs (causing build errors)
+    # "sphinx_toggleprompt",  # DISABLED: Module not available
+    "sphinx_issues",  # NEW: Link to GitHub issues
+    "sphinx_git",  # NEW: Git integration for changelogs
+    # "seed_intersphinx_mapping",  # DISABLED: Auto-populate intersphinx from requirements.txt (has bug)
+    "sphinx_favicon",  # NEW: Multiple favicon support
+    "sphinx_changelog",  # NEW: Structured changelog support
+    "sphinx_prompt",  # NEW: Better shell prompts and code blocks
+    # "sphinxemoji",  # NOTE: Extension installed but may have compatibility issues
+    # "sphinx_codeautolink",  # DISABLED: Auto-link code to docs (causing errors)
+    "enum_tools.autoenum",  # NEW: Better enum documentation
 ]
 
 # AutoAPI Configuration
-autoapi_dirs = ["../../src/haive"]  # Point directly to haive package to avoid src prefix
+autoapi_dirs = [
+    "../../src/haive"
+]  # Point directly to haive package to avoid src prefix
 autoapi_type = "python"
-autoapi_add_toctree_entry = True  # Let AutoAPI add itself to the toctree
+autoapi_add_toctree_entry = True  # Allow AutoAPI to add to toctree
 autoapi_keep_files = True
 autoapi_root = "autoapi"
-# Add API Reference at the top of the toctree with a custom caption
-autoapi_toctree_caption = "🔍 API Reference"
-autoapi_toctree_first = True  # Add API Reference at the beginning
 autoapi_include_inheritance_diagram = False  # Disable for now
 autoapi_options = [
     "members",
@@ -87,7 +65,7 @@ autoapi_options = [
     "imported-members",
     "special-members",  # Show __init__ and other special methods
 ]
-# autoapi_template_dir = "_templates/autoapi"  # Commented out - directory doesn't exist
+autoapi_template_dir = "_templates/autoapi"  # Use custom templates
 
 # CRITICAL: Use module-level pages for hierarchical organization
 autoapi_own_page_level = "module"
@@ -115,23 +93,11 @@ autoapi_ignore = [
     "**/engine_node_test/**",
     "**/engine_node_test.py",
     "**/graph/state_graph/base.py",  # Metaclass issues
-    # Missing modules that are referenced in docstrings but don't exist
-    # graph modules fixed - state_management documented as aspirational
-    # persistence modules fixed - now using correct paths
-    "**/schema/reducers.py",
-    "**/schema/validation.py",
-    "**/tools/composition.py",
-    "**/tools/validation.py",
 ]
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "furo"
 html_static_path = ["_static"]
-
-# Syntax highlighting style
-# Use purple-friendly syntax highlighting themes
-pygments_style = "default"  # Better for light mode with our custom CSS
-pygments_dark_style = "monokai"  # Good for dark mode
 
 # Furo theme configuration - Enhanced with vibrant colors
 html_theme_options = {
@@ -160,9 +126,9 @@ html_theme_options = {
         "color-admonition-title--tip": "#047857",
         "color-admonition-title--important": "#b91c1c",
         "color-admonition-title--warning": "#92400e",
-        "color-code-background": "#1e1e2e",  # Dark purple-tinted code bg for better contrast
-        "color-code-foreground": "#e9ecef",  # Light text on dark bg
-        "color-inline-code-background": "#f3e8ff",  # Light purple for inline code
+        "color-code-background": "#f8f4ff",  # Light purple code bg
+        "color-code-foreground": "#1f2937",
+        "color-inline-code-background": "#ede9fe",
         "color-highlight-on-target": "#8b5cf640",
         "color-link": "#8b5cf6",
         "color-link--hover": "#7c3aed",
@@ -216,7 +182,7 @@ html_theme_options = {
     # Navigation and UI options
     "sidebar_hide_name": False,
     "navigation_with_keys": True,
-    "announcement": "🚀 <b>haive-core</b> - The foundation of the Haive AI Agent Framework",
+    "announcement": "🔧 <b>haive-core</b> - Core framework components for the Haive ecosystem",
     "source_repository": "https://github.com/haive-ai/haive",
     "source_branch": "main",
     "source_directory": "packages/haive-core/docs/",
@@ -237,9 +203,6 @@ html_use_index = True  # Generate index pages
 # CSS files
 html_css_files = [
     "custom.css",
-    "enhanced-design.css",  # Modern design system
-    "graphviz-purple-theme.css",  # Purple theme for diagrams
-    "code-purple-theme.css",  # Enhanced purple code block styling (loads last to override)
     "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap",
 ]
 
@@ -369,16 +332,16 @@ autodoc_default_options = {
 napoleon_preprocess_types = True
 napoleon_attr_annotations = True
 
-# NEW: Pydantic configuration
-autodoc_pydantic_model_show_json = True
-autodoc_pydantic_model_show_config_summary = True
-autodoc_pydantic_model_show_validator_summary = True
-autodoc_pydantic_model_show_field_summary = True
-autodoc_pydantic_model_show_validator_members = True
-autodoc_pydantic_field_list_validators = True
-autodoc_pydantic_field_show_constraints = True
-autodoc_pydantic_model_erdantic_figure = False
-autodoc_pydantic_model_erdantic_figure_collapsed = False
+# # NEW: Pydantic configuration - DISABLED due to autodoc_pydantic issues
+# autodoc_pydantic_model_show_json = True
+# autodoc_pydantic_model_show_config_summary = True
+# autodoc_pydantic_model_show_validator_summary = True
+# autodoc_pydantic_model_show_field_summary = True
+# autodoc_pydantic_model_show_validator_members = True
+# autodoc_pydantic_field_list_validators = True
+# autodoc_pydantic_field_show_constraints = True
+# autodoc_pydantic_model_erdantic_figure = False
+# autodoc_pydantic_model_erdantic_figure_collapsed = False
 
 # MyST Parser
 myst_enable_extensions = [
@@ -445,21 +408,9 @@ sd_fontawesome_latex = True  # Enable FontAwesome icons in LaTeX/PDF
 # Additional design components to enable
 design_builders = ["html", "dirhtml", "singlehtml"]
 
-# Graphviz configuration for beautiful diagrams
+# NEW: Graphviz configuration
 graphviz_output_format = "svg"
-graphviz_dot_args = [
-    "-Kdot",
-    "-Tsvg",
-    "-Gfontname=Inter",
-    "-Nfontname=Inter",
-    "-Efontname=Inter",
-    "-Gbgcolor=transparent",
-    "-Gpad=0.5",
-    "-Grankdir=TB",
-    "-Gnodesep=0.7",
-    "-Granksep=0.8",
-    "-Gsplines=true",
-]
+graphviz_dot_args = ["-Kdot", "-Tsvg"]
 
 # Viewcode extension settings
 viewcode_enable_epub = False
@@ -509,30 +460,41 @@ tippy_add_class = "has-tooltip"
 # Custom tooltips for specific URLs or patterns
 tippy_custom_tips = {
     # Core modules
-    "haive.core.engine": "The core engine module provides the foundation for all agent operations.",
-    "haive.core.schema": "Type-safe state management with Pydantic schemas.",
-    "haive.core.graph": "Graph-based workflow orchestration and routing.",
-    "haive.core.tools": "Tool integration and management system.",
-    # Key classes
-    "AugLLMConfig": "Enhanced LLM configuration with support for multiple providers and advanced features.",
-    "StateSchema": "Base class for all state schemas in Haive, providing persistence and validation.",
-    "MetaStateSchema": "Advanced meta-agent state management for complex agent workflows.",
-    "DynamicGraph": "Flexible graph builder for creating complex agent workflows.",
-    "ReactAgent": "An agent that uses ReAct (Reasoning and Acting) pattern for complex tasks.",
-    "SimpleAgent": "Basic agent implementation for straightforward LLM interactions.",
-    "BaseAgent": "Foundation class that all Haive agents inherit from.",
+    "haive.core.engine": "Core engine components for LLM interactions and orchestration.",
+    "haive.core.schema": "Schema system for type-safe state management and validation.",
+    "haive.core.graph": "Graph-based workflow orchestration and execution.",
+    "haive.core.tools": "Tool integration and management systems.",
+    "haive.core.persistence": "State persistence and storage backends.",
+    "haive.core.common": "Common utilities and shared components.",
+    # Key core classes
+    "AugLLMConfig": "Configuration for augmented language model engines.",
+    "StateSchema": "Base class for all agent state schemas with validation.",
+    "BaseGraph": "Foundation for all graph-based workflows.",
+    "StateGraph": "State-based workflow execution graph.",
+    "DynamicGraph": "Dynamic, runtime-modifiable workflow graph.",
+    "BaseTool": "Base class for all tool implementations.",
+    "BaseEngine": "Foundation class for all engine implementations.",
+    "MetaStateSchema": "Schema for managing multi-agent state coordination.",
+    "MessagesState": "Standard state schema for message-based interactions.",
+    # Core patterns
+    "Engine": "Component that provides specific functionality (LLM, tools, etc.)",
+    "Schema": "Type-safe data structure definition with validation.",
+    "Graph": "Workflow orchestration using node-based execution.",
+    "State Management": "Persistent storage and retrieval of execution state.",
+    "Tool Integration": "External function calling and API integration.",
+    "Persistence Layer": "Storage backends for state and conversation history.",
     # Common terms
     "LLM": "Large Language Model - AI models like GPT-4, Claude, etc.",
-    "RAG": "Retrieval-Augmented Generation - combining search with LLM generation.",
     "embedding": "Vector representation of text for semantic search.",
-    "vectorstore": "Database optimized for storing and searching embeddings.",
-    "checkpoint": "Saved state snapshot for recovery and persistence.",
-    "tool": "External function or API that agents can call.",
-    "mixin": "Reusable component that adds functionality to classes.",
-    # Pydantic terms
+    "tool": "External function or API that can be called.",
+    "state": "Execution data and history maintained across operations.",
+    "workflow": "Sequence of operations to complete a task.",
+    "orchestration": "Coordinating multiple components to work together.",
+    # Technical terms
     "Field": "Pydantic field descriptor for model attributes.",
-    "validator": "Function that validates field values in Pydantic models.",
     "BaseModel": "Pydantic's base class for data validation.",
+    "mixin": "Reusable component that adds functionality to classes.",
+    "node": "Single operation or step in a workflow graph.",
 }
 
 # Enable tooltips on all cross-references
@@ -570,6 +532,20 @@ exec_code_source_file_link = True
 
 # NEW: Sphinx-codeautolink configuration
 # Automatically link code references to their documentation
+
+
+# Mock torch to avoid CUDA errors during doc build
+class MockCuda:
+    def is_available(self):
+        return False
+
+
+class MockTorch:
+    cuda = MockCuda()
+
+
+sys.modules["torch"] = MockTorch()
+
 codeautolink_global_preface = """
 # Standard library
 import os
@@ -578,6 +554,16 @@ import json
 import asyncio
 from typing import Any, Dict, List, Optional, Union, Type
 from pathlib import Path
+
+# Mock torch for documentation build
+class MockCuda:
+    def is_available(self):
+        return False
+
+class MockTorch:
+    cuda = MockCuda()
+
+sys.modules['torch'] = MockTorch()
 
 # Third party
 import pydantic
@@ -723,19 +709,19 @@ enum_tools_namespace = "haive.core"
 enum_tools_default_render_style = "table"  # or "list" or "definition"
 enum_tools_member_order = "bysource"  # Keep original order
 
-# NEW: autodoc_pydantic configuration - Enhanced Pydantic model docs
-autodoc_pydantic_model_show_json = True
-autodoc_pydantic_model_show_config_member = True
-autodoc_pydantic_model_show_validator_summary = True
-autodoc_pydantic_model_show_field_summary = True
-autodoc_pydantic_model_members = True
-autodoc_pydantic_model_member_order = "bysource"
-autodoc_pydantic_model_undoc_members = True
-autodoc_pydantic_model_hide_reused_validator = False
-autodoc_pydantic_field_list_validators = True
-autodoc_pydantic_field_show_default = True
-autodoc_pydantic_field_show_required = True
-autodoc_pydantic_field_show_alias = True
+# # NEW: autodoc_pydantic configuration - DISABLED due to autodoc_pydantic issues
+# autodoc_pydantic_model_show_json = True
+# autodoc_pydantic_model_show_config_member = True
+# autodoc_pydantic_model_show_validator_summary = True
+# autodoc_pydantic_model_show_field_summary = True
+# autodoc_pydantic_model_members = True
+# autodoc_pydantic_model_member_order = "bysource"
+# autodoc_pydantic_model_undoc_members = True
+# autodoc_pydantic_model_hide_reused_validator = False
+# autodoc_pydantic_field_list_validators = True
+# autodoc_pydantic_field_show_default = True
+# autodoc_pydantic_field_show_required = True
+# autodoc_pydantic_field_show_alias = True
 
 # AutoAPI + Pydantic integration
 autoapi_autodoc_typehints = "both"
@@ -778,11 +764,3 @@ needs_types = [
 needs_id_regex = "^[A-Z0-9_]{5,}"
 needs_show_link_type = True
 needs_show_link_title = True
-
-# -- Performance optimizations for faster builds ---------------------------
-html_copy_source = False  # Don't copy source files
-html_show_sourcelink = False  # Don't show source links  
-coverage_show_missing_items = False  # Disable expensive coverage
-autoapi_keep_files = True  # Cache AutoAPI files
-html_use_index = True  # Enable search indexing
-html_split_index = False  # Keep index in single file

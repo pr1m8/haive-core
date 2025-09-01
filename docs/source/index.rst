@@ -37,6 +37,7 @@ engine capabilities, state management, graph workflows, and tool integration.
    :maxdepth: 2
    :caption: Reference
 
+   api_reference
    common_module_overview
 
 .. toctree::
