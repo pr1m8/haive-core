@@ -53,100 +53,95 @@ tools to retrievers - is unified under the Engine abstraction, enabling:
 🚀 QUICK START
 --------------
 
-```python
-from haive.core.engine import AugLLMConfig, create_retriever, create_vectorstore
-
-# 1. Create an enhanced LLM with tools and structured output
-llm = AugLLMConfig(
-    model="gpt-4",
-    temperature=0.7,
-    tools=["web_search", "calculator", "code_executor"],
-    structured_output_model=AnalysisResult,
-    system_message="You are a helpful AI assistant with tool access."
-)
-
-# 2. Create a vector store for knowledge management
-vectorstore = create_vectorstore(
-    type="pinecone",
-    index_name="knowledge_base",
-    embedding_model="text-embedding-3-large"
-)
-
-# 3. Create a retriever for RAG workflows
-retriever = create_retriever(
-    vectorstore=vectorstore,
-    search_type="similarity",
-    search_kwargs={"k": 5, "score_threshold": 0.7}
-)
-
-# 4. Compose engines for complex workflows
-from haive.core.engine import compose_runnable
-
-rag_chain = compose_runnable([
-    retriever,
-    llm.with_context_from_retriever()
-])
-
-# 5. Execute with streaming
-async for chunk in rag_chain.astream("What are the latest AI breakthroughs?"):
-    print(chunk, end="", flush=True)
-```
+Examples:
+    >>> from haive.core.engine import AugLLMConfig, create_retriever, create_vectorstore
+    >>>
+    >>> # 1. Create an enhanced LLM with tools and structured output
+    >>> llm = AugLLMConfig(
+    >>> model="gpt-4",
+    >>> temperature=0.7,
+    >>> tools=["web_search", "calculator", "code_executor"],
+    >>> structured_output_model=AnalysisResult,
+    >>> system_message="You are a helpful AI assistant with tool access."
+    >>> )
+    >>>
+    >>> # 2. Create a vector store for knowledge management
+    >>> vectorstore = create_vectorstore(
+    >>> type="pinecone",
+    >>> index_name="knowledge_base",
+    >>> embedding_model="text-embedding-3-large"
+    >>> )
+    >>>
+    >>> # 3. Create a retriever for RAG workflows
+    >>> retriever = create_retriever(
+    >>> vectorstore=vectorstore,
+    >>> search_type="similarity",
+    >>> search_kwargs={"k": 5, "score_threshold": 0.7}
+    >>> )
+    >>>
+    >>> # 4. Compose engines for complex workflows
+    >>> from haive.core.engine import compose_runnable
+    >>>
+    >>> rag_chain = compose_runnable([
+    >>> retriever,
+    >>> llm.with_context_from_retriever()
+    >>> ])
+    >>>
+    >>> # 5. Execute with streaming
+    >>> async for chunk in rag_chain.astream("What are the latest AI breakthroughs?"):
+    >>> print(chunk, end="", flush=True)
 
 🎯 KEY INNOVATIONS
 ------------------
 
 **1. Unified Execution Model** 🔄
    Every engine supports the same interface:
-   ```python
-   # Synchronous
-   result = engine.invoke(input_data)
-   
-   # Asynchronous
-   result = await engine.ainvoke(input_data)
-   
-   # Streaming
-   for chunk in engine.stream(input_data):
-       process(chunk)
-   
-   # Batch processing
-   results = engine.batch([input1, input2, input3])
-   ```
+
+    >>> # Synchronous
+    >>> result = engine.invoke(input_data)
+    >>>
+    >>> # Asynchronous
+    >>> result = await engine.ainvoke(input_data)
+    >>>
+    >>> # Streaming
+    >>> for chunk in engine.stream(input_data):
+    >>> process(chunk)
+    >>>
+    >>> # Batch processing
+    >>> results = engine.batch([input1, input2, input3])
 
 **2. Dynamic Composition** 🧩
    Engines can be composed like building blocks:
-   ```python
-   # Chain engines together
-   pipeline = retriever | reranker | llm | output_parser
-   
-   # Parallel execution
-   parallel = retriever & web_search & database_query
-   
-   # Conditional routing
-   router = conditional_engine(
-       condition=lambda x: x.get("type") == "technical",
-       if_true=technical_llm,
-       if_false=general_llm
-   )
-   ```
+
+    >>> # Chain engines together
+    >>> pipeline = retriever | reranker | llm | output_parser
+    >>>
+    >>> # Parallel execution
+    >>> parallel = retriever & web_search & database_query
+    >>>
+    >>> # Conditional routing
+    >>> router = conditional_engine(
+    >>> condition=lambda x: x.get("type") == "technical",
+    >>> if_true=technical_llm,
+    >>> if_false=general_llm
+    >>> )
 
 **3. Intelligent Caching** 💾
    Automatic result caching with semantic similarity:
-   ```python
-   cached_llm = llm.with_caching(
-       cache_type="semantic",
-       similarity_threshold=0.95,
-       ttl=3600
-   )
-   ```
+
+    >>> cached_llm = llm.with_caching(
+    >>> cache_type="semantic",
+    >>> similarity_threshold=0.95,
+    >>> ttl=3600
+    >>> )
 
 **4. Observability Built-In** 📊
    Every engine emits detailed telemetry:
-   ```python
-   # Automatic metrics collection
-   llm.metrics.latency_p95  # 95th percentile latency
-   llm.metrics.token_usage  # Token consumption
-   llm.metrics.error_rate   # Error percentage
-   ```
+
+    >>> # Automatic metrics collection
+    >>> llm.metrics.latency_p95  # 95th percentile latency
+    >>> llm.metrics.token_usage  # Token consumption
+    >>> llm.metrics.error_rate   # Error percentage
 
 📚 ENGINE MODULES
 -----------------
@@ -171,96 +166,89 @@ async for chunk in rag_chain.astream("What are the latest AI breakthroughs?"):
 ------------------------
 
 **1. Provider Abstraction**
-```python
-# Switch providers without changing code
-config = AugLLMConfig(
-    model="gpt-4",  # or "claude-3", "gemini-pro", "llama-2"
-    provider="openai"  # auto-detected from model
-)
-```
+
+    >>> # Switch providers without changing code
+    >>> config = AugLLMConfig(
+    >>> model="gpt-4",  # or "claude-3", "gemini-pro", "llama-2"
+    >>> provider="openai"  # auto-detected from model
+    >>> )
 
 **2. Engine Registry**
-```python
-# Register custom engines
-@EngineRegistry.register("my_custom_engine")
-class MyCustomEngine(InvokableEngine):
-    async def ainvoke(self, input_data):
-        # Custom implementation
-        return process(input_data)
 
-# Use anywhere
-engine = EngineRegistry.create("my_custom_engine", config)
-```
+    >>> # Register custom engines
+    >>> @EngineRegistry.register("my_custom_engine")
+    >>> class MyCustomEngine(InvokableEngine):
+    >>> async def ainvoke(self, input_data):
+    >>> # Custom implementation
+    >>> return process(input_data)
+    >>>
+    >>> # Use anywhere
+    >>> engine = EngineRegistry.create("my_custom_engine", config)
 
 **3. Middleware Pattern**
-```python
-# Add capabilities to any engine
-enhanced = base_engine.pipe(
-    add_retry(max_attempts=3),
-    add_rate_limiting(requests_per_minute=100),
-    add_caching(ttl=3600),
-    add_logging(level="DEBUG")
-)
-```
+
+    >>> # Add capabilities to any engine
+    >>> enhanced = base_engine.pipe(
+    >>> add_retry(max_attempts=3),
+    >>> add_rate_limiting(requests_per_minute=100),
+    >>> add_caching(ttl=3600),
+    >>> add_logging(level="DEBUG")
+    >>> )
 
 🎨 ADVANCED FEATURES
 --------------------
 
 **1. Multi-Modal Support** 🖼️
-```python
-vision_llm = AugLLMConfig(
-    model="gpt-4-vision",
-    accept_types=["text", "image", "video"]
-)
 
-result = vision_llm.invoke({
-    "text": "What's in this image?",
-    "image": image_data
-})
-```
+    >>> vision_llm = AugLLMConfig(
+    >>> model="gpt-4-vision",
+    >>> accept_types=["text", "image", "video"]
+    >>> )
+    >>>
+    >>> result = vision_llm.invoke({
+    >>> "text": "What's in this image?",
+    >>> "image": image_data
+    >>> })
 
 **2. Function Calling** 📞
-```python
-llm_with_tools = AugLLMConfig(
-    model="gpt-4",
-    tools=[weather_tool, calculator_tool],
-    tool_choice="auto"  # or "required", "none", specific tool
-)
-```
+
+    >>> llm_with_tools = AugLLMConfig(
+    >>> model="gpt-4",
+    >>> tools=[weather_tool, calculator_tool],
+    >>> tool_choice="auto"  # or "required", "none", specific tool
+    >>> )
 
 **3. Structured Output** 📋
-```python
-from pydantic import BaseModel
 
-class Analysis(BaseModel):
-    sentiment: str
-    confidence: float
-    key_points: List[str]
-
-llm = AugLLMConfig(
-    model="gpt-4",
-    structured_output_model=Analysis
-)
-
-result: Analysis = llm.invoke("Analyze this text...")
-```
+    >>> from pydantic import BaseModel
+    >>>
+    >>> class Analysis(BaseModel):
+    >>> sentiment: str
+    >>> confidence: float
+    >>> key_points: List[str]
+    >>>
+    >>> llm = AugLLMConfig(
+    >>> model="gpt-4",
+    >>> structured_output_model=Analysis
+    >>> )
+    >>>
+    >>> result: Analysis = llm.invoke("Analyze this text...")
 
 **4. Streaming with Callbacks** 🌊
-```python
-async def on_token(token: str):
-    print(token, end="", flush=True)
 
-async def on_complete(result: dict):
-    print(f"\nTokens used: {result['usage']['total_tokens']}")
-
-llm = AugLLMConfig(
-    streaming=True,
-    callbacks={
-        "on_llm_new_token": on_token,
-        "on_llm_end": on_complete
-    }
-)
-```
+    >>> async def on_token(token: str):
+    >>> print(token, end="", flush=True)
+    >>>
+    >>> async def on_complete(result: dict):
+    >>> print(f"\nTokens used: {result['usage']['total_tokens']}")
+    >>>
+    >>> llm = AugLLMConfig(
+    >>> streaming=True,
+    >>> callbacks={
+    >>> "on_llm_new_token": on_token,
+    >>> "on_llm_end": on_complete
+    >>> }
+    >>> )
 
 🚨 PERFORMANCE OPTIMIZATIONS
 ----------------------------

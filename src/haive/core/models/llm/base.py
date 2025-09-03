@@ -364,18 +364,18 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin, RateLimitingMixin, BaseMo
             Integer count of tokens across all messages
 
         Example:
-            ```python
-            from langchain_core.messages import HumanMessage, AIMessage
 
-            config = OpenAILLMConfig(model="gpt-3.5-turbo")
-            messages = [
-                HumanMessage(content="Translate 'Hello' to French."),
-                AIMessage(content="Bonjour"),
-            ]
-
-            token_count = config.get_num_tokens_from_messages(messages)
-            print(f"Total tokens: {token_count}")
-            ```
+    Examples:
+        >>> from langchain_core.messages import HumanMessage, AIMessage
+        >>>
+        >>> config = OpenAILLMConfig(model="gpt-3.5-turbo")
+        >>> messages = [
+        >>> HumanMessage(content="Translate 'Hello' to French."),
+        >>> AIMessage(content="Bonjour"),
+        >>> ]
+        >>>
+        >>> token_count = config.get_num_tokens_from_messages(messages)
+        >>> print(f"Total tokens: {token_count}")
         """
         try:
             llm = self.instantiate()
@@ -411,12 +411,12 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin, RateLimitingMixin, BaseMo
             Integer count of tokens in the text
 
         Example:
-            ```python
-            config = OpenAILLMConfig(model="gpt-3.5-turbo")
-            text = "Hello, world!"
-            token_count = config.get_num_tokens(text)
-            print(f"Tokens in text: {token_count}")
-            ```
+
+    Examples:
+        >>> config = OpenAILLMConfig(model="gpt-3.5-turbo")
+        >>> text = "Hello, world!"
+        >>> token_count = config.get_num_tokens(text)
+        >>> print(f"Tokens in text: {token_count}")
         """
         try:
             llm = self.instantiate()
@@ -458,15 +458,15 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin, RateLimitingMixin, BaseMo
             }
 
         Example:
-            ```python
-            from langchain_core.messages import HumanMessage
 
-            config = OpenAILLMConfig(model="gpt-4")
-            messages = [HumanMessage(content="Write a short story about AI.")]
-
-            cost_estimate = config.estimate_cost_from_messages(messages)
-            print(f"Estimated total cost: ${cost_estimate['total_estimated_cost']:.6f}")
-            ```
+    Examples:
+        >>> from langchain_core.messages import HumanMessage
+        >>>
+        >>> config = OpenAILLMConfig(model="gpt-4")
+        >>> messages = [HumanMessage(content="Write a short story about AI.")]
+        >>>
+        >>> cost_estimate = config.estimate_cost_from_messages(messages)
+        >>> print(f"Estimated total cost: ${cost_estimate['total_estimated_cost']:.6f}")
         """
         try:
             # Count input tokens
@@ -521,13 +521,13 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin, RateLimitingMixin, BaseMo
             Dictionary with cost breakdown (same format as estimate_cost_from_messages)
 
         Example:
-            ```python
-            config = AnthropicLLMConfig(model="claude-3-opus-20240229")
-            text = "Explain quantum computing in simple terms."
 
-            cost_estimate = config.estimate_cost_from_text(text)
-            print(f"Input cost: ${cost_estimate['input_cost']:.6f}")
-            ```
+    Examples:
+        >>> config = AnthropicLLMConfig(model="claude-3-opus-20240229")
+        >>> text = "Explain quantum computing in simple terms."
+        >>>
+        >>> cost_estimate = config.estimate_cost_from_text(text)
+        >>> print(f"Input cost: ${cost_estimate['input_cost']:.6f}")
         """
         try:
             # Count input tokens
@@ -592,14 +592,14 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin, RateLimitingMixin, BaseMo
             }
 
         Example:
-            ```python
-            config = OpenAILLMConfig(model="gpt-3.5-turbo")
 
-            # Check if messages fit
-            fit_check = config.check_context_window_fit(messages)
-            if not fit_check["fits"]:
-                print(f"Messages exceed context window by {fit_check['tokens_over_limit']} tokens")
-            ```
+    Examples:
+        >>> config = OpenAILLMConfig(model="gpt-3.5-turbo")
+        >>>
+        >>> # Check if messages fit
+        >>> fit_check = config.check_context_window_fit(messages)
+        >>> if not fit_check["fits"]:
+        >>> print(f"Messages exceed context window by {fit_check['tokens_over_limit']} tokens")
         """
         try:
             input_tokens = self.get_num_tokens_from_messages(messages, tools=tools)

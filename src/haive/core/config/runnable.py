@@ -14,21 +14,21 @@ Classes:
     RunnableConfigManager: Static utility class for managing runnable configurations
 
 Example:
-    ```python
-    # Create a basic config with thread tracking
-    config = RunnableConfigManager.create(
-        thread_id="123",
-        user_id="user_456"
-    )
 
-    # Add engine-specific configuration
-    config = RunnableConfigManager.add_engine_config(
-        config,
-        "my_llm",
-        temperature=0.7,
-        max_tokens=100
-    )
-    ```
+Examples:
+    >>> # Create a basic config with thread tracking
+    >>> config = RunnableConfigManager.create(
+    >>> thread_id="123",
+    >>> user_id="user_456"
+    >>> )
+    >>>
+    >>> # Add engine-specific configuration
+    >>> config = RunnableConfigManager.add_engine_config(
+    >>> config,
+    >>> "my_llm",
+    >>> temperature=0.7,
+    >>> max_tokens=100
+    >>> )
 """
 
 import copy

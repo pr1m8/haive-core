@@ -1,4 +1,3 @@
-
 Welcome to haive-core Documentation
 ===================================
 
@@ -7,7 +6,7 @@ engine capabilities, state management, graph workflows, and tool integration.
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Getting Started
 
    installation
@@ -16,7 +15,7 @@ engine capabilities, state management, graph workflows, and tool integration.
    concepts
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: User Guides
 
    examples
@@ -25,7 +24,7 @@ engine capabilities, state management, graph workflows, and tool integration.
    schema_system
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Advanced Topics
 
    graph_workflows
@@ -34,10 +33,17 @@ engine capabilities, state management, graph workflows, and tool integration.
    common_utilities
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Reference
+   :maxdepth: 5
+   :caption: 🔍 API Reference
 
-   api_reference
+   API Overview <autoapi/haive/core/index>
+   Engine <autoapi/haive/core/engine/index>
+   Schema <autoapi/haive/core/schema/index>
+   Graph <autoapi/haive/core/graph/index>
+   Models <autoapi/haive/core/models/index>
+   Tools <autoapi/haive/core/tools/index>
+   Persistence <autoapi/haive/core/persistence/index>
+   Common <autoapi/haive/core/common/index>
    common_module_overview
 
 .. toctree::

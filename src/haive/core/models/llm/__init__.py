@@ -14,21 +14,21 @@ Key Components:
     - Metadata: Utilities for accessing model capabilities and context windows
 
 Typical usage example:
-    ```python
-    from haive.core.models.llm.base import OpenAILLMConfig
 
-    # Configure an LLM
-    config = OpenAILLMConfig(
-        model="gpt-4",
-        cache_enabled=True
-    )
-
-    # Instantiate the LLM
-    llm = config.instantiate()
-
-    # Generate text
-    response = llm.generate("Explain quantum computing")
-    ```
+Examples:
+    >>> from haive.core.models.llm.base import OpenAILLMConfig
+    >>>
+    >>> # Configure an LLM
+    >>> config = OpenAILLMConfig(
+    >>> model="gpt-4",
+    >>> cache_enabled=True
+    >>> )
+    >>>
+    >>> # Instantiate the LLM
+    >>> llm = config.instantiate()
+    >>>
+    >>> # Generate text
+    >>> response = llm.generate("Explain quantum computing")
 """
 
 # Import base classes

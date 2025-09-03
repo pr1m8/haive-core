@@ -25,44 +25,44 @@ The Document Engine represents a paradigm shift from traditional document proces
 
 **1. Intelligent Document Engine** 🚀
    Revolutionary document processing that thinks and adapts:
-   ```python
-   from haive.core.engine.document import DocumentEngine, DocumentEngineConfig
-   from haive.core.engine.document import ChunkingStrategy, ProcessingStrategy
-   
-   # Create intelligent document engine with learning capabilities
-   engine = DocumentEngine(
-       config=DocumentEngineConfig(
-           name="intelligent_processor",
-           chunking_strategy=ChunkingStrategy.SEMANTIC_AWARE,
-           processing_strategy=ProcessingStrategy.ADAPTIVE,
-           learning_enabled=True,
-           context_preservation=True
-       )
-   )
-   
-   # Engine automatically optimizes processing based on content
-   engine.enable_content_learning(
-       metrics=["chunk_quality", "semantic_coherence", "processing_speed"],
-       optimization_target="content_understanding"
-   )
-   
-   # Process documents with intelligent adaptation
-   result = engine.invoke([
-       "path/to/technical_manual.pdf",
-       "https://api.docs.example.com/v1/guide",
-       {"database": "mongodb://localhost", "collection": "documents"}
-   ])
-   
-   # Engine learns optimal processing strategies for each content type
-   processing_insights = engine.get_processing_insights()
-   content_analysis = engine.get_content_analysis_report()
-   
-   # Apply learned optimizations automatically
-   engine.apply_learned_optimizations(
-       confidence_threshold=0.85,
-       preserve_quality=True
-   )
-   ```
+
+Examples:
+    >>> from haive.core.engine.document import DocumentEngine, DocumentEngineConfig
+    >>> from haive.core.engine.document import ChunkingStrategy, ProcessingStrategy
+    >>>
+    >>> # Create intelligent document engine with learning capabilities
+    >>> engine = DocumentEngine(
+    >>> config=DocumentEngineConfig(
+    >>> name="intelligent_processor",
+    >>> chunking_strategy=ChunkingStrategy.SEMANTIC_AWARE,
+    >>> processing_strategy=ProcessingStrategy.ADAPTIVE,
+    >>> learning_enabled=True,
+    >>> context_preservation=True
+    >>> )
+    >>> )
+    >>>
+    >>> # Engine automatically optimizes processing based on content
+    >>> engine.enable_content_learning(
+    >>> metrics=["chunk_quality", "semantic_coherence", "processing_speed"],
+    >>> optimization_target="content_understanding"
+    >>> )
+    >>>
+    >>> # Process documents with intelligent adaptation
+    >>> result = engine.invoke([
+    >>> "path/to/technical_manual.pdf",
+    >>> "https://api.docs.example.com/v1/guide",
+    >>> {"database": "mongodb://localhost", "collection": "documents"}
+    >>> ])
+    >>>
+    >>> # Engine learns optimal processing strategies for each content type
+    >>> processing_insights = engine.get_processing_insights()
+    >>> content_analysis = engine.get_content_analysis_report()
+    >>>
+    >>> # Apply learned optimizations automatically
+    >>> engine.apply_learned_optimizations(
+    >>> confidence_threshold=0.85,
+    >>> preserve_quality=True
+    >>> )
 
 For complete examples and advanced patterns, see the documentation.
 """

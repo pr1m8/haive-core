@@ -29,28 +29,28 @@ Key Components:
     - Optimizers: Optimize filter execution for performance
 
 Typical usage example:
-    ```python
-    from haive.core.models.embeddings.filter import FilterBuilder
 
-    # Build a metadata filter
-    filter_criteria = (
-        FilterBuilder()
-        .metadata("category", "eq", "technical")
-        .metadata("published_date", "gte", "2024-01-01")
-        .similarity_threshold(0.7)
-        .build()
-    )
-
-    # Use with retriever
-    retriever = RetrieverConfig(
-        vectorstore_config=vectorstore_config,
-        filter_criteria=filter_criteria,
-        search_kwargs={"k": 10}
-    ).instantiate()
-
-    # Filtered retrieval
-    docs = retriever.get_relevant_documents("machine learning")
-    ```
+Examples:
+    >>> from haive.core.models.embeddings.filter import FilterBuilder
+    >>>
+    >>> # Build a metadata filter
+    >>> filter_criteria = (
+    >>> FilterBuilder()
+    >>> .metadata("category", "eq", "technical")
+    >>> .metadata("published_date", "gte", "2024-01-01")
+    >>> .similarity_threshold(0.7)
+    >>> .build()
+    >>> )
+    >>>
+    >>> # Use with retriever
+    >>> retriever = RetrieverConfig(
+    >>> vectorstore_config=vectorstore_config,
+    >>> filter_criteria=filter_criteria,
+    >>> search_kwargs={"k": 10}
+    >>> ).instantiate()
+    >>>
+    >>> # Filtered retrieval
+    >>> docs = retriever.get_relevant_documents("machine learning")
 
 Architecture:
     The filter system operates at multiple levels:

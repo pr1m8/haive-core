@@ -55,34 +55,33 @@ systems that adapt, learn, and grow beyond their initial programming.
 🚀 QUICK START
 --------------
 
-```python
-from haive.core import AugLLMConfig, BaseGraph, StateSchema
-from haive.core.schema import Field
-
-# 1. Define your state
-class AgentState(StateSchema):
-    messages: list = Field(default_factory=list)
-    context: dict = Field(default_factory=dict)
-    confidence: float = Field(default=0.0)
-
-# 2. Create an enhanced LLM
-llm = AugLLMConfig(
-    model="gpt-4",
-    temperature=0.7,
-    tools=["web_search", "calculator"],
-    structured_output_model=AnalysisResult
-)
-
-# 3. Build a workflow
-graph = BaseGraph(state_schema=AgentState)
-graph.add_node("analyze", analysis_node)
-graph.add_node("synthesize", synthesis_node)
-graph.add_edge("analyze", "synthesize")
-
-# 4. Execute with persistence
-app = graph.compile(checkpointer=PostgresCheckpointer())
-result = await app.ainvoke({"messages": ["Analyze market trends"]})
-```
+Examples:
+    >>> from haive.core import AugLLMConfig, BaseGraph, StateSchema
+    >>> from haive.core.schema import Field
+    >>>
+    >>> # 1. Define your state
+    >>> class AgentState(StateSchema):
+    >>> messages: list = Field(default_factory=list)
+    >>> context: dict = Field(default_factory=dict)
+    >>> confidence: float = Field(default=0.0)
+    >>>
+    >>> # 2. Create an enhanced LLM
+    >>> llm = AugLLMConfig(
+    >>> model="gpt-4",
+    >>> temperature=0.7,
+    >>> tools=["web_search", "calculator"],
+    >>> structured_output_model=AnalysisResult
+    >>> )
+    >>>
+    >>> # 3. Build a workflow
+    >>> graph = BaseGraph(state_schema=AgentState)
+    >>> graph.add_node("analyze", analysis_node)
+    >>> graph.add_node("synthesize", synthesis_node)
+    >>> graph.add_edge("analyze", "synthesize")
+    >>>
+    >>> # 4. Execute with persistence
+    >>> app = graph.compile(checkpointer=PostgresCheckpointer())
+    >>> result = await app.ainvoke({"messages": ["Analyze market trends"]})
 
 🎯 KEY INNOVATIONS
 ------------------
@@ -143,34 +142,32 @@ Haive Core seamlessly integrates with:
 💡 ADVANCED PATTERNS
 --------------------
 
-```python
-# Multi-Agent Orchestration
-from haive.core.graph import OrchestratorGraph
-
-orchestrator = OrchestratorGraph()
-orchestrator.add_agents({
-    "researcher": ResearchAgent(),
-    "analyst": AnalystAgent(),
-    "writer": WriterAgent()
-})
-orchestrator.set_coordination_pattern("hierarchical")
-
-# Dynamic Schema Evolution
-from haive.core.schema import SchemaComposer
-
-composer = SchemaComposer()
-composer.add_fields_from_llm_output(llm_response)
-DynamicState = composer.build()
-
-# Self-Modifying Workflows
-from haive.core.graph import DynamicGraph
-
-graph = DynamicGraph()
-graph.add_mutation_rule(
-    condition=lambda state: state.confidence < 0.5,
-    action=lambda graph: graph.add_verification_node()
-)
-```
+    >>> # Multi-Agent Orchestration
+    >>> from haive.core.graph import OrchestratorGraph
+    >>>
+    >>> orchestrator = OrchestratorGraph()
+    >>> orchestrator.add_agents({
+    >>> "researcher": ResearchAgent(),
+    >>> "analyst": AnalystAgent(),
+    >>> "writer": WriterAgent()
+    >>> })
+    >>> orchestrator.set_coordination_pattern("hierarchical")
+    >>>
+    >>> # Dynamic Schema Evolution
+    >>> from haive.core.schema import SchemaComposer
+    >>>
+    >>> composer = SchemaComposer()
+    >>> composer.add_fields_from_llm_output(llm_response)
+    >>> DynamicState = composer.build()
+    >>>
+    >>> # Self-Modifying Workflows
+    >>> from haive.core.graph import DynamicGraph
+    >>>
+    >>> graph = DynamicGraph()
+    >>> graph.add_mutation_rule(
+    >>> condition=lambda state: state.confidence < 0.5,
+    >>> action=lambda graph: graph.add_verification_node()
+    >>> )
 
 🚨 ENTERPRISE FEATURES
 ----------------------

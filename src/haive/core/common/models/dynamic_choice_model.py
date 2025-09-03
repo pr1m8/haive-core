@@ -47,8 +47,7 @@ class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
     _option_names: list[str] = PrivateAttr(default_factory=list)
     _model_counter: int = PrivateAttr(default=0)
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}
 
     def __init__(self, **data) -> None:
         """Init  .

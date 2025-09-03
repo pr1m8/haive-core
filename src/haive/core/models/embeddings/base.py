@@ -7,20 +7,20 @@ text into high-dimensional vector representations for use in semantic search, cl
 and other NLP tasks.
 
 Typical usage example:
-    ```python
-    from haive.core.models.embeddings.base import create_embeddings, HuggingFaceEmbeddingConfig
 
-    # Create a HuggingFace embedding model configuration
-    config = HuggingFaceEmbeddingConfig(
-        model="sentence-transformers/all-MiniLM-L6-v2"
-    )
-
-    # Instantiate the embeddings model
-    embeddings = create_embeddings(config)
-
-    # Use the model to embed documents or queries
-    doc_embeddings = embeddings.embed_documents(["Text to embed"])
-    ```
+Examples:
+    >>> from haive.core.models.embeddings.base import create_embeddings, HuggingFaceEmbeddingConfig
+    >>>
+    >>> # Create a HuggingFace embedding model configuration
+    >>> config = HuggingFaceEmbeddingConfig(
+    >>> model="sentence-transformers/all-MiniLM-L6-v2"
+    >>> )
+    >>>
+    >>> # Instantiate the embeddings model
+    >>> embeddings = create_embeddings(config)
+    >>>
+    >>> # Use the model to embed documents or queries
+    >>> doc_embeddings = embeddings.embed_documents(["Text to embed"])
 """
 
 import os
@@ -884,9 +884,9 @@ def create_embeddings(config: BaseEmbeddingConfig) -> Any:
         Any: The instantiated embedding model
 
     Example:
-        ```python
-        config = HuggingFaceEmbeddingConfig(model="sentence-transformers/all-mpnet-base-v2")
-        embeddings = create_embeddings(config)
-        ```
+
+    Examples:
+        >>> config = HuggingFaceEmbeddingConfig(model="sentence-transformers/all-mpnet-base-v2")
+        >>> embeddings = create_embeddings(config)
     """
     return config.instantiate()

@@ -67,10 +67,9 @@ This is a **markdown** document for testing.
 
 ## Example Code
 
-```python
-loader = AutoLoader()
-docs = loader.load("document.md")
-```
+    Examples:
+        >>> loader = AutoLoader()
+        >>> docs = loader.load("document.md")
 """
     )
     test_files["markdown"] = md_file

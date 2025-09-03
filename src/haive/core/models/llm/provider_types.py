@@ -7,14 +7,14 @@ These provider types are used throughout the Haive LLM framework to identify
 the source of language models and apply appropriate configuration patterns.
 
 Typical usage example:
-    ```python
-    from haive.core.models.llm.provider_types import LLMProvider
 
-    # Check if a provider is supported
-    if provider == LLMProvider.OPENAI:
-        # Use OpenAI-specific configuration
-        pass
-    ```
+Examples:
+    >>> from haive.core.models.llm.provider_types import LLMProvider
+    >>>
+    >>> # Check if a provider is supported
+    >>> if provider == LLMProvider.OPENAI:
+    >>> # Use OpenAI-specific configuration
+    >>> pass
 """
 
 from enum import Enum

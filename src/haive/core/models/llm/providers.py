@@ -11,22 +11,22 @@ The provider implementations follow a consistent pattern:
 3. Registration with the EngineRegistry
 
 Typical usage example:
-    ```python
-    from haive.core.models.llm.providers import OpenAIConfig
 
-    # Create a provider-specific configuration
-    config = OpenAIConfig(
-        name="gpt4",
-        model="gpt-4",
-        api_key="sk-..."
-    )
-
-    # Instantiate the engine
-    engine = config.instantiate()
-
-    # Generate text
-    response = engine.generate("Explain quantum computing")
-    ```
+Examples:
+    >>> from haive.core.models.llm.providers import OpenAIConfig
+    >>>
+    >>> # Create a provider-specific configuration
+    >>> config = OpenAIConfig(
+    >>> name="gpt4",
+    >>> model="gpt-4",
+    >>> api_key="sk-..."
+    >>> )
+    >>>
+    >>> # Instantiate the engine
+    >>> engine = config.instantiate()
+    >>>
+    >>> # Generate text
+    >>> response = engine.generate("Explain quantum computing")
 """
 
 from __future__ import annotations
