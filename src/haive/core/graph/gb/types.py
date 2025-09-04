@@ -138,15 +138,15 @@ class RetryPolicy(BaseModel):
         jitter: Whether to add random jitter to delays
 
     Example:
-        ```python
-        # Retry up to 3 times with exponential backoff
-        retry_policy = RetryPolicy(
-            max_attempts=3,
-            backoff_factor=2.0,
-            initial_delay=1.0,
-            retry_on=[ConnectionError, TimeoutError]
-        )
-        ```
+
+    Examples:
+        >>> # Retry up to 3 times with exponential backoff
+        >>> retry_policy = RetryPolicy(
+        >>> max_attempts=3,
+        >>> backoff_factor=2.0,
+        >>> initial_delay=1.0,
+        >>> retry_on=[ConnectionError, TimeoutError]
+        >>> )
     """
 
     max_attempts: int = Field(

@@ -15,28 +15,28 @@ Classes:
     HaiveRunnableConfigManager: Extended config manager with Supabase auth and PostgreSQL integration
 
 Example:
-    ```python
-    # Create a config with Supabase authentication
-    config = HaiveRunnableConfigManager.create_with_auth(
-        supabase_user_id="auth0|1234567890",
-        username="john.doe",
-        email="john.doe@example.com"
-    )
 
-    # Add PostgreSQL persistence information
-    config = HaiveRunnableConfigManager.add_persistence_info(
-        config,
-        db_session_id="pgsql-session-123",
-        persistence_type="postgres"
-    )
-
-    # Add engine-specific configuration
-    config = HaiveRunnableConfigManager.add_engine_config(
-        config,
-        "my_llm_engine",
-        temperature=0.7
-    )
-    ```
+Examples:
+    >>> # Create a config with Supabase authentication
+    >>> config = HaiveRunnableConfigManager.create_with_auth(
+    >>> supabase_user_id="auth0|1234567890",
+    >>> username="john.doe",
+    >>> email="john.doe@example.com"
+    >>> )
+    >>>
+    >>> # Add PostgreSQL persistence information
+    >>> config = HaiveRunnableConfigManager.add_persistence_info(
+    >>> config,
+    >>> db_session_id="pgsql-session-123",
+    >>> persistence_type="postgres"
+    >>> )
+    >>>
+    >>> # Add engine-specific configuration
+    >>> config = HaiveRunnableConfigManager.add_engine_config(
+    >>> config,
+    >>> "my_llm_engine",
+    >>> temperature=0.7
+    >>> )
 """
 
 import copy

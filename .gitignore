@@ -90,6 +90,7 @@ docs/build/
 docs/_build/
 docs/logs/
 docs/autoapi/
+docs/dynamic_graph.log
 # Allow custom static files but ignore auto-generated ones
 docs/source/_static/*
 !docs/source/_static/custom.css
@@ -98,6 +99,7 @@ docs/source/_static/*
 !docs/source/_static/logo.png
 docs/source/_tags/
 docs/source/autoapi/
+docs/source/_autosummary/
 docs/source/changelog.rst
 docs/source/_build/
 docs/source/api/

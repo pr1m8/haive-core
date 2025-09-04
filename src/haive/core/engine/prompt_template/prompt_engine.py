@@ -21,59 +21,56 @@ Key Features:
 Example:
     Basic usage with a simple text template:
 
-    ```python
-    from langchain_core.prompts import PromptTemplate
-    from haive.core.engine.prompt_template import PromptTemplateEngine
-
-    # Create a prompt template
-    template = PromptTemplate.from_template(
-        "Question: {question}\\nContext: {context}\\nAnswer:"
-    )
-
-    # Wrap as an engine
-    engine = PromptTemplateEngine(
-        name="qa_prompt",
-        prompt_template=template
-    )
-
-    # Get auto-derived input schema
-    schema = engine.derive_input_schema()
-    print(schema.model_fields.keys())  # ['question', 'context']
-
-    # Use the engine
-    result = engine.invoke({
-        "question": "What is Python?",
-        "context": "Python is a programming language"
-    })
-    ```
+Examples:
+    >>> from langchain_core.prompts import PromptTemplate
+    >>> from haive.core.engine.prompt_template import PromptTemplateEngine
+    >>>
+    >>> # Create a prompt template
+    >>> template = PromptTemplate.from_template(
+    >>> "Question: {question}\\nContext: {context}\\nAnswer:"
+    >>> )
+    >>>
+    >>> # Wrap as an engine
+    >>> engine = PromptTemplateEngine(
+    >>> name="qa_prompt",
+    >>> prompt_template=template
+    >>> )
+    >>>
+    >>> # Get auto-derived input schema
+    >>> schema = engine.derive_input_schema()
+    >>> print(schema.model_fields.keys())  # ['question', 'context']
+    >>>
+    >>> # Use the engine
+    >>> result = engine.invoke({
+    >>> "question": "What is Python?",
+    >>> "context": "Python is a programming language"
+    >>> })
 
     Advanced usage with chat templates:
 
-    ```python
-    from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-
-    # Create a chat template with messages placeholder
-    chat_template = ChatPromptTemplate.from_messages([
-        ("system", "You are a helpful assistant"),
-        MessagesPlaceholder(variable_name="chat_history", optional=True),
-        ("human", "Question: {question}")
-    ])
-
-    # Wrap as an engine
-    engine = PromptTemplateEngine(
-        name="chat_prompt",
-        prompt_template=chat_template
-    )
-
-    # Schema includes both 'question' and 'chat_history' fields
-    schema = engine.derive_input_schema()
-
-    # Format with messages
-    result = engine.invoke({
-        "question": "How are you?",
-        "chat_history": [...]  # Optional
-    })
-    ```
+    >>> from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+    >>>
+    >>> # Create a chat template with messages placeholder
+    >>> chat_template = ChatPromptTemplate.from_messages([
+    >>> ("system", "You are a helpful assistant"),
+    >>> MessagesPlaceholder(variable_name="chat_history", optional=True),
+    >>> ("human", "Question: {question}")
+    >>> ])
+    >>>
+    >>> # Wrap as an engine
+    >>> engine = PromptTemplateEngine(
+    >>> name="chat_prompt",
+    >>> prompt_template=chat_template
+    >>> )
+    >>>
+    >>> # Schema includes both 'question' and 'chat_history' fields
+    >>> schema = engine.derive_input_schema()
+    >>>
+    >>> # Format with messages
+    >>> result = engine.invoke({
+    >>> "question": "How are you?",
+    >>> "chat_history": [...]  # Optional
+    >>> })
 
 Classes:
     PromptTemplateEngine: Main engine class for wrapping prompt templates

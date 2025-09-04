@@ -22,18 +22,17 @@ The Config Module represents a paradigm shift from manual configuration to
 🚀 QUICK START
 --------------
 
-```python
-from haive.core.config import RunnableConfigManager
-
-# Create intelligent configuration manager
-config = RunnableConfigManager.create_intelligent(
-    thread_id="my_thread",
-    optimization_profile="balanced"
-)
-
-# Configuration automatically adapts to your needs
-result = config.get_optimized_settings()
-```
+Examples:
+    >>> from haive.core.config import RunnableConfigManager
+    >>>
+    >>> # Create intelligent configuration manager
+    >>> config = RunnableConfigManager.create_intelligent(
+    >>> thread_id="my_thread",
+    >>> optimization_profile="balanced"
+    >>> )
+    >>>
+    >>> # Configuration automatically adapts to your needs
+    >>> result = config.get_optimized_settings()
 
 For complete examples and advanced patterns, see the documentation.
 """

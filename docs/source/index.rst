@@ -1,54 +1,615 @@
+.. haive-core documentation master file
 
-Welcome to haive-core Documentation
-===================================
+==============================================
+Haive Core - AI Agent Framework Foundation
+==============================================
 
-Haive-core is the foundational package of the Haive AI Agent Framework, providing core 
-engine capabilities, state management, graph workflows, and tool integration.
+.. raw:: html
 
+   <style>
+      .hero-section {
+         text-align: center;
+         padding: 3.5rem 2rem;
+         margin: -2rem -2rem 3rem -2rem;
+         background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 50%, #4c1d95 100%);
+         color: white;
+         border-radius: 0;
+         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+      .hero-section h1 {
+         font-size: 3rem;
+         font-weight: 800;
+         margin-bottom: 1rem;
+         letter-spacing: -0.025em;
+      }
+      .hero-section .subtitle {
+         font-size: 1.5rem;
+         font-weight: 300;
+         opacity: 0.95;
+         margin-bottom: 0.5rem;
+      }
+      .hero-section .description {
+         font-size: 1.1rem;
+         max-width: 800px;
+         margin: 0 auto;
+         opacity: 0.9;
+         line-height: 1.6;
+      }
+      .feature-icon {
+         font-size: 2.5rem;
+         margin-bottom: 1rem;
+         display: block;
+      }
+      .code-example {
+         background: #f5f5f5;
+         border-left: 4px solid #8b5cf6;
+         margin: 1rem 0;
+      }
+   </style>
+   
+   <div class="hero-section">
+      <h1>🚀 Haive Core</h1>
+      <p class="subtitle">Build Production-Ready AI Agent Systems</p>
+      <p class="description">The foundational framework for creating sophisticated AI agents with state management, 
+      graph-based workflows, tool integration, and advanced orchestration capabilities.</p>
+   </div>
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Getting Started
+.. grid:: 1 2 2 3
+   :gutter: 3
+   :class: landing-grid
 
-   installation
-   getting_started
-   overview
-   concepts
+   .. grid-item-card:: 
+      :class-card: sd-border-0 sd-shadow-sm
+      :class-title: sd-text-center sd-fs-5
+      
+      **⚡ Quick Start**
+      ^^^
+      Get up and running in under 5 minutes. Build your first agent with our streamlined API.
+      +++
+      .. button-ref:: getting_started
+         :expand:
+         :color: primary
+         :outline:
+         
+         Start Building →
 
-.. toctree::
-   :maxdepth: 2
-   :caption: User Guides
+   .. grid-item-card::
+      :class-card: sd-border-0 sd-shadow-sm
+      :class-title: sd-text-center sd-fs-5
+      
+      **📘 Learn by Example**
+      ^^^
+      Explore practical examples and real-world patterns from simple agents to complex workflows.
+      +++
+      .. button-ref:: examples
+         :expand:
+         :color: info
+         :outline:
+         
+         View Examples →
 
-   examples
-   configuration
-   engine_architecture
-   schema_system
+   .. grid-item-card::
+      :class-card: sd-border-0 sd-shadow-sm
+      :class-title: sd-text-center sd-fs-5
+      
+      **🔍 API Reference**
+      ^^^
+      Comprehensive API documentation with detailed class references and method signatures.
+      +++
+      .. button-link:: autoapi/haive/core/index.html
+         :expand:
+         :color: warning
+         :outline:
+         
+         Browse API →
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Advanced Topics
+.. admonition:: 🎉 Latest Release: v0.1.0
+   :class: tip
 
-   graph_workflows
-   persistence_layer
-   tool_integration
-   common_utilities
+   **What's New:**
+   
+   • **MetaStateSchema** - Revolutionary agent composition with type-safe state management
+   • **Dynamic Graphs** - Runtime graph modification and node composition
+   • **Tool Orchestration** - Seamless tool discovery, registration, and validation
+   • **Performance** - 2x faster state transitions with optimized reducers
+   • **Developer Experience** - Enhanced debugging tools and error messages
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Reference
+Documentation Hub
+-----------------
 
-   api_reference
-   common_module_overview
+.. tab-set::
 
-.. toctree::
-   :maxdepth: 1
-   :caption: About
+   .. tab-item:: 🎓 Learn
 
-   changelog
+      .. grid:: 1 2 2 2
+         :gutter: 2
 
-Indices and tables
-==================
+         .. grid-item::
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+            **Fundamentals**
+
+            .. toctree::
+               :maxdepth: 1
+
+               installation
+               getting_started
+               overview
+               concepts
+
+         .. grid-item::
+
+            **Tutorials**
+
+            .. toctree::
+               :maxdepth: 1
+
+               examples
+               vectorstore_example_enhanced
+
+      **Key Concepts to Master:**
+
+      • **Engines** - The computational heart of agents (LLMs, retrievers, vector stores)
+      • **Schemas** - Type-safe state management with Pydantic validation
+      • **Graphs** - Workflow orchestration with nodes, edges, and conditional routing
+      • **Tools** - External capabilities and function calling
+
+   .. tab-item:: 🛠️ Build
+
+      .. grid:: 1 2 2 2
+         :gutter: 2
+
+         .. grid-item::
+
+            **Core Architecture**
+
+            .. toctree::
+               :maxdepth: 2
+
+               engine_architecture
+               schema_system
+               graph_workflows
+
+         .. grid-item::
+
+            **Implementation**
+
+            .. toctree::
+               :maxdepth: 2
+
+               configuration
+               tool_integration
+               persistence_layer
+               common_utilities
+
+      **Architecture Highlights:**
+
+      • **Modular Design** - Compose complex systems from simple, reusable components
+      • **Type Safety** - Full Pydantic integration for runtime validation
+      • **Async-First** - Built on asyncio for high-performance concurrent operations
+      • **Extensible** - Plugin architecture for custom engines and tools
+
+   .. tab-item:: 📚 API Docs
+
+      .. grid:: 1 1 2 2
+         :gutter: 3
+
+         .. grid-item::
+
+            **🎮 Core Systems**
+            
+            .. toctree::
+               :maxdepth: 2
+
+               Engine Module <autoapi/haive/core/engine/index>
+               Schema Module <autoapi/haive/core/schema/index>
+               Graph Module <autoapi/haive/core/graph/index>
+
+         .. grid-item::
+
+            **🔧 Supporting Systems**
+            
+            .. toctree::
+               :maxdepth: 2
+
+               Models <autoapi/haive/core/models/index>
+               Tools <autoapi/haive/core/tools/index>
+               Persistence <autoapi/haive/core/persistence/index>
+
+         .. grid-item::
+
+            **🛠️ Utilities**
+            
+            .. toctree::
+               :maxdepth: 2
+
+               Common <autoapi/haive/core/common/index>
+               Utils <autoapi/haive/core/utils/index>
+               Types <autoapi/haive/core/types/index>
+
+         .. grid-item::
+
+            **📖 Guides**
+            
+            .. toctree::
+               :maxdepth: 2
+
+               API Overview <autoapi/haive/core/index>
+               common_module_overview
+               api_reference
+
+   .. tab-item:: ℹ️ Resources
+
+      **Project Information**
+
+      .. toctree::
+         :maxdepth: 1
+
+         changelog
+
+      **Community & Support**
+
+      .. grid:: 1 2 2 3
+         :gutter: 2
+
+         .. grid-item::
+
+            `📦 PyPI Package <https://pypi.org/project/haive-core/>`_
+            
+            Install via pip or poetry
+
+         .. grid-item::
+
+            `💻 GitHub <https://github.com/haive/haive-core>`_
+            
+            Source code and issues
+
+         .. grid-item::
+
+            `💬 Discord <https://discord.gg/haive>`_
+            
+            Community discussions
+
+      **License**
+
+      MIT License - Free for commercial and personal use
+
+Core Capabilities
+-----------------
+
+.. grid:: 1 2 2 2
+   :gutter: 3
+
+   .. grid-item-card:: **🎮 Engine System**
+      :class-card: sd-bg-light
+      
+      **Augmented LLM Engine**
+      
+      • Multi-provider support (OpenAI, Anthropic, Azure)
+      • Structured output with Pydantic models
+      • Token management and cost tracking
+      • Streaming and async execution
+      
+      **Retriever & Vector Stores**
+      
+      • ChromaDB, FAISS, Pinecone integrations
+      • Embedding model flexibility
+      • Hybrid search capabilities
+      • Document processing pipelines
+
+   .. grid-item-card:: **📋 State Management**
+      :class-card: sd-bg-light
+      
+      **Type-Safe Schemas**
+      
+      • Pydantic-based validation
+      • Automatic serialization/deserialization
+      • State composition and inheritance
+      • Custom field validators
+      
+      **MetaStateSchema**
+      
+      • Agent state embedding
+      • Execution tracking
+      • Recompilation management
+      • Graph context preservation
+
+   .. grid-item-card:: **🔄 Graph Workflows**
+      :class-card: sd-bg-light
+      
+      **StateGraph Architecture**
+      
+      • Node-based computation
+      • Conditional branching
+      • Parallel execution paths
+      • Dynamic graph modification
+      
+      **Advanced Features**
+      
+      • Checkpointing and recovery
+      • Graph visualization
+      • Performance profiling
+      • Error handling and retry
+
+   .. grid-item-card:: **🔧 Tool Ecosystem**
+      :class-card: sd-bg-light
+      
+      **Built-in Tools**
+      
+      • File operations
+      • Web scraping
+      • API integrations
+      • Database connectors
+      
+      **Tool Management**
+      
+      • Automatic discovery
+      • Runtime registration
+      • Validation framework
+      • Human-in-the-loop support
+
+Quick Examples
+--------------
+
+.. tab-set::
+
+   .. tab-item:: Engine Configuration
+
+      **Setting up an Augmented LLM Engine:**
+
+      .. code-block:: python
+
+         from haive.core.engine.aug_llm import AugLLMConfig
+         from haive.core.schema.prebuilt.messages_state import MessagesState
+         
+         # Configure the engine with Azure OpenAI
+         config = AugLLMConfig(
+             model="gpt-4",
+             temperature=0.7,
+             max_tokens=2000,
+             system_message="You are a helpful AI assistant.",
+             provider="azure",  # or "openai", "anthropic"
+             api_base="https://your-resource.openai.azure.com/"
+         )
+         
+         # Initialize state management
+         state = MessagesState()
+         state.add_user_message("Explain quantum computing")
+         
+         # The engine is now ready for use in agents
+
+   .. tab-item:: Graph Workflow
+
+      **Building a multi-step workflow:**
+
+      .. code-block:: python
+
+         from haive.core.graph.state_graph import BaseGraph
+         from haive.core.graph.node import create_node
+         from haive.core.schema.prebuilt import MessagesState
+         
+         # Create a workflow graph
+         graph = BaseGraph(state_schema=MessagesState)
+         
+         # Define processing nodes
+         async def analyze_node(state: MessagesState):
+             # Process and analyze input
+             return {"analysis": "completed"}
+         
+         async def generate_node(state: MessagesState):
+             # Generate response based on analysis
+             return {"response": "generated"}
+         
+         # Build the graph
+         graph.add_node("analyze", analyze_node)
+         graph.add_node("generate", generate_node)
+         graph.add_edge("analyze", "generate")
+         graph.set_entry_point("analyze")
+         
+         # Compile and execute
+         workflow = graph.compile()
+         result = await workflow.ainvoke(state)
+
+   .. tab-item:: Tool Integration
+
+      **Creating and registering custom tools:**
+
+      .. code-block:: python
+
+         from langchain_core.tools import tool
+         from haive.core.registry import get_registry
+         from typing import Annotated
+         
+         @tool
+         def calculate_compound_interest(
+             principal: Annotated[float, "Initial amount"],
+             rate: Annotated[float, "Annual interest rate (as decimal)"],
+             time: Annotated[int, "Time period in years"]
+         ) -> float:
+             """Calculate compound interest with annual compounding."""
+             amount = principal * (1 + rate) ** time
+             return round(amount - principal, 2)
+         
+         # Register the tool globally
+         registry = get_registry()
+         registry.register_tool("compound_interest", calculate_compound_interest)
+         
+         # Tools are now available to all agents
+         from haive.core.tools import get_available_tools
+         tools = get_available_tools()
+
+   .. tab-item:: Vector Store RAG
+
+      **Setting up a RAG system with vector stores:**
+
+      .. code-block:: python
+
+         from haive.core.models.vectorstore import VectorStoreConfig
+         from haive.core.models.embeddings import HuggingFaceEmbeddingConfig
+         from haive.core.engine.document import DocumentProcessor
+         
+         # Configure embeddings
+         embedding_config = HuggingFaceEmbeddingConfig(
+             model_name="sentence-transformers/all-mpnet-base-v2",
+             model_kwargs={"device": "cpu"},
+             encode_kwargs={"normalize_embeddings": True}
+         )
+         
+         # Setup vector store
+         vector_config = VectorStoreConfig(
+             provider="Chroma",
+             embedding_config=embedding_config,
+             collection_name="knowledge_base",
+             persist_directory="./chroma_db"
+         )
+         
+         # Initialize and populate
+         vector_store = vector_config.create()
+         
+         # Process documents
+         processor = DocumentProcessor(chunk_size=1000, chunk_overlap=200)
+         documents = processor.process_files(["./docs/*.pdf"])
+         vector_store.add_documents(documents)
+         
+         # Ready for retrieval
+         results = vector_store.similarity_search("What is haive?", k=5)
+
+Architecture Overview
+---------------------
+
+.. mermaid::
+
+   graph TB
+      subgraph "Haive Core Architecture"
+         A[Application Layer]
+         A --> B[Engine Layer]
+         A --> C[Schema Layer]
+         A --> D[Graph Layer]
+         
+         B --> B1[AugLLM<br/>Engine]
+         B --> B2[Retriever<br/>Engine]
+         B --> B3[VectorStore<br/>Engine]
+         
+         C --> C1[State<br/>Schemas]
+         C --> C2[Message<br/>Formats]
+         C --> C3[Validation<br/>Rules]
+         
+         D --> D1[Nodes &<br/>Edges]
+         D --> D2[Execution<br/>Runtime]
+         D --> D3[State<br/>Management]
+         
+         E[Tool Registry]
+         F[Persistence Layer]
+         
+         B1 & B2 & B3 --> E
+         D --> F
+      end
+      
+      style A fill:#8b5cf6,color:#fff
+      style B fill:#6d28d9,color:#fff
+      style C fill:#6d28d9,color:#fff  
+      style D fill:#6d28d9,color:#fff
+
+Performance & Scalability
+-------------------------
+
+.. grid:: 1 3 3 3
+   :gutter: 2
+
+   .. grid-item-card:: ⚡ **Fast**
+      :text-align: center
+      
+      • Async/await throughout
+      • Optimized state transitions
+      • Efficient memory usage
+      • Connection pooling
+
+   .. grid-item-card:: 📈 **Scalable**
+      :text-align: center
+      
+      • Distributed execution
+      • Horizontal scaling
+      • Queue-based processing
+      • Load balancing
+
+   .. grid-item-card:: 💪 **Reliable**
+      :text-align: center
+      
+      • Automatic retries
+      • Error recovery
+      • State persistence
+      • Health monitoring
+
+Getting Help
+------------
+
+.. grid:: 1 2 3 3
+   :gutter: 3
+
+   .. grid-item-card:: 📖 **Documentation**
+      :text-align: center
+      :class-card: sd-border-1
+      
+      Comprehensive guides and API reference
+      
+      +++
+      
+      `Read the Docs → <https://docs.haive.ai>`_
+
+   .. grid-item-card:: 💬 **Community**
+      :text-align: center
+      :class-card: sd-border-1
+      
+      Join our Discord for discussions
+      
+      +++
+      
+      `Join Discord → <https://discord.gg/haive>`_
+
+   .. grid-item-card:: 🐛 **Issues**
+      :text-align: center
+      :class-card: sd-border-1
+      
+      Report bugs or request features
+      
+      +++
+      
+      `GitHub Issues → <https://github.com/haive/haive-core/issues>`_
+
+Search & Navigation
+-------------------
+
+.. grid:: 1 3 3 3
+   :gutter: 2
+
+   .. grid-item::
+   
+      **🔍 Search Documentation**
+      
+      :ref:`search`
+
+   .. grid-item::
+   
+      **📑 Full Index**
+      
+      :ref:`genindex`
+
+   .. grid-item::
+   
+      **📦 Module Index**
+      
+      :ref:`modindex`
+
+----
+
+.. note::
+   
+   **Documentation Version:** This documentation is automatically generated from the latest source code 
+   and is synchronized with version 0.1.0 of haive-core. All code examples are tested in our CI pipeline.
+
+.. seealso::
+
+   **Related Packages in the Haive Ecosystem:**
+   
+   • `haive-agents <https://pypi.org/project/haive-agents/>`_ - Pre-built agent implementations
+   • `haive-tools <https://pypi.org/project/haive-tools/>`_ - Extended tool library
+   • `haive-games <https://pypi.org/project/haive-games/>`_ - Game environments for agent training

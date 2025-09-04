@@ -58,21 +58,21 @@ def extract_input_schema(
         Pydantic BaseModel class representing the input schema
 
     Example:
-        ```python
-        def my_function(name: str, age: int = 25, active: bool = True):
-            '''Process user information.
 
-    Args:
-                name: User's full name
-                age: User's age in years
-                active: Whether the user is active
-            '''
-            return f"User {name} is {age} years old"
-
-        Schema = extract_input_schema(my_function)
-        # Creates a Pydantic model with name, age, active fields
-        # and stores the original signature for dynamic invocation
-        ```
+    Examples:
+        >>> def my_function(name: str, age: int = 25, active: bool = True):
+        >>> '''Process user information.
+        >>>
+        >>> Args:
+        >>> name: User's full name
+        >>> age: User's age in years
+        >>> active: Whether the user is active
+        >>> '''
+        >>> return f"User {name} is {age} years old"
+        >>>
+        >>> Schema = extract_input_schema(my_function)
+        >>> # Creates a Pydantic model with name, age, active fields
+        >>> # and stores the original signature for dynamic invocation
     """
     # Determine schema name
     if schema_name is None:
@@ -424,11 +424,11 @@ def invoke_from_schema(schema_instance: BaseModel, **extra_kwargs) -> Any:
         Result of calling the original function
 
     Example:
-        ```python
-        Schema = extract_input_schema(my_function)
-        input_data = Schema(name="John", age=30)
-        result = invoke_from_schema(input_data)
-        ```
+
+    Examples:
+        >>> Schema = extract_input_schema(my_function)
+        >>> input_data = Schema(name="John", age=30)
+        >>> result = invoke_from_schema(input_data)
     """
     schema_class = type(schema_instance)
 
@@ -557,25 +557,25 @@ def create_goal_tool_node(
         ToolNode instance or None if LangChain not available
 
     Example:
-        ```python
-        class SearchQueries(BaseModel):
-            search_queries: List[str]
 
-        class AnswerQuestion(BaseModel):
-            answer: str
-            sources: List[str]
-
-        def execute_goal(goal_data, **kwargs):
-            if isinstance(goal_data, SearchQueries):
-                return search_function(goal_data.search_queries)
-            elif isinstance(goal_data, AnswerQuestion):
-                return answer_function(goal_data.answer, goal_data.sources)
-
-        tool_node = create_goal_tool_node(
-            [SearchQueries, AnswerQuestion],
-            execute_goal
-        )
-        ```
+    Examples:
+        >>> class SearchQueries(BaseModel):
+        >>> search_queries: List[str]
+        >>>
+        >>> class AnswerQuestion(BaseModel):
+        >>> answer: str
+        >>> sources: List[str]
+        >>>
+        >>> def execute_goal(goal_data, **kwargs):
+        >>> if isinstance(goal_data, SearchQueries):
+        >>> return search_function(goal_data.search_queries)
+        >>> elif isinstance(goal_data, AnswerQuestion):
+        >>> return answer_function(goal_data.answer, goal_data.sources)
+        >>>
+        >>> tool_node = create_goal_tool_node(
+        >>> [SearchQueries, AnswerQuestion],
+        >>> execute_goal
+        >>> )
     """
     if not LANGCHAIN_AVAILABLE or ToolNode is None:
         logger.warning("LangChain not available, cannot create ToolNode")
@@ -656,21 +656,21 @@ def create_batch_goal_tool_node(
         ToolNode instance or None if LangChain not available
 
     Example:
-        ```python
-        class SearchQueries(BaseModel):
-            search_queries: List[str]
 
-        class ReviseAnswer(BaseModel):
-            search_queries: List[str]
-
-        def run_queries(search_queries: List[str], **kwargs):
-            return tavily_tool.batch([{"query": query} for query in search_queries])
-
-        tool_node = create_batch_goal_tool_node(
-            [SearchQueries, ReviseAnswer],
-            run_queries
-        )
-        ```
+    Examples:
+        >>> class SearchQueries(BaseModel):
+        >>> search_queries: List[str]
+        >>>
+        >>> class ReviseAnswer(BaseModel):
+        >>> search_queries: List[str]
+        >>>
+        >>> def run_queries(search_queries: List[str], **kwargs):
+        >>> return tavily_tool.batch([{"query": query} for query in search_queries])
+        >>>
+        >>> tool_node = create_batch_goal_tool_node(
+        >>> [SearchQueries, ReviseAnswer],
+        >>> run_queries
+        >>> )
     """
     if not LANGCHAIN_AVAILABLE or ToolNode is None:
         logger.warning("LangChain not available, cannot create ToolNode")

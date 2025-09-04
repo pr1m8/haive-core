@@ -7,14 +7,14 @@ These provider types are used throughout the Haive embedding framework to identi
 the source of embedding models and apply appropriate configuration patterns.
 
 Typical usage example:
-    ```python
-    from haive.core.models.embeddings.provider_types import EmbeddingProvider
 
-    # Check if a provider is supported
-    if provider == EmbeddingProvider.HUGGINGFACE:
-        # Use HuggingFace-specific configuration
-        pass
-    ```
+Examples:
+    >>> from haive.core.models.embeddings.provider_types import EmbeddingProvider
+    >>>
+    >>> # Check if a provider is supported
+    >>> if provider == EmbeddingProvider.HUGGINGFACE:
+    >>> # Use HuggingFace-specific configuration
+    >>> pass
 """
 
 from enum import Enum

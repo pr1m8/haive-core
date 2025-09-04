@@ -281,7 +281,7 @@ exclude = [
 
 [tool.poetry.group.docs.dependencies]
 # Use the shared pydevelop-docs system (contains all 43+ Sphinx extensions)
-pydevelop-docs = { path = "../../tools/pydevelop-docs", develop = true }
+pydevelop-docs = { path = "../../tools/pydvlp-docs", develop = true }
 sphinx = "^8.2.3"
 sphinx-autoapi = "^3.6.0"
 sphinx-autodoc-typehints = "^3.1.0"

@@ -28,29 +28,29 @@ Key Components:
     - Ranking: Sophisticated ranking and re-ranking algorithms
 
 Typical usage example:
-    ```python
-    from haive.core.models.retriever import RetrieverConfig, RetrieverType
-    from haive.core.models.vectorstore import VectorStoreConfig
 
-    # Configure a vector store retriever
-    vectorstore_config = VectorStoreConfig(provider="chroma")
-
-    retriever_config = RetrieverConfig(
-        type=RetrieverType.VECTORSTORE,
-        vectorstore_config=vectorstore_config,
-        search_type="similarity",
-        search_kwargs={"k": 10, "score_threshold": 0.7}
-    )
-
-    # Create the retriever
-    retriever = retriever_config.instantiate()
-
-    # Retrieve relevant documents
-    docs = retriever.get_relevant_documents("What is machine learning?")
-
-    # Async retrieval
-    docs = await retriever.aget_relevant_documents("AI applications")
-    ```
+Examples:
+    >>> from haive.core.models.retriever import RetrieverConfig, RetrieverType
+    >>> from haive.core.models.vectorstore import VectorStoreConfig
+    >>>
+    >>> # Configure a vector store retriever
+    >>> vectorstore_config = VectorStoreConfig(provider="chroma")
+    >>>
+    >>> retriever_config = RetrieverConfig(
+    >>> type=RetrieverType.VECTORSTORE,
+    >>> vectorstore_config=vectorstore_config,
+    >>> search_type="similarity",
+    >>> search_kwargs={"k": 10, "score_threshold": 0.7}
+    >>> )
+    >>>
+    >>> # Create the retriever
+    >>> retriever = retriever_config.instantiate()
+    >>>
+    >>> # Retrieve relevant documents
+    >>> docs = retriever.get_relevant_documents("What is machine learning?")
+    >>>
+    >>> # Async retrieval
+    >>> docs = await retriever.aget_relevant_documents("AI applications")
 
 Architecture:
     Retrievers in Haive follow a layered architecture:
