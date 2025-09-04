@@ -31,7 +31,7 @@ extensions = [
 ]
 
 # AutoAPI Configuration
-autoapi_dirs = ["../../src"]
+autoapi_dirs = ["../../src/haive"]
 autoapi_type = "python"
 autoapi_add_toctree_entry = True
 autoapi_keep_files = True  # Keep generated files like haive-mcp
@@ -143,13 +143,8 @@ graphviz_dot_args = [
 ]
 
 # CSS files in correct order - purple theme loads last to override
-html_css_files = [
-    "purple-theme.css",  # Main purple theme
-    "code-purple-theme.css",  # Purple code blocks
-    "tippy-enhancements.css",  # Tooltip enhancements
-    "purple-theme-enhanced.css",  # Enhanced purple theming (MUST be last)
-    "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap",
-]
+# Simplified - using Furo's built-in theme (no CSS overrides needed)
+# The dark_css_variables above already provide the purple theme
 
 # Autosummary settings for detailed API docs
 autosummary_generate = True
