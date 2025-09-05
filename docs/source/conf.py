@@ -59,6 +59,7 @@ autoapi_python_use_implicit_namespaces = True
 # -- Options for HTML output -------------------------------------------------
 html_theme = "furo"
 html_static_path = ["_static"]
+html_css_files = ["custom.css"]  # Ensure our custom CSS loads
 
 # Furo theme configuration - Enhanced purple theme with proper contrast
 html_theme_options = {
