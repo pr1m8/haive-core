@@ -7,15 +7,27 @@ Haive Core - AI Agent Framework Foundation
 .. raw:: html
 
    <style>
+      /* Hero section with guaranteed contrast */
       .hero-section {
          text-align: center;
          padding: 3.5rem 2rem;
          margin: -2rem -2rem 3rem -2rem;
          background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 50%, #4c1d95 100%);
-         color: white;
+         color: white !important; /* Force white text */
          border-radius: 0;
          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       }
+      
+      /* Ensure all hero children have white text on purple background */
+      .hero-section h1,
+      .hero-section h2,
+      .hero-section p,
+      .hero-section .subtitle,
+      .hero-section .description {
+         color: white !important;
+         background: transparent !important; /* Transparent is safe here since parent has gradient */
+      }
+      
       .hero-section h1 {
          font-size: 3rem;
          font-weight: 800;
@@ -35,15 +47,51 @@ Haive Core - AI Agent Framework Foundation
          opacity: 0.9;
          line-height: 1.6;
       }
+      
+      /* Ensure feature icons are visible */
       .feature-icon {
          font-size: 2.5rem;
          margin-bottom: 1rem;
          display: block;
+         color: var(--color-brand-primary, #8b5cf6);
       }
+      
+      /* Code examples with proper contrast */
       .code-example {
-         background: #f5f5f5;
+         background: #f8f9fa !important; /* Light gray background */
+         color: #1f2937 !important; /* Dark text */
          border-left: 4px solid #8b5cf6;
          margin: 1rem 0;
+         padding: 0.5rem;
+      }
+      
+      /* Fix for grid cards to ensure text visibility */
+      .sd-card {
+         background: var(--color-card-background, #ffffff) !important;
+         color: var(--color-foreground-primary, #1f2937) !important;
+      }
+      
+      /* Ensure all text outside hero has proper contrast */
+      body .content h1:not(.hero-section h1),
+      body .content h2:not(.hero-section h2),
+      body .content h3:not(.hero-section h3),
+      body .content p:not(.hero-section p) {
+         color: var(--color-foreground-primary, #1f2937) !important;
+         background: transparent; /* Safe since body has white background */
+      }
+      
+      /* Sidebar text visibility */
+      .sidebar {
+         background: var(--color-sidebar-background, #faf5ff) !important;
+      }
+      .sidebar a {
+         color: var(--color-sidebar-link-text, #374151) !important;
+      }
+      
+      /* Tab content visibility */
+      .tab-content {
+         background: var(--color-background-primary, #ffffff) !important;
+         color: var(--color-foreground-primary, #1f2937) !important;
       }
    </style>
    
@@ -280,7 +328,7 @@ Core Capabilities
    :gutter: 3
 
    .. grid-item-card:: **🎮 Engine System**
-      :class-card: sd-bg-light
+      :class-card: sd-border-1
       
       **Augmented LLM Engine**
       
@@ -297,7 +345,7 @@ Core Capabilities
       • Document processing pipelines
 
    .. grid-item-card:: **📋 State Management**
-      :class-card: sd-bg-light
+      :class-card: sd-border-1
       
       **Type-Safe Schemas**
       
@@ -314,7 +362,7 @@ Core Capabilities
       • Graph context preservation
 
    .. grid-item-card:: **🔄 Graph Workflows**
-      :class-card: sd-bg-light
+      :class-card: sd-border-1
       
       **StateGraph Architecture**
       
@@ -331,7 +379,7 @@ Core Capabilities
       • Error handling and retry
 
    .. grid-item-card:: **🔧 Tool Ecosystem**
-      :class-card: sd-bg-light
+      :class-card: sd-border-1
       
       **Built-in Tools**
       
