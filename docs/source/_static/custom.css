@@ -174,10 +174,99 @@ a:not(.hero-section a):hover {
     }
 }
 
+/* Architecture diagram fixes */
+.architecture-grid .layer {
+    background-color: var(--color-card-background, #f8f9fa) !important;
+    color: var(--color-foreground-primary, #1f2937) !important;
+    border: 1px solid var(--color-card-border, #e5e7eb) !important;
+}
+
+.architecture-grid .layer-title {
+    color: var(--color-foreground-primary, #111827) !important;
+    font-weight: 600;
+}
+
+.architecture-grid .component {
+    background-color: var(--color-background-secondary, #ffffff) !important;
+    color: var(--color-foreground-secondary, #4b5563) !important;
+    border: 1px solid var(--color-card-border, #d1d5db) !important;
+}
+
+/* Fix for any remaining white text on transparent */
+.landing-grid span,
+.landing-grid div:not(.hero-section *) {
+    color: var(--color-foreground-primary, #1f2937) !important;
+}
+
+/* Mermaid diagram fixes - COMPREHENSIVE */
+/* Target all Mermaid text elements */
+.mermaid text,
+.mermaid .nodeLabel,
+.mermaid span.nodeLabel,
+.mermaid foreignObject span,
+.mermaid foreignObject div {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+}
+
+/* Ensure nodes have colored backgrounds */
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node ellipse,
+.mermaid .node polygon,
+.mermaid .node path {
+    fill: #8b5cf6 !important;
+    stroke: #6d28d9 !important;
+    stroke-width: 2px !important;
+}
+
+/* Special handling for foreignObject spans that contain labels */
+.mermaid foreignObject span.nodeLabel {
+    display: inline-block !important;
+    padding: 4px 8px !important;
+    background: #6d28d9 !important;
+    color: #ffffff !important;
+    border-radius: 4px !important;
+    font-weight: 500 !important;
+}
+
+/* Fallback for any Mermaid element with white text on transparent */
+.mermaid *[style*="color: rgb(255, 255, 255)"],
+.mermaid *[style*="fill: rgb(255, 255, 255)"] {
+    background: #6d28d9 !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+}
+
+/* Override inline styles on Mermaid elements */
+.mermaid g text {
+    fill: #ffffff !important;
+}
+
+.mermaid .edgeLabel {
+    background-color: #f9fafb !important;
+    color: #1f2937 !important;
+}
+
 /* NUCLEAR OPTION: If something still has white on white, this catches it */
 *:not(.hero-section *) {
     /* If text is white and background is transparent/white, force black text */
     color: var(--color-foreground-primary, #1f2937);
+}
+
+/* AutoAPI page fix - ensure custom CSS loads there too */
+.autoapi-section h1,
+.autoapi-section h2,
+.autoapi-section h3,
+.autoapi-section p {
+    color: var(--color-foreground-primary, #1f2937) !important;
+    background-color: transparent;
+}
+
+/* Fix for API reference pages */
+body[data-theme="auto"] .content,
+body[data-theme="light"] .content {
+    color: var(--color-foreground-primary, #1f2937) !important;
 }
 
 /* Debug helper - uncomment to see all transparent backgrounds */

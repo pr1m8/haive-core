@@ -6,7 +6,8 @@ Haive Core - AI Agent Framework Foundation
 
 .. raw:: html
 
-   <style>
+   <!-- Styles moved to _static/custom.css -->
+   <style>/* Minimal styles only */
       /* Hero section with guaranteed contrast */
       .hero-section {
          text-align: center;
@@ -95,12 +96,7 @@ Haive Core - AI Agent Framework Foundation
       }
    </style>
    
-   <div class="hero-section">
-      <h1>🚀 Haive Core</h1>
-      <p class="subtitle">Build Production-Ready AI Agent Systems</p>
-      <p class="description">The foundational framework for creating sophisticated AI agents with state management, 
-      graph-based workflows, tool integration, and advanced orchestration capabilities.</p>
-   </div>
+   <!-- Hero section removed per request -->
 
 .. grid:: 1 2 2 3
    :gutter: 3
@@ -287,14 +283,18 @@ Documentation Hub
 
    .. tab-item:: ℹ️ Resources
 
-      **Project Information**
-
       .. toctree::
          :maxdepth: 1
 
+         additional_resources
          changelog
 
-      **Community & Support**
+      **Quick Links**
+      
+      * `GitHub Repository <https://github.com/pr1m8/haive-core>`_
+      * `Discord Community <https://discord.gg/haive>`_
+      * `Haive Central Docs <https://docs.haive.io>`_
+      * `Report Issues <https://github.com/pr1m8/haive-core/issues>`_
 
       .. grid:: 1 2 2 3
          :gutter: 2
@@ -307,7 +307,7 @@ Documentation Hub
 
          .. grid-item::
 
-            `💻 GitHub <https://github.com/haive/haive-core>`_
+            `💻 GitHub <https://github.com/pr1m8/haive-core>`_
             
             Source code and issues
 
@@ -491,8 +491,8 @@ Quick Examples
 
       .. code-block:: python
 
-         from haive.core.models.vectorstore import VectorStoreConfig
-         from haive.core.models.embeddings import HuggingFaceEmbeddingConfig
+         from haive.core.engine.vectorstore import VectorStoreConfig
+         from haive.core.engine.embedding.providers import HuggingFaceEmbeddingConfig
          from haive.core.engine.document import DocumentProcessor
          
          # Configure embeddings
@@ -552,10 +552,10 @@ Architecture Overview
          D --> F
       end
       
-      style A fill:#8b5cf6,color:#fff
-      style B fill:#6d28d9,color:#fff
-      style C fill:#6d28d9,color:#fff  
-      style D fill:#6d28d9,color:#fff
+      style A fill:#8b5cf6,color:#ffffff,stroke:#6d28d9,stroke-width:2px
+      style B fill:#6d28d9,color:#ffffff,stroke:#4c1d95,stroke-width:2px
+      style C fill:#6d28d9,color:#ffffff,stroke:#4c1d95,stroke-width:2px
+      style D fill:#6d28d9,color:#ffffff,stroke:#4c1d95,stroke-width:2px
 
 Performance & Scalability
 -------------------------
@@ -621,7 +621,7 @@ Getting Help
       
       +++
       
-      `GitHub Issues → <https://github.com/haive/haive-core/issues>`_
+      `GitHub Issues → <https://github.com/pr1m8/haive-core/issues>`_
 
 Search & Navigation
 -------------------

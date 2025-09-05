@@ -345,19 +345,18 @@ Building a RAG system:
 
 .. code-block:: python
 
-   from haive.core.engine.vectorstore import VectorStoreConfig
+   from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
    from haive.core.engine.aug_llm import AugLLMConfig
    from langchain_core.documents import Document
    
    # Configure vector store
    vector_config = VectorStoreConfig(
-       provider="chroma",
-       collection_name="knowledge_base",
-       embedding_model="text-embedding-ada-002"
+       provider=VectorStoreProvider.CHROMA,
+       collection_name="knowledge_base"
    )
    
    # Create vector store
-   vector_store = vector_config.create_store()
+   vector_store = vector_config.instantiate()
    
    # Add documents
    documents = [

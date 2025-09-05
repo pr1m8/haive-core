@@ -179,13 +179,12 @@ Configure different vector store backends:
 
 .. code-block:: python
 
-   from haive.core.engine.vectorstore import VectorStoreConfig
+   from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
    
    vector_config = VectorStoreConfig(
-       provider="chroma",
+       provider=VectorStoreProvider.CHROMA,
        collection_name="documents",
-       persist_directory="./chroma_data",
-       embedding_model="text-embedding-ada-002"
+       persist_directory="./chroma_data"
    )
 
 **Pinecone**:
@@ -193,11 +192,10 @@ Configure different vector store backends:
 .. code-block:: python
 
    vector_config = VectorStoreConfig(
-       provider="pinecone",
+       provider=VectorStoreProvider.PINECONE,
        api_key=os.getenv("PINECONE_API_KEY"),
        environment="us-east-1",
-       index_name="haive-docs",
-       embedding_model="text-embedding-ada-002"
+       index_name="haive-docs"
    )
 
 **FAISS**:
@@ -205,9 +203,8 @@ Configure different vector store backends:
 .. code-block:: python
 
    vector_config = VectorStoreConfig(
-       provider="faiss",
-       index_path="./faiss_index",
-       embedding_model="sentence-transformers/all-MiniLM-L6-v2"
+       provider=VectorStoreProvider.FAISS,
+       index_path="./faiss_index"
    )
 
 **PostgreSQL with pgvector**:
@@ -215,10 +212,9 @@ Configure different vector store backends:
 .. code-block:: python
 
    vector_config = VectorStoreConfig(
-       provider="postgres",
+       provider=VectorStoreProvider.PGVECTOR,
        connection_string="postgresql://user:pass@localhost/haive",
-       table_name="embeddings",
-       embedding_model="text-embedding-ada-002"
+       table_name="embeddings"
    )
 
 Embedding Configuration
