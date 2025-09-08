@@ -1,7 +1,7 @@
-:mod:`haive.core.models.vectorstore`
+:mod:`haive.core.engine.vectorstore`
 =====================================
 
-.. currentmodule:: haive.core.models.vectorstore
+.. currentmodule:: haive.core.engine.vectorstore
 
 .. admonition:: Quick Links
    :class: tip
@@ -67,7 +67,7 @@ Quick Start
 
       .. code-block:: python
 
-         from haive.core.models.vectorstore import VectorStoreConfig, VectorStoreProvider
+         from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
 
          # Configure a local vector store
          config = VectorStoreConfig(
@@ -94,7 +94,7 @@ Quick Start
          )
 
          # Create with custom embeddings
-         from haive.core.models.embeddings import OpenAIEmbeddingConfig
+         from haive.core.engine.embeddings import OpenAIEmbeddingConfig
          
          embedding_config = OpenAIEmbeddingConfig(model="text-embedding-3-small")
          config.embedding_model = embedding_config
@@ -103,7 +103,7 @@ Quick Start
 
       .. code-block:: python
 
-         from haive.core.models.vectorstore import VectorStoreConfig
+         from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
          from langchain_core.documents import Document
 
          # Create documents
@@ -251,7 +251,7 @@ RAG Pipeline Example
   :hide_code:
 
   # Example of a complete RAG pipeline
-  from haive.core.models.vectorstore import VectorStoreConfig, VectorStoreProvider
+  from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
   from haive.core.engine.retriever import create_retriever
   from langchain_core.documents import Document
   
@@ -295,7 +295,7 @@ See Also
 --------
 
 * :doc:`/autoapi/haive/core/engine/retriever/index` - Retriever configurations
-* :doc:`/autoapi/haive/core/models/embeddings/index` - Embedding models
+* :doc:`/autoapi/haive/core/engine/embeddings/index` - Embedding models
 * :doc:`/autoapi/haive/core/engine/document/index` - Document processing
 * `LangChain Vector Stores <https://python.langchain.com/docs/modules/data_connection/vectorstores/>`_ - External documentation
 

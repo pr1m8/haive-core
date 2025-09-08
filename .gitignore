@@ -91,6 +91,11 @@ docs/_build/
 docs/logs/
 docs/autoapi/
 docs/dynamic_graph.log
+docs_audit/
+test_contrast_fixes.py
+fix_white_on_white.py
+audit_docs.py
+*.html.backup
 # Allow custom static files but ignore auto-generated ones
 docs/source/_static/*
 !docs/source/_static/custom.css

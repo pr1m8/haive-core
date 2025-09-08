@@ -6,16 +6,29 @@ Haive Core - AI Agent Framework Foundation
 
 .. raw:: html
 
-   <style>
+   <!-- Styles moved to _static/custom.css -->
+   <style>/* Minimal styles only */
+      /* Hero section with guaranteed contrast */
       .hero-section {
          text-align: center;
          padding: 3.5rem 2rem;
          margin: -2rem -2rem 3rem -2rem;
          background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 50%, #4c1d95 100%);
-         color: white;
+         color: white !important; /* Force white text */
          border-radius: 0;
          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       }
+      
+      /* Ensure all hero children have white text on purple background */
+      .hero-section h1,
+      .hero-section h2,
+      .hero-section p,
+      .hero-section .subtitle,
+      .hero-section .description {
+         color: white !important;
+         background: transparent !important; /* Transparent is safe here since parent has gradient */
+      }
+      
       .hero-section h1 {
          font-size: 3rem;
          font-weight: 800;
@@ -35,24 +48,55 @@ Haive Core - AI Agent Framework Foundation
          opacity: 0.9;
          line-height: 1.6;
       }
+      
+      /* Ensure feature icons are visible */
       .feature-icon {
          font-size: 2.5rem;
          margin-bottom: 1rem;
          display: block;
+         color: var(--color-brand-primary, #8b5cf6);
       }
+      
+      /* Code examples with proper contrast */
       .code-example {
-         background: #f5f5f5;
+         background: #f8f9fa !important; /* Light gray background */
+         color: #1f2937 !important; /* Dark text */
          border-left: 4px solid #8b5cf6;
          margin: 1rem 0;
+         padding: 0.5rem;
+      }
+      
+      /* Fix for grid cards to ensure text visibility */
+      .sd-card {
+         background: var(--color-card-background, #ffffff) !important;
+         color: var(--color-foreground-primary, #1f2937) !important;
+      }
+      
+      /* Ensure all text outside hero has proper contrast */
+      body .content h1:not(.hero-section h1),
+      body .content h2:not(.hero-section h2),
+      body .content h3:not(.hero-section h3),
+      body .content p:not(.hero-section p) {
+         color: var(--color-foreground-primary, #1f2937) !important;
+         background: transparent; /* Safe since body has white background */
+      }
+      
+      /* Sidebar text visibility */
+      .sidebar {
+         background: var(--color-sidebar-background, #faf5ff) !important;
+      }
+      .sidebar a {
+         color: var(--color-sidebar-link-text, #374151) !important;
+      }
+      
+      /* Tab content visibility */
+      .tab-content {
+         background: var(--color-background-primary, #ffffff) !important;
+         color: var(--color-foreground-primary, #1f2937) !important;
       }
    </style>
    
-   <div class="hero-section">
-      <h1>🚀 Haive Core</h1>
-      <p class="subtitle">Build Production-Ready AI Agent Systems</p>
-      <p class="description">The foundational framework for creating sophisticated AI agents with state management, 
-      graph-based workflows, tool integration, and advanced orchestration capabilities.</p>
-   </div>
+   <!-- Hero section removed per request -->
 
 .. grid:: 1 2 2 3
    :gutter: 3
@@ -239,14 +283,18 @@ Documentation Hub
 
    .. tab-item:: ℹ️ Resources
 
-      **Project Information**
-
       .. toctree::
          :maxdepth: 1
 
+         additional_resources
          changelog
 
-      **Community & Support**
+      **Quick Links**
+      
+      * `GitHub Repository <https://github.com/pr1m8/haive-core>`_
+      * `Discord Community <https://discord.gg/haive>`_
+      * `Haive Central Docs <https://docs.haive.io>`_
+      * `Report Issues <https://github.com/pr1m8/haive-core/issues>`_
 
       .. grid:: 1 2 2 3
          :gutter: 2
@@ -259,7 +307,7 @@ Documentation Hub
 
          .. grid-item::
 
-            `💻 GitHub <https://github.com/haive/haive-core>`_
+            `💻 GitHub <https://github.com/pr1m8/haive-core>`_
             
             Source code and issues
 
@@ -280,7 +328,7 @@ Core Capabilities
    :gutter: 3
 
    .. grid-item-card:: **🎮 Engine System**
-      :class-card: sd-bg-light
+      :class-card: sd-border-1
       
       **Augmented LLM Engine**
       
@@ -297,7 +345,7 @@ Core Capabilities
       • Document processing pipelines
 
    .. grid-item-card:: **📋 State Management**
-      :class-card: sd-bg-light
+      :class-card: sd-border-1
       
       **Type-Safe Schemas**
       
@@ -314,7 +362,7 @@ Core Capabilities
       • Graph context preservation
 
    .. grid-item-card:: **🔄 Graph Workflows**
-      :class-card: sd-bg-light
+      :class-card: sd-border-1
       
       **StateGraph Architecture**
       
@@ -331,7 +379,7 @@ Core Capabilities
       • Error handling and retry
 
    .. grid-item-card:: **🔧 Tool Ecosystem**
-      :class-card: sd-bg-light
+      :class-card: sd-border-1
       
       **Built-in Tools**
       
@@ -443,8 +491,8 @@ Quick Examples
 
       .. code-block:: python
 
-         from haive.core.models.vectorstore import VectorStoreConfig
-         from haive.core.models.embeddings import HuggingFaceEmbeddingConfig
+         from haive.core.engine.vectorstore import VectorStoreConfig
+         from haive.core.engine.embedding.providers import HuggingFaceEmbeddingConfig
          from haive.core.engine.document import DocumentProcessor
          
          # Configure embeddings
@@ -504,10 +552,10 @@ Architecture Overview
          D --> F
       end
       
-      style A fill:#8b5cf6,color:#fff
-      style B fill:#6d28d9,color:#fff
-      style C fill:#6d28d9,color:#fff  
-      style D fill:#6d28d9,color:#fff
+      style A fill:#8b5cf6,color:#ffffff,stroke:#6d28d9,stroke-width:2px
+      style B fill:#6d28d9,color:#ffffff,stroke:#4c1d95,stroke-width:2px
+      style C fill:#6d28d9,color:#ffffff,stroke:#4c1d95,stroke-width:2px
+      style D fill:#6d28d9,color:#ffffff,stroke:#4c1d95,stroke-width:2px
 
 Performance & Scalability
 -------------------------
@@ -573,7 +621,7 @@ Getting Help
       
       +++
       
-      `GitHub Issues → <https://github.com/haive/haive-core/issues>`_
+      `GitHub Issues → <https://github.com/pr1m8/haive-core/issues>`_
 
 Search & Navigation
 -------------------

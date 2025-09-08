@@ -133,11 +133,11 @@ Using Vector Stores
 
 .. code-block:: python
 
-   from haive.core.engine.vectorstore import VectorStoreConfig
+   from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
    
    # Configure a vector store
    vector_config = VectorStoreConfig(
-       provider="chroma",
+       provider=VectorStoreProvider.CHROMA,
        collection_name="my_documents"
    )
 

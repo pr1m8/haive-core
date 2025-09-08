@@ -1,0 +1,276 @@
+/* HAIVE-CORE DOCUMENTATION - CONTRAST FIX CSS
+   ============================================
+   This file ensures NO white-on-white text issues occur
+*/
+
+/* CRITICAL FIX: Force all text to have proper contrast */
+* {
+    /* Reset any problematic inheritance */
+    color: inherit;
+}
+
+/* Hero Section - ABSOLUTE fix for white-on-white */
+.hero-section {
+    /* Ensure gradient is always visible */
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 50%, #4c1d95 100%) !important;
+    /* Force white text */
+    color: white !important;
+    position: relative;
+    z-index: 1;
+}
+
+/* CRITICAL: All elements inside hero MUST be white */
+.hero-section * {
+    color: white !important;
+    /* Transparent background is SAFE here because parent has gradient */
+    background-color: transparent !important;
+}
+
+/* Specifically target problem elements in hero */
+.hero-section h1,
+.hero-section h2, 
+.hero-section h3,
+.hero-section p,
+.hero-section .subtitle,
+.hero-section .description {
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for extra clarity */
+}
+
+/* Fix for ALL content outside hero section */
+.content h1:not(.hero-section *),
+.content h2:not(.hero-section *),
+.content h3:not(.hero-section *),
+.content h4:not(.hero-section *),
+.content h5:not(.hero-section *),
+.content h6:not(.hero-section *) {
+    color: var(--color-foreground-primary, #1f2937) !important;
+    background-color: transparent;
+}
+
+/* Fix ALL paragraphs outside hero */
+.content p:not(.hero-section *) {
+    color: var(--color-foreground-primary, #374151) !important;
+    background-color: transparent;
+}
+
+/* Ensure body has proper background */
+body {
+    background-color: var(--color-background-primary, #ffffff) !important;
+    color: var(--color-foreground-primary, #1f2937) !important;
+}
+
+/* Main content area */
+.main, .content, article {
+    background-color: var(--color-background-primary, #ffffff) !important;
+    color: var(--color-foreground-primary, #1f2937) !important;
+}
+
+/* Grid cards - ensure visibility */
+.sd-card {
+    background-color: var(--color-card-background, #ffffff) !important;
+    color: var(--color-foreground-primary, #1f2937) !important;
+    border: 1px solid var(--color-card-border, #e5e7eb) !important;
+}
+
+.sd-card-title {
+    color: var(--color-foreground-primary, #111827) !important;
+    font-weight: 600;
+}
+
+.sd-card-body {
+    color: var(--color-foreground-secondary, #4b5563) !important;
+}
+
+/* Tab content areas */
+.sd-tab-content {
+    background-color: var(--color-background-primary, #ffffff) !important;
+    color: var(--color-foreground-primary, #1f2937) !important;
+}
+
+/* Code blocks */
+pre, code {
+    background-color: var(--color-code-background, #f8f9fa) !important;
+    color: var(--color-code-foreground, #1f2937) !important;
+}
+
+/* Inline code */
+code:not(pre code) {
+    background-color: var(--color-code-background, #f3f4f6) !important;
+    color: var(--color-brand-primary, #8b5cf6) !important;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+}
+
+/* Links */
+a:not(.hero-section a) {
+    color: var(--color-brand-primary, #8b5cf6) !important;
+}
+
+a:not(.hero-section a):hover {
+    color: var(--color-brand-content, #7c3aed) !important;
+}
+
+/* Sidebar */
+.sidebar {
+    background-color: var(--color-sidebar-background, #faf5ff) !important;
+}
+
+.sidebar-tree .reference {
+    color: var(--color-sidebar-link-text, #374151) !important;
+}
+
+.sidebar-tree .current > .reference {
+    color: var(--color-brand-primary, #8b5cf6) !important;
+    font-weight: 600;
+}
+
+/* Admonitions */
+.admonition {
+    background-color: var(--color-background-secondary, #f9fafb) !important;
+    color: var(--color-foreground-primary, #1f2937) !important;
+    border-left: 4px solid var(--color-brand-primary, #8b5cf6) !important;
+}
+
+/* Buttons */
+.sd-btn {
+    background-color: var(--color-brand-primary, #8b5cf6) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.sd-btn:hover {
+    background-color: var(--color-brand-content, #7c3aed) !important;
+}
+
+.sd-btn-outline-primary {
+    background-color: transparent !important;
+    color: var(--color-brand-primary, #8b5cf6) !important;
+    border: 1px solid var(--color-brand-primary, #8b5cf6) !important;
+}
+
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: var(--color-background-primary, #0f0a1f) !important;
+        color: var(--color-foreground-primary, #f9fafb) !important;
+    }
+    
+    .main, .content, article {
+        background-color: var(--color-background-primary, #0f0a1f) !important;
+        color: var(--color-foreground-primary, #f9fafb) !important;
+    }
+    
+    .sd-card {
+        background-color: var(--color-card-background, #1e1b3a) !important;
+        color: var(--color-foreground-primary, #f9fafb) !important;
+        border-color: var(--color-card-border, #4c1d95) !important;
+    }
+    
+    /* Hero stays the same in dark mode */
+    .hero-section,
+    .hero-section * {
+        color: white !important;
+    }
+}
+
+/* Architecture diagram fixes */
+.architecture-grid .layer {
+    background-color: var(--color-card-background, #f8f9fa) !important;
+    color: var(--color-foreground-primary, #1f2937) !important;
+    border: 1px solid var(--color-card-border, #e5e7eb) !important;
+}
+
+.architecture-grid .layer-title {
+    color: var(--color-foreground-primary, #111827) !important;
+    font-weight: 600;
+}
+
+.architecture-grid .component {
+    background-color: var(--color-background-secondary, #ffffff) !important;
+    color: var(--color-foreground-secondary, #4b5563) !important;
+    border: 1px solid var(--color-card-border, #d1d5db) !important;
+}
+
+/* Fix for any remaining white text on transparent */
+.landing-grid span,
+.landing-grid div:not(.hero-section *) {
+    color: var(--color-foreground-primary, #1f2937) !important;
+}
+
+/* Mermaid diagram fixes - COMPREHENSIVE */
+/* Target all Mermaid text elements */
+.mermaid text,
+.mermaid .nodeLabel,
+.mermaid span.nodeLabel,
+.mermaid foreignObject span,
+.mermaid foreignObject div {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+}
+
+/* Ensure nodes have colored backgrounds */
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node ellipse,
+.mermaid .node polygon,
+.mermaid .node path {
+    fill: #8b5cf6 !important;
+    stroke: #6d28d9 !important;
+    stroke-width: 2px !important;
+}
+
+/* Special handling for foreignObject spans that contain labels */
+.mermaid foreignObject span.nodeLabel {
+    display: inline-block !important;
+    padding: 4px 8px !important;
+    background: #6d28d9 !important;
+    color: #ffffff !important;
+    border-radius: 4px !important;
+    font-weight: 500 !important;
+}
+
+/* Fallback for any Mermaid element with white text on transparent */
+.mermaid *[style*="color: rgb(255, 255, 255)"],
+.mermaid *[style*="fill: rgb(255, 255, 255)"] {
+    background: #6d28d9 !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+}
+
+/* Override inline styles on Mermaid elements */
+.mermaid g text {
+    fill: #ffffff !important;
+}
+
+.mermaid .edgeLabel {
+    background-color: #f9fafb !important;
+    color: #1f2937 !important;
+}
+
+/* NUCLEAR OPTION: If something still has white on white, this catches it */
+*:not(.hero-section *) {
+    /* If text is white and background is transparent/white, force black text */
+    color: var(--color-foreground-primary, #1f2937);
+}
+
+/* AutoAPI page fix - ensure custom CSS loads there too */
+.autoapi-section h1,
+.autoapi-section h2,
+.autoapi-section h3,
+.autoapi-section p {
+    color: var(--color-foreground-primary, #1f2937) !important;
+    background-color: transparent;
+}
+
+/* Fix for API reference pages */
+body[data-theme="auto"] .content,
+body[data-theme="light"] .content {
+    color: var(--color-foreground-primary, #1f2937) !important;
+}
+
+/* Debug helper - uncomment to see all transparent backgrounds */
+/* *[style*="background-color: transparent"],
+*[style*="background-color: rgba(0, 0, 0, 0)"] {
+    outline: 2px dashed red !important;
+} */

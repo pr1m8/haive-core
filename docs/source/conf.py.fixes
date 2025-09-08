@@ -1,0 +1,26 @@
+# Additional configurations to suppress common warnings
+
+# Suppress specific warnings
+suppress_warnings = [
+    "ref.python",  # Suppress cross-reference warnings
+    "ref.doc",     # Suppress document reference warnings
+    "autosummary", # Suppress autosummary import warnings
+]
+
+# Nitpicky mode exceptions - ignore these references
+nitpick_ignore = [
+    ('py:class', 'VectorStoreConfig'),
+    ('py:class', 'BaseEmbeddingConfig'),
+    ('py:class', 'FieldMapping'),
+    ('py:class', 'TypeAnalyzer'),
+]
+
+# AutoAPI specific ignores for missing imports
+autoapi_ignore = [
+    "**/test_*.py",
+    "**/tests/*",
+    "**/*_test.py",
+    "**/examples/*",  # Ignore examples that might have optional deps
+]
+
+# Add to your conf.py to suppress these warnings

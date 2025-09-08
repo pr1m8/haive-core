@@ -116,13 +116,12 @@ Enable semantic search and retrieval:
 
 .. code-block:: python
 
-   from haive.core.engine.vectorstore import VectorStoreConfig
+   from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
    
    # Configure vector store
    vector_config = VectorStoreConfig(
-       provider="chroma",
-       collection_name="knowledge_base",
-       embedding_model="text-embedding-ada-002"
+       provider=VectorStoreProvider.CHROMA,
+       collection_name="knowledge_base"
    )
 
 Design Patterns
