@@ -211,7 +211,7 @@ class TestOrchestrator:
         orchestrator = Orchestrator()
         
         # Register engine
-        engine = MockEngine()
+        engine = MockEngine()di
         orchestrator.register_engine("test_engine", engine)
         
         # Register node
