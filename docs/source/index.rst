@@ -150,13 +150,15 @@ Haive Core - AI Agent Framework Foundation
 .. admonition:: 🎉 Latest Release: v0.1.0
    :class: tip
 
-   **What's New:**
+   **What's New in haive-core:**
    
    • **MetaStateSchema** - Revolutionary agent composition with type-safe state management
-   • **Dynamic Graphs** - Runtime graph modification and node composition
+   • **Dynamic Graphs** - Runtime graph modification and node composition  
    • **Tool Orchestration** - Seamless tool discovery, registration, and validation
    • **Performance** - 2x faster state transitions with optimized reducers
    • **Developer Experience** - Enhanced debugging tools and error messages
+   
+   **Installation:** ``pip install git+https://github.com/pr1m8/haive-core.git``
 
 Documentation Hub
 -----------------
@@ -291,31 +293,9 @@ Documentation Hub
 
       **Quick Links**
       
-      * `GitHub Repository <https://github.com/pr1m8/haive-core>`_
-      * `Discord Community <https://discord.gg/haive>`_
-      * `Haive Central Docs <https://docs.haive.io>`_
-      * `Report Issues <https://github.com/pr1m8/haive-core/issues>`_
-
-      .. grid:: 1 2 2 3
-         :gutter: 2
-
-         .. grid-item::
-
-            `📦 PyPI Package <https://pypi.org/project/haive-core/>`_
-            
-            Install via pip or poetry
-
-         .. grid-item::
-
-            `💻 GitHub <https://github.com/pr1m8/haive-core>`_
-            
-            Source code and issues
-
-         .. grid-item::
-
-            `💬 Discord <https://discord.gg/haive>`_
-            
-            Community discussions
+      * `Source Code & Issues <https://github.com/pr1m8/haive-core>`_
+      * `Central Documentation Hub <https://pub-7f716b302a2948e19f08b49b71408039.r2.dev>`_
+      * `Installation Guide <https://github.com/pr1m8/haive-core#installation>`_
 
       **License**
 
@@ -587,41 +567,51 @@ Performance & Scalability
       • State persistence
       • Health monitoring
 
-Getting Help
-------------
+Getting Help & Community
+------------------------
 
-.. grid:: 1 2 3 3
-   :gutter: 3
+.. grid:: 1 2 4 4
+   :gutter: 2
 
    .. grid-item-card:: 📖 **Documentation**
       :text-align: center
       :class-card: sd-border-1
       
-      Comprehensive guides and API reference
+      Complete documentation hub
       
       +++
       
-      `Read the Docs → <https://docs.haive.ai>`_
+      `Central Docs → <https://pub-7f716b302a2948e19f08b49b71408039.r2.dev>`_
 
-   .. grid-item-card:: 💬 **Community**
+   .. grid-item-card:: 🐛 **Issues & Bugs**
       :text-align: center
       :class-card: sd-border-1
       
-      Join our Discord for discussions
-      
-      +++
-      
-      `Join Discord → <https://discord.gg/haive>`_
-
-   .. grid-item-card:: 🐛 **Issues**
-      :text-align: center
-      :class-card: sd-border-1
-      
-      Report bugs or request features
+      Report bugs and request features
       
       +++
       
       `GitHub Issues → <https://github.com/pr1m8/haive-core/issues>`_
+
+   .. grid-item-card:: 💡 **Discussions**
+      :text-align: center
+      :class-card: sd-border-1
+      
+      Community discussions and Q&A
+      
+      +++
+      
+      `GitHub Discussions → <https://github.com/pr1m8/haive-core/discussions>`_
+
+   .. grid-item-card:: 📧 **Contact**
+      :text-align: center
+      :class-card: sd-border-1
+      
+      Direct support and inquiries
+      
+      +++
+      
+      `Email Support → <mailto:support@pr1m8.com>`_
 
 Search & Navigation
 -------------------
@@ -658,6 +648,6 @@ Search & Navigation
 
    **Related Packages in the Haive Ecosystem:**
    
-   • `haive-agents <https://pypi.org/project/haive-agents/>`_ - Pre-built agent implementations
-   • `haive-tools <https://pypi.org/project/haive-tools/>`_ - Extended tool library
-   • `haive-games <https://pypi.org/project/haive-games/>`_ - Game environments for agent training
+   • `haive-agents <https://github.com/pr1m8/haive-agents>`_ - Pre-built agent implementations
+   • `haive-tools <https://github.com/pr1m8/haive-tools>`_ - Extended tool library
+   • `haive-games <https://github.com/pr1m8/haive-games>`_ - Game environments for agent training

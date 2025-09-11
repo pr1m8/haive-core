@@ -49,10 +49,10 @@ External Links
          </div>
          
          <div class="resource-card">
-            <h3>💬 Discord Community</h3>
+            <h3>💬 Community Discussions</h3>
             <p>Chat with developers and get help</p>
-            <a href="https://discord.gg/haive" target="_blank">
-               Join Discord →
+            <a href="https://github.com/pr1m8/haive-core/discussions" target="_blank">
+               Join Discussions →
             </a>
          </div>
          
@@ -65,10 +65,10 @@ External Links
          </div>
          
          <div class="resource-card">
-            <h3>📦 PyPI Package</h3>
-            <p>Install via pip or poetry</p>
-            <a href="https://pypi.org/project/haive-core/" target="_blank">
-               View on PyPI →
+            <h3>📦 Installation</h3>
+            <p>Install from source or development</p>
+            <a href="https://github.com/pr1m8/haive-core#installation" target="_blank">
+               View Installation Guide →
             </a>
          </div>
       </div>
@@ -121,7 +121,7 @@ Support & Help
       <h3 style="margin-top: 0;">🆘 Need Help?</h3>
       <ul>
          <li>📖 Check the <a href="getting_started.html">Getting Started Guide</a></li>
-         <li>💬 Ask in <a href="https://discord.gg/haive" target="_blank">Discord</a></li>
+         <li>💬 Ask in <a href="https://github.com/pr1m8/haive-core/discussions" target="_blank">GitHub Discussions</a></li>
          <li>🐛 Report bugs on <a href="https://github.com/pr1m8/haive-core/issues" target="_blank">GitHub Issues</a></li>
          <li>💡 Request features via <a href="https://github.com/pr1m8/haive-core/discussions" target="_blank">GitHub Discussions</a></li>
       </ul>

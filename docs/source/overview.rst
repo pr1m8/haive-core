@@ -281,7 +281,7 @@ Resources 📚
       Step-by-step guides and examples
 
    .. grid-item-card:: 💬 **Community**
-      :link: https://github.com/haive-ai/haive/discussions
+      :link: https://github.com/pr1m8/haive-core/discussions
       :link-type: url
 
       Join discussions and get help
@@ -290,8 +290,8 @@ Need Help? 🤝
 ------------
 
 - 📝 Check our :doc:`tutorials/index` for step-by-step guides
-- 🐛 Found a bug? `Report it on GitHub <https://github.com/haive-ai/haive/issues>`_
-- 💡 Have a feature request? `Start a discussion <https://github.com/haive-ai/haive/discussions>`_
+- 🐛 Found a bug? `Report it on GitHub <https://github.com/pr1m8/haive-core/issues>`_
+- 💡 Have a feature request? `Start a discussion <https://github.com/pr1m8/haive-core/discussions>`_
 - 📧 Contact us at support@haive.ai
 
 .. toctree::

@@ -123,7 +123,7 @@ Next Steps
 1. **Explore the API Reference**: Check out the complete :doc:`API documentation <autoapi/haive/index>`
 2. **Learn about Agents**: See how to build agents with haive-agents
 3. **Add Tools**: Integrate tools from haive-tools
-4. **Join the Community**: Visit our `GitHub repository <https://github.com/haive-ai/haive>`_
+4. **Join the Community**: Visit our `GitHub repository <https://github.com/pr1m8/haive-core>`_
 
 Common Patterns
 ---------------
