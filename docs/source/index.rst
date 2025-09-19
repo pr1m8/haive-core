@@ -83,7 +83,7 @@ Haive Core - AI Agent Framework Foundation
       
       /* Sidebar text visibility */
       .sidebar {
-         background: var(--color-sidebar-background, #faf5ff) !important;
+         background: var(--color-sidebar-background, #f9fafb) !important;
       }
       .sidebar a {
          color: var(--color-sidebar-link-text, #374151) !important;
@@ -142,7 +142,7 @@ Haive Core - AI Agent Framework Foundation
       +++
       .. button-link:: autoapi/haive/core/index.html
          :expand:
-         :color: warning
+         :color: secondary
          :outline:
          
          Browse API →
@@ -651,3 +651,26 @@ Search & Navigation
    • `haive-agents <https://github.com/pr1m8/haive-agents>`_ - Pre-built agent implementations
    • `haive-tools <https://github.com/pr1m8/haive-tools>`_ - Extended tool library
    • `haive-games <https://github.com/pr1m8/haive-games>`_ - Game environments for agent training
+
+.. toctree::
+   :hidden:
+   :maxdepth: 3
+   :caption: Contents
+
+   installation
+   getting_started
+   overview
+   concepts
+   examples
+   vectorstore_example_enhanced
+   engine_architecture
+   schema_system
+   graph_workflows
+   configuration
+   tool_integration
+   persistence_layer
+   common_utilities
+   common_module_overview
+   api_reference
+   additional_resources
+   changelog
