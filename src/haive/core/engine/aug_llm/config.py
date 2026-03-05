@@ -99,7 +99,7 @@ from rich.tree import Tree
 if TYPE_CHECKING:
     from haive.core.common.mixins.structured_output_mixin import StructuredOutputMixin
     from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
-    from haive.core.models.llm.base import AzureLLMConfig, LLMConfig
+    from haive.core.models.llm.base import AzureLLMConfig, LLMConfig, OpenAILLMConfig
 else:
 
     class StructuredOutputMixin:
@@ -109,9 +109,10 @@ else:
         pass
 
     try:
-        from haive.core.models.llm.base import AzureLLMConfig, LLMConfig
+        from haive.core.models.llm.base import AzureLLMConfig, LLMConfig, OpenAILLMConfig
     except ImportError:
         AzureLLMConfig = None
+        OpenAILLMConfig = None
         LLMConfig = None
 from haive.core.engine.base import EngineType, InvokableEngine
 
@@ -119,6 +120,18 @@ logger = logging.getLogger(__name__)
 console = Console()
 logger.setLevel(logging.WARNING)
 DEBUG_OUTPUT = os.getenv("HAIVE_DEBUG_CONFIG", "FALSE").lower() in ("true", "1", "yes")
+
+
+def _create_default_llm_config():
+    """Create default LLM config based on OPENAI_API_TYPE env var."""
+    api_type = os.getenv("OPENAI_API_TYPE", "openai").lower()
+    if api_type == "azure" and AzureLLMConfig is not None:
+        return AzureLLMConfig(model="gpt-4o")
+    if OpenAILLMConfig is not None:
+        return OpenAILLMConfig(model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
+    if AzureLLMConfig is not None:
+        return AzureLLMConfig(model="gpt-4o")
+    return None
 
 
 def debug_print(*args, **kwargs) -> None:
@@ -219,9 +232,7 @@ class AugLLMConfig(*_get_augllm_base_classes()):
         default=EngineType.LLM, description="The type of engine"
     )
     llm_config: LLMConfig = Field(
-        default_factory=lambda: (
-            AzureLLMConfig(model="gpt-4o") if AzureLLMConfig else None
-        ),
+        default_factory=lambda: _create_default_llm_config(),
         description="LLM provider configuration",
     )
     prompt_template: BasePromptTemplate | None = Field(

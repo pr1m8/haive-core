@@ -15,7 +15,7 @@ from haive.core.engine.document.loaders.sources.types import SourceType
 
 
 # from langchain_core.documents import Document
-class SourceClass(Enum, str):
+class SourceClass(str, Enum):
     """Enum of source classes."""
 
     LOCAL = "LOCAL"

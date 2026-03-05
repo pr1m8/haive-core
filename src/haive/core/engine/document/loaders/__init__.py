@@ -136,6 +136,12 @@ from haive.core.engine.document.loaders.auto_registry import (
     list_available_sources,
 )
 
+# Document Loader Registry
+from haive.core.engine.document.loaders.registry import (
+    DocumentLoaderRegistry,
+    get_default_registry,
+)
+
 # Path Analysis
 from haive.core.engine.document.loaders.path_analyzer import PathAnalyzer, SourceInfo, analyze_path
 
@@ -180,6 +186,7 @@ __all__ = [
     "RemoteSource",
     "SourceCategory",
     "SourceInfo",
+    "DocumentLoaderRegistry",
     "aload_document",
     "analyze_path",
     "auto_register_all",
@@ -187,6 +194,7 @@ __all__ = [
     "default_loader",
     # 🎛️ Registry Management
     "enhanced_registry",
+    "get_default_registry",
     "get_registration_status",
     "get_sources_by_category",
     "list_available_sources",

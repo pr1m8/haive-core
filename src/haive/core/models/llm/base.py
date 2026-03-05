@@ -739,6 +739,10 @@ class OpenAILLMConfig(LLMConfig):
     """Configuration for OpenAI models."""
 
     provider: LLMProvider = LLMProvider.OPENAI
+    model: str = Field(
+        default_factory=lambda: os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        description="OpenAI model name.",
+    )
     api_key: SecretStr = Field(
         default_factory=lambda: SecretStr(os.getenv("OPENAI_API_KEY", "")),
         description="API key for OpenAI.",
@@ -763,7 +767,7 @@ class OpenAILLMConfig(LLMConfig):
 
     def instantiate(self, **kwargs) -> Any:
         """Instantiate OpenAI Chat model."""
-        from langchain_openai import OpenAIChat
+        from langchain_openai import ChatOpenAI
 
         # Validate API key
         if not self.get_api_key():
@@ -773,10 +777,9 @@ class OpenAILLMConfig(LLMConfig):
             )
 
         try:
-            return OpenAIChat(
-                model_name=self.model,
-                openai_api_key=self.get_api_key(),
-                cache=self.cache_enabled,
+            return ChatOpenAI(
+                model=self.model,
+                api_key=self.get_api_key(),
                 **(self.extra_params or {}),
                 **kwargs,
             )

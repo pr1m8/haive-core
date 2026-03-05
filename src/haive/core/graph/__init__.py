@@ -389,7 +389,9 @@ Self-Modifying Graph:
 
 # Import current graph implementation
 from haive.core.graph.state_graph.base_graph2 import BaseGraph
+from haive.core.graph.dynamic_graph_builder import DynamicGraph
 
 __all__ = [
     "BaseGraph",
+    "DynamicGraph",
 ]

@@ -67,34 +67,23 @@ Examples:
 For complete examples and advanced patterns, see the documentation.
 """
 
+from haive.core.engine.document.config import DocumentEngineConfig, DocumentOutput
 from haive.core.engine.document.engine import (
+    DocumentEngine,
+    create_directory_document_engine,
     create_file_document_engine,
     create_web_document_engine,
-    create_directory_document_engine,
 )
 from haive.core.engine.document.loaders import (
     get_default_registry,
-    get_loader,
-    load_documents,
-    register_loader,
-)
-from haive.core.engine.document.loaders.adapters import (
-    create_loader,
-)
-from haive.core.engine.document.registry import (
-    source_registry,
-    strategy_registry,
 )
 
 __all__ = [
+    "DocumentEngine",
+    "DocumentEngineConfig",
+    "DocumentOutput",
     "create_directory_document_engine",
     "create_file_document_engine",
-    "create_loader",
     "create_web_document_engine",
     "get_default_registry",
-    "get_loader",
-    "load_documents",
-    "register_loader",
-    "source_registry",
-    "strategy_registry",
 ]

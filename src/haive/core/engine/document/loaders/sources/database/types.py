@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class DatabaseSourceType(Enum, str):
+class DatabaseSourceType(str, Enum):
     SQLITE = "sqlite"
     MYSQL = "mysql"
     POSTGRESQL = "postgresql"

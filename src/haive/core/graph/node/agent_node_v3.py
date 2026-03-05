@@ -1103,8 +1103,11 @@ def create_agent_node_v3(
         - :class:`haive.agents.base.Agent`: Base agent class
         - :mod:`langgraph.graph`: LangGraph integration
     """
-    with contextlib.suppress(ImportError):
+    try:
+        from haive.agents.base.agent import Agent  # noqa: F811
         AgentNodeV3Config.model_rebuild()
+    except Exception:
+        pass
     if not name:
         name = f"agent_{agent_name}"
     return AgentNodeV3Config(name=name, agent_name=agent_name, agent=agent, **kwargs)
