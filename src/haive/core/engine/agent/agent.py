@@ -957,12 +957,23 @@ class Agent(Generic[TConfig], ABC):
                 else "sync"
             )
 
+        def _create_checkpointer():
+            """Create checkpointer with fallback to memory on failure."""
+            try:
+                return setup_checkpointer(self.config)
+            except Exception as e:
+                logger.warning(
+                    f"Failed to create checkpointer for {self.config.name}: {e}. "
+                    "Falling back to memory checkpointer."
+                )
+                from haive.core.persistence.memory import MemoryCheckpointerConfig
+                return MemoryCheckpointerConfig().create_checkpointer()
+
         if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
             with self.console.status(
                 "[bold blue]Setting up synchronous persistence...[/bold blue]"
             ):
-                # Set up standard synchronous checkpointer
-                self.checkpointer = setup_checkpointer(self.config)
+                self.checkpointer = _create_checkpointer()
 
                 # Add store if configured
                 self.store = None
@@ -991,8 +1002,7 @@ class Agent(Generic[TConfig], ABC):
             if hasattr(self, "store") and self.store:
                 self.console.print("[bold]Store:[/bold] ✅ Enabled")
         else:
-            # Standard synchronous checkpointer setup
-            self.checkpointer = setup_checkpointer(self.config)
+            self.checkpointer = _create_checkpointer()
             logger.debug(
                 f"Synchronous checkpointer set up for {self.config.name}: {type(self.checkpointer).__name__}"
             )

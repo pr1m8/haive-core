@@ -300,12 +300,12 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
                 open=False,  # Don't open in constructor to avoid early failures
             )
 
-            # Explicitly open the pool with error handling
+            # Explicitly open the pool with error handling and timeout
             try:
-                pool.open()
+                pool.open(wait=True, timeout=10.0)
                 logger.info("PostgreSQL connection pool opened successfully")
             except Exception as e:
-                logger.exception(f"Failed to open PostgreSQL connection pool: {e}")
+                logger.warning(f"Failed to open PostgreSQL connection pool: {e}")
                 raise
 
             # Import our production serializer factory

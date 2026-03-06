@@ -176,11 +176,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                 connection_string=os.getenv("POSTGRES_CONNECTION_STRING")
             )
             if POSTGRES_AVAILABLE and os.getenv("POSTGRES_CONNECTION_STRING")
-            else (
-                PostgresCheckpointerConfig()
-                if POSTGRES_AVAILABLE
-                else MemoryCheckpointerConfig()
-            )
+            else MemoryCheckpointerConfig()
         ),
         description="Persistence configuration for state checkpointing",
     )
