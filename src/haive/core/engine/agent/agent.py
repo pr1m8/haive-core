@@ -1946,6 +1946,15 @@ class Agent(Generic[TConfig], ABC):
                 # Add to top level
                 runtime_config[key] = value
 
+        # Promote recursion_limit from configurable to top-level
+        # LanGraph expects recursion_limit as a top-level RunnableConfig key
+        if "recursion_limit" not in runtime_config:
+            configurable_limit = runtime_config.get("configurable", {}).get(
+                "recursion_limit"
+            )
+            if configurable_limit:
+                runtime_config["recursion_limit"] = configurable_limit
+
         if (
             self.rich_logging
             and RICH_AVAILABLE

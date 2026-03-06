@@ -155,7 +155,8 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
     save_history: bool = Field(default=True)
     runnable_config: RunnableConfig = Field(
         default={
-            "configurable": {"thread_id": str(uuid.uuid4()), "recursion_limit": 200}
+            "configurable": {"thread_id": str(uuid.uuid4())},
+            "recursion_limit": 200,
         }
     )
     add_store: bool = Field(default=False)
