@@ -28,9 +28,9 @@ if not any(isinstance(handler, logging.StreamHandler) for handler in logger.hand
         markup=True,
         log_time_format="[%Y-%m-%d %H:%M:%S]",
     )
-    handler.setLevel(logging.DEBUG)
+    handler.setLevel(logging.WARNING)
     logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.WARNING)
 
 
 class ParserNodeConfig(NodeConfig):

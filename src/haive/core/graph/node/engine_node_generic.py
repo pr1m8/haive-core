@@ -26,7 +26,7 @@ TOutput = TypeVar("TOutput", bound=BaseModel)
 
 # Get module logger
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 
 
 class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):

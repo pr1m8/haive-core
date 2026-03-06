@@ -13,7 +13,7 @@ from haive.core.graph.node.base_config import NodeConfig
 from haive.core.graph.node.types import NodeType
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 
 
 class ToolNodeConfig(NodeConfig):

@@ -8,7 +8,7 @@ from haive.core.models.retriever.base import RetrieverConfig, RetrieverType
 from haive.core.models.vectorstore.base import VectorStoreConfig
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 
 
 @RetrieverConfig.register(RetrieverType.SELF_QUERY)

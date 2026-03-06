@@ -44,7 +44,7 @@ from haive.core.graph.node.types import NodeType
 
 # Get module logger
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 
 
 class MetaAgentNodeConfig(NodeConfig):

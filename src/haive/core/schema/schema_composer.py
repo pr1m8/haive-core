@@ -86,17 +86,13 @@ from haive.core.schema.state_schema import StateSchema
 if TYPE_CHECKING:
     from haive.core.schema.schema_manager import StateSchemaManager
 
-# Configure rich logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(message)s",
-    datefmt="[%X]",
-    handlers=[RichHandler(rich_tracebacks=True)],
-)
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
-console = Console()
+
+# Use quiet console that only outputs when HAIVE_DEBUG is set
+import os as _os
+_HAIVE_DEBUG = _os.environ.get("HAIVE_DEBUG", "").lower() in ("1", "true", "yes")
+console = Console(quiet=not _HAIVE_DEBUG)
 
 # Check if rich is available for UI
 try:

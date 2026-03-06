@@ -32,8 +32,10 @@ try:
     from rich.panel import Panel
     from rich.tree import Tree
 
+    import os as _os
     RICH_AVAILABLE = True
-    console = Console()
+    _haive_debug = _os.environ.get("HAIVE_DEBUG", "").lower() in ("1", "true", "yes")
+    console = Console(quiet=not _haive_debug)
 except ImportError:
     RICH_AVAILABLE = False
     console = None

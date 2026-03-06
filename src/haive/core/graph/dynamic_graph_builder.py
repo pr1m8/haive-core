@@ -49,7 +49,7 @@ console_handler.setFormatter(console_formatter)
 # Add handlers to logger
 logger.addHandler(file_handler)
 logger.addHandler(console_handler)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 
 
 # Debug level enum

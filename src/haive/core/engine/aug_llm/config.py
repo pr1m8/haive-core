@@ -117,9 +117,10 @@ else:
 from haive.core.engine.base import EngineType, InvokableEngine
 
 logger = logging.getLogger(__name__)
-console = Console()
 logger.setLevel(logging.WARNING)
 DEBUG_OUTPUT = os.getenv("HAIVE_DEBUG_CONFIG", "FALSE").lower() in ("true", "1", "yes")
+_HAIVE_DEBUG = os.getenv("HAIVE_DEBUG", "").lower() in ("1", "true", "yes")
+console = Console(quiet=not _HAIVE_DEBUG)
 
 
 def _create_default_llm_config():

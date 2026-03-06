@@ -110,17 +110,21 @@ class Agent(Generic[TConfig], ABC):
     """
 
     def __init__(
-        self, config: TConfig, verbose: bool = False, rich_logging: bool = True
+        self, config: TConfig, verbose: bool = False, rich_logging: bool | None = None
     ):
         """Initialize the agent with its configuration.
 
         Args:
             config: Agent configuration
             verbose: Whether to enable verbose logging
-            rich_logging: Whether to use rich UI for logging and debugging
+            rich_logging: Whether to use rich UI for logging and debugging.
+                         Defaults to HAIVE_DEBUG env var (off by default).
         """
         self.config = config
         self.verbose = verbose
+        if rich_logging is None:
+            import os
+            rich_logging = os.environ.get("HAIVE_DEBUG", "").lower() in ("1", "true", "yes")
         self.rich_logging = rich_logging and RICH_AVAILABLE
         self._async_context_managers = {}  # Store async context managers
         self._async_checkpointer = None  # Async checkpointer instance
