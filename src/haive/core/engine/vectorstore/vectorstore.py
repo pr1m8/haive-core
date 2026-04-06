@@ -220,7 +220,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
     # Core components
     embedding_model: BaseEmbeddingConfig = Field(
         default_factory=lambda: HuggingFaceEmbeddingConfig(
-            model="sentence-transformers/all-MiniLM-L6-v2"
+            model="sentence-transformers/all-mpnet-base-v2"
         ),
         description="The embedding model to use for the vector store",
     )
@@ -715,7 +715,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
         """
         if embedding_model is None:
             embedding_model = HuggingFaceEmbeddingConfig(
-                model="sentence-transformers/all-MiniLM-L6-v2"
+                model="sentence-transformers/all-mpnet-base-v2"
             )
 
         return cls(documents=documents, embedding_model=embedding_model, **kwargs)

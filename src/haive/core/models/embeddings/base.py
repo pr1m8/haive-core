@@ -100,7 +100,6 @@ try:
         SentenceTransformerEmbeddings,
     )
     from langchain_community.embeddings.voyageai import VoyageEmbeddings
-    from langchain_huggingface import HuggingFaceEmbeddings
     from langchain_openai import AzureOpenAIEmbeddings, OpenAIEmbeddings
 except ImportError:
     # Fallback classes for documentation builds
@@ -112,6 +111,19 @@ except ImportError:
     class OllamaEmbeddings: pass
     class SentenceTransformerEmbeddings: pass
     class VoyageEmbeddings: pass
+
+# HuggingFace embeddings loaded lazily to avoid sentence-transformers
+# hanging on import (v5.2.3 downloads/initializes models at import time).
+# Use get_huggingface_embeddings() instead of direct class reference.
+HuggingFaceEmbeddings = None
+
+def get_huggingface_embeddings():
+    """Lazy import of HuggingFaceEmbeddings."""
+    global HuggingFaceEmbeddings
+    if HuggingFaceEmbeddings is None:
+        from langchain_huggingface import HuggingFaceEmbeddings as _HFE
+        HuggingFaceEmbeddings = _HFE
+    return HuggingFaceEmbeddings
     class VertexAIEmbeddings: pass
     class HuggingFaceEmbeddings: pass
     class AzureOpenAIEmbeddings: pass
@@ -329,7 +341,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
             Exception: If model instantiation fails after cleanup attempt
         """
         try:
-            embedder = HuggingFaceEmbeddings(
+            embedder = get_huggingface_embeddings()(
                 model_name=self.model,
                 model_kwargs=self.model_kwargs,
                 encode_kwargs=self.encode_kwargs,
@@ -354,7 +366,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
             try:
                 torch.cuda.empty_cache()
                 torch.cuda.ipc_collect()
-                embedder = HuggingFaceEmbeddings(
+                embedder = get_huggingface_embeddings()(
                     model_name=self.model,
                     model_kwargs=self.model_kwargs,
                     encode_kwargs=self.encode_kwargs,

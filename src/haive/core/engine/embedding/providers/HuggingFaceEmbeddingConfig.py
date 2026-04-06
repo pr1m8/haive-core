@@ -32,7 +32,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
 
             config = HuggingFaceEmbeddingConfig(
                 name="hf_embeddings",
-                model="sentence-transformers/all-MiniLM-L6-v2",
+                model="sentence-transformers/all-mpnet-base-v2",
                 model_kwargs={"device": "cuda"},
                 encode_kwargs={"normalize_embeddings": True}
             )
@@ -216,7 +216,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
         """Get list of popular HuggingFace embedding models."""
         return [
             "sentence-transformers/all-MiniLM-L6-v2",
-            "sentence-transformers/all-MiniLM-L6-v2",
+            "sentence-transformers/all-mpnet-base-v2",
             "sentence-transformers/all-roberta-large-v1",
             "sentence-transformers/multi-qa-MiniLM-L6-cos-v1",
             "sentence-transformers/multi-qa-mpnet-base-cos-v1",
@@ -242,7 +242,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
                 "max_seq_length": 256,
                 "description": "Fast, lightweight model with good performance",
             },
-            "sentence-transformers/all-MiniLM-L6-v2": {
+            "sentence-transformers/all-mpnet-base-v2": {
                 "dimensions": 768,
                 "max_seq_length": 384,
                 "description": "High-quality all-round model",

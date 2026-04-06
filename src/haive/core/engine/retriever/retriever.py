@@ -521,7 +521,7 @@ class VectorStoreRetrieverConfig(BaseRetrieverConfig):
                 vector_store_config = VectorStoreConfig(
                     name="my_vectorstore",
                     store_type="chroma",
-                    embedding_config={"model": "sentence-transformers/all-MiniLM-L6-v2"}
+                    embedding_config={"model": "sentence-transformers/all-mpnet-base-v2"}
                 )
 
                 # Create a vector store retriever config

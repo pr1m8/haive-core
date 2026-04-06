@@ -33,7 +33,7 @@ class VectorStoreRetrieverConfig(RetrieverConfig):
     # Embedding configuration with default
     embedding_config: BaseEmbeddingConfig | None = Field(
         default_factory=lambda: HuggingFaceEmbeddingConfig(
-            model="sentence-transformers/all-MiniLM-L6-v2"
+            model="sentence-transformers/all-mpnet-base-v2"
         ),
         description="Optional embedding configuration",
     )
@@ -88,7 +88,7 @@ class VectorStoreRetrieverConfig(RetrieverConfig):
 
             # Fallback to default Hugging Face embeddings
             return HuggingFaceEmbeddingConfig(
-                model="sentence-transformers/all-MiniLM-L6-v2"
+                model="sentence-transformers/all-mpnet-base-v2"
             ).instantiate()
         except Exception as e:
             logger.exception(f"Error creating embeddings: {e!s}")
