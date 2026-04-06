@@ -2681,7 +2681,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 resolved_input_schema = input_schema or output_schema
                 logger.info(f"Using output_schema as state: {output_schema.__name__}")
             else:
-                resolved_state_schema = getattr(self, "state_schema", dict)
+                resolved_state_schema = getattr(self, "state_schema", None) or dict
                 resolved_input_schema = resolved_state_schema
                 resolved_output_schema = resolved_state_schema
                 schema_name = (
