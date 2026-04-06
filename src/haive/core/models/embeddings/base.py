@@ -886,7 +886,7 @@ def create_embeddings(config: BaseEmbeddingConfig) -> Any:
     Example:
 
     Examples:
-        >>> config = HuggingFaceEmbeddingConfig(model="sentence-transformers/all-mpnet-base-v2")
+        >>> config = HuggingFaceEmbeddingConfig(model="sentence-transformers/all-MiniLM-L6-v2")
         >>> embeddings = create_embeddings(config)
     """
     return config.instantiate()

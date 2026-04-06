@@ -90,7 +90,7 @@ class RetrieverMixin:
         # Use default embedding model if not provided
         if embedding_model is None:
             embedding_model = HuggingFaceEmbeddingConfig(
-                model="sentence-transformers/all-mpnet-base-v2"
+                model="sentence-transformers/all-MiniLM-L6-v2"
             )
 
         # Create vector store config from documents

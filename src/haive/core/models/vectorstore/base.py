@@ -33,7 +33,7 @@ class VectorStoreConfig(BaseModel):
     name: str | None = Field(default=None)
     embedding_model: BaseEmbeddingConfig = Field(
         default=HuggingFaceEmbeddingConfig(
-            model="sentence-transformers/all-mpnet-base-v2"
+            model="sentence-transformers/all-MiniLM-L6-v2"
         ),
         description="The embedding model to use for the vector store",
     )
@@ -121,7 +121,7 @@ class VectorStoreConfig(BaseModel):
         cls,
         documents: list[Document],
         embedding_model: BaseEmbeddingConfig = HuggingFaceEmbeddingConfig(
-            model="sentence-transformers/all-mpnet-base-v2"
+            model="sentence-transformers/all-MiniLM-L6-v2"
         ),
         **kwargs,
     ) -> VectorStoreConfig:
@@ -134,7 +134,7 @@ class VectorStoreConfig(BaseModel):
         cls,
         documents: list[Document],
         embedding_model: BaseEmbeddingConfig = HuggingFaceEmbeddingConfig(
-            model="sentence-transformers/all-mpnet-base-v2"
+            model="sentence-transformers/all-MiniLM-L6-v2"
         ),
         **kwargs,
     ) -> VectorStoreConfig:
@@ -157,7 +157,7 @@ def create_retriever(config: VectorStoreConfig, async_mode: bool = False):
 def create_vs_config_from_documents(
     documents: list[Document],
     embedding_model: BaseEmbeddingConfig = HuggingFaceEmbeddingConfig(
-        model="sentence-transformers/all-mpnet-base-v2"
+        model="sentence-transformers/all-MiniLM-L6-v2"
     ),
     **kwargs,
 ) -> VectorStoreConfig:
@@ -169,7 +169,7 @@ def create_vs_config_from_documents(
 def create_vs_from_documents(
     documents: list[Document],
     embedding_model: BaseEmbeddingConfig = HuggingFaceEmbeddingConfig(
-        model="sentence-transformers/all-mpnet-base-v2"
+        model="sentence-transformers/all-MiniLM-L6-v2"
     ),
     **kwargs,
 ) -> VectorStore:
@@ -181,7 +181,7 @@ def create_vs_from_documents(
 def create_retriever_from_documents(
     documents: list[Document],
     embedding_model: BaseEmbeddingConfig = HuggingFaceEmbeddingConfig(
-        model="sentence-transformers/all-mpnet-base-v2"
+        model="sentence-transformers/all-MiniLM-L6-v2"
     ),
     **kwargs,
 ) -> BaseRetriever:
