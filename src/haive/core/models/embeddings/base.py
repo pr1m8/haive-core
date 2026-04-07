@@ -111,6 +111,9 @@ except ImportError:
     class OllamaEmbeddings: pass
     class SentenceTransformerEmbeddings: pass
     class VoyageEmbeddings: pass
+    class VertexAIEmbeddings: pass
+    class AzureOpenAIEmbeddings: pass
+    class OpenAIEmbeddings: pass
 
 # HuggingFace embeddings loaded lazily to avoid sentence-transformers
 # hanging on import (v5.2.3 downloads/initializes models at import time).
@@ -124,10 +127,6 @@ def get_huggingface_embeddings():
         from langchain_huggingface import HuggingFaceEmbeddings as _HFE
         HuggingFaceEmbeddings = _HFE
     return HuggingFaceEmbeddings
-    class VertexAIEmbeddings: pass
-    class HuggingFaceEmbeddings: pass
-    class AzureOpenAIEmbeddings: pass
-    class OpenAIEmbeddings: pass
 from pydantic import BaseModel, Field, SecretStr, ValidationInfo, field_validator
 
 from haive.core.config.constants import EMBEDDINGS_CACHE_DIR
