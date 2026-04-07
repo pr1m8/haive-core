@@ -1,11 +1,27 @@
 [tool.poetry]
 name = "haive-core"
-version = "1.0.0"
+version = "1.0.1"
 description = "Foundation for the Haive AI agent framework — engines, graph builder, state schemas, persistence, and stores"
 authors = ["pr1m8 <william.astley@algebraicwealth.com>"]
 license = "MIT"
 readme = "README.md"
 packages = [{ include = "haive", from = "src" }]
+
+homepage = "https://github.com/pr1m8/haive-core"
+repository = "https://github.com/pr1m8/haive-core"
+documentation = "https://pr1m8.github.io/haive-core/"
+keywords = ["ai", "agents", "llm", "langchain", "langgraph", "framework", "pydantic", "state-management"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Typing :: Typed",
+]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
