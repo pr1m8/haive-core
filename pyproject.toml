@@ -37,10 +37,6 @@ pytest-clarity = "^1.0.1"
 pytest-html = "^4.1.1"
 
 # Development tools - available to all packages!
-#haive-cli = {path = "../../tools/haive-cli", develop = true}
-#haive-dev = {path = "../../tools/haive-dev", develop = true}
-#haive-testing = {path = "../../tools/haive-testing", develop = true}
-#pydevelop-docs = {path = "../../tools/pydevelop-docs", develop = true}
 pyment = "^0.3.3"
 docstring-parser = "^0.17.0"
 
@@ -282,8 +278,6 @@ exclude = [
 ]
 
 [tool.poetry.group.docs.dependencies]
-# Use the shared pydevelop-docs system (contains all 43+ Sphinx extensions)
-pydevelop-docs = { path = "../../tools/pydvlp-docs", develop = true }
 sphinx = "^8.2.3"
 sphinx-autoapi = "^3.6.0"
 sphinx-autodoc-typehints = "^3.1.0"
