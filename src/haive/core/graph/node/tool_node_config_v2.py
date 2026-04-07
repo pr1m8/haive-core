@@ -248,7 +248,10 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
             handle_tool_errors=self.handle_tool_errors,
             messages_key=self.messages_field,
         )
-        state_dict = state if isinstance(state, dict) else state.dict()
+        # Pass only the messages dict to ToolNode — using .dict()/model_dump()
+        # would convert BaseMessage objects to plain dicts, breaking ToolNode
+        # which expects actual BaseMessage instances.
+        state_dict = {self.messages_field: messages}
         result = tool_node.invoke(state_dict, config)
         if isinstance(result, dict) and self.messages_field in result:
             updated_messages = result[self.messages_field]

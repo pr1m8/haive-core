@@ -302,7 +302,7 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
 
             # Explicitly open the pool with error handling and timeout
             try:
-                pool.open(wait=True, timeout=10.0)
+                pool.open(wait=True, timeout=3.0)
                 logger.info("PostgreSQL connection pool opened successfully")
             except Exception as e:
                 logger.warning(f"Failed to open PostgreSQL connection pool: {e}")

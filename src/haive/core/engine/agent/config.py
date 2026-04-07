@@ -171,14 +171,9 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         default_factory=dict, description="Additional metadata for this agent"
     )
     persistence: CheckpointerConfig | None = Field(
-        default_factory=lambda: (
-            PostgresCheckpointerConfig(
-                connection_string=os.getenv("POSTGRES_CONNECTION_STRING")
-            )
-            if POSTGRES_AVAILABLE and os.getenv("POSTGRES_CONNECTION_STRING")
-            else MemoryCheckpointerConfig()
-        ),
-        description="Persistence configuration for state checkpointing",
+        default_factory=lambda: MemoryCheckpointerConfig(),
+        description="Persistence configuration for state checkpointing. "
+        "Defaults to in-memory. Set to PostgresCheckpointerConfig explicitly for Postgres.",
     )
     checkpoint_mode: str = Field(
         default="sync", description="Checkpoint mode: 'sync', 'async', or 'none'"
