@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "haive-core"
-version = "1.0.1"
+version = "1.0.2"
 description = "Foundation for the Haive AI agent framework — engines, graph builder, state schemas, persistence, and stores"
 authors = ["pr1m8 <william.astley@algebraicwealth.com>"]
 license = "MIT"
